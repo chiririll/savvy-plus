@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -39,34 +40,21 @@ interface RecurringFormProps {
 }
 
 const typeOptions = [
-    { value: 'income', label: 'Income', icon: ArrowDownLeft, color: 'text-green-500' },
-    { value: 'expense', label: 'Expense', icon: ArrowUpRight, color: 'text-red-500' },
-    { value: 'transfer', label: 'Transfer', icon: ArrowLeftRight, color: 'text-blue-500' },
+    { value: 'income', icon: ArrowDownLeft, color: 'text-green-500' },
+    { value: 'expense', icon: ArrowUpRight, color: 'text-red-500' },
+    { value: 'transfer', icon: ArrowLeftRight, color: 'text-blue-500' },
 ] as const
 
-const frequencyOptions = [
-    { value: 'daily', label: 'Daily' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'monthly', label: 'Monthly' },
-    { value: 'yearly', label: 'Yearly' },
-]
-
-const dayOfWeekOptions = [
-    { value: 0, label: 'Sunday' },
-    { value: 1, label: 'Monday' },
-    { value: 2, label: 'Tuesday' },
-    { value: 3, label: 'Wednesday' },
-    { value: 4, label: 'Thursday' },
-    { value: 5, label: 'Friday' },
-    { value: 6, label: 'Saturday' },
-]
+const frequencyOptions = ['daily', 'weekly', 'monthly', 'yearly'] as const
+const weekdayValues = [0, 1, 2, 3, 4, 5, 6] as const
 
 export function RecurringForm({
     defaultValues,
     onSubmit,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
 }: RecurringFormProps) {
+    const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
     const { data: categories } = useCategories()
     const { data: tags } = useTags()
@@ -144,10 +132,10 @@ export function RecurringForm({
                                 className="w-full"
                             >
                                 <TabsList className="w-full">
-                                    {typeOptions.map(({ value, label, icon: Icon, color }) => (
+                                    {typeOptions.map(({ value, icon: Icon, color }) => (
                                         <TabsTrigger key={value} value={value} className="flex-1">
                                             <Icon className={cn('size-4', field.value === value && color)} />
-                                            {label}
+                                            {t(`pages:transactions.types.${value}`)}
                                         </TabsTrigger>
                                     ))}
                                 </TabsList>
@@ -164,7 +152,7 @@ export function RecurringForm({
                         name="account_id"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>{isTransfer ? 'From Account' : 'Account'}</FormLabel>
+                                <FormLabel>{isTransfer ? t('forms:fromAccount') : t('fields.account')}</FormLabel>
                                 <AccountSelect
                                     value={field.value}
                                     onChange={field.onChange}
@@ -180,7 +168,7 @@ export function RecurringForm({
                             name="to_account_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>To Account</FormLabel>
+                                    <FormLabel>{t('forms:recurring.toAccount')}</FormLabel>
                                     <AccountSelect
                                         value={field.value}
                                         onChange={field.onChange}
@@ -200,7 +188,7 @@ export function RecurringForm({
                         name="category_id"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Category</FormLabel>
+                                <FormLabel>{t('fields.category')}</FormLabel>
                                 <CategorySelect
                                     value={field.value}
                                     onChange={field.onChange}
@@ -220,7 +208,7 @@ export function RecurringForm({
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    Amount
+                                    {t('fields.amount')}
                                     {selectedAccount?.currency?.symbol && (
                                         <span className="text-muted-foreground ml-1">
                                             ({selectedAccount.currency.symbol})
@@ -241,19 +229,19 @@ export function RecurringForm({
                             name="to_amount"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>To Amount</FormLabel>
+                                    <FormLabel>{t('forms:recurring.toAmount')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
                                             step="0.01"
                                             min="0"
-                                            placeholder="Same as amount"
+                                            placeholder={t('forms:recurring.toAmountPlaceholder')}
                                             {...field}
                                             value={field.value ?? ''}
                                             onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
                                         />
                                     </FormControl>
-                                    <FormDescription>Leave empty for same currency</FormDescription>
+                                    <FormDescription>{t('forms:recurring.toAmountHelp')}</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -267,10 +255,10 @@ export function RecurringForm({
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Description</FormLabel>
+                            <FormLabel>{t('fields.description')}</FormLabel>
                             <FormControl>
                                 <Textarea
-                                    placeholder="e.g., Monthly rent payment"
+                                    placeholder={t('forms:recurring.descriptionPlaceholder')}
                                     className="resize-none h-20"
                                     {...field}
                                     value={field.value ?? ''}
@@ -283,7 +271,7 @@ export function RecurringForm({
 
                 {/* Schedule Section */}
                 <div className="space-y-4 pt-4 border-t">
-                    <h3 className="font-medium">Schedule</h3>
+                    <h3 className="font-medium">{t('forms:recurring.schedule')}</h3>
 
                     <div className="grid grid-cols-2 gap-4">
                         <FormField
@@ -291,7 +279,7 @@ export function RecurringForm({
                             name="frequency"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Frequency</FormLabel>
+                                    <FormLabel>{t('forms:recurring.frequency')}</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
@@ -300,8 +288,8 @@ export function RecurringForm({
                                         </FormControl>
                                         <SelectContent>
                                             {frequencyOptions.map((option) => (
-                                                <SelectItem key={option.value} value={option.value}>
-                                                    {option.label}
+                                                <SelectItem key={option} value={option}>
+                                                    {t(`forms:recurring.frequencies.${option}`)}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -316,15 +304,15 @@ export function RecurringForm({
                             name="interval"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Every</FormLabel>
+                                    <FormLabel>{t('forms:recurring.every')}</FormLabel>
                                     <FormControl>
                                         <Input type="number" min="1" max="365" {...field} />
                                     </FormControl>
                                     <FormDescription>
-                                        {frequency === 'daily' && 'day(s)'}
-                                        {frequency === 'weekly' && 'week(s)'}
-                                        {frequency === 'monthly' && 'month(s)'}
-                                        {frequency === 'yearly' && 'year(s)'}
+                                        {frequency === 'daily' && t('forms:recurring.days')}
+                                        {frequency === 'weekly' && t('forms:recurring.weeks')}
+                                        {frequency === 'monthly' && t('forms:recurring.months')}
+                                        {frequency === 'yearly' && t('forms:recurring.years')}
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -338,20 +326,20 @@ export function RecurringForm({
                             name="day_of_week"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Day of Week</FormLabel>
+                                    <FormLabel>{t('forms:recurring.dayOfWeek')}</FormLabel>
                                     <Select
                                         onValueChange={(val) => field.onChange(Number(val))}
                                         value={field.value?.toString() ?? ''}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select day" />
+                                                <SelectValue placeholder={t('forms:selectDay')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {dayOfWeekOptions.map((option) => (
-                                                <SelectItem key={option.value} value={option.value.toString()}>
-                                                    {option.label}
+                                            {weekdayValues.map((value) => (
+                                                <SelectItem key={value} value={value.toString()}>
+                                                    {t(`forms:recurring.weekdays.${value}`)}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -368,7 +356,7 @@ export function RecurringForm({
                             name="day_of_month"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Day of Month</FormLabel>
+                                    <FormLabel>{t('forms:recurring.dayOfMonth')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
@@ -379,7 +367,7 @@ export function RecurringForm({
                                             onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
                                         />
                                     </FormControl>
-                                    <FormDescription>1-31 (adjusted for shorter months)</FormDescription>
+                                    <FormDescription>{t('forms:recurring.dayOfMonthHelp')}</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -392,7 +380,7 @@ export function RecurringForm({
                             name="start_date"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Start Date</FormLabel>
+                                    <FormLabel>{t('forms:recurring.startDate')}</FormLabel>
                                     <FormControl>
                                         <Input type="date" {...field} />
                                     </FormControl>
@@ -406,7 +394,7 @@ export function RecurringForm({
                             name="end_date"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>End Date</FormLabel>
+                                    <FormLabel>{t('forms:recurring.endDate')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="date"
@@ -415,7 +403,7 @@ export function RecurringForm({
                                             onChange={(e) => field.onChange(e.target.value || null)}
                                         />
                                     </FormControl>
-                                    <FormDescription>Leave empty for no end</FormDescription>
+                                    <FormDescription>{t('forms:recurring.endDateHelp')}</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -430,7 +418,7 @@ export function RecurringForm({
                         name="tag_ids"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Tags</FormLabel>
+                                <FormLabel>{t('forms:tags.label')}</FormLabel>
                                 <div className="flex flex-wrap gap-2 p-3 rounded-md border">
                                     {tags.map((tag) => {
                                         const isSelected = selectedTagIds.includes(tag.id)
@@ -472,13 +460,13 @@ export function RecurringForm({
                                     onCheckedChange={field.onChange}
                                 />
                             </FormControl>
-                            <FormLabel>Active</FormLabel>
+                            <FormLabel>{t('fields.active')}</FormLabel>
                         </FormItem>
                     )}
                 />
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? 'Saving...' : submitLabel}
+                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                 </Button>
             </form>
         </Form>

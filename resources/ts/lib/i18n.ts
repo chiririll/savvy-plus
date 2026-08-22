@@ -7,11 +7,13 @@ import enNav from '@/locales/en/nav.json'
 import enAuth from '@/locales/en/auth.json'
 import enSettings from '@/locales/en/settings.json'
 import enPages from '@/locales/en/pages.json'
+import enForms from '@/locales/en/forms.json'
 import ruCommon from '@/locales/ru/common.json'
 import ruNav from '@/locales/ru/nav.json'
 import ruAuth from '@/locales/ru/auth.json'
 import ruSettings from '@/locales/ru/settings.json'
 import ruPages from '@/locales/ru/pages.json'
+import ruForms from '@/locales/ru/forms.json'
 
 export const SUPPORTED_LOCALES = ['en', 'ru'] as const
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number]
@@ -37,14 +39,14 @@ void i18n
     .use(initReactI18next)
     .init({
         resources: {
-            en: { common: enCommon, nav: enNav, auth: enAuth, settings: enSettings, pages: enPages },
-            ru: { common: ruCommon, nav: ruNav, auth: ruAuth, settings: ruSettings, pages: ruPages },
+            en: { common: enCommon, nav: enNav, auth: enAuth, settings: enSettings, pages: enPages, forms: enForms },
+            ru: { common: ruCommon, nav: ruNav, auth: ruAuth, settings: ruSettings, pages: ruPages, forms: ruForms },
         },
         fallbackLng: 'en',
         supportedLngs: [...SUPPORTED_LOCALES],
         nonExplicitSupportedLngs: true,
         defaultNS: 'common',
-        ns: ['common', 'nav', 'auth', 'settings', 'pages'],
+        ns: ['common', 'nav', 'auth', 'settings', 'pages', 'forms'],
         interpolation: { escapeValue: false },
         detection: {
             order: ['localStorage', 'navigator'],

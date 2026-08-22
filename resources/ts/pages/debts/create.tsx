@@ -12,7 +12,7 @@ export default function DebtCreatePage() {
             <DebtForm
                 onSubmit={(data) => createDebt.mutate(data)}
                 isSubmitting={createDebt.isPending}
-                submitLabel="Create"
+                submitLabel={t('common:actions.create')}
             />
         </FormPage>
     )

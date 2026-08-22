@@ -12,7 +12,7 @@ export default function AccountCreatePage() {
             <AccountForm
                 onSubmit={(data) => createAccount.mutate(data)}
                 isSubmitting={createAccount.isPending}
-                submitLabel="Create"
+                submitLabel={t('common:actions.create')}
             />
         </FormPage>
     )

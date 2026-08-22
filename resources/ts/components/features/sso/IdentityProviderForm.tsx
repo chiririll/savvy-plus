@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Trash2, Plug, UserCog, Waypoints, Copy } from 'lucide-react'
@@ -41,14 +42,16 @@ interface IdentityProviderFormProps {
     previewPreset?: string
 }
 
-const TOGGLES: { name: keyof IdentityProviderFormValues; label: string; description: string }[] = [
-    { name: 'enabled', label: 'Enabled', description: 'Show this provider on the login screen' },
-    { name: 'allow_jit', label: 'Just-in-time provisioning', description: 'Create new accounts on first sign-in' },
-    { name: 'link_by_email', label: 'Link by email', description: 'Attach to an existing account with the same email' },
-    { name: 'sync_role_on_login', label: 'Sync role on login', description: 'Re-apply role mapping on every sign-in' },
+const TOGGLES: { name: keyof IdentityProviderFormValues; labelKey: string; descriptionKey: string }[] = [
+    { name: 'enabled', labelKey: 'sso.enabled', descriptionKey: 'sso.enabledHelp' },
+    { name: 'allow_jit', labelKey: 'sso.allowJit', descriptionKey: 'sso.allowJitHelp' },
+    { name: 'link_by_email', labelKey: 'sso.linkByEmail', descriptionKey: 'sso.linkByEmailHelp' },
+    { name: 'sync_role_on_login', labelKey: 'sso.syncRole', descriptionKey: 'sso.syncRoleHelp' },
 ]
 
 function CopyableUrl({ label, value }: { label: string; value: string }) {
+    const { t } = useTranslation('forms')
+
     return (
         <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground">{label}</p>
@@ -61,7 +64,7 @@ function CopyableUrl({ label, value }: { label: string; value: string }) {
                     className="size-7 shrink-0 text-muted-foreground"
                     onClick={() => {
                         navigator.clipboard?.writeText(value)
-                        toast.success('Copied to clipboard')
+                        toast.success(t('sso.copied'))
                     }}
                 >
                     <Copy className="size-3.5" />
@@ -72,19 +75,20 @@ function CopyableUrl({ label, value }: { label: string; value: string }) {
 }
 
 function RedirectUrls({ slug, protocol }: { slug: string; protocol: string }) {
+    const { t } = useTranslation('forms')
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
     const base = `${origin}/api/auth/sso/${slug}`
 
     return (
         <div className="space-y-3 rounded-lg border border-dashed bg-muted/30 p-4">
-            <p className="text-xs text-muted-foreground">Register these URLs in your identity provider.</p>
+            <p className="text-xs text-muted-foreground">{t('sso.registerUrls')}</p>
             {protocol === 'saml' ? (
                 <>
-                    <CopyableUrl label="ACS (Reply) URL" value={`${base}/acs`} />
-                    <CopyableUrl label="SP Entity ID / Metadata" value={`${base}/metadata`} />
+                    <CopyableUrl label={t('sso.acsUrl')} value={`${base}/acs`} />
+                    <CopyableUrl label={t('sso.spEntityId')} value={`${base}/metadata`} />
                 </>
             ) : (
-                <CopyableUrl label="Redirect / Callback URL" value={`${base}/callback`} />
+                <CopyableUrl label={t('sso.redirectUrl')} value={`${base}/callback`} />
             )}
         </div>
     )
@@ -111,11 +115,12 @@ export function IdentityProviderForm({
     defaultValues,
     onSubmit,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
     isEdit = false,
     presetLocked = false,
     previewPreset,
 }: IdentityProviderFormProps) {
+    const { t } = useTranslation(['common', 'forms'])
     const { data: presets } = useSsoPresets()
 
     const form = useForm<IdentityProviderFormValues>({
@@ -165,7 +170,7 @@ export function IdentityProviderForm({
                         ) : (
                             <Input
                                 type={field.secret ? 'password' : field.type === 'url' ? 'url' : 'text'}
-                                placeholder={isEdit && field.secret ? 'Leave blank to keep current' : field.placeholder}
+                                placeholder={isEdit && field.secret ? t('forms:sso.secretKeepPlaceholder') : field.placeholder}
                                 {...f}
                                 value={f.value ?? ''}
                             />
@@ -182,15 +187,15 @@ export function IdentityProviderForm({
         <FormWrapper>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className={`space-y-6 ${previewPreset ? 'w-full' : 'max-w-2xl'}`}>
-                    <Section icon={Plug} title="Connection" description="How Savvy talks to your identity provider">
+                    <Section icon={Plug} title={t('forms:sso.connection')} description={t('forms:sso.connectionHelp')}>
                         <FormField
                             control={form.control}
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Display name</FormLabel>
+                                    <FormLabel>{t('forms:sso.displayName')}</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Company Okta" {...field} />
+                                        <Input placeholder={t('forms:sso.displayNamePlaceholder')} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -202,11 +207,11 @@ export function IdentityProviderForm({
                             name="slug"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Slug</FormLabel>
+                                    <FormLabel>{t('forms:sso.slug')}</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="company-okta" {...field} disabled={isEdit} />
+                                        <Input placeholder={t('forms:sso.slugPlaceholder')} {...field} disabled={isEdit} />
                                     </FormControl>
-                                    <FormDescription>Used in the sign-in URL. Cannot be changed later.</FormDescription>
+                                    <FormDescription>{t('forms:sso.slugHelp')}</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -218,11 +223,11 @@ export function IdentityProviderForm({
                                 name="preset"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Provider type</FormLabel>
+                                        <FormLabel>{t('forms:sso.providerType')}</FormLabel>
                                         <Select value={field.value} onValueChange={field.onChange} disabled={isEdit}>
                                             <FormControl>
                                                 <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select a provider type" />
+                                                    <SelectValue placeholder={t('forms:sso.selectProviderType')} />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
@@ -246,13 +251,13 @@ export function IdentityProviderForm({
                         )}
                     </Section>
 
-                    <Section icon={UserCog} title="Provisioning" description="What happens when someone signs in through this provider">
+                    <Section icon={UserCog} title={t('forms:sso.provisioning')} description={t('forms:sso.provisioningHelp')}>
                         <FormField
                             control={form.control}
                             name="default_role"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Default role</FormLabel>
+                                    <FormLabel>{t('forms:sso.defaultRole')}</FormLabel>
                                     <Select value={field.value} onValueChange={field.onChange}>
                                         <FormControl>
                                             <SelectTrigger className="w-full">
@@ -260,11 +265,11 @@ export function IdentityProviderForm({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="read-only">Read-Only</SelectItem>
-                                            <SelectItem value="read-write">Read-Write</SelectItem>
+                                            <SelectItem value="read-only">{t('roles.read-only')}</SelectItem>
+                                            <SelectItem value="read-write">{t('roles.read-write')}</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    <FormDescription>Admin can only be granted through a role-mapping rule.</FormDescription>
+                                    <FormDescription>{t('forms:sso.defaultRoleHelp')}</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -279,8 +284,8 @@ export function IdentityProviderForm({
                                     render={({ field }) => (
                                         <FormItem className="flex items-center justify-between gap-4 px-4 py-3">
                                             <div className="space-y-0.5">
-                                                <FormLabel className="cursor-pointer">{toggle.label}</FormLabel>
-                                                <FormDescription>{toggle.description}</FormDescription>
+                                                <FormLabel className="cursor-pointer">{t(`forms:${toggle.labelKey}`)}</FormLabel>
+                                                <FormDescription>{t(`forms:${toggle.descriptionKey}`)}</FormDescription>
                                             </div>
                                             <FormControl>
                                                 <Switch checked={Boolean(field.value)} onCheckedChange={field.onChange} />
@@ -292,13 +297,13 @@ export function IdentityProviderForm({
                         </div>
                     </Section>
 
-                    <Section icon={Waypoints} title="Role mapping" description="Assign roles from IdP claims — the first matching rule wins">
+                    <Section icon={Waypoints} title={t('forms:sso.roleMapping')} description={t('forms:sso.roleMappingHelp')}>
                         {ruleFields.length > 0 && (
                             <div className="hidden grid-cols-[1fr_140px_1fr_160px_auto] gap-2 px-1 text-xs font-medium text-muted-foreground sm:grid">
-                                <span>Claim</span>
-                                <span>Condition</span>
-                                <span>Value</span>
-                                <span>Role</span>
+                                <span>{t('forms:sso.claim')}</span>
+                                <span>{t('forms:sso.condition')}</span>
+                                <span>{t('forms:sso.value')}</span>
+                                <span>{t('fields.role')}</span>
                                 <span />
                             </div>
                         )}
@@ -309,7 +314,7 @@ export function IdentityProviderForm({
                                 className="grid grid-cols-1 gap-2 rounded-lg border bg-muted/30 p-2 sm:grid-cols-[1fr_140px_1fr_160px_auto] sm:items-center sm:bg-transparent sm:border-0 sm:p-0"
                             >
                                 <Input
-                                    placeholder="groups"
+                                    placeholder={t('forms:sso.claimPlaceholder')}
                                     className="font-mono text-sm"
                                     {...form.register(`role_mapping.${index}.claim`)}
                                 />
@@ -319,13 +324,13 @@ export function IdentityProviderForm({
                                 >
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="equals">equals</SelectItem>
-                                        <SelectItem value="contains">contains</SelectItem>
-                                        <SelectItem value="one_of">one of</SelectItem>
+                                        <SelectItem value="equals">{t('forms:sso.equals')}</SelectItem>
+                                        <SelectItem value="contains">{t('forms:sso.contains')}</SelectItem>
+                                        <SelectItem value="one_of">{t('forms:sso.oneOf')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <Input
-                                    placeholder="value"
+                                    placeholder={t('forms:sso.valuePlaceholder')}
                                     className="font-mono text-sm"
                                     {...form.register(`role_mapping.${index}.value`)}
                                 />
@@ -335,9 +340,9 @@ export function IdentityProviderForm({
                                 >
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="admin">Admin</SelectItem>
-                                        <SelectItem value="read-write">Read-Write</SelectItem>
-                                        <SelectItem value="read-only">Read-Only</SelectItem>
+                                        <SelectItem value="admin">{t('roles.admin')}</SelectItem>
+                                        <SelectItem value="read-write">{t('roles.read-write')}</SelectItem>
+                                        <SelectItem value="read-only">{t('roles.read-only')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <Button
@@ -354,7 +359,7 @@ export function IdentityProviderForm({
 
                         {ruleFields.length === 0 && (
                             <p className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
-                                No rules yet — everyone gets the default role above.
+                                {t('forms:sso.noRules')}
                             </p>
                         )}
 
@@ -366,12 +371,12 @@ export function IdentityProviderForm({
                             onClick={() => append({ claim: 'groups', operator: 'contains', value: '', role: 'read-only' })}
                         >
                             <Plus className="mr-2 size-4" />
-                            Add rule
+                            {t('forms:sso.addRule')}
                         </Button>
                     </Section>
 
                     <Button type="submit" disabled={isSubmitting} className="w-full">
-                        {isSubmitting ? 'Saving...' : submitLabel}
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                     </Button>
                 </form>
             </Form>
@@ -387,7 +392,7 @@ export function IdentityProviderForm({
             {formBody}
             <Card className="lg:sticky lg:top-6">
                 <CardHeader>
-                    <CardTitle className="text-sm">Login button preview</CardTitle>
+                    <CardTitle className="text-sm">{t('forms:sso.loginPreview')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                     <div
@@ -396,13 +401,13 @@ export function IdentityProviderForm({
                     >
                         <div className="inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-md border bg-background px-4 text-sm font-medium shadow-sm">
                             <BrandIcon preset={previewPreset} className="size-4" />
-                            Continue with {previewName || 'Provider'}
+                            {t('forms:sso.continueWith', { name: previewName || t('forms:sso.providerFallback') })}
                         </div>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
                         <span className={`size-1.5 rounded-full ${previewEnabled ? 'bg-emerald-500' : 'bg-muted-foreground/40'}`} />
                         <span className="text-muted-foreground">
-                            {previewEnabled ? 'Visible on the sign-in screen' : 'Hidden — enable to show on login'}
+                            {previewEnabled ? t('forms:sso.visibleOnLogin') : t('forms:sso.hiddenOnLogin')}
                         </span>
                     </div>
                 </CardContent>

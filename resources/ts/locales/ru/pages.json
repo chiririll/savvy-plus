@@ -188,6 +188,211 @@
         "deleteDescription": "Это действие нельзя отменить."
     },
     "reports": {
-        "title": "Отчёты"
+        "title": "Отчёты",
+        "description": "Разбор финансов в разных разрезах",
+        "tabs": {
+            "overview": "Обзор",
+            "cashflow": "Денежный поток",
+            "expenses": "Расходы",
+            "income": "Доходы",
+            "networth": "Чистый капитал"
+        },
+        "noData": "Нет данных за выбранный период",
+        "vsPreviousPeriod": "к прошлому периоду",
+        "vsAmount": "к {{amount}}",
+        "vsPreviousAmount": "{{amount}} к прошлому периоду",
+        "filters": {
+            "month": "Месяц",
+            "quarter": "Квартал",
+            "year": "Год",
+            "ytd": "С нач. года",
+            "custom": "Свой период",
+            "comparePlaceholder": "Сравнить с...",
+            "noComparison": "Без сравнения",
+            "previousPeriod": "Предыдущий период",
+            "samePeriodLastYear": "Тот же период год назад",
+            "accounts": "Счета",
+            "categories": "Категории",
+            "tags": "Теги",
+            "title": "Фильтры",
+            "period": "Период",
+            "compareWith": "Сравнить с",
+            "filterBy": "Фильтровать",
+            "reset": "Сбросить",
+            "resetFilters": "Сбросить фильтры",
+            "quarterLabel": "{{q}} кв. {{year}}"
+        },
+        "groupBy": {
+            "day": "День",
+            "week": "Неделя",
+            "month": "Месяц"
+        },
+        "views": {
+            "donut": "Кольцо",
+            "bar": "Столбцы",
+            "treemap": "Карта",
+            "line": "Линия"
+        },
+        "metrics": {
+            "income": "Доходы",
+            "expenses": "Расходы",
+            "netCashFlow": "Чистый денежный поток",
+            "savingsRate": "Норма сбережений",
+            "inflow": "Приток",
+            "outflow": "Отток",
+            "totalExpenses": "Всего расходов",
+            "totalIncome": "Всего доходов",
+            "avgPerDay": "В среднем за день",
+            "avgPerWeek": "В среднем за неделю",
+            "currentNetWorth": "Текущий чистый капитал",
+            "percentagePoints": "{{value}} п.п."
+        },
+        "series": {
+            "income": "Доходы",
+            "expenses": "Расходы",
+            "balance": "Баланс",
+            "flow": "Поток",
+            "prevIncome": "Прошлые доходы",
+            "prevExpenses": "Прошлые расходы",
+            "prevBalance": "Прошлый баланс",
+            "previousPeriod": "Прошлый период",
+            "netWorth": "Чистый капитал",
+            "budgetPace": "Темп бюджета",
+            "actual": "Факт",
+            "current": "Сейчас",
+            "budget": "Бюджет",
+            "today": "Сегодня",
+            "total": "Итого",
+            "sources": "Источники",
+            "day": "День {{day}}",
+            "budgetLabel": "Бюджет: {{amount}}"
+        },
+        "errors": {
+            "overview": "Не удалось загрузить метрики обзора",
+            "cashflow": "Не удалось загрузить метрики денежного потока",
+            "cashflowChart": "Не удалось загрузить данные денежного потока",
+            "moneyFlow": "Не удалось загрузить движение денег",
+            "expensePace": "Не удалось загрузить темп расходов",
+            "heatmap": "Не удалось загрузить тепловую карту",
+            "expensesByCategory": "Не удалось загрузить расходы по категориям"
+        },
+        "moneyFlow": {
+            "title": "Движение денег",
+            "subtitle": "Откуда приходят и куда уходят деньги"
+        },
+        "expensePace": {
+            "title": "Темп расходов",
+            "subtitleBudget": "Сравнение расходов с месячным бюджетом",
+            "subtitleDaily": "Ежедневный прогресс расходов",
+            "budgetRemaining": "Остаток бюджета",
+            "spentSoFar": "Потрачено",
+            "noBudgetHint": "Бюджет не задан. Создайте бюджет, чтобы следить за целями.",
+            "projectedEnd": "Прогноз на конец месяца",
+            "totalSpent": "Всего потрачено",
+            "overBudget": "{{amount}} сверх бюджета",
+            "underBudget": "{{amount}} в пределах бюджета",
+            "spentInDays": "{{spent}} за {{days}} дн. = {{avg}}/день × {{monthDays}} дн.",
+            "spentOverDays": "{{spent}} за {{days}} дн. = {{avg}}/день",
+            "noData": "Нет данных о расходах за выбранный период"
+        },
+        "heatmap": {
+            "title": "Активность расходов",
+            "subtitle": "Интенсивность ежедневных расходов",
+            "less": "Меньше",
+            "more": "Больше",
+            "noExpenses": "Нет расходов",
+            "transactions_one": "{{count}} транзакция",
+            "transactions_few": "{{count}} транзакции",
+            "transactions_many": "{{count}} транзакций",
+            "transactions_other": "{{count}} транзакций"
+        },
+        "expensesByCategory": {
+            "title": "Расходы по категориям",
+            "subtitle": "Сравнение расходов по категориям",
+            "noData": "Нет данных о расходах за выбранный период"
+        },
+        "expensesStructure": {
+            "title": "Структура расходов",
+            "subtitle": "Разбивка по категориям",
+            "noData": "Нет расходов за выбранный период"
+        },
+        "incomeStructure": {
+            "title": "Структура доходов",
+            "subtitle": "Разбивка по источникам",
+            "noData": "Нет доходов за выбранный период"
+        },
+        "expensesDynamics": {
+            "title": "Динамика расходов",
+            "subtitle": "Как меняются расходы со временем"
+        },
+        "incomeDynamics": {
+            "title": "Динамика доходов",
+            "subtitle": "Как меняются доходы со временем"
+        },
+        "topExpenses": {
+            "title": "Крупные расходы",
+            "subtitle": "Крупнейшие транзакции за период",
+            "topTotal": "Итого топ-{{count}}",
+            "noData": "Нет расходов за выбранный период"
+        },
+        "topIncome": {
+            "title": "Крупные доходы",
+            "subtitle": "Крупнейшие поступления за период",
+            "topTotal": "Итого топ-{{count}}",
+            "noData": "Нет доходов за выбранный период"
+        },
+        "cashFlowChart": {
+            "title": "Денежный поток во времени",
+            "subtitle": "Доходы, расходы и накопленный баланс",
+            "noIncomeOrExpenses": "Нет доходов и расходов за выбранный период",
+            "noIncome": "Нет данных о доходах за выбранный период",
+            "noExpenses": "Нет данных о расходах за выбранный период"
+        },
+        "netWorth": {
+            "accountsBreakdown": "Разбивка по счетам",
+            "distribution": "Распределение по счетам",
+            "noAccounts": "Счета не найдены",
+            "chartTitle": "Чистый капитал во времени",
+            "chartSubtitle": "Динамика капитала"
+        }
+    },
+    "dashboard": {
+        "title": "Обзор",
+        "welcome": "Сводка по вашим финансам",
+        "totalBalance": "Общий баланс",
+        "incomeThisMonth": "Доходы за месяц",
+        "expensesThisMonth": "Расходы за месяц",
+        "balanceDynamics": "Динамика баланса",
+        "accountBalances": "Балансы счетов",
+        "expensesByCategory": "Расходы по категориям",
+        "recentTransactions": "Последние транзакции",
+        "budgets": "Бюджеты",
+        "noBudgets": "Бюджетов пока нет",
+        "allExpenses": "Все расходы",
+        "noCategories": "Нет категорий",
+        "noDebts": "Нет активных долгов",
+        "noRecurring": "Нет регулярных платежей",
+        "transaction": "Транзакция",
+        "debts": "Долги",
+        "upcoming": "Предстоящие платежи",
+        "recurring": "Регулярный платёж",
+        "noDataPeriod": "Нет данных за этот период",
+        "noAccounts": "Нет активных счетов",
+        "noExpensesMonth": "Нет расходов в этом месяце",
+        "noTransactions": "Транзакций пока нет",
+        "createBudget": "Создать бюджет",
+        "addDebt": "Добавить долг",
+        "createRecurring": "Создать платёж",
+        "percentPaid": "{{percent}}% выплачено",
+        "toCounterparty": "Кому: {{name}}",
+        "fromCounterparty": "От: {{name}}",
+        "periods": {
+            "this_month": "Этот месяц",
+            "last_month": "Прошлый месяц",
+            "last_3_months": "Последние 3 месяца",
+            "last_6_months": "Последние 6 месяцев",
+            "this_year": "Этот год",
+            "custom": "Свой период"
+        }
     }
 }

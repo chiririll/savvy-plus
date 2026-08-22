@@ -15,9 +15,9 @@ export default function ProvidersPage() {
         <Page title={t('providers.title')}>
             <PageHeader
                 title={t('providers.title')}
-                description="Configure OIDC and SAML single sign-on"
+                description={t('providers.description')}
                 createLink={hasProviders ? '/settings/providers/create' : undefined}
-                createLabel="Add Provider"
+                createLabel={t('providers.add')}
             />
 
             {isLoading ? (

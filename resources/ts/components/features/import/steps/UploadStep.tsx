@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Upload, FileText, AlertCircle, X, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -24,6 +25,8 @@ export function UploadStep({
     uploadPercentage,
     error,
 }: UploadStepProps) {
+    const { t } = useTranslation('settings')
+    const { t: tCommon } = useTranslation('common')
     const [dragActive, setDragActive] = useState(false)
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
@@ -113,10 +116,10 @@ export function UploadStep({
                         <div className="flex flex-col items-center gap-2">
                             <Upload className="size-12 text-muted-foreground" />
                             <div className="text-lg font-medium">
-                                Drop CSV file here or click to browse
+                                {t('import.dropzone')}
                             </div>
                             <div className="text-sm text-muted-foreground">
-                                Parallel multipart upload — up to 512MB
+                                {t('import.dropzoneHint')}
                             </div>
                         </div>
                     </label>
@@ -127,11 +130,11 @@ export function UploadStep({
             {isUploading && (
                 <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Uploading parts in parallel…</span>
+                        <span className="text-muted-foreground">{t('import.uploading')}</span>
                         <div className="flex items-center gap-3">
                             <span className="font-mono">{uploadPercentage}%</span>
                             <Button variant="ghost" size="sm" onClick={onCancelUpload}>
-                                Cancel
+                                {tCommon('actions.cancel')}
                             </Button>
                         </div>
                     </div>
@@ -143,7 +146,7 @@ export function UploadStep({
             {isParsing && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="size-4 animate-spin" />
-                    <span>Parsing file on the server…</span>
+                    <span>{t('import.parsing')}</span>
                 </div>
             )}
 
@@ -159,28 +162,28 @@ export function UploadStep({
             {parseResult && !isLoading && (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="font-medium">File Preview</h3>
+                        <h3 className="font-medium">{t('import.filePreview')}</h3>
                         <span className="text-sm text-muted-foreground">
-                            {parseResult.totalRows} rows detected
+                            {t('import.rowsDetected', { count: parseResult.totalRows })}
                         </span>
                     </div>
 
                     {/* Detected Formats */}
                     <div className="flex gap-4 text-sm">
                         <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Date format:</span>
+                            <span className="text-muted-foreground">{t('import.dateFormat')}</span>
                             <span className="font-mono bg-muted px-2 py-0.5 rounded">
                                 {parseResult.detectedFormats.dateFormat}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Amount format:</span>
+                            <span className="text-muted-foreground">{t('import.amountFormat')}</span>
                             <span className="font-mono bg-muted px-2 py-0.5 rounded">
                                 {parseResult.detectedFormats.amountFormat}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Delimiter:</span>
+                            <span className="text-muted-foreground">{t('import.delimiter')}</span>
                             <span className="font-mono bg-muted px-2 py-0.5 rounded">
                                 {parseResult.detectedFormats.delimiter === '\t' ? 'TAB' : parseResult.detectedFormats.delimiter}
                             </span>
@@ -215,7 +218,7 @@ export function UploadStep({
                         </div>
                         {parseResult.previewRows.length > 5 && (
                             <div className="px-4 py-2 text-sm text-muted-foreground bg-muted/50 border-t">
-                                ... and {parseResult.totalRows - 5} more rows
+                                {t('import.moreRows', { count: parseResult.totalRows - 5 })}
                             </div>
                         )}
                     </div>

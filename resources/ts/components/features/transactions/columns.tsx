@@ -189,7 +189,7 @@ export function createTransactionColumns(
                             <>
                             <DropdownMenuItem onClick={() => onDuplicate(transaction.id)}>
                                 <Copy className="mr-2 size-4" />
-                                Duplicate
+                                {i18n.t('actions.duplicate')}
                             </DropdownMenuItem>
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>

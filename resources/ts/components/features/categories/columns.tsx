@@ -96,7 +96,7 @@ export const createCategoryColumns = (
                                     disabled={isLastOfType}
                                 >
                                     <Trash2 className="mr-2 size-4" />
-                                    {isLastOfType ? "Can't delete last" : i18n.t('actions.delete')}
+                                    {isLastOfType ? i18n.t('actions.cannotDeleteLast') : i18n.t('actions.delete')}
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>

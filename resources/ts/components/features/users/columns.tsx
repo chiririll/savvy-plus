@@ -91,7 +91,7 @@ export const createUserColumns = (
                                     disabled={isCurrentUser}
                                 >
                                     <Trash2 className="mr-2 size-4" />
-                                    {isCurrentUser ? "Can't delete yourself" : i18n.t('actions.delete')}
+                                    {isCurrentUser ? i18n.t('actions.cannotDeleteSelf') : i18n.t('actions.delete')}
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>

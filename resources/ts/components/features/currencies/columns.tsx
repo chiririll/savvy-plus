@@ -130,7 +130,7 @@ export const createCurrencyColumns = ({
                                     disabled={cannotDelete}
                                 >
                                     <Trash2 className="mr-2 size-4" />
-                                    {isLast ? "Can't delete last" : i18n.t('actions.delete')}
+                                    {isLast ? i18n.t('actions.cannotDeleteLast') : i18n.t('actions.delete')}
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>

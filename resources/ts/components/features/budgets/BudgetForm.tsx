@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -33,19 +34,15 @@ interface BudgetFormProps {
     submitLabel?: string
 }
 
-const periodOptions = [
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'monthly', label: 'Monthly' },
-    { value: 'yearly', label: 'Yearly' },
-    { value: 'one_time', label: 'One-time' },
-]
+const periodOptions = ['weekly', 'monthly', 'yearly', 'one_time'] as const
 
 export function BudgetForm({
     defaultValues,
     onSubmit,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
 }: BudgetFormProps) {
+    const { t } = useTranslation(['common', 'forms'])
     const { data: categories } = useCategories('expense')
     const { data: currencies } = useCurrencies()
     const { data: tags } = useTags()
@@ -82,9 +79,9 @@ export function BudgetForm({
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>{t('fields.name')}</FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g., Food budget" {...field} />
+                                <Input placeholder={t('forms:budgets.namePlaceholder')} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -97,7 +94,7 @@ export function BudgetForm({
                         name="amount"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Limit</FormLabel>
+                                <FormLabel>{t('forms:budgets.limit')}</FormLabel>
                                 <FormControl>
                                     <Input
                                         type="number"
@@ -117,21 +114,21 @@ export function BudgetForm({
                         name="currency_id"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Currency</FormLabel>
+                                <FormLabel>{t('fields.currency')}</FormLabel>
                                 <Select
                                     onValueChange={(val) => field.onChange(val ? Number(val) : null)}
                                     value={field.value?.toString() ?? ''}
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Base currency" />
+                                            <SelectValue placeholder={t('forms:budgets.baseCurrency')} />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
                                         {currencies?.map((currency) => (
                                             <SelectItem key={currency.id} value={currency.id.toString()}>
                                                 {currency.code} ({currency.symbol})
-                                                {currency.isBase && ' - Base'}
+                                                {currency.isBase && ` — ${t('forms:budgets.baseSuffix')}`}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -147,17 +144,17 @@ export function BudgetForm({
                     name="period"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Period</FormLabel>
+                            <FormLabel>{t('forms:budgets.period')}</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select period" />
+                                        <SelectValue placeholder={t('forms:selectPeriod')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                     {periodOptions.map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
-                                            {option.label}
+                                        <SelectItem key={option} value={option}>
+                                            {t(`forms:budgets.periods.${option}`)}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -174,7 +171,7 @@ export function BudgetForm({
                             name="start_date"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Start date</FormLabel>
+                                    <FormLabel>{t('forms:budgets.startDate')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="date"
@@ -192,7 +189,7 @@ export function BudgetForm({
                             name="end_date"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>End date</FormLabel>
+                                    <FormLabel>{t('forms:budgets.endDate')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="date"
@@ -219,9 +216,9 @@ export function BudgetForm({
                                 />
                             </FormControl>
                             <div className="space-y-1 leading-none">
-                                <FormLabel>Global budget</FormLabel>
+                                <FormLabel>{t('forms:budgets.global')}</FormLabel>
                                 <FormDescription>
-                                    Apply to all expenses, not specific categories
+                                    {t('forms:budgets.globalHelp')}
                                 </FormDescription>
                             </div>
                         </FormItem>
@@ -234,7 +231,7 @@ export function BudgetForm({
                         name="category_ids"
                         render={() => (
                             <FormItem>
-                                <FormLabel>Categories</FormLabel>
+                                <FormLabel>{t('forms:budgets.categories')}</FormLabel>
                                 <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto rounded-md border p-3">
                                     {categories.map((category: Category) => (
                                         <FormField
@@ -287,9 +284,9 @@ export function BudgetForm({
                         name="tag_ids"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Tags</FormLabel>
+                                <FormLabel>{t('forms:tags.label')}</FormLabel>
                                 <FormDescription>
-                                    Only transactions with selected tags will count toward this budget
+                                    {t('forms:budgets.tagsHelp')}
                                 </FormDescription>
                                 <div className="flex flex-wrap gap-2 p-3 rounded-md border">
                                     {tags.map((tag) => {
@@ -327,13 +324,13 @@ export function BudgetForm({
                     name="notify_at_percent"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Notify at %</FormLabel>
+                            <FormLabel>{t('forms:budgets.notifyAt')}</FormLabel>
                             <FormControl>
                                 <Input
                                     type="number"
                                     min="1"
                                     max="100"
-                                    placeholder="e.g., 80"
+                                    placeholder={t('forms:budgets.notifyPlaceholder')}
                                     {...field}
                                     value={field.value ?? ''}
                                     onChange={(e) => {
@@ -343,7 +340,7 @@ export function BudgetForm({
                                 />
                             </FormControl>
                             <FormDescription>
-                                Get notified when spending reaches this percentage
+                                {t('forms:budgets.notifyHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -361,13 +358,13 @@ export function BudgetForm({
                                     onCheckedChange={field.onChange}
                                 />
                             </FormControl>
-                            <FormLabel>Active</FormLabel>
+                            <FormLabel>{t('fields.active')}</FormLabel>
                         </FormItem>
                     )}
                 />
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? 'Saving...' : submitLabel}
+                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                 </Button>
             </form>
         </Form>

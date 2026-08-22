@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sparkline } from '@/components/ui/sparkline'
 import { cn } from '@/lib/utils'
@@ -16,6 +17,7 @@ interface MetricCardProps {
 }
 
 export function MetricCard({ title, value, previousValue, sparklineData, type, compareWith, suffix, currency = '$' }: MetricCardProps) {
+    const { t } = useTranslation('pages')
     const absoluteChange = previousValue != null ? value - previousValue : null
     const percentChange = previousValue && previousValue !== 0
         ? ((value - previousValue) / previousValue) * 100
@@ -46,7 +48,7 @@ export function MetricCard({ title, value, previousValue, sparklineData, type, c
 
     const formatChangeValue = (val: number) => {
         if (type === 'percent') {
-            return `${val > 0 ? '+' : ''}${val.toFixed(1)}pp`
+            return t('reports.metrics.percentagePoints', { value: `${val > 0 ? '+' : ''}${val.toFixed(1)}` })
         }
         return `${val > 0 ? '+' : ''}${formatCurrency(val)}`
     }

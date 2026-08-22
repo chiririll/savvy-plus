@@ -105,7 +105,7 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
                         <DropdownMenuItem asChild>
                             <Link to={`/automation/${row.original.id}/logs`}>
                                 <History className="size-4 mr-2" />
-                                View Logs
+                                {i18n.t('actions.viewLogs')}
                             </Link>
                         </DropdownMenuItem>
                         {!isReadOnly && (

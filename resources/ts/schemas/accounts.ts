@@ -1,20 +1,21 @@
 import { z } from 'zod'
+import i18n from '@/lib/i18n'
 
 export const accountSchema = z.object({
     name: z.string()
-        .min(1, 'Name is required')
-        .max(255, 'Maximum 255 characters'),
+        .min(1, i18n.t('validation.nameRequired'))
+        .max(255, i18n.t('validation.maxChars', { count: 255 })),
 
     type: z.enum(['bank', 'crypto', 'cash'], {
-        required_error: 'Please select account type',
+        required_error: i18n.t('validation.selectAccountType'),
     }),
 
     currency_id: z.coerce.number({
-        required_error: 'Please select currency',
-    }).positive('Please select currency'),
+        required_error: i18n.t('validation.selectCurrency'),
+    }).positive(i18n.t('validation.selectCurrency')),
 
     initial_balance: z.coerce.number()
-        .min(0, 'Balance cannot be negative')
+        .min(0, i18n.t('validation.balanceNegative'))
         .optional()
         .default(0),
 

@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactECharts from 'echarts-for-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PieChart, BarChart3, LayoutGrid } from 'lucide-react'
 import { useTransactionReportByCategory } from '@/hooks'
+import i18n from '@/lib/i18n'
 import type { ReportFilters } from '../types'
 
 type ViewMode = 'donut' | 'bar' | 'treemap'
@@ -14,6 +16,7 @@ interface IncomeStructureChartProps {
 }
 
 export function IncomeStructureChart({ filters }: IncomeStructureChartProps) {
+    const { t, i18n: i18nInstance } = useTranslation('pages')
     const [viewMode, setViewMode] = useState<ViewMode>('donut')
     const { data, isLoading } = useTransactionReportByCategory(filters, 'income')
 
@@ -107,13 +110,13 @@ export function IncomeStructureChart({ filters }: IncomeStructureChartProps) {
             left: '35%',
             top: '55%',
             style: {
-                text: 'Total',
+                text: i18n.t('pages:reports.series.total'),
                 textAlign: 'center',
                 fontSize: 12,
                 fill: '#64748b',
             },
         }],
-    }), [chartData, total, currency])
+    }), [chartData, total, currency, i18nInstance.language])
 
     // Bar chart option
     const barOption = useMemo(() => {
@@ -242,7 +245,7 @@ export function IncomeStructureChart({ filters }: IncomeStructureChartProps) {
                 },
             })),
         }],
-    }), [chartData, total, currency])
+    }), [chartData, total, currency, i18nInstance.language])
 
     const getOption = () => {
         switch (viewMode) {
@@ -256,9 +259,9 @@ export function IncomeStructureChart({ filters }: IncomeStructureChartProps) {
     }
 
     const viewModes: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
-        { value: 'donut', label: 'Donut', icon: <PieChart className="size-3.5" /> },
-        { value: 'bar', label: 'Bar', icon: <BarChart3 className="size-3.5" /> },
-        { value: 'treemap', label: 'Treemap', icon: <LayoutGrid className="size-3.5" /> },
+        { value: 'donut', label: t('reports.views.donut'), icon: <PieChart className="size-3.5" /> },
+        { value: 'bar', label: t('reports.views.bar'), icon: <BarChart3 className="size-3.5" /> },
+        { value: 'treemap', label: t('reports.views.treemap'), icon: <LayoutGrid className="size-3.5" /> },
     ]
 
     return (
@@ -266,9 +269,9 @@ export function IncomeStructureChart({ filters }: IncomeStructureChartProps) {
             <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                     <div>
-                        <CardTitle className="text-lg">Income Structure</CardTitle>
+                        <CardTitle className="text-lg">{t('reports.incomeStructure.title')}</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            Breakdown by source
+                            {t('reports.incomeStructure.subtitle')}
                         </p>
                     </div>
                     <div className="flex gap-1">
@@ -291,7 +294,7 @@ export function IncomeStructureChart({ filters }: IncomeStructureChartProps) {
                     <Skeleton className="h-[350px]" />
                 ) : chartData.length === 0 ? (
                     <div className="h-[350px] flex items-center justify-center text-muted-foreground">
-                        No income for selected period
+                        {t('reports.incomeStructure.noData')}
                     </div>
                 ) : (
                     <ReactECharts

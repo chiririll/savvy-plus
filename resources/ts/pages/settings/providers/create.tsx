@@ -28,7 +28,7 @@ export default function ProviderCreatePage() {
                     defaultValues={{ preset }}
                     onSubmit={(data) => createProvider.mutate(data)}
                     isSubmitting={createProvider.isPending}
-                    submitLabel="Create"
+                    submitLabel={t('actions.create', { ns: 'common' })}
                 />
             </div>
         </FormPage>

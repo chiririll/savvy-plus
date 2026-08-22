@@ -13,15 +13,15 @@ export default function ImportSettingsPage() {
         <Page title={t('import.title')}>
             <PageHeader
                 title={t('import.title')}
-                description="Import transactions from a CSV file"
+                description={t('import.description')}
             />
             {isReadOnly ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                         <ShieldAlert className="size-12 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-medium mb-2">Read-Only Mode</h3>
+                        <h3 className="text-lg font-medium mb-2">{t('import.readOnlyTitle')}</h3>
                         <p className="text-muted-foreground max-w-md">
-                            You don't have permission to import transactions. Please contact an administrator if you need write access.
+                            {t('import.readOnlyDescription')}
                         </p>
                     </CardContent>
                 </Card>

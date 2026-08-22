@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactECharts from 'echarts-for-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -31,6 +32,7 @@ interface IncomeDynamicsChartProps {
 }
 
 export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
+    const { t } = useTranslation('pages')
     const [chartType, setChartType] = useState<ChartType>('line')
     const [groupBy, setGroupBy] = useState<CashFlowGroupBy>(() => defaultGroupBy(filters))
     const [sources, setSources] = useState<SourceConfig[]>([])
@@ -181,9 +183,9 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
             <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                     <div>
-                        <CardTitle className="text-lg">Income Dynamics</CardTitle>
+                        <CardTitle className="text-lg">{t('reports.incomeDynamics.title')}</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            How your income changes over time
+                            {t('reports.incomeDynamics.subtitle')}
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -195,7 +197,7 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
                                 onClick={() => setChartType('line')}
                             >
                                 <LineChart className="size-3.5" />
-                                Line
+                                {t('reports.views.line')}
                             </Badge>
                             <Badge
                                 variant={chartType === 'bar' ? 'default' : 'outline'}
@@ -203,7 +205,7 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
                                 onClick={() => setChartType('bar')}
                             >
                                 <BarChart3 className="size-3.5" />
-                                Bar
+                                {t('reports.views.bar')}
                             </Badge>
                         </div>
 
@@ -213,10 +215,10 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
                                 <Badge
                                     key={g}
                                     variant={groupBy === g ? 'default' : 'outline'}
-                                    className="cursor-pointer capitalize"
+                                    className="cursor-pointer"
                                     onClick={() => setGroupBy(g)}
                                 >
-                                    {g}
+                                    {t(`reports.groupBy.${g}`)}
                                 </Badge>
                             ))}
                         </div>
@@ -225,7 +227,7 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" size="sm" className="h-7 gap-1">
-                                    Sources
+                                    {t('reports.series.sources')}
                                     <Badge variant="secondary" className="ml-1 px-1.5 text-xs">
                                         {enabledCount}
                                     </Badge>
@@ -264,7 +266,7 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
                     <Skeleton className="h-[350px]" />
                 ) : chartData.labels.length === 0 ? (
                     <div className="h-[350px] flex items-center justify-center text-muted-foreground">
-                        No data for selected period
+                        {t('reports.noData')}
                     </div>
                 ) : (
                     <ReactECharts

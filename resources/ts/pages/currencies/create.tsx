@@ -13,7 +13,7 @@ export default function CurrencyCreatePage() {
             <CurrencyForm
                 onSubmit={(data) => createCurrency.mutate(data)}
                 isSubmitting={createCurrency.isPending}
-                submitLabel="Create"
+                submitLabel={t('common:actions.create')}
                 autoUpdateEnabled={settings?.auto_update_currencies}
             />
         </FormPage>

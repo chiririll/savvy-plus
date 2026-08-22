@@ -170,7 +170,7 @@ export const createRecurringColumns = ({
                     {!isReadOnly && row.original.isActive && (
                         <DropdownMenuItem onClick={() => onSkip(row.original.id)}>
                             <SkipForward className="mr-2 h-4 w-4" />
-                            Skip Next
+                            {i18n.t('actions.skipNext')}
                         </DropdownMenuItem>
                     )}
                     {!isReadOnly && (

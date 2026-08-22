@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -22,7 +23,6 @@ import {
 import { accountSchema, AccountFormData } from '@/schemas'
 import { useCurrencies } from '@/hooks'
 import { REGULAR_ACCOUNT_TYPE_CONFIG, REGULAR_ACCOUNT_TYPES } from '@/constants'
-import type { RegularAccountType } from '@/types'
 import { cn } from '@/lib/utils'
 import { FormWrapper } from '@/components/shared/FormWrapper'
 
@@ -37,8 +37,9 @@ export function AccountForm({
     defaultValues,
     onSubmit,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
 }: AccountFormProps) {
+    const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: currencies, isLoading: currenciesLoading } = useCurrencies()
 
     const form = useForm<AccountFormData>({
@@ -62,9 +63,9 @@ export function AccountForm({
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>{t('fields.name')}</FormLabel>
                             <FormControl>
-                                <Input placeholder="My Account" {...field} />
+                                <Input placeholder={t('forms:namePlaceholder')} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -76,11 +77,11 @@ export function AccountForm({
                     name="type"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Type</FormLabel>
+                            <FormLabel>{t('fields.type')}</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select account type" />
+                                        <SelectValue placeholder={t('forms:selectAccountType')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -91,7 +92,7 @@ export function AccountForm({
                                             <SelectItem key={type} value={type}>
                                                 <div className="flex items-center gap-2">
                                                     <Icon className={cn('size-4', config.textColor)} />
-                                                    {config.label}
+                                                    {t(`pages:accounts.types.${type}`)}
                                                 </div>
                                             </SelectItem>
                                         )
@@ -108,7 +109,7 @@ export function AccountForm({
                     name="currency_id"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Currency</FormLabel>
+                            <FormLabel>{t('fields.currency')}</FormLabel>
                             <Select
                                 onValueChange={field.onChange}
                                 defaultValue={field.value?.toString()}
@@ -116,7 +117,7 @@ export function AccountForm({
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select currency" />
+                                        <SelectValue placeholder={t('forms:selectCurrency')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -143,7 +144,7 @@ export function AccountForm({
                     name="initial_balance"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Initial Balance</FormLabel>
+                            <FormLabel>{t('forms:accounts.initialBalance')}</FormLabel>
                             <FormControl>
                                 <Input
                                     type="number"
@@ -154,7 +155,7 @@ export function AccountForm({
                                 />
                             </FormControl>
                             <FormDescription>
-                                Starting balance for this account
+                                {t('forms:accounts.initialBalanceHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -167,9 +168,9 @@ export function AccountForm({
                     render={({ field }) => (
                         <FormItem className="flex items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                                <FormLabel className="text-base">Active</FormLabel>
+                                <FormLabel className="text-base">{t('fields.active')}</FormLabel>
                                 <FormDescription>
-                                    Inactive accounts are hidden from lists
+                                    {t('forms:accounts.activeHelp')}
                                 </FormDescription>
                             </div>
                             <FormControl>
@@ -183,7 +184,7 @@ export function AccountForm({
                 />
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? 'Saving...' : submitLabel}
+                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                 </Button>
             </form>
         </Form>

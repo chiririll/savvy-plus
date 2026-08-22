@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSsoPresets } from '@/hooks/use-sso'
@@ -9,6 +10,7 @@ interface SelectedPresetBannerProps {
 }
 
 export function SelectedPresetBanner({ preset, onChange }: SelectedPresetBannerProps) {
+    const { t } = useTranslation('settings')
     const { data: presets } = useSsoPresets()
     const selected = presets?.find((p) => p.key === preset)
 
@@ -24,7 +26,7 @@ export function SelectedPresetBanner({ preset, onChange }: SelectedPresetBannerP
             {onChange && (
                 <Button type="button" variant="ghost" size="sm" onClick={onChange}>
                     <ArrowLeft className="mr-2 size-4" />
-                    Change
+                    {t('providers.change')}
                 </Button>
             )}
         </div>

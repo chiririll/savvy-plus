@@ -12,7 +12,7 @@ export default function CategoryCreatePage() {
             <CategoryForm
                 onSubmit={(data) => createCategory.mutate(data)}
                 isSubmitting={createCategory.isPending}
-                submitLabel="Create"
+                submitLabel={t('common:actions.create')}
             />
         </FormPage>
     )

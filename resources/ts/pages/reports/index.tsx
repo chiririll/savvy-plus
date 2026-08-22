@@ -35,7 +35,7 @@ export default function ReportsPage() {
         <Page title={t('reports.title')}>
             <PageHeader
                 title={t('reports.title')}
-                description="Analyze your finances across different dimensions"
+                description={t('reports.description')}
             />
 
             {/* Global Filters Bar */}
@@ -51,7 +51,7 @@ export default function ReportsPage() {
                 <TabsList className="h-auto flex-wrap md:flex-nowrap md:h-9 md:w-fit">
                     {TABS.map(tab => (
                         <TabsTrigger key={tab.value} value={tab.value}>
-                            {tab.label}
+                            {t(`reports.tabs.${tab.value}`)}
                         </TabsTrigger>
                     ))}
                 </TabsList>

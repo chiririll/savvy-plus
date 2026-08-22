@@ -37,6 +37,7 @@ import { toast } from 'sonner'
 import { QRCode } from 'react-qrcode-logo'
 import { useTheme } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
+import { intlLocale } from '@/lib/i18n'
 
 type SetupStep = 'qr' | 'verify' | 'recovery'
 
@@ -106,6 +107,7 @@ function RowSkeleton() {
 
 export default function SecuritySettingsPage() {
     const { t } = useTranslation('settings')
+    const { t: tCommon } = useTranslation('common')
     const { theme } = useTheme()
     const isReadOnly = useReadOnly()
     const { data: status, isLoading } = useTwoFactorStatus()
@@ -129,6 +131,8 @@ export default function SecuritySettingsPage() {
     const [otpValue, setOtpValue] = useState('')
     const [showAddPasskeyDialog, setShowAddPasskeyDialog] = useState(false)
     const [passkeyName, setPasskeyName] = useState('')
+
+    const formatDate = (value: string) => new Date(value).toLocaleDateString(intlLocale())
 
     const handleEnable = async () => {
         const data = await enableMutation.mutateAsync()
@@ -168,13 +172,13 @@ export default function SecuritySettingsPage() {
     const copySecret = () => {
         if (qrData?.secret) {
             navigator.clipboard.writeText(qrData.secret)
-            toast.success('Secret copied to clipboard')
+            toast.success(t('security.dialogs.secretCopied'))
         }
     }
 
     const copyRecoveryCodes = () => {
         navigator.clipboard.writeText(recoveryCodes.join('\n'))
-        toast.success('Recovery codes copied to clipboard')
+        toast.success(t('security.dialogs.codesCopied'))
     }
 
     const closeEnableDialog = () => {
@@ -191,19 +195,18 @@ export default function SecuritySettingsPage() {
 
             <FormWrapper>
                 <div className="grid items-start gap-6 lg:grid-cols-2">
-                    {/* Two-Factor Authentication */}
                     <Section
                         icon={ShieldCheck}
-                        title="Two-Factor Authentication"
-                        description="Require a verification code in addition to your password"
+                        title={t('security.twoFactor.title')}
+                        description={t('security.twoFactor.description')}
                     >
                         <div className="rounded-lg border">
                             {isLoading ? (
                                 <RowSkeleton />
                             ) : (
                                 <ActionRow
-                                    label="Authenticator app"
-                                    description="Use a TOTP app such as Google Authenticator or Authy to generate sign-in codes."
+                                    label={t('security.twoFactor.authenticator')}
+                                    description={t('security.twoFactor.authenticatorDescription')}
                                 >
                                     <Switch
                                         checked={status?.enabled ?? false}
@@ -211,19 +214,18 @@ export default function SecuritySettingsPage() {
                                         onCheckedChange={(checked) =>
                                             checked ? handleEnable() : setShowDisableDialog(true)
                                         }
-                                        aria-label="Toggle two-factor authentication"
+                                        aria-label={t('security.twoFactor.toggleAria')}
                                     />
                                 </ActionRow>
                             )}
                         </div>
                     </Section>
 
-                    {/* Passkeys */}
                     {passkeySupported && (
                         <Section
                             icon={Fingerprint}
-                            title="Passkeys"
-                            description="Sign in without a password using biometrics, a screen lock, or a security key"
+                            title={t('security.passkeys.title')}
+                            description={t('security.passkeys.description')}
                         >
                             <div className="space-y-4">
                                 {passkeysLoading ? (
@@ -236,13 +238,14 @@ export default function SecuritySettingsPage() {
                                             <div key={passkey.id} className="flex items-center justify-between gap-4 px-4 py-3.5">
                                                 <div className="min-w-0 space-y-1">
                                                     <div className="truncate text-sm font-medium">
-                                                        {passkey.name || 'Unnamed passkey'}
+                                                        {passkey.name || t('security.passkeys.unnamed')}
                                                     </div>
                                                     <p className="text-sm leading-relaxed text-muted-foreground">
-                                                        Added {new Date(passkey.created_at).toLocaleDateString()}
+                                                        {t('security.passkeys.added', { date: formatDate(passkey.created_at) })}
+                                                        {' · '}
                                                         {passkey.last_used_at
-                                                            ? ` · Last used ${new Date(passkey.last_used_at).toLocaleDateString()}`
-                                                            : ' · Never used'}
+                                                            ? t('security.passkeys.lastUsed', { date: formatDate(passkey.last_used_at) })
+                                                            : t('security.passkeys.neverUsed')}
                                                     </p>
                                                 </div>
                                                 <Button
@@ -250,7 +253,7 @@ export default function SecuritySettingsPage() {
                                                     size="icon"
                                                     onClick={() => deletePasskey.mutate(passkey.id)}
                                                     disabled={isReadOnly || deletePasskey.isPending}
-                                                    aria-label="Remove passkey"
+                                                    aria-label={t('security.passkeys.removeAria')}
                                                 >
                                                     <Trash2 className="size-4 text-destructive" />
                                                 </Button>
@@ -259,13 +262,12 @@ export default function SecuritySettingsPage() {
                                     </div>
                                 ) : (
                                     <div className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
-                                        No passkeys registered yet.
+                                        {t('security.passkeys.empty')}
                                     </div>
                                 )}
                                 {!passkeyDomainValid && (
                                     <p className="text-sm text-muted-foreground">
-                                        Passkeys require a secure origin and a valid domain. Open the app over HTTPS or via{' '}
-                                        <code className="rounded bg-muted px-1 py-0.5 text-xs">localhost</code> — raw IP addresses are not allowed.
+                                        {t('security.passkeys.domainHint')}
                                     </p>
                                 )}
                                 <Button
@@ -273,23 +275,22 @@ export default function SecuritySettingsPage() {
                                     disabled={isReadOnly || registerPasskey.isPending || !passkeyDomainValid}
                                 >
                                     <Plus className="mr-2 size-4" />
-                                    Add passkey
+                                    {t('security.passkeys.add')}
                                 </Button>
                             </div>
                         </Section>
                     )}
 
-                    {/* Recovery Codes */}
                     {status?.enabled && (
                         <Section
                             icon={Key}
-                            title="Recovery Codes"
-                            description="Single-use codes to access your account if you lose your authenticator"
+                            title={t('security.recovery.title')}
+                            description={t('security.recovery.description')}
                         >
                             <div className="rounded-lg border">
                                 <ActionRow
-                                    label="Backup recovery codes"
-                                    description={`${status.recovery_codes_remaining} codes remaining. Regenerating invalidates the old set.`}
+                                    label={t('security.recovery.backup')}
+                                    description={t('security.recovery.remaining', { count: status.recovery_codes_remaining })}
                                 >
                                     <Button
                                         variant="outline"
@@ -297,7 +298,7 @@ export default function SecuritySettingsPage() {
                                         disabled={isReadOnly}
                                     >
                                         <RefreshCw className="mr-2 size-4" />
-                                        Regenerate
+                                        {t('security.recovery.regenerate')}
                                     </Button>
                                 </ActionRow>
                             </div>
@@ -306,15 +307,14 @@ export default function SecuritySettingsPage() {
                 </div>
             </FormWrapper>
 
-            {/* Enable 2FA Dialog */}
             <Dialog open={showEnableDialog} onOpenChange={closeEnableDialog}>
                 <DialogContent className="sm:max-w-md">
                     {setupStep === 'qr' && qrData && (
                         <>
                             <DialogHeader>
-                                <DialogTitle>Set up Two-Factor Authentication</DialogTitle>
+                                <DialogTitle>{t('security.dialogs.enableTitle')}</DialogTitle>
                                 <DialogDescription>
-                                    Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+                                    {t('security.dialogs.enableDescription')}
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="flex flex-col items-center gap-4 py-4">
@@ -330,7 +330,7 @@ export default function SecuritySettingsPage() {
                                 />
                                 <div className="w-full">
                                     <p className="text-sm text-muted-foreground mb-2 text-center">
-                                        Or enter this code manually:
+                                        {t('security.dialogs.manualCode')}
                                     </p>
                                     <div className="flex items-center gap-2 bg-muted p-2 rounded-md">
                                         <code className="flex-1 text-sm font-mono break-all">
@@ -344,7 +344,7 @@ export default function SecuritySettingsPage() {
                             </div>
                             <DialogFooter>
                                 <Button onClick={() => setSetupStep('verify')}>
-                                    Continue
+                                    {tCommon('actions.continue')}
                                 </Button>
                             </DialogFooter>
                         </>
@@ -353,9 +353,9 @@ export default function SecuritySettingsPage() {
                     {setupStep === 'verify' && (
                         <>
                             <DialogHeader>
-                                <DialogTitle>Verify Setup</DialogTitle>
+                                <DialogTitle>{t('security.dialogs.verifyTitle')}</DialogTitle>
                                 <DialogDescription>
-                                    Enter the 6-digit code from your authenticator app to confirm setup.
+                                    {t('security.dialogs.verifyDescription')}
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="flex justify-center py-6">
@@ -379,13 +379,13 @@ export default function SecuritySettingsPage() {
                             </div>
                             <DialogFooter className="gap-2 sm:gap-0">
                                 <Button variant="outline" onClick={() => setSetupStep('qr')}>
-                                    Back
+                                    {tCommon('actions.back')}
                                 </Button>
                                 <Button
                                     onClick={handleConfirm}
                                     disabled={otpValue.length !== 6 || confirmMutation.isPending}
                                 >
-                                    {confirmMutation.isPending ? 'Verifying...' : 'Verify'}
+                                    {confirmMutation.isPending ? t('security.dialogs.verifying') : t('security.dialogs.verify')}
                                 </Button>
                             </DialogFooter>
                         </>
@@ -394,9 +394,9 @@ export default function SecuritySettingsPage() {
                     {setupStep === 'recovery' && recoveryCodes.length > 0 && (
                         <>
                             <DialogHeader>
-                                <DialogTitle>Save Your Recovery Codes</DialogTitle>
+                                <DialogTitle>{t('security.dialogs.recoveryTitle')}</DialogTitle>
                                 <DialogDescription>
-                                    Store these codes in a safe place. Each code can only be used once.
+                                    {t('security.dialogs.recoveryDescription')}
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="py-4">
@@ -413,12 +413,12 @@ export default function SecuritySettingsPage() {
                                     onClick={copyRecoveryCodes}
                                 >
                                     <Copy className="h-4 w-4 mr-2" />
-                                    Copy All Codes
+                                    {t('security.dialogs.copyCodes')}
                                 </Button>
                             </div>
                             <DialogFooter>
                                 <Button onClick={closeEnableDialog}>
-                                    Done
+                                    {tCommon('actions.done')}
                                 </Button>
                             </DialogFooter>
                         </>
@@ -426,13 +426,12 @@ export default function SecuritySettingsPage() {
                 </DialogContent>
             </Dialog>
 
-            {/* Disable 2FA Dialog */}
             <Dialog open={showDisableDialog} onOpenChange={setShowDisableDialog}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Disable Two-Factor Authentication</DialogTitle>
+                        <DialogTitle>{t('security.dialogs.disableTitle')}</DialogTitle>
                         <DialogDescription>
-                            Enter a verification code to disable 2FA. You can use a code from your authenticator app or a recovery code.
+                            {t('security.dialogs.disableDescription')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-center py-6">
@@ -459,26 +458,25 @@ export default function SecuritySettingsPage() {
                             setShowDisableDialog(false)
                             setOtpValue('')
                         }}>
-                            Cancel
+                            {tCommon('actions.cancel')}
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={handleDisable}
                             disabled={otpValue.length !== 6 || disableMutation.isPending}
                         >
-                            {disableMutation.isPending ? 'Disabling...' : 'Disable 2FA'}
+                            {disableMutation.isPending ? t('security.dialogs.disabling') : t('security.dialogs.disable')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Regenerate Recovery Codes Dialog */}
             <Dialog open={showRegenerateDialog} onOpenChange={setShowRegenerateDialog}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Regenerate Recovery Codes</DialogTitle>
+                        <DialogTitle>{t('security.recovery.regenerateTitle')}</DialogTitle>
                         <DialogDescription>
-                            This will invalidate all existing recovery codes. Enter a verification code from your authenticator app to continue.
+                            {t('security.recovery.regenerateDescription')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-center py-6">
@@ -505,33 +503,32 @@ export default function SecuritySettingsPage() {
                             setShowRegenerateDialog(false)
                             setOtpValue('')
                         }}>
-                            Cancel
+                            {tCommon('actions.cancel')}
                         </Button>
                         <Button
                             onClick={handleRegenerate}
                             disabled={otpValue.length !== 6 || regenerateMutation.isPending}
                         >
-                            {regenerateMutation.isPending ? 'Regenerating...' : 'Regenerate'}
+                            {regenerateMutation.isPending ? t('security.recovery.regenerating') : t('security.recovery.regenerate')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Add Passkey Dialog */}
             <Dialog open={showAddPasskeyDialog} onOpenChange={(open) => {
                 setShowAddPasskeyDialog(open)
                 if (!open) setPasskeyName('')
             }}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Add a passkey</DialogTitle>
+                        <DialogTitle>{t('security.passkeys.addTitle')}</DialogTitle>
                         <DialogDescription>
-                            Give this passkey a name so you can recognize it later, then follow your browser's prompt.
+                            {t('security.passkeys.addDescription')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-2">
                         <Input
-                            placeholder="e.g. MacBook Touch ID, iPhone, YubiKey"
+                            placeholder={t('security.passkeys.namePlaceholder')}
                             value={passkeyName}
                             onChange={(e) => setPasskeyName(e.target.value)}
                             maxLength={100}
@@ -546,10 +543,10 @@ export default function SecuritySettingsPage() {
                             setShowAddPasskeyDialog(false)
                             setPasskeyName('')
                         }}>
-                            Cancel
+                            {tCommon('actions.cancel')}
                         </Button>
                         <Button onClick={handleAddPasskey} disabled={registerPasskey.isPending}>
-                            {registerPasskey.isPending ? 'Waiting for device...' : 'Continue'}
+                            {registerPasskey.isPending ? t('security.passkeys.waiting') : tCommon('actions.continue')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

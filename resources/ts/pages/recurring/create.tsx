@@ -12,7 +12,7 @@ export default function RecurringCreatePage() {
             <RecurringForm
                 onSubmit={(data) => createRecurring.mutate(data)}
                 isSubmitting={createRecurring.isPending}
-                submitLabel="Create"
+                submitLabel={t('common:actions.create')}
             />
         </FormPage>
     )

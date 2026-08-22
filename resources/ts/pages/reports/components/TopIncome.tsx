@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { intlLocale } from '@/lib/i18n'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronRight } from 'lucide-react'
@@ -12,6 +14,7 @@ interface TopIncomeProps {
 }
 
 export function TopIncome({ filters, limit = 10 }: TopIncomeProps) {
+    const { t } = useTranslation('pages')
     const navigate = useNavigate()
     const { data, isLoading } = useTransactionReportTop(filters, 'income', limit)
 
@@ -32,7 +35,7 @@ export function TopIncome({ filters, limit = 10 }: TopIncomeProps) {
         if (parts.length !== 3) return dateStr
         const [year, month, day] = parts.map(Number)
         const date = new Date(year, month - 1, day)
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        return date.toLocaleDateString(intlLocale(), { month: 'short', day: 'numeric' })
     }
 
     const handleTransactionClick = (id: number) => {
@@ -44,14 +47,14 @@ export function TopIncome({ filters, limit = 10 }: TopIncomeProps) {
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="text-lg">Top Income</CardTitle>
+                        <CardTitle className="text-lg">{t('reports.topIncome.title')}</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            Largest income transactions this period
+                            {t('reports.topIncome.subtitle')}
                         </p>
                     </div>
                     {!isLoading && transactions.length > 0 && (
                         <div className="text-right">
-                            <p className="text-sm text-muted-foreground">Top {transactions.length} total</p>
+                            <p className="text-sm text-muted-foreground">{t('reports.topIncome.topTotal', { count: transactions.length })}</p>
                             <p className="text-lg font-semibold text-green-600">{formatCurrency(totalTop)}</p>
                         </div>
                     )}
@@ -66,7 +69,7 @@ export function TopIncome({ filters, limit = 10 }: TopIncomeProps) {
                     </div>
                 ) : transactions.length === 0 ? (
                     <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                        No income for selected period
+                        {t('reports.topIncome.noData')}
                     </div>
                 ) : (
                     <div className="space-y-1">

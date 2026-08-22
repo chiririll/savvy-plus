@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { useStorageMonitoring, useResourceMonitoring } from '@/hooks'
 import type { StorageSnapshot, ResourceSnapshot } from '@/types/monitoring'
+import i18n, { intlLocale } from '@/lib/i18n'
 
 function formatBytes(bytes: number | null | undefined, decimals = 1): string {
     if (bytes === null || bytes === undefined) return '—'
@@ -34,7 +35,7 @@ function formatBytes(bytes: number | null | undefined, decimals = 1): string {
 
 function formatCount(value: number | null | undefined): string {
     if (value === null || value === undefined) return '—'
-    return new Intl.NumberFormat('en-US').format(value)
+    return new Intl.NumberFormat(intlLocale()).format(value)
 }
 
 function formatUptime(seconds: number | null): string {
@@ -42,9 +43,9 @@ function formatUptime(seconds: number | null): string {
     const d = Math.floor(seconds / 86400)
     const h = Math.floor((seconds % 86400) / 3600)
     const m = Math.floor((seconds % 3600) / 60)
-    if (d > 0) return `${d}d ${h}h`
-    if (h > 0) return `${h}h ${m}m`
-    return `${m}m`
+    if (d > 0) return i18n.t('monitoring.uptimeDaysHours', { ns: 'settings', days: d, hours: h })
+    if (h > 0) return i18n.t('monitoring.uptimeHoursMinutes', { ns: 'settings', hours: h, minutes: m })
+    return i18n.t('monitoring.uptimeMinutes', { ns: 'settings', minutes: m })
 }
 
 type Severity = 'ok' | 'warn' | 'crit'
@@ -171,13 +172,14 @@ function RuntimeChip({ label, value }: { label: string; value: string }) {
 }
 
 function ResourcePanel({ data }: { data: ResourceSnapshot }) {
+    const { t } = useTranslation('settings')
     const { cpu, memory, process, queue, runtime } = data
     const memSeverity = severityFor(memory.used_percent)
     const cpuSeverity = severityFor(cpu.load_percent)
     const procPercent =
         process.limit_bytes && process.limit_bytes > 0
-            ? `${((process.memory_bytes / process.limit_bytes) * 100).toFixed(0)}% of limit`
-            : `peak ${formatBytes(process.peak_bytes)}`
+            ? t('monitoring.ofLimit', { percent: ((process.memory_bytes / process.limit_bytes) * 100).toFixed(0) })
+            : t('monitoring.peak', { size: formatBytes(process.peak_bytes) })
 
     return (
         <section className="rounded-2xl border bg-card shadow-sm">
@@ -186,8 +188,8 @@ function ResourcePanel({ data }: { data: ResourceSnapshot }) {
                     <Cpu className="size-5" />
                 </div>
                 <div>
-                    <h2 className="text-sm font-semibold leading-none">System resources</h2>
-                    <p className="mt-1 text-xs text-muted-foreground">What the application consumes right now</p>
+                    <h2 className="text-sm font-semibold leading-none">{t('monitoring.resourcesTitle')}</h2>
+                    <p className="mt-1 text-xs text-muted-foreground">{t('monitoring.resourcesDescription')}</p>
                 </div>
                 <div className="ml-auto flex flex-wrap items-center gap-2">
                     <RuntimeChip label="PHP" value={runtime.php_version} />
@@ -198,29 +200,29 @@ function ResourcePanel({ data }: { data: ResourceSnapshot }) {
 
             <div className="grid gap-6 p-6 md:grid-cols-2">
                 <div className="flex items-center gap-6 rounded-xl border bg-muted/20 p-5">
-                    <Gauge percent={cpu.load_percent} label="CPU load" size={150} />
+                    <Gauge percent={cpu.load_percent} label={t('monitoring.cpuLoad')} size={150} />
                     <div className="min-w-0 space-y-3 text-sm">
                         <div>
-                            <p className="text-xs uppercase tracking-wide text-muted-foreground">vCPUs</p>
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('monitoring.vcpus')}</p>
                             <p className="mt-0.5 text-lg font-semibold tabular-nums">
                                 {cpu.cores ?? '—'}
                             </p>
                         </div>
                         <div>
-                            <p className="text-xs uppercase tracking-wide text-muted-foreground">Load avg</p>
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('monitoring.loadAvg')}</p>
                             <div className="mt-1 flex gap-1.5">
                                 {cpu.load ? (
                                     cpu.load.map((v, i) => (
                                         <span
                                             key={i}
                                             className="rounded-md border bg-background px-2 py-0.5 font-mono text-xs tabular-nums"
-                                            title={['1 min', '5 min', '15 min'][i]}
+                                            title={[t('monitoring.load1'), t('monitoring.load5'), t('monitoring.load15')][i]}
                                         >
                                             {v.toFixed(2)}
                                         </span>
                                     ))
                                 ) : (
-                                    <span className="text-muted-foreground">unavailable</span>
+                                    <span className="text-muted-foreground">{t('monitoring.unavailable')}</span>
                                 )}
                             </div>
                         </div>
@@ -228,32 +230,32 @@ function ResourcePanel({ data }: { data: ResourceSnapshot }) {
                 </div>
 
                 <div className="flex items-center gap-6 rounded-xl border bg-muted/20 p-5">
-                    <Gauge percent={memory.used_percent} label="Memory" size={150} />
+                    <Gauge percent={memory.used_percent} label={t('monitoring.memory')} size={150} />
                     <div className="min-w-0 space-y-3 text-sm">
                         {memory.total_bytes === null ? (
-                            <p className="text-muted-foreground">Memory stats unavailable on this host.</p>
+                            <p className="text-muted-foreground">{t('monitoring.memoryUnavailable')}</p>
                         ) : (
                             <>
                                 <div className="space-y-2">
                                     <LegendDot
                                         className={SEVERITY_FILL[memSeverity]}
-                                        label="Used"
+                                        label={t('monitoring.used')}
                                         value={formatBytes(memory.used_bytes)}
                                     />
                                     <LegendDot
                                         className="bg-muted"
-                                        label="Free"
+                                        label={t('monitoring.free')}
                                         value={formatBytes(memory.free_bytes)}
                                     />
                                     <LegendDot
                                         className="bg-foreground"
-                                        label="Limit"
+                                        label={t('monitoring.limit')}
                                         value={formatBytes(memory.total_bytes)}
                                     />
                                 </div>
                                 {memory.source && (
                                     <p className="text-xs text-muted-foreground">
-                                        {memory.source === 'cgroup' ? 'Container cgroup limit' : 'Host memory'}
+                                        {memory.source === 'cgroup' ? t('monitoring.cgroupLimit') : t('monitoring.hostMemory')}
                                     </p>
                                 )}
                             </>
@@ -265,28 +267,28 @@ function ResourcePanel({ data }: { data: ResourceSnapshot }) {
             <div className="grid gap-4 border-t p-6 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
                     icon={MemoryStick}
-                    label="Process memory"
+                    label={t('monitoring.processMemory')}
                     value={formatBytes(process.memory_bytes)}
                     hint={procPercent}
                 />
                 <StatCard
                     icon={Layers}
-                    label="Queue backlog"
+                    label={t('monitoring.queueBacklog')}
                     value={formatCount(queue.pending)}
-                    hint={`${formatCount(queue.reserved ?? 0)} in progress`}
+                    hint={t('monitoring.inProgress', { count: formatCount(queue.reserved ?? 0) })}
                 />
                 <StatCard
                     icon={XCircle}
-                    label="Failed jobs"
+                    label={t('monitoring.failedJobs')}
                     value={formatCount(queue.failed)}
                     tone={(queue.failed ?? 0) > 0 ? 'crit' : 'ok'}
-                    hint={(queue.failed ?? 0) > 0 ? 'needs attention' : 'all clear'}
+                    hint={(queue.failed ?? 0) > 0 ? t('monitoring.needsAttention') : t('monitoring.allClear')}
                 />
                 <StatCard
                     icon={Clock}
-                    label="Uptime"
+                    label={t('monitoring.uptime')}
                     value={formatUptime(runtime.uptime_seconds)}
-                    hint={cpuSeverity === 'crit' ? 'high CPU pressure' : undefined}
+                    hint={cpuSeverity === 'crit' ? t('monitoring.highCpu') : undefined}
                 />
             </div>
         </section>
@@ -294,6 +296,7 @@ function ResourcePanel({ data }: { data: ResourceSnapshot }) {
 }
 
 function VolumePanel({ data }: { data: StorageSnapshot }) {
+    const { t } = useTranslation('settings')
     const { volume, managed } = data
     const severity = severityFor(volume.used_percent)
     const total = volume.total_bytes ?? 0
@@ -316,7 +319,7 @@ function VolumePanel({ data }: { data: StorageSnapshot }) {
                     <HardDrive className="size-5" />
                 </div>
                 <div className="min-w-0">
-                    <h2 className="text-sm font-semibold leading-none">Upload volume</h2>
+                    <h2 className="text-sm font-semibold leading-none">{t('monitoring.uploadVolume')}</h2>
                     <p className="mt-1 truncate font-mono text-xs text-muted-foreground" title={volume.path}>
                         {volume.disk} · {volume.path}
                     </p>
@@ -331,7 +334,7 @@ function VolumePanel({ data }: { data: StorageSnapshot }) {
                         )}
                     >
                         <AlertTriangle className="size-3" />
-                        {severity === 'crit' ? 'Critical' : 'Filling up'}
+                        {severity === 'crit' ? t('monitoring.critical') : t('monitoring.fillingUp')}
                     </span>
                 )}
             </header>
@@ -339,12 +342,12 @@ function VolumePanel({ data }: { data: StorageSnapshot }) {
             {volume.total_bytes === null ? (
                 <div className="flex items-center gap-3 px-6 py-10 text-sm text-muted-foreground">
                     <AlertTriangle className="size-4" />
-                    Volume capacity is unavailable on this host.
+                    {t('monitoring.volumeUnavailable')}
                 </div>
             ) : (
                 <div className="grid items-center gap-8 p-6 md:grid-cols-[auto_1fr]">
                     <div className="flex justify-center md:justify-start">
-                        <Gauge percent={volume.used_percent} />
+                        <Gauge percent={volume.used_percent} label={t('monitoring.used')} />
                     </div>
 
                     <div className="space-y-5">
@@ -361,29 +364,29 @@ function VolumePanel({ data }: { data: StorageSnapshot }) {
                         <div className="grid gap-2.5 text-sm sm:grid-cols-2">
                             <LegendDot
                                 className={SEVERITY_FILL[severity]}
-                                label="Savvy data"
+                                label={t('monitoring.savvyData')}
                                 value={formatBytes(appBytes)}
                             />
                             <LegendDot
                                 className="bg-muted-foreground/35"
-                                label="Other usage"
+                                label={t('monitoring.otherUsage')}
                                 value={formatBytes(otherBytes)}
                             />
-                            <LegendDot className="bg-muted" label="Free" value={formatBytes(free)} />
-                            <LegendDot className="bg-foreground" label="Capacity" value={formatBytes(total)} />
+                            <LegendDot className="bg-muted" label={t('monitoring.free')} value={formatBytes(free)} />
+                            <LegendDot className="bg-foreground" label={t('monitoring.capacity')} value={formatBytes(total)} />
                         </div>
 
                         <div className="grid grid-cols-3 gap-4 border-t pt-5">
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-muted-foreground">Used</p>
+                                <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('monitoring.used')}</p>
                                 <p className="mt-1 text-xl font-semibold tabular-nums">{formatBytes(used)}</p>
                             </div>
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-muted-foreground">Free</p>
+                                <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('monitoring.free')}</p>
                                 <p className="mt-1 text-xl font-semibold tabular-nums">{formatBytes(free)}</p>
                             </div>
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-muted-foreground">Total</p>
+                                <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('monitoring.total')}</p>
                                 <p className="mt-1 text-xl font-semibold tabular-nums">{formatBytes(total)}</p>
                             </div>
                         </div>
@@ -395,6 +398,7 @@ function VolumePanel({ data }: { data: StorageSnapshot }) {
 }
 
 function BucketBreakdown({ data }: { data: StorageSnapshot }) {
+    const { t } = useTranslation('settings')
     const { buckets, used_bytes } = data.managed
 
     return (
@@ -404,14 +408,14 @@ function BucketBreakdown({ data }: { data: StorageSnapshot }) {
                     <Boxes className="size-5" />
                 </div>
                 <div>
-                    <h2 className="text-sm font-semibold leading-none">Storage by bucket</h2>
-                    <p className="mt-1 text-xs text-muted-foreground">What Savvy keeps on the volume</p>
+                    <h2 className="text-sm font-semibold leading-none">{t('monitoring.storageByBucket')}</h2>
+                    <p className="mt-1 text-xs text-muted-foreground">{t('monitoring.storageByBucketDescription')}</p>
                 </div>
             </header>
 
             {buckets.length === 0 ? (
                 <p className="px-6 py-10 text-center text-sm text-muted-foreground">
-                    Nothing stored on the volume yet.
+                    {t('monitoring.nothingStored')}
                 </p>
             ) : (
                 <ul className="divide-y">
@@ -432,7 +436,7 @@ function BucketBreakdown({ data }: { data: StorageSnapshot }) {
                                     />
                                 </div>
                                 <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
-                                    <span>{formatCount(bucket.objects)} objects</span>
+                                    <span>{t('monitoring.objects', { count: bucket.objects })}</span>
                                     <span className="tabular-nums">{share.toFixed(0)}%</span>
                                 </div>
                             </li>
@@ -468,7 +472,7 @@ export default function MonitoringPage() {
 
     const updatedLabel = useMemo(() => {
         const latest = Math.max(storage.dataUpdatedAt ?? 0, resources.dataUpdatedAt ?? 0)
-        return latest > 0 ? new Date(latest).toLocaleTimeString() : null
+        return latest > 0 ? new Date(latest).toLocaleTimeString(intlLocale()) : null
     }, [storage.dataUpdatedAt, resources.dataUpdatedAt])
 
     const refresh = () => {
@@ -480,7 +484,7 @@ export default function MonitoringPage() {
         <Page title={t('monitoring.title')}>
             <PageHeader
                 title={t('monitoring.title')}
-                description="Live view of resource usage and storage health"
+                description={t('monitoring.description')}
                 actions={
                     <div className="flex items-center gap-3">
                         {updatedLabel && (
@@ -489,12 +493,12 @@ export default function MonitoringPage() {
                                     <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-60" />
                                     <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
                                 </span>
-                                Updated {updatedLabel}
+                                {t('monitoring.updated', { time: updatedLabel })}
                             </span>
                         )}
                         <Button variant="outline" size="sm" onClick={refresh} disabled={isFetching}>
                             <RefreshCw className={cn('mr-2 size-4', isFetching && 'animate-spin')} />
-                            Refresh
+                            {t('monitoring.refresh')}
                         </Button>
                     </div>
                 }
@@ -513,27 +517,27 @@ export default function MonitoringPage() {
                             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 <StatCard
                                     icon={Database}
-                                    label="Savvy data"
+                                    label={t('monitoring.savvyData')}
                                     value={formatBytes(storage.data.managed.used_bytes)}
-                                    hint={`${formatCount(storage.data.managed.objects)} stored objects`}
+                                    hint={t('monitoring.storedObjects', { count: storage.data.managed.objects })}
                                 />
                                 <StatCard
                                     icon={UploadCloud}
-                                    label="In-flight uploads"
+                                    label={t('monitoring.inFlight')}
                                     value={formatBytes(storage.data.managed.pending_bytes)}
-                                    hint={`${formatCount(storage.data.uploads.by_status.pending ?? 0)} pending`}
+                                    hint={t('monitoring.pending', { count: storage.data.uploads.by_status.pending ?? 0 })}
                                 />
                                 <StatCard
                                     icon={Boxes}
-                                    label="Uploads"
+                                    label={t('monitoring.uploads')}
                                     value={formatCount(storage.data.uploads.total)}
-                                    hint={`${formatCount(storage.data.uploads.by_status.completed ?? 0)} completed`}
+                                    hint={t('monitoring.completed', { count: storage.data.uploads.by_status.completed ?? 0 })}
                                 />
                                 <StatCard
                                     icon={FileSpreadsheet}
-                                    label="Imports"
+                                    label={t('monitoring.imports')}
                                     value={formatCount(storage.data.imports.total)}
-                                    hint={`${formatCount(storage.data.imports.by_status.completed ?? 0)} completed`}
+                                    hint={t('monitoring.completed', { count: storage.data.imports.by_status.completed ?? 0 })}
                                 />
                             </div>
 

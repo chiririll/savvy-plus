@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,10 +13,13 @@ import { useEnableTwoFactor, useConfirmTwoFactor, useTheme } from '@/hooks'
 import { ShieldCheck, Copy, Loader2, ArrowLeft, Star } from 'lucide-react'
 import { toast } from 'sonner'
 import { QRCode } from 'react-qrcode-logo'
+import { LanguageSwitcher } from '@/components/shared'
 
 type SetupStep = 'intro' | 'qr' | 'verify' | 'recovery' | 'star'
 
 export default function Setup2FAPage() {
+    const { t } = useTranslation('auth')
+    const { t: tCommon } = useTranslation('common')
     const navigate = useNavigate()
     const { theme } = useTheme()
 
@@ -34,12 +38,12 @@ export default function Setup2FAPage() {
     }, [navigate])
 
     const handleSkip = () => {
-        toast.info('You can enable 2FA later in Settings > Security')
+        toast.info(t('setup2fa.skipToast'))
         setStep('star')
     }
 
     const handleComplete = () => {
-        toast.success('2FA enabled successfully!')
+        toast.success(t('setup2fa.enabledToast'))
         setStep('star')
     }
 
@@ -64,13 +68,13 @@ export default function Setup2FAPage() {
     const copySecret = () => {
         if (qrData?.secret) {
             navigator.clipboard.writeText(qrData.secret)
-            toast.success('Secret copied to clipboard')
+            toast.success(t('setup2fa.secretCopied'))
         }
     }
 
     const copyRecoveryCodes = () => {
         navigator.clipboard.writeText(recoveryCodes.join('\n'))
-        toast.success('Recovery codes copied to clipboard')
+        toast.success(t('setup2fa.codesCopied'))
     }
 
     return (
@@ -84,18 +88,18 @@ export default function Setup2FAPage() {
                                     <ShieldCheck className="size-7" />
                                 </div>
                             </div>
-                            <CardTitle className="text-2xl">Secure Your Account</CardTitle>
+                            <CardTitle className="text-2xl">{t('setup2fa.title')}</CardTitle>
                             <CardDescription>
-                                Add two-factor authentication for extra security. This protects your account even if your password is compromised.
+                                {t('setup2fa.description')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="text-sm text-muted-foreground space-y-2">
-                                <p>With 2FA enabled:</p>
+                                <p>{t('setup2fa.withEnabled')}</p>
                                 <ul className="list-disc list-inside space-y-1">
-                                    <li>You'll need your phone to log in</li>
-                                    <li>Your account is protected from unauthorized access</li>
-                                    <li>You'll get recovery codes for emergencies</li>
+                                    <li>{t('setup2fa.needPhone')}</li>
+                                    <li>{t('setup2fa.protected')}</li>
+                                    <li>{t('setup2fa.recoveryCodes')}</li>
                                 </ul>
                             </div>
                             <div className="flex flex-col gap-2">
@@ -105,14 +109,14 @@ export default function Setup2FAPage() {
                                     className="w-full"
                                 >
                                     {enableMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                                    Enable 2FA
+                                    {t('setup2fa.enable')}
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     onClick={handleSkip}
                                     className="w-full"
                                 >
-                                    Skip for now
+                                    {t('setup2fa.skip')}
                                 </Button>
                             </div>
                         </CardContent>
@@ -122,9 +126,9 @@ export default function Setup2FAPage() {
                 {step === 'qr' && qrData && (
                     <>
                         <CardHeader className="text-center">
-                            <CardTitle>Scan QR Code</CardTitle>
+                            <CardTitle>{t('setup2fa.scanTitle')}</CardTitle>
                             <CardDescription>
-                                Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+                                {t('setup2fa.scanDescription')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -142,7 +146,7 @@ export default function Setup2FAPage() {
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground mb-2 text-center">
-                                    Or enter this code manually:
+                                    {t('setup2fa.manualCode')}
                                 </p>
                                 <div className="flex items-center gap-2 bg-muted p-2 rounded-md">
                                     <code className="flex-1 text-sm font-mono break-all">
@@ -160,13 +164,13 @@ export default function Setup2FAPage() {
                                     className="flex-1"
                                 >
                                     <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back
+                                    {tCommon('actions.back')}
                                 </Button>
                                 <Button
                                     onClick={() => setStep('verify')}
                                     className="flex-1"
                                 >
-                                    Continue
+                                    {tCommon('actions.continue')}
                                 </Button>
                             </div>
                         </CardContent>
@@ -176,9 +180,9 @@ export default function Setup2FAPage() {
                 {step === 'verify' && (
                     <>
                         <CardHeader className="text-center">
-                            <CardTitle>Verify Setup</CardTitle>
+                            <CardTitle>{t('setup2fa.verifyTitle')}</CardTitle>
                             <CardDescription>
-                                Enter the 6-digit code from your authenticator app
+                                {t('setup2fa.verifyDescription')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
@@ -208,7 +212,7 @@ export default function Setup2FAPage() {
                                     className="flex-1"
                                 >
                                     <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back
+                                    {tCommon('actions.back')}
                                 </Button>
                                 <Button
                                     onClick={handleConfirm}
@@ -216,7 +220,7 @@ export default function Setup2FAPage() {
                                     className="flex-1"
                                 >
                                     {confirmMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                                    Verify
+                                    {t('twoFactor.verify')}
                                 </Button>
                             </div>
                         </CardContent>
@@ -226,9 +230,9 @@ export default function Setup2FAPage() {
                 {step === 'recovery' && recoveryCodes.length > 0 && (
                     <>
                         <CardHeader className="text-center">
-                            <CardTitle>Save Your Recovery Codes</CardTitle>
+                            <CardTitle>{t('setup2fa.recoveryTitle')}</CardTitle>
                             <CardDescription>
-                                Store these codes in a safe place. Each code can only be used once to access your account if you lose your device.
+                                {t('setup2fa.recoveryDescription')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -245,10 +249,10 @@ export default function Setup2FAPage() {
                                 onClick={copyRecoveryCodes}
                             >
                                 <Copy className="h-4 w-4 mr-2" />
-                                Copy All Codes
+                                {t('setup2fa.copyCodes')}
                             </Button>
                             <Button onClick={handleComplete} className="w-full">
-                                Done
+                                {tCommon('actions.done')}
                             </Button>
                         </CardContent>
                     </>
@@ -262,9 +266,9 @@ export default function Setup2FAPage() {
                                     <Star className="size-7" />
                                 </div>
                             </div>
-                            <CardTitle className="text-2xl">Support Savvy</CardTitle>
+                            <CardTitle className="text-2xl">{t('setup2fa.starTitle')}</CardTitle>
                             <CardDescription>
-                                If you enjoy using Savvy, please consider giving us a star on GitHub. It helps others discover the project!
+                                {t('setup2fa.starDescription')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -279,7 +283,7 @@ export default function Setup2FAPage() {
                                         rel="noopener noreferrer"
                                     >
                                         <Star className="mr-2 size-4" />
-                                        Star on GitHub
+                                        {t('setup2fa.starGithub')}
                                     </a>
                                 </Button>
                                 <Button
@@ -287,12 +291,15 @@ export default function Setup2FAPage() {
                                     onClick={handleFinish}
                                     className="w-full"
                                 >
-                                    Skip
+                                    {tCommon('actions.skip')}
                                 </Button>
                             </div>
                         </CardContent>
                     </>
                 )}
+                <div className="px-6 pb-6">
+                    <LanguageSwitcher variant="auth" className="pt-2" />
+                </div>
             </Card>
         </div>
     )

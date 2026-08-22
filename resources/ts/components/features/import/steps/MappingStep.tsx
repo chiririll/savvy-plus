@@ -1,6 +1,8 @@
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import i18n from '@/lib/i18n'
 import {
     Form,
     FormControl,
@@ -22,8 +24,8 @@ import type { CsvParseResult, ColumnMapping, ImportOptions, DateFormat, AmountFo
 import { useEffect } from 'react'
 
 const mappingSchema = z.object({
-    date: z.number({ required_error: 'Date column is required' }),
-    amount: z.number({ required_error: 'Amount column is required' }),
+    date: z.number({ required_error: i18n.t('import.dateRequired', { ns: 'forms' }) }),
+    amount: z.number({ required_error: i18n.t('import.amountRequired', { ns: 'forms' }) }),
     description: z.number().nullable(),
     type: z.number().nullable(),
     category: z.number().nullable(),
@@ -31,7 +33,7 @@ const mappingSchema = z.object({
     currency: z.number().nullable(),
     dateFormat: z.string(),
     amountFormat: z.string(),
-    defaultAccountId: z.number({ required_error: 'Account is required' }),
+    defaultAccountId: z.number({ required_error: i18n.t('import.accountRequired', { ns: 'forms' }) }),
     defaultType: z.enum(['income', 'expense']),
 })
 
@@ -46,6 +48,9 @@ interface MappingStepProps {
 const NONE_VALUE = '__none__'
 
 export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepProps) {
+    const { t } = useTranslation('settings')
+    const { t: tForms } = useTranslation('forms')
+    const { t: tPages } = useTranslation('pages')
     const form = useForm<MappingFormValues>({
         resolver: zodResolver(mappingSchema),
         defaultValues: {
@@ -106,7 +111,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6" id="mapping-form">
                 {/* Required Mappings */}
                 <div className="space-y-4">
-                    <h3 className="font-medium">Required Fields</h3>
+                    <h3 className="font-medium">{t('import.requiredFields')}</h3>
 
                     <div className="grid gap-4 sm:grid-cols-2">
                         <FormField
@@ -114,7 +119,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                             name="date"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Date Column *</FormLabel>
+                                    <FormLabel>{tForms('import.dateColumn')}</FormLabel>
                                     <Select
                                         onValueChange={(val) => field.onChange(Number(val))}
                                         value={field.value?.toString()}
@@ -122,7 +127,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select column" />
+                                                <SelectValue placeholder={tForms('import.selectColumn')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -143,7 +148,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                             name="amount"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Amount Column *</FormLabel>
+                                    <FormLabel>{tForms('import.amountColumn')}</FormLabel>
                                     <Select
                                         onValueChange={(val) => field.onChange(Number(val))}
                                         value={field.value?.toString()}
@@ -151,7 +156,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select column" />
+                                                <SelectValue placeholder={tForms('import.selectColumn')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -173,15 +178,15 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                         name="defaultAccountId"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Target Account *</FormLabel>
+                                <FormLabel>{tForms('import.targetAccount')}</FormLabel>
                                 <AccountSelect
                                     value={field.value}
                                     onChange={field.onChange}
-                                    placeholder="Select account for import"
+                                    placeholder={tForms('import.targetAccountPlaceholder')}
                                     disabled={isLoading}
                                 />
                                 <FormDescription>
-                                    All imported transactions will be added to this account
+                                    {tForms('import.targetAccountHelp')}
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -191,7 +196,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
 
                 {/* Optional Mappings */}
                 <div className="space-y-4">
-                    <h3 className="font-medium">Optional Fields</h3>
+                    <h3 className="font-medium">{t('import.optionalFields')}</h3>
 
                     <div className="grid gap-4 sm:grid-cols-2">
                         <FormField
@@ -199,7 +204,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Description Column</FormLabel>
+                                    <FormLabel>{tForms('import.descriptionColumn')}</FormLabel>
                                     <Select
                                         onValueChange={(val) => field.onChange(val === NONE_VALUE ? null : Number(val))}
                                         value={field.value?.toString() ?? NONE_VALUE}
@@ -207,11 +212,11 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select column" />
+                                                <SelectValue placeholder={tForms('import.selectColumn')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={NONE_VALUE}>-- None --</SelectItem>
+                                            <SelectItem value={NONE_VALUE}>{tForms('import.none')}</SelectItem>
                                             {columnOptions.map((opt) => (
                                                 <SelectItem key={opt.value} value={opt.value}>
                                                     {opt.label}
@@ -229,7 +234,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                             name="category"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Category Column</FormLabel>
+                                    <FormLabel>{tForms('import.categoryColumn')}</FormLabel>
                                     <Select
                                         onValueChange={(val) => field.onChange(val === NONE_VALUE ? null : Number(val))}
                                         value={field.value?.toString() ?? NONE_VALUE}
@@ -237,11 +242,11 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select column" />
+                                                <SelectValue placeholder={tForms('import.selectColumn')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={NONE_VALUE}>-- None --</SelectItem>
+                                            <SelectItem value={NONE_VALUE}>{tForms('import.none')}</SelectItem>
                                             {columnOptions.map((opt) => (
                                                 <SelectItem key={opt.value} value={opt.value}>
                                                     {opt.label}
@@ -250,7 +255,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
-                                        Categories will be auto-created if not found
+                                        {tForms('import.categoryHelp')}
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -262,7 +267,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                             name="tags"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Tags Column</FormLabel>
+                                    <FormLabel>{tForms('import.tagsColumn')}</FormLabel>
                                     <Select
                                         onValueChange={(val) => field.onChange(val === NONE_VALUE ? null : Number(val))}
                                         value={field.value?.toString() ?? NONE_VALUE}
@@ -270,11 +275,11 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select column" />
+                                                <SelectValue placeholder={tForms('import.selectColumn')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={NONE_VALUE}>-- None --</SelectItem>
+                                            <SelectItem value={NONE_VALUE}>{tForms('import.none')}</SelectItem>
                                             {columnOptions.map((opt) => (
                                                 <SelectItem key={opt.value} value={opt.value}>
                                                     {opt.label}
@@ -283,7 +288,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
-                                        Multiple tags separated by comma
+                                        {tForms('import.tagsHelp')}
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -295,7 +300,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                             name="type"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Type Column</FormLabel>
+                                    <FormLabel>{tForms('import.typeColumn')}</FormLabel>
                                     <Select
                                         onValueChange={(val) => field.onChange(val === NONE_VALUE ? null : Number(val))}
                                         value={field.value?.toString() ?? NONE_VALUE}
@@ -303,11 +308,11 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select column" />
+                                                <SelectValue placeholder={tForms('import.selectColumn')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={NONE_VALUE}>-- Auto-detect from amount --</SelectItem>
+                                            <SelectItem value={NONE_VALUE}>{tForms('import.autoDetect')}</SelectItem>
                                             {columnOptions.map((opt) => (
                                                 <SelectItem key={opt.value} value={opt.value}>
                                                     {opt.label}
@@ -316,7 +321,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
-                                        If not set, type is determined by amount sign
+                                        {tForms('import.typeHelp')}
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -327,7 +332,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
 
                 {/* Format Options */}
                 <div className="space-y-4">
-                    <h3 className="font-medium">Format Settings</h3>
+                    <h3 className="font-medium">{t('import.formatSettings')}</h3>
 
                     <div className="grid gap-4 sm:grid-cols-3">
                         <FormField
@@ -335,7 +340,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                             name="dateFormat"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Date Format</FormLabel>
+                                    <FormLabel>{tForms('import.dateFormat')}</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         value={field.value}
@@ -363,7 +368,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                             name="amountFormat"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Amount Format</FormLabel>
+                                    <FormLabel>{tForms('import.amountFormat')}</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         value={field.value}
@@ -389,7 +394,7 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                             name="defaultType"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Default Type</FormLabel>
+                                    <FormLabel>{tForms('import.defaultType')}</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         value={field.value}
@@ -401,12 +406,12 @@ export function MappingStep({ parseResult, onSubmit, isLoading }: MappingStepPro
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="expense">Expense</SelectItem>
-                                            <SelectItem value="income">Income</SelectItem>
+                                            <SelectItem value="expense">{tPages('transactions.types.expense')}</SelectItem>
+                                            <SelectItem value="income">{tPages('transactions.types.income')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
-                                        Used for zero amounts
+                                        {tForms('import.defaultTypeHelp')}
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>

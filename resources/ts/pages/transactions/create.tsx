@@ -27,7 +27,7 @@ export default function TransactionCreatePage() {
                 onTypeChange={setType}
                 onSubmit={(data) => createTransaction.mutate(data)}
                 isSubmitting={createTransaction.isPending}
-                submitLabel="Create"
+                submitLabel={t('common:actions.create')}
             />
         </FormPage>
     )

@@ -188,6 +188,209 @@
         "deleteDescription": "This action cannot be undone."
     },
     "reports": {
-        "title": "Reports"
+        "title": "Reports",
+        "description": "Analyze your finances across different dimensions",
+        "tabs": {
+            "overview": "Overview",
+            "cashflow": "Cash Flow",
+            "expenses": "Expenses",
+            "income": "Income",
+            "networth": "Net Worth"
+        },
+        "noData": "No data for selected period",
+        "vsPreviousPeriod": "vs previous period",
+        "vsAmount": "vs {{amount}}",
+        "vsPreviousAmount": "{{amount}} vs previous period",
+        "filters": {
+            "month": "Month",
+            "quarter": "Quarter",
+            "year": "Year",
+            "ytd": "YTD",
+            "custom": "Custom",
+            "comparePlaceholder": "Compare with...",
+            "noComparison": "No comparison",
+            "previousPeriod": "Previous period",
+            "samePeriodLastYear": "Same period last year",
+            "accounts": "Accounts",
+            "categories": "Categories",
+            "tags": "Tags",
+            "title": "Filters",
+            "period": "Period",
+            "compareWith": "Compare with",
+            "filterBy": "Filter by",
+            "reset": "Reset",
+            "resetFilters": "Reset filters",
+            "quarterLabel": "Q{{q}} {{year}}"
+        },
+        "groupBy": {
+            "day": "Day",
+            "week": "Week",
+            "month": "Month"
+        },
+        "views": {
+            "donut": "Donut",
+            "bar": "Bar",
+            "treemap": "Treemap",
+            "line": "Line"
+        },
+        "metrics": {
+            "income": "Income",
+            "expenses": "Expenses",
+            "netCashFlow": "Net Cash Flow",
+            "savingsRate": "Savings Rate",
+            "inflow": "Inflow",
+            "outflow": "Outflow",
+            "totalExpenses": "Total Expenses",
+            "totalIncome": "Total Income",
+            "avgPerDay": "Avg. per day",
+            "avgPerWeek": "Avg. per week",
+            "currentNetWorth": "Current Net Worth",
+            "percentagePoints": "{{value}}pp"
+        },
+        "series": {
+            "income": "Income",
+            "expenses": "Expenses",
+            "balance": "Balance",
+            "flow": "Flow",
+            "prevIncome": "Prev Income",
+            "prevExpenses": "Prev Expenses",
+            "prevBalance": "Prev Balance",
+            "previousPeriod": "Previous Period",
+            "netWorth": "Net Worth",
+            "budgetPace": "Budget Pace",
+            "actual": "Actual",
+            "current": "Current",
+            "budget": "Budget",
+            "today": "Today",
+            "total": "Total",
+            "sources": "Sources",
+            "day": "Day {{day}}",
+            "budgetLabel": "Budget: {{amount}}"
+        },
+        "errors": {
+            "overview": "Failed to load overview metrics",
+            "cashflow": "Failed to load cash flow metrics",
+            "cashflowChart": "Failed to load cash flow data",
+            "moneyFlow": "Failed to load money flow data",
+            "expensePace": "Failed to load expense pace data",
+            "heatmap": "Failed to load activity heatmap",
+            "expensesByCategory": "Failed to load expenses by category"
+        },
+        "moneyFlow": {
+            "title": "Money Flow",
+            "subtitle": "Where your money comes from and where it goes"
+        },
+        "expensePace": {
+            "title": "Expense Pace",
+            "subtitleBudget": "Track your spending against the monthly budget",
+            "subtitleDaily": "Track your daily spending progress",
+            "budgetRemaining": "Budget Remaining",
+            "spentSoFar": "Spent So Far",
+            "noBudgetHint": "No budget set. Create a budget to track your spending goals.",
+            "projectedEnd": "Projected by end of month",
+            "totalSpent": "Total spent",
+            "overBudget": "{{amount}} over budget",
+            "underBudget": "{{amount}} under budget",
+            "spentInDays": "{{spent}} spent in {{days}} days = {{avg}}/day avg × {{monthDays}} days",
+            "spentOverDays": "{{spent}} spent over {{days}} days = {{avg}}/day avg",
+            "noData": "No expense data for selected period"
+        },
+        "heatmap": {
+            "title": "Spending Activity",
+            "subtitle": "Daily expense intensity",
+            "less": "Less",
+            "more": "More",
+            "noExpenses": "No expenses",
+            "transactions_one": "{{count}} transaction",
+            "transactions_other": "{{count}} transactions"
+        },
+        "expensesByCategory": {
+            "title": "Expenses by Category",
+            "subtitle": "Compare spending across categories",
+            "noData": "No expense data for selected period"
+        },
+        "expensesStructure": {
+            "title": "Expenses Structure",
+            "subtitle": "Breakdown by category",
+            "noData": "No expenses for selected period"
+        },
+        "incomeStructure": {
+            "title": "Income Structure",
+            "subtitle": "Breakdown by source",
+            "noData": "No income for selected period"
+        },
+        "expensesDynamics": {
+            "title": "Expenses Dynamics",
+            "subtitle": "How your spending changes over time"
+        },
+        "incomeDynamics": {
+            "title": "Income Dynamics",
+            "subtitle": "How your income changes over time"
+        },
+        "topExpenses": {
+            "title": "Top Expenses",
+            "subtitle": "Largest transactions this period",
+            "topTotal": "Top {{count}} total",
+            "noData": "No expenses for selected period"
+        },
+        "topIncome": {
+            "title": "Top Income",
+            "subtitle": "Largest income transactions this period",
+            "topTotal": "Top {{count}} total",
+            "noData": "No income for selected period"
+        },
+        "cashFlowChart": {
+            "title": "Cash Flow Over Time",
+            "subtitle": "Income, expenses, and running balance",
+            "noIncomeOrExpenses": "No income or expenses for selected period",
+            "noIncome": "No income data for selected period",
+            "noExpenses": "No expenses data for selected period"
+        },
+        "netWorth": {
+            "accountsBreakdown": "Accounts Breakdown",
+            "distribution": "Distribution by account",
+            "noAccounts": "No accounts found",
+            "chartTitle": "Net Worth Over Time",
+            "chartSubtitle": "Track your wealth growth"
+        }
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "welcome": "Welcome to your finance dashboard",
+        "totalBalance": "Total Balance",
+        "incomeThisMonth": "Income this month",
+        "expensesThisMonth": "Expenses this month",
+        "balanceDynamics": "Balance Dynamics",
+        "accountBalances": "Account Balances",
+        "expensesByCategory": "Expenses by Category",
+        "recentTransactions": "Recent Transactions",
+        "budgets": "Budgets",
+        "noBudgets": "No budgets yet",
+        "allExpenses": "All expenses",
+        "noCategories": "No categories",
+        "noDebts": "No active debts",
+        "noRecurring": "No recurring transactions",
+        "transaction": "Transaction",
+        "debts": "Debts",
+        "upcoming": "Upcoming Recurring",
+        "recurring": "Recurring",
+        "noDataPeriod": "No data for this period",
+        "noAccounts": "No active accounts",
+        "noExpensesMonth": "No expenses this month",
+        "noTransactions": "No transactions yet",
+        "createBudget": "Create Budget",
+        "addDebt": "Add Debt",
+        "createRecurring": "Create Recurring",
+        "percentPaid": "{{percent}}% paid",
+        "toCounterparty": "To: {{name}}",
+        "fromCounterparty": "From: {{name}}",
+        "periods": {
+            "this_month": "This month",
+            "last_month": "Last month",
+            "last_3_months": "Last 3 months",
+            "last_6_months": "Last 6 months",
+            "this_year": "This year",
+            "custom": "Custom"
+        }
     }
 }

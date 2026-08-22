@@ -12,7 +12,7 @@ export default function BudgetCreatePage() {
             <BudgetForm
                 onSubmit={(data) => createBudget.mutate(data)}
                 isSubmitting={createBudget.isPending}
-                submitLabel="Create"
+                submitLabel={t('common:actions.create')}
             />
         </FormPage>
     )

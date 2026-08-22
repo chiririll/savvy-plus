@@ -54,7 +54,7 @@ export default function ProviderEditPage() {
                     defaultValues={defaultValues}
                     onSubmit={(data) => updateProvider.mutate({ id: provider.id, data })}
                     isSubmitting={updateProvider.isPending}
-                    submitLabel="Save"
+                    submitLabel={t('actions.save', { ns: 'common' })}
                 />
             </div>
         </FormPage>

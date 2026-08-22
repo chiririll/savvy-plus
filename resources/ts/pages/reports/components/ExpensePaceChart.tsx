@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactECharts from 'echarts-for-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -6,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils'
 import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
 import { useExpensePace } from '@/hooks'
+import i18n from '@/lib/i18n'
 import type { ReportFilters } from '../types'
 import type { ExpensePaceMonth } from '@/api/reports'
 
@@ -106,10 +108,14 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
     }
 
     const series: any[] = []
+    const nameBudgetPace = i18n.t('pages:reports.series.budgetPace')
+    const nameActual = i18n.t('pages:reports.series.actual')
+    const nameCurrent = i18n.t('pages:reports.series.current')
+    const nameBudget = i18n.t('pages:reports.series.budget')
 
     if (hasBudget && idealPace.length > 0) {
         series.push({
-            name: 'Budget Pace',
+            name: nameBudgetPace,
             type: 'line',
             data: idealPace,
             smooth: true,
@@ -129,7 +135,7 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
     }
 
     series.push({
-        name: 'Actual',
+        name: nameActual,
         type: 'line',
         data: actualExpenses,
         smooth: true,
@@ -149,7 +155,7 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
 
     if (currentDay !== null && currentDay > 0) {
         series.push({
-            name: 'Current',
+            name: nameCurrent,
             type: 'scatter',
             data: [[currentDay, currentActual]],
             symbol: 'circle',
@@ -164,7 +170,7 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
             label: {
                 show: true,
                 position: 'top',
-                formatter: 'Today',
+                formatter: i18n.t('pages:reports.series.today'),
                 fontSize: 11,
                 color: '#ef4444',
                 fontWeight: 'bold',
@@ -176,7 +182,7 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
 
     if (hasBudget && budget) {
         series.push({
-            name: 'Budget',
+            name: nameBudget,
             type: 'line',
             data: Array.from({ length: daysInMonth }, () => budget),
             symbol: 'none',
@@ -187,7 +193,7 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
                 label: {
                     show: true,
                     position: 'end',
-                    formatter: `Budget: ${currency}${budget.toLocaleString()}`,
+                    formatter: i18n.t('pages:reports.series.budgetLabel', { amount: `${currency}${budget.toLocaleString()}` }),
                     fontSize: 11,
                     color: '#22c55e',
                 },
@@ -202,13 +208,13 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
             trigger: 'axis',
             formatter: (params: { seriesName: string; value: number; axisValue: number }[]) => {
                 const day = params[0]?.axisValue
-                let html = `<div class="font-medium mb-1">Day ${day}</div>`
+                let html = `<div class="font-medium mb-1">${i18n.t('pages:reports.series.day', { day })}</div>`
                 params.forEach(p => {
-                    if (p.value !== undefined && p.seriesName !== 'Current') {
+                    if (p.value !== undefined && p.seriesName !== nameCurrent) {
                         const colors: Record<string, string> = {
-                            'Actual': '#ef4444',
-                            'Budget Pace': '#94a3b8',
-                            'Budget': '#22c55e',
+                            [nameActual]: '#ef4444',
+                            [nameBudgetPace]: '#94a3b8',
+                            [nameBudget]: '#22c55e',
                         }
                         const color = colors[p.seriesName] || '#64748b'
                         html += `<div class="flex items-center gap-2">
@@ -239,6 +245,7 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
 }
 
 export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
+    const { t, i18n } = useTranslation('pages')
     const { data, isLoading, error } = useExpensePace(filters)
     const [selectedMonth, setSelectedMonth] = useState(0)
 
@@ -257,7 +264,7 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
     const chartOption = useMemo(() => {
         if (!currentMonthData || !data) return null
         return buildChartOption(currentMonthData, data.currency)
-    }, [currentMonthData, data])
+    }, [currentMonthData, data, i18n.language])
 
     const formatCurrency = (val: number) => {
         return `${data?.currency ?? '$'}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
@@ -267,7 +274,7 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
         return (
             <Card>
                 <CardContent className="py-8 text-center text-red-500">
-                    Failed to load expense pace data
+                    {t('reports.errors.expensePace')}
                 </CardContent>
             </Card>
         )
@@ -278,18 +285,18 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
             <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                     <div>
-                        <CardTitle className="text-lg">Expense Pace</CardTitle>
+                        <CardTitle className="text-lg">{t('reports.expensePace.title')}</CardTitle>
                         <p className="text-sm text-muted-foreground">
                             {currentMonthData?.hasBudget
-                                ? 'Track your spending against the monthly budget'
-                                : 'Track your daily spending progress'
+                                ? t('reports.expensePace.subtitleBudget')
+                                : t('reports.expensePace.subtitleDaily')
                             }
                         </p>
                     </div>
                     {currentMonthData && (
                         <div className="text-right">
                             <p className="text-sm text-muted-foreground">
-                                {currentMonthData.hasBudget ? 'Budget Remaining' : 'Spent So Far'}
+                                {currentMonthData.hasBudget ? t('reports.expensePace.budgetRemaining') : t('reports.expensePace.spentSoFar')}
                             </p>
                             <p className={cn(
                                 'text-2xl font-bold',
@@ -311,7 +318,7 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
                     <Skeleton className="h-[300px]" />
                 ) : !chartOption || !monthsData ? (
                     <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                        No expense data for selected period
+                        {t('reports.expensePace.noData')}
                     </div>
                 ) : (
                     <>
@@ -337,14 +344,14 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
                                 {!currentMonthData.hasBudget && (
                                     <div className="flex items-center gap-2 text-sm text-amber-600 mb-3">
                                         <AlertCircle className="size-4" />
-                                        <span>No budget set. Create a budget to track your spending goals.</span>
+                                        <span>{t('reports.expensePace.noBudgetHint')}</span>
                                     </div>
                                 )}
 
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-sm text-muted-foreground">
-                                            {currentMonthData.currentDay ? 'Projected by end of month' : 'Total spent'}
+                                            {currentMonthData.currentDay ? t('reports.expensePace.projectedEnd') : t('reports.expensePace.totalSpent')}
                                         </p>
                                         <p className="text-lg font-semibold">
                                             {currentMonthData.currentDay ? formatCurrency(currentMonthData.forecastTotal) : formatCurrency(currentMonthData.totalSpent)}
@@ -357,18 +364,29 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
                                         )}>
                                             {currentMonthData.isOverBudget ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
                                             <span className="text-sm font-medium">
-                                                {currentMonthData.isOverBudget ? '+' : ''}{formatCurrency(Math.abs(currentMonthData.forecastDiff))} {currentMonthData.isOverBudget ? 'over' : 'under'} budget
+                                                {currentMonthData.isOverBudget
+                                                    ? t('reports.expensePace.overBudget', { amount: `+${formatCurrency(Math.abs(currentMonthData.forecastDiff))}` })
+                                                    : t('reports.expensePace.underBudget', { amount: formatCurrency(Math.abs(currentMonthData.forecastDiff)) })}
                                             </span>
                                         </div>
                                     )}
                                 </div>
                                 {currentMonthData.currentDay ? (
                                     <p className="text-xs text-muted-foreground mt-2">
-                                        {formatCurrency(currentMonthData.currentActual)} spent in {currentMonthData.currentDay} days = {formatCurrency(currentMonthData.dailyAverage)}/day avg × {currentMonthData.daysInMonth} days
+                                        {t('reports.expensePace.spentInDays', {
+                                            spent: formatCurrency(currentMonthData.currentActual),
+                                            days: currentMonthData.currentDay,
+                                            avg: formatCurrency(currentMonthData.dailyAverage),
+                                            monthDays: currentMonthData.daysInMonth,
+                                        })}
                                     </p>
                                 ) : (
                                     <p className="text-xs text-muted-foreground mt-2">
-                                        {formatCurrency(currentMonthData.totalSpent)} spent over {currentMonthData.daysInMonth} days = {formatCurrency(currentMonthData.dailyAverage)}/day avg
+                                        {t('reports.expensePace.spentOverDays', {
+                                            spent: formatCurrency(currentMonthData.totalSpent),
+                                            days: currentMonthData.daysInMonth,
+                                            avg: formatCurrency(currentMonthData.dailyAverage),
+                                        })}
                                     </p>
                                 )}
                             </div>

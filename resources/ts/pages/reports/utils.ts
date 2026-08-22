@@ -1,3 +1,5 @@
+import i18n, { intlLocale } from '@/lib/i18n'
+
 // Format date as YYYY-MM (timezone-safe)
 function formatYearMonth(date: Date): string {
     const year = date.getFullYear()
@@ -12,7 +14,7 @@ export function getMonthOptions() {
     for (let i = 0; i < 24; i++) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
         const value = formatYearMonth(date)
-        const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        const label = date.toLocaleDateString(intlLocale(), { month: 'long', year: 'numeric' })
         months.push({ value, label })
     }
     return months
@@ -35,7 +37,7 @@ export function getQuarterOptions() {
         for (let q = maxQ; q >= 1; q--) {
             quarters.push({
                 value: `${year}-Q${q}`,
-                label: `Q${q} ${year}`,
+                label: i18n.t('pages:reports.filters.quarterLabel', { q, year }),
             })
         }
     }

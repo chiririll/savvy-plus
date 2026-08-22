@@ -12,7 +12,7 @@ export default function UserCreatePage() {
             <UserForm
                 onSubmit={(data) => createUser.mutate(data)}
                 isSubmitting={createUser.isPending}
-                submitLabel="Create"
+                submitLabel={t('common:actions.create')}
             />
         </FormPage>
     )

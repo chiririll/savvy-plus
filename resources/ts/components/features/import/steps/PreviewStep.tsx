@@ -1,6 +1,6 @@
 import { CheckCircle2, XCircle, AlertTriangle, Copy } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { ImportPreviewResult } from '@/types/import'
 
@@ -10,6 +10,8 @@ interface PreviewStepProps {
 }
 
 export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
+    const { t } = useTranslation('settings')
+    const { t: tPages } = useTranslation('pages')
     const { previewTransactions, summary } = previewResult
 
     const isSampled = summary.totalRows !== null && summary.sampled < summary.totalRows
@@ -21,66 +23,63 @@ export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
             icon: CheckCircle2,
             color: 'text-green-500',
             bgColor: 'bg-green-500/10',
-            label: 'New',
+            label: t('import.statusNew'),
         },
         duplicate: {
             icon: Copy,
             color: 'text-yellow-500',
             bgColor: 'bg-yellow-500/10',
-            label: 'Duplicate',
+            label: t('import.statusDuplicate'),
         },
         error: {
             icon: XCircle,
             color: 'text-red-500',
             bgColor: 'bg-red-500/10',
-            label: 'Error',
+            label: t('import.statusError'),
         },
     }
 
     return (
         <div className={cn('space-y-6', isLoading && 'opacity-50 pointer-events-none')}>
-            {/* Summary Cards */}
             <div className="grid gap-4 sm:grid-cols-3">
                 <div className="p-4 border rounded-lg bg-green-500/10">
                     <div className="text-3xl font-bold text-green-600">
                         {isSampled && '~'}{nf(createEstimate)}
                     </div>
-                    <div className="text-sm text-muted-foreground">Will be created</div>
+                    <div className="text-sm text-muted-foreground">{t('import.willCreate')}</div>
                 </div>
                 <div className="p-4 border rounded-lg bg-yellow-500/10">
                     <div className="text-3xl font-bold text-yellow-600">{nf(summary.willSkip)}</div>
                     <div className="text-sm text-muted-foreground">
-                        Duplicates (skipped){isSampled && ' in sample'}
+                        {isSampled ? t('import.duplicatesSkippedSample') : t('import.duplicatesSkipped')}
                     </div>
                 </div>
                 <div className="p-4 border rounded-lg bg-red-500/10">
                     <div className="text-3xl font-bold text-red-600">{nf(summary.hasErrors)}</div>
                     <div className="text-sm text-muted-foreground">
-                        Errors{isSampled && ' in sample'}
+                        {isSampled ? t('import.errorsSample') : t('import.errors')}
                     </div>
                 </div>
             </div>
 
             {isSampled && (
                 <p className="text-sm text-muted-foreground">
-                    Large file: validated a sample of {nf(summary.sampled)} of {nf(summary.totalRows as number)} rows.
-                    Exact created/skipped counts are reported after the import runs.
+                    {t('import.sampledNote', { sampled: nf(summary.sampled), total: nf(summary.totalRows as number) })}
                 </p>
             )}
 
-            {/* Auto-create info */}
             {(summary.categoriesToCreate.length > 0 ||
                 summary.tagsToCreate.length > 0 ||
                 summary.currenciesToCreate.length > 0) && (
                 <div className="p-4 border rounded-lg bg-blue-500/10">
                     <div className="flex items-center gap-2 mb-2">
                         <AlertTriangle className="size-4 text-blue-500" />
-                        <span className="font-medium">New entities will be created:</span>
+                        <span className="font-medium">{t('import.newEntities')}</span>
                     </div>
                     <div className="space-y-2 text-sm">
                         {summary.categoriesToCreate.length > 0 && (
                             <div className="flex flex-wrap gap-1">
-                                <span className="text-muted-foreground">Categories:</span>
+                                <span className="text-muted-foreground">{t('import.categories')}</span>
                                 {summary.categoriesToCreate.map((cat) => (
                                     <Badge key={cat} variant="outline">{cat}</Badge>
                                 ))}
@@ -88,7 +87,7 @@ export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
                         )}
                         {summary.tagsToCreate.length > 0 && (
                             <div className="flex flex-wrap gap-1">
-                                <span className="text-muted-foreground">Tags:</span>
+                                <span className="text-muted-foreground">{t('import.tags')}</span>
                                 {summary.tagsToCreate.map((tag) => (
                                     <Badge key={tag} variant="outline">{tag}</Badge>
                                 ))}
@@ -96,7 +95,7 @@ export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
                         )}
                         {summary.currenciesToCreate.length > 0 && (
                             <div className="flex flex-wrap gap-1">
-                                <span className="text-muted-foreground">Currencies:</span>
+                                <span className="text-muted-foreground">{t('import.currencies')}</span>
                                 {summary.currenciesToCreate.map((cur) => (
                                     <Badge key={cur} variant="outline">{cur}</Badge>
                                 ))}
@@ -106,19 +105,18 @@ export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
                 </div>
             )}
 
-            {/* Transactions Preview Table */}
             <div className="border rounded-lg overflow-hidden">
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                     <table className="w-full text-sm">
                         <thead className="bg-muted sticky top-0">
                             <tr>
-                                <th className="px-4 py-2 text-left font-medium w-16">Row</th>
-                                <th className="px-4 py-2 text-left font-medium w-24">Status</th>
-                                <th className="px-4 py-2 text-left font-medium w-28">Date</th>
-                                <th className="px-4 py-2 text-left font-medium w-20">Type</th>
-                                <th className="px-4 py-2 text-right font-medium w-28">Amount</th>
-                                <th className="px-4 py-2 text-left font-medium">Description</th>
-                                <th className="px-4 py-2 text-left font-medium w-32">Category</th>
+                                <th className="px-4 py-2 text-left font-medium w-16">{t('import.colRow')}</th>
+                                <th className="px-4 py-2 text-left font-medium w-24">{t('import.colStatus')}</th>
+                                <th className="px-4 py-2 text-left font-medium w-28">{t('import.colDate')}</th>
+                                <th className="px-4 py-2 text-left font-medium w-20">{t('import.colType')}</th>
+                                <th className="px-4 py-2 text-right font-medium w-28">{t('import.colAmount')}</th>
+                                <th className="px-4 py-2 text-left font-medium">{t('import.colDescription')}</th>
+                                <th className="px-4 py-2 text-left font-medium w-32">{t('import.colCategory')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -142,7 +140,9 @@ export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
                                         </td>
                                         <td className="px-4 py-2">
                                             <Badge variant={tx.type === 'income' ? 'default' : 'secondary'}>
-                                                {tx.type}
+                                                {tx.type
+                                                    ? tPages(`transactions.types.${tx.type}`, { defaultValue: tx.type })
+                                                    : '-'}
                                             </Badge>
                                         </td>
                                         <td className="px-4 py-2 text-right font-mono">
@@ -162,12 +162,11 @@ export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
                 </div>
             </div>
 
-            {/* Warnings */}
             {previewTransactions.some((tx) => tx.warnings.length > 0) && (
                 <div className="p-4 border rounded-lg bg-yellow-500/10">
                     <div className="flex items-center gap-2 mb-2">
                         <AlertTriangle className="size-4 text-yellow-500" />
-                        <span className="font-medium">Warnings:</span>
+                        <span className="font-medium">{t('import.warnings')}</span>
                     </div>
                     <ul className="text-sm space-y-1">
                         {previewTransactions
@@ -175,19 +174,18 @@ export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
                             .slice(0, 10)
                             .map((tx) => (
                                 <li key={tx.row}>
-                                    Row {tx.row}: {tx.warnings.join(', ')}
+                                    {t('import.rowDetail', { row: tx.row, detail: tx.warnings.join(', ') })}
                                 </li>
                             ))}
                     </ul>
                 </div>
             )}
 
-            {/* Errors */}
             {previewTransactions.some((tx) => tx.error) && (
                 <div className="p-4 border rounded-lg bg-red-500/10">
                     <div className="flex items-center gap-2 mb-2">
                         <XCircle className="size-4 text-red-500" />
-                        <span className="font-medium">Errors (will be skipped):</span>
+                        <span className="font-medium">{t('import.errorsSkipped')}</span>
                     </div>
                     <ul className="text-sm space-y-1">
                         {previewTransactions
@@ -195,7 +193,7 @@ export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
                             .slice(0, 10)
                             .map((tx) => (
                                 <li key={tx.row}>
-                                    Row {tx.row}: {tx.error}
+                                    {t('import.rowDetail', { row: tx.row, detail: tx.error })}
                                 </li>
                             ))}
                     </ul>

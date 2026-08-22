@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import i18n from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -16,9 +18,9 @@ import { FormWrapper } from '@/components/shared/FormWrapper'
 
 const tagSchema = z.object({
     name: z.string()
-        .min(1, 'Name is required')
-        .max(50, 'Name is too long')
-        .regex(/^[a-zA-Zа-яА-ЯёЁ0-9_-]+$/, 'Only letters, numbers, _ and - allowed'),
+        .min(1, i18n.t('validation.nameRequired'))
+        .max(50, i18n.t('validation.maxChars', { count: 50 }))
+        .regex(/^[a-zA-Zа-яА-ЯёЁ0-9_-]+$/, i18n.t('validation.tagFormat')),
 })
 
 type TagFormValues = z.infer<typeof tagSchema>
@@ -34,8 +36,9 @@ export function TagForm({
     defaultValues,
     onSubmit,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
 }: TagFormProps) {
+    const { t } = useTranslation(['common', 'forms'])
     const form = useForm<TagFormValues>({
         resolver: zodResolver(tagSchema),
         defaultValues: {
@@ -52,18 +55,18 @@ export function TagForm({
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>{t('fields.name')}</FormLabel>
                             <FormControl>
                                 <div className="flex items-center gap-2">
                                     <span className="text-muted-foreground text-lg">#</span>
                                     <Input
-                                        placeholder="vacation"
+                                        placeholder={t('forms:tags.namePlaceholder')}
                                         {...field}
                                     />
                                 </div>
                             </FormControl>
                             <FormDescription>
-                                Tag name without #. Only letters, numbers, _ and - allowed.
+                                {t('forms:tags.nameHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -71,7 +74,7 @@ export function TagForm({
                 />
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? 'Saving...' : submitLabel}
+                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                 </Button>
             </form>
         </Form>

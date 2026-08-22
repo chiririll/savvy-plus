@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
@@ -19,16 +20,13 @@ import type {
     ImportResult,
 } from '@/types/import'
 
-const STEPS: { id: ImportStep; label: string }[] = [
-    { id: 'upload', label: 'Upload' },
-    { id: 'mapping', label: 'Mapping' },
-    { id: 'preview', label: 'Preview' },
-    { id: 'result', label: 'Result' },
-]
+const STEP_IDS: ImportStep[] = ['upload', 'mapping', 'preview', 'result']
 
 const UPLOAD_BUCKET = 'transaction-imports'
 
 export function CsvImportWizard() {
+    const { t } = useTranslation('settings')
+    const { t: tCommon } = useTranslation('common')
     const [step, setStep] = useState<ImportStep>('upload')
     const [parseResult, setParseResult] = useState<CsvParseResult | null>(null)
     const [previewResult, setPreviewResult] = useState<ImportPreviewResult | null>(null)
@@ -42,7 +40,7 @@ export function CsvImportWizard() {
     const previewMutation = usePreviewImport()
     const importMutation = useExecuteImport()
 
-    const currentStepIndex = STEPS.findIndex((s) => s.id === step)
+    const currentStepIndex = STEP_IDS.findIndex((s) => s === step)
 
     const handleFileSelect = useCallback(async (file: File) => {
         setError(null)
@@ -54,9 +52,9 @@ export function CsvImportWizard() {
             if (e instanceof DOMException && e.name === 'AbortError') {
                 return
             }
-            setError(e instanceof Error ? e.message : 'Failed to process file')
+            setError(e instanceof Error ? e.message : t('import.processFailed'))
         }
-    }, [upload, parseMutation])
+    }, [upload, parseMutation, t])
 
     const handleMappingSubmit = useCallback(async (newMapping: ColumnMapping, newOptions: ImportOptions) => {
         if (!parseResult) return
@@ -74,9 +72,9 @@ export function CsvImportWizard() {
             setPreviewResult(result)
             setStep('preview')
         } catch (e) {
-            setError(e instanceof Error ? e.message : 'Failed to preview import')
+            setError(e instanceof Error ? e.message : tCommon('toasts.import.previewFailed'))
         }
-    }, [parseResult, previewMutation])
+    }, [parseResult, previewMutation, tCommon])
 
     const handleImport = useCallback(async () => {
         if (!parseResult || !mapping || !options) return
@@ -92,9 +90,9 @@ export function CsvImportWizard() {
             setImportResult(result)
             setStep('result')
         } catch (e) {
-            setError(e instanceof Error ? e.message : 'Failed to execute import')
+            setError(e instanceof Error ? e.message : tCommon('toasts.import.executeFailed'))
         }
-    }, [parseResult, mapping, options, importMutation])
+    }, [parseResult, mapping, options, importMutation, tCommon])
 
     const handleBack = useCallback(() => {
         if (step === 'mapping') {
@@ -135,7 +133,7 @@ export function CsvImportWizard() {
 
     const handleStepChange = (targetIndex: number) => {
         if (canGoToStep(targetIndex) && !isLoading) {
-            setStep(STEPS[targetIndex].id)
+            setStep(STEP_IDS[targetIndex])
         }
     }
 
@@ -146,9 +144,9 @@ export function CsvImportWizard() {
                 onStepChange={handleStepChange}
                 className="w-full"
             >
-                {STEPS.map((s, index) => (
-                    <Step key={s.id} disabled={!canGoToStep(index) || isLoading}>
-                        {s.label}
+                {STEP_IDS.map((id, index) => (
+                    <Step key={id} disabled={!canGoToStep(index) || isLoading}>
+                        {t(`import.steps.${id}`)}
                     </Step>
                 ))}
             </Stepper>
@@ -196,7 +194,7 @@ export function CsvImportWizard() {
             {step === 'preview' && importMutation.isPending && importMutation.progress && (
                 <div className="space-y-2">
                     <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>Importing transactions…</span>
+                        <span>{t('import.importingProgress')}</span>
                         <span>
                             {importMutation.progress.processed}
                             {importMutation.progress.total ? ` / ${importMutation.progress.total}` : ''}
@@ -222,7 +220,7 @@ export function CsvImportWizard() {
                                 disabled={isLoading}
                             >
                                 <ArrowLeft className="size-4 mr-2" />
-                                Back
+                                {tCommon('actions.back')}
                             </Button>
                         )}
                     </div>
@@ -232,7 +230,7 @@ export function CsvImportWizard() {
                                 onClick={handleNext}
                                 disabled={!parseResult || isLoading}
                             >
-                                Next
+                                {t('import.next')}
                                 <ArrowRight className="size-4 ml-2" />
                             </Button>
                         )}
@@ -245,11 +243,11 @@ export function CsvImportWizard() {
                                 {previewMutation.isPending ? (
                                     <>
                                         <Loader2 className="size-4 mr-2 animate-spin" />
-                                        Loading...
+                                        {t('import.loading')}
                                     </>
                                 ) : (
                                     <>
-                                        Preview
+                                        {t('import.preview')}
                                         <ArrowRight className="size-4 ml-2" />
                                     </>
                                 )}
@@ -263,17 +261,20 @@ export function CsvImportWizard() {
                                 {importMutation.isPending ? (
                                     <>
                                         <Loader2 className="size-4 mr-2 animate-spin" />
-                                        Importing...
+                                        {t('import.importing')}
                                     </>
                                 ) : (
                                     <>
                                         <Upload className="size-4 mr-2" />
-                                        Import {(() => {
+                                        {(() => {
                                             const s = previewResult?.summary
-                                            if (!s) return 0
+                                            if (!s) return t('import.importCount', { tilde: '', count: 0 })
                                             const sampled = s.totalRows !== null && s.sampled < s.totalRows
-                                            return `${sampled ? '~' : ''}${(sampled ? (s.totalRows as number) : s.willCreate).toLocaleString()}`
-                                        })()} Transactions
+                                            return t('import.importCount', {
+                                                tilde: sampled ? '~' : '',
+                                                count: (sampled ? (s.totalRows as number) : s.willCreate).toLocaleString(),
+                                            })
+                                        })()}
                                     </>
                                 )}
                             </Button>
@@ -285,7 +286,7 @@ export function CsvImportWizard() {
             {step === 'result' && (
                 <div className="flex justify-center pt-6 border-t">
                     <Button variant="outline" onClick={reset}>
-                        Import Another File
+                        {t('import.importAnother')}
                     </Button>
                 </div>
             )}

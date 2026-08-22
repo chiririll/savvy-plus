@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -13,6 +14,7 @@ interface NetWorthTabProps {
 }
 
 export function NetWorthTab({ filters }: NetWorthTabProps) {
+    const { t } = useTranslation('pages')
     const { data, isLoading } = useNetWorth(filters)
 
     const isPositive = (data?.change ?? 0) >= 0
@@ -42,7 +44,7 @@ export function NetWorthTab({ filters }: NetWorthTabProps) {
 
                             {/* Label */}
                             <p className="text-sm text-muted-foreground font-medium mb-2">
-                                Current Net Worth
+                                {t('reports.metrics.currentNetWorth')}
                             </p>
 
                             {/* Main value */}
@@ -78,7 +80,7 @@ export function NetWorthTab({ filters }: NetWorthTabProps) {
                                     </div>
 
                                     <span className="text-sm text-muted-foreground">
-                                        vs previous period
+                                        {t('reports.vsPreviousPeriod')}
                                     </span>
                                 </div>
                             )}
@@ -93,9 +95,9 @@ export function NetWorthTab({ filters }: NetWorthTabProps) {
             {/* Block 3 — Accounts Breakdown */}
             <Card>
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Accounts Breakdown</CardTitle>
+                    <CardTitle className="text-lg">{t('reports.netWorth.accountsBreakdown')}</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                        Distribution by account
+                        {t('reports.netWorth.distribution')}
                     </p>
                 </CardHeader>
                 <CardContent>
@@ -107,7 +109,7 @@ export function NetWorthTab({ filters }: NetWorthTabProps) {
                         </div>
                     ) : !data?.accounts?.length ? (
                         <div className="h-[150px] flex items-center justify-center text-muted-foreground">
-                            No accounts found
+                            {t('reports.netWorth.noAccounts')}
                         </div>
                     ) : (
                         <div className="space-y-2">
@@ -133,7 +135,7 @@ export function NetWorthTab({ filters }: NetWorthTabProps) {
                                             {account.name}
                                         </p>
                                         <p className="text-xs text-muted-foreground capitalize">
-                                            {account.type}
+                                            {t(`accounts.types.${account.type}`, { defaultValue: account.type })}
                                         </p>
                                     </div>
 

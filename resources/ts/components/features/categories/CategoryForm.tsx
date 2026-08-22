@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -28,8 +29,9 @@ export function CategoryForm({
     defaultValues,
     onSubmit,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
 }: CategoryFormProps) {
+    const { t } = useTranslation(['common', 'forms'])
     const form = useForm<CategoryFormData>({
         resolver: zodResolver(categorySchema),
         defaultValues: {
@@ -52,9 +54,9 @@ export function CategoryForm({
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>{t('fields.name')}</FormLabel>
                             <FormControl>
-                                <Input placeholder="Category name" {...field} />
+                                <Input placeholder={t('forms:categories.namePlaceholder')} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -110,7 +112,7 @@ export function CategoryForm({
                 />
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? 'Saving...' : submitLabel}
+                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                 </Button>
             </form>
         </Form>
