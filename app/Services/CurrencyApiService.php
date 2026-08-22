@@ -57,13 +57,13 @@ class CurrencyApiService
     public function updateRates(): array
     {
         if (! settings('auto_update_currencies', true)) {
-            return ['status' => 'skipped', 'message' => 'Auto-update disabled'];
+            return ['status' => 'skipped', 'message' => __('messages.currencies.auto_update_disabled')];
         }
 
         $baseCurrency = Currency::getBase();
 
         if (! $baseCurrency) {
-            return ['status' => 'error', 'message' => 'No base currency set'];
+            return ['status' => 'error', 'message' => __('messages.currencies.no_base')];
         }
 
         $baseCode = strtolower($baseCurrency->code);
@@ -179,7 +179,7 @@ class CurrencyApiService
 
         return [
             'status' => 'success',
-            'message' => "Updated {$updated} currencies, skipped {$skipped}",
+            'message' => __('messages.currencies.updated', ['updated' => $updated, 'skipped' => $skipped]),
             'updated' => $updated,
             'skipped' => $skipped,
         ];
@@ -240,7 +240,7 @@ class CurrencyApiService
 
             return [
                 'status' => 'success',
-                'message' => "Updated {$updated} currencies via {$refCode}, skipped {$skipped}",
+                'message' => __('messages.currencies.updated_via', ['updated' => $updated, 'skipped' => $skipped, 'ref' => $refCode]),
                 'updated' => $updated,
                 'skipped' => $skipped,
                 'reference' => $refCode,
@@ -249,7 +249,7 @@ class CurrencyApiService
 
         return [
             'status' => 'error',
-            'message' => 'No matching currencies found in API',
+            'message' => __('messages.currencies.no_api_match'),
         ];
     }
 }

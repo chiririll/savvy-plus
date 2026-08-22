@@ -40,12 +40,12 @@ class ExecuteImportRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'import_id.required' => 'Import session ID is required.',
-            'import_id.uuid' => 'Invalid import session ID.',
-            'mapping.date.required' => 'Date column mapping is required.',
-            'mapping.amount.required' => 'Amount column mapping is required.',
-            'options.default_account_id.required' => 'Please select a default account.',
-            'options.default_account_id.exists' => 'Selected account does not exist.',
+            'import_id.required' => __('messages.import.session_required'),
+            'import_id.uuid' => __('messages.import.session_invalid'),
+            'mapping.date.required' => __('messages.import.date_mapping_required'),
+            'mapping.amount.required' => __('messages.import.amount_mapping_required'),
+            'options.default_account_id.required' => __('messages.import.select_account'),
+            'options.default_account_id.exists' => __('messages.import.account_missing'),
         ];
     }
 }

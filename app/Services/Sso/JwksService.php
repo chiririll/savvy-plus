@@ -24,7 +24,7 @@ class JwksService
             $doc = $this->fetchJson($discoveryUrl);
 
             if (! isset($doc['issuer'], $doc['authorization_endpoint'], $doc['token_endpoint'])) {
-                throw SsoException::make('discovery_failed', 'Invalid OIDC discovery document.', 502);
+                throw SsoException::make('discovery_failed', __('messages.sso.discovery_failed'), 502);
             }
 
             return $doc;
@@ -49,7 +49,7 @@ class JwksService
         $raw = Cache::remember($key, $ttl, fn () => $this->fetchJson($jwksUri));
 
         if (empty($raw['keys'])) {
-            throw SsoException::make('jwks_failed', 'JWKS endpoint returned no keys.', 502);
+            throw SsoException::make('jwks_failed', __('messages.sso.jwks_empty'), 502);
         }
 
         return JWK::parseKeySet($this->normalizeAlgs($raw));
@@ -103,7 +103,7 @@ class JwksService
 
             if (! $response->successful()) {
                 Log::warning('SSO metadata fetch failed', ['url' => $url, 'status' => $response->status()]);
-                throw SsoException::make('metadata_unreachable', 'Failed to reach identity provider metadata.', 502);
+                throw SsoException::make('metadata_unreachable', __('messages.sso.metadata_unreachable'), 502);
             }
 
             return (array) $response->json();
@@ -111,7 +111,7 @@ class JwksService
             throw $e;
         } catch (\Throwable $e) {
             Log::error('SSO metadata fetch error', ['url' => $url, 'error' => $e->getMessage()]);
-            throw SsoException::make('metadata_unreachable', 'Failed to reach identity provider metadata.', 502);
+            throw SsoException::make('metadata_unreachable', __('messages.sso.metadata_unreachable'), 502);
         }
     }
 }

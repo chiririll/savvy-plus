@@ -42,7 +42,7 @@ class SamlConnector extends AbstractConnector
         $stateRow = $this->states->consume($state);
 
         if (! $stateRow || $stateRow->identity_provider_id !== $provider->id) {
-            throw SsoException::make('invalid_state', 'SSO state is invalid or expired. Please try again.');
+            throw SsoException::make('invalid_state', __('messages.sso.invalid_state'));
         }
 
         $auth = new Saml2Auth($this->buildSettings($provider));
@@ -52,7 +52,7 @@ class SamlConnector extends AbstractConnector
             $auth->processResponse($stateRow->saml_request_id);
         } catch (\Throwable $e) {
             Log::warning('SAML response processing error', ['provider' => $provider->slug, 'error' => $e->getMessage()]);
-            throw SsoException::make('saml_invalid', 'Failed to process the SAML response.', 401);
+            throw SsoException::make('saml_invalid', __('messages.sso.saml_invalid'), 401);
         }
 
         if (! empty($auth->getErrors()) || ! $auth->isAuthenticated()) {
@@ -61,7 +61,7 @@ class SamlConnector extends AbstractConnector
                 'errors' => $auth->getErrors(),
                 'reason' => $auth->getLastErrorReason(),
             ]);
-            throw SsoException::make('saml_invalid', 'SAML assertion is invalid.', 401);
+            throw SsoException::make('saml_invalid', __('messages.sso.saml_assertion_invalid'), 401);
         }
 
         return $this->buildIdentity($provider, $auth->getNameId(), $auth->getAttributes());
@@ -75,7 +75,7 @@ class SamlConnector extends AbstractConnector
         $errors = $settings->validateMetadata($metadata);
 
         if (! empty($errors)) {
-            throw SsoException::make('saml_metadata_invalid', 'Invalid SP metadata: '.implode(', ', $errors), 500);
+            throw SsoException::make('saml_metadata_invalid', __('messages.sso.saml_metadata_invalid', ['errors' => implode(', ', $errors)]), 500);
         }
 
         return $metadata;
@@ -94,7 +94,7 @@ class SamlConnector extends AbstractConnector
         $subject = $first($mappings['subject'] ?? null) ?: $nameId;
 
         if (blank($subject)) {
-            throw SsoException::make('missing_subject', 'SAML assertion has no usable subject.', 422);
+            throw SsoException::make('missing_subject', __('messages.sso.saml_no_subject'), 422);
         }
 
         $groupsAttr = $mappings['groups'] ?? null;

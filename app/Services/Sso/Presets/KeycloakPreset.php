@@ -15,8 +15,8 @@ class KeycloakPreset extends AbstractOidcPreset
     public function fields(): array
     {
         return [
-            ['key' => 'base_url', 'label' => 'Keycloak base URL', 'type' => 'url', 'required' => true, 'group' => 'config', 'placeholder' => 'https://kc.example.com'],
-            ['key' => 'realm', 'label' => 'Realm', 'type' => 'text', 'required' => true, 'group' => 'config'],
+            ['key' => 'base_url', 'label' => __('messages.sso.fields.keycloak_base_url'), 'type' => 'url', 'required' => true, 'group' => 'config', 'placeholder' => 'https://kc.example.com'],
+            ['key' => 'realm', 'label' => __('messages.sso.fields.realm'), 'type' => 'text', 'required' => true, 'group' => 'config'],
             ...$this->clientFields(),
         ];
     }

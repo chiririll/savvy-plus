@@ -71,13 +71,13 @@ class OidcConnector extends AbstractConnector
         $state = (string) $request->input('state');
 
         if (blank($code) || blank($state)) {
-            throw SsoException::make('invalid_request', 'Missing authorization code or state.');
+            throw SsoException::make('invalid_request', __('messages.sso.invalid_request'));
         }
 
         $stateRow = $this->states->consume($state);
 
         if (! $stateRow || $stateRow->identity_provider_id !== $provider->id) {
-            throw SsoException::make('invalid_state', 'SSO state is invalid or expired. Please try again.');
+            throw SsoException::make('invalid_state', __('messages.sso.invalid_state'));
         }
 
         $conn = $this->connection($provider);
@@ -86,7 +86,7 @@ class OidcConnector extends AbstractConnector
         $tokens = $this->exchangeCode($provider, $disco, $conn, $code, $stateRow->code_verifier);
 
         if (empty($tokens['id_token'])) {
-            throw SsoException::make('missing_id_token', 'Identity provider did not return an id_token.', 502);
+            throw SsoException::make('missing_id_token', __('messages.sso.missing_id_token'), 502);
         }
 
         $preset = $this->presets->get($provider->preset);
@@ -112,7 +112,7 @@ class OidcConnector extends AbstractConnector
 
         if (! $response->successful()) {
             Log::warning('OIDC token exchange failed', ['provider' => $provider->slug, 'status' => $response->status()]);
-            throw SsoException::make('token_exchange_failed', 'Failed to exchange authorization code.', 502);
+            throw SsoException::make('token_exchange_failed', __('messages.sso.token_exchange_failed'), 502);
         }
 
         return (array) $response->json();
@@ -121,7 +121,7 @@ class OidcConnector extends AbstractConnector
     private function verifyIdToken(AbstractOidcPreset $preset, array $disco, string $clientId, string $idToken, ?string $expectedNonce): array
     {
         JWT::$leeway = (int) config('sso.leeway', 60);
-        $jwksUri = $disco['jwks_uri'] ?? throw SsoException::make('no_jwks', 'Discovery document has no jwks_uri.', 502);
+        $jwksUri = $disco['jwks_uri'] ?? throw SsoException::make('no_jwks', __('messages.sso.no_jwks'), 502);
 
         try {
             $payload = JWT::decode($idToken, $this->jwks->keySet($jwksUri));
@@ -131,32 +131,32 @@ class OidcConnector extends AbstractConnector
                 $payload = JWT::decode($idToken, $this->jwks->keySet($jwksUri, force: true));
             } catch (\Throwable $second) {
                 Log::warning('OIDC id_token verification failed', ['error' => $second->getMessage()]);
-                throw SsoException::make('invalid_id_token', 'Could not verify the id_token signature.', 401);
+                throw SsoException::make('invalid_id_token', __('messages.sso.invalid_id_token'), 401);
             }
         }
 
         $claims = json_decode(json_encode($payload), true);
 
         if (! $preset->matchesIssuer((string) ($disco['issuer'] ?? ''), $claims)) {
-            throw SsoException::make('invalid_issuer', 'id_token issuer mismatch.', 401);
+            throw SsoException::make('invalid_issuer', __('messages.sso.invalid_issuer'), 401);
         }
 
         $aud = (array) ($claims['aud'] ?? []);
         if (! in_array($clientId, $aud, true)) {
-            throw SsoException::make('invalid_audience', 'id_token audience mismatch.', 401);
+            throw SsoException::make('invalid_audience', __('messages.sso.invalid_audience'), 401);
         }
 
         $azp = $claims['azp'] ?? null;
         if ($azp !== null && ! hash_equals($clientId, (string) $azp)) {
-            throw SsoException::make('invalid_audience', 'id_token authorized party mismatch.', 401);
+            throw SsoException::make('invalid_audience', __('messages.sso.invalid_azp'), 401);
         }
 
         if (count($aud) > 1 && $azp === null) {
-            throw SsoException::make('invalid_audience', 'id_token has multiple audiences without an authorized party.', 401);
+            throw SsoException::make('invalid_audience', __('messages.sso.invalid_multi_aud'), 401);
         }
 
         if ($expectedNonce !== null && ($claims['nonce'] ?? null) !== $expectedNonce) {
-            throw SsoException::make('invalid_nonce', 'id_token nonce mismatch.', 401);
+            throw SsoException::make('invalid_nonce', __('messages.sso.invalid_nonce'), 401);
         }
 
         return $claims;

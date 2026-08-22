@@ -27,10 +27,16 @@ class RunImportJob implements ShouldQueue
 
     public function __construct(
         public string $importId,
-    ) {}
+        public string $locale = 'en',
+    ) {
+        $this->locale = app()->getLocale();
+    }
 
     public function handle(CsvImportService $service): void
     {
+        app()->setLocale($this->locale);
+        \Carbon\Carbon::setLocale($this->locale);
+
         $import = TransactionImport::find($this->importId);
 
         if (! $import) {
@@ -42,7 +48,7 @@ class RunImportJob implements ShouldQueue
         if (! $upload || ! $upload->isCompleted()) {
             $import->update([
                 'status' => TransactionImport::STATUS_FAILED,
-                'message' => 'The uploaded file is no longer available.',
+                'message' => __('messages.import.file_gone'),
             ]);
 
             return;
@@ -72,7 +78,7 @@ class RunImportJob implements ShouldQueue
 
         $jobs = [];
         foreach ($ranges as $index => [$start, $end]) {
-            $jobs[] = new ImportSliceJob($import->id, $upload->id, $start, $end, $index === 0);
+            $jobs[] = new ImportSliceJob($import->id, $upload->id, $start, $end, $index === 0, $this->locale);
         }
 
         $importId = $import->id;

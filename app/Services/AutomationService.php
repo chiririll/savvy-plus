@@ -270,7 +270,7 @@ class AutomationService
         $fromAccountId = $this->resolveValue($action['from_account_id'] ?? null, $entity);
         $toAccountId = $action['to_account_id'] ?? null;
         $amountFormula = $action['amount_formula'] ?? $action['amount'] ?? null;
-        $description = $action['description'] ?? 'Auto-transfer by automation rule';
+        $description = $action['description'] ?? __('messages.automation.auto_transfer');
 
         if (! $fromAccountId || ! $toAccountId || ! $amountFormula) {
             return null;

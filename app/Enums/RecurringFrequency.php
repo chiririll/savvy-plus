@@ -12,10 +12,10 @@ enum RecurringFrequency: string
     public function label(): string
     {
         return match ($this) {
-            self::Daily => 'Daily',
-            self::Weekly => 'Weekly',
-            self::Monthly => 'Monthly',
-            self::Yearly => 'Yearly',
+            self::Daily => __('messages.enums.frequency.daily'),
+            self::Weekly => __('messages.enums.frequency.weekly'),
+            self::Monthly => __('messages.enums.frequency.monthly'),
+            self::Yearly => __('messages.enums.frequency.yearly'),
         };
     }
 }

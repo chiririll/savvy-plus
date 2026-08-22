@@ -16,7 +16,7 @@ class PeriodGenerator
                 case 'day':
                     $periods[] = [
                         'key' => $current->toDateString(),
-                        'label' => $current->format('M j'),
+                        'label' => $this->dateLabel($current, 'M j'),
                     ];
                     $current->addDay();
                     break;
@@ -25,7 +25,7 @@ class PeriodGenerator
                     $weekStart = $current->copy()->startOfWeek(Carbon::SUNDAY);
                     $periods[] = [
                         'key' => $weekStart->toDateString(),
-                        'label' => 'Week '.$weekStart->format('M j'),
+                        'label' => __('messages.reports.week', ['date' => $this->dateLabel($weekStart, 'M j')]),
                     ];
                     $current->addWeek();
                     break;
@@ -33,7 +33,7 @@ class PeriodGenerator
                 case 'month':
                     $periods[] = [
                         'key' => $current->copy()->startOfMonth()->toDateString(),
-                        'label' => $current->format("M 'y"),
+                        'label' => $this->dateLabel($current, "M 'y"),
                     ];
                     $current->addMonth();
                     break;
@@ -41,7 +41,7 @@ class PeriodGenerator
                 default:
                     $periods[] = [
                         'key' => $current->toDateString(),
-                        'label' => $current->format('M j'),
+                        'label' => $this->dateLabel($current, 'M j'),
                     ];
                     $current->addDay();
                     break;
@@ -81,9 +81,17 @@ class PeriodGenerator
     public function getPeriodLabel(Carbon $current, string $groupBy): string
     {
         return match ($groupBy) {
-            'week' => 'W'.$current->weekOfYear.' '.$current->format("M 'y"),
-            'month' => $current->format("M 'y"),
-            default => $current->format('M j'),
+            'week' => __('messages.reports.week_num', [
+                'week' => $current->weekOfYear,
+                'date' => $this->dateLabel($current, "M 'y"),
+            ]),
+            'month' => $this->dateLabel($current, "M 'y"),
+            default => $this->dateLabel($current, 'M j'),
         };
+    }
+
+    private function dateLabel(Carbon $date, string $format): string
+    {
+        return $date->copy()->locale(app()->getLocale())->translatedFormat($format);
     }
 }

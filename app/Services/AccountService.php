@@ -166,7 +166,7 @@ class AccountService
         }
         // Add total series
         $series[] = [
-            'name' => 'Total',
+            'name' => __('messages.reports.total'),
             'type' => 'total',
             'data' => $totalData,
         ];

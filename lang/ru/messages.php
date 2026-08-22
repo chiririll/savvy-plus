@@ -32,6 +32,11 @@ return [
         'delete_in_use' => 'Нельзя удалить валюту, которая используется в счетах.',
         'delete_base' => 'Нельзя удалить базовую валюту. Сначала назначьте другую.',
         'delete_last' => 'Нельзя удалить последнюю валюту.',
+        'auto_update_disabled' => 'Автообновление выключено',
+        'no_base' => 'Базовая валюта не задана',
+        'no_api_match' => 'В API нет подходящих валют',
+        'updated' => 'Обновлено валют: :updated, пропущено: :skipped',
+        'updated_via' => 'Обновлено валют: :updated через :ref, пропущено: :skipped',
     ],
 
     'debts' => [
@@ -47,6 +52,64 @@ return [
 
     'sso' => [
         'delete_sso_only_users' => 'Нельзя удалить: пользователи только с SSO останутся без способа входа.',
+        'invalid_ticket' => 'Билет входа недействителен или истёк.',
+        'provider_not_found' => 'Неизвестный или отключённый провайдер.',
+        'unknown_preset' => 'Неизвестный SSO-пресет: :key',
+        'missing_field' => 'Не заполнено обязательное поле: :field.',
+        'invalid_state' => 'Сессия SSO недействительна или истекла. Попробуйте ещё раз.',
+        'saml_invalid' => 'Не удалось обработать SAML-ответ.',
+        'saml_assertion_invalid' => 'SAML-утверждение недействительно.',
+        'saml_metadata_invalid' => 'Неверные SP metadata: :errors',
+        'saml_no_subject' => 'В SAML-утверждении нет субъекта.',
+        'discovery_failed' => 'Неверный OIDC discovery-документ.',
+        'jwks_empty' => 'JWKS-эндпоинт не вернул ключи.',
+        'metadata_unreachable' => 'Не удалось достучаться до metadata провайдера.',
+        'invalid_request' => 'Нет кода авторизации или state.',
+        'missing_id_token' => 'Провайдер не вернул id_token.',
+        'token_exchange_failed' => 'Не удалось обменять код авторизации.',
+        'no_jwks' => 'В discovery-документе нет jwks_uri.',
+        'invalid_id_token' => 'Не удалось проверить подпись id_token.',
+        'invalid_issuer' => 'Не совпал issuer у id_token.',
+        'invalid_audience' => 'Не совпал audience у id_token.',
+        'invalid_azp' => 'Не совпал authorized party у id_token.',
+        'invalid_multi_aud' => 'У id_token несколько audience без authorized party.',
+        'invalid_nonce' => 'Не совпал nonce у id_token.',
+        'userinfo_failed' => 'Не удалось получить профиль пользователя у провайдера.',
+        'missing_subject' => 'Провайдер не вернул идентификатор субъекта.',
+        'unsupported_protocol' => 'Нет коннектора SSO для протокола: :protocol',
+        'no_admin' => 'Сначала завершите первоначальную настройку, затем используйте SSO.',
+        'user_missing' => 'Привязанный аккаунт больше не существует.',
+        'signup_disabled' => 'Этот аккаунт не подготовлен. Обратитесь к администратору.',
+        'no_email' => 'Провайдер не вернул адрес эл. почты.',
+        'email_unverified' => 'Провайдер не подтвердил этот адрес эл. почты.',
+        'email_in_use' => 'Аккаунт с этой почтой уже существует.',
+        'presets' => [
+            'custom_oidc' => 'Свой OIDC',
+            'custom_saml' => 'Свой SAML',
+        ],
+        'fields' => [
+            'client_id' => 'Client ID',
+            'client_secret' => 'Client secret',
+            'tenant' => 'Tenant ID',
+            'domain' => 'Домен Okta',
+            'auth_server_id' => 'ID сервера авторизации',
+            'base_url' => 'Базовый URL',
+            'gitlab_base_url' => 'Базовый URL GitLab',
+            'keycloak_base_url' => 'Базовый URL Keycloak',
+            'authentik_base_url' => 'Базовый URL Authentik',
+            'realm' => 'Realm',
+            'app_slug' => 'Slug приложения',
+            'discovery_url' => 'Discovery URL',
+            'scopes' => 'Scopes (через пробел)',
+            'idp_entity_id' => 'IdP Entity ID',
+            'idp_sso_url' => 'IdP SSO URL',
+            'idp_x509_cert' => 'Сертификат IdP X.509',
+            'idp_x509_cert_standby' => 'Резервный сертификат (ротация)',
+        ],
+        'placeholders' => [
+            'auth_server_id' => 'default (оставьте пустым для org-сервера)',
+            'scopes' => 'openid profile email',
+        ],
     ],
 
     'two_factor' => [
@@ -65,6 +128,89 @@ return [
         'verification_failed' => 'Не удалось подтвердить ключ доступа.',
         'not_registered' => 'Этот ключ доступа не зарегистрирован.',
         'limit_reached' => 'Можно зарегистрировать не больше :max ключей доступа.',
+        'registered' => 'Ключ доступа зарегистрирован.',
+        'renamed' => 'Ключ доступа переименован.',
+        'removed' => 'Ключ доступа удалён.',
+    ],
+
+    'backup' => [
+        'restored' => 'База данных восстановлена',
+    ],
+
+    'import' => [
+        'file_not_ready' => 'Загруженный файл ещё не готов к импорту.',
+        'file_gone' => 'Загруженный файл больше недоступен.',
+        'file_gone_reupload' => 'Загруженный файл больше недоступен. Загрузите его снова.',
+        'file_unavailable' => 'Загруженный файл недоступен.',
+        'session_required' => 'Нужен ID сессии импорта.',
+        'session_invalid' => 'Неверный ID сессии импорта.',
+        'date_mapping_required' => 'Нужно указать колонку даты.',
+        'amount_mapping_required' => 'Нужно указать колонку суммы.',
+        'select_account' => 'Выберите счёт по умолчанию.',
+        'account_missing' => 'Выбранный счёт не существует.',
+        'invalid_date' => "Неверный формат даты: ':value'",
+        'invalid_amount' => "Неверный формат суммы: ':value'",
+        'date_unmapped' => 'Колонка даты не сопоставлена или пуста',
+        'amount_unmapped' => 'Колонка суммы не сопоставлена или пуста',
+    ],
+
+    'upload' => [
+        'not_accepting' => 'Эта загрузка больше не принимает части.',
+        'part_out_of_range' => 'Номер части вне допустимого диапазона.',
+        'cannot_complete' => 'Эту загрузку нельзя завершить.',
+        'part_required' => 'Чтобы завершить загрузку, нужна хотя бы одна часть.',
+        'not_ready' => 'Загрузка ещё не готова к чтению.',
+        'empty' => 'Файл пустой.',
+        'too_large' => 'Файл больше максимального размера :size.',
+        'type_not_allowed' => 'Тип файла не разрешён. Допустимо: :types.',
+        'content_type' => 'MIME-тип файла не разрешён.',
+        'assemble_failed' => 'Не удалось собрать файл из частей.',
+        'part_missing' => 'Часть :number так и не была загружена.',
+        'etag_mismatch' => 'ETag части :number не совпал.',
+    ],
+
+    'enums' => [
+        'transaction' => [
+            'income' => 'Доход',
+            'expense' => 'Расход',
+            'transfer' => 'Перевод',
+            'debt_payment' => 'Платёж по долгу',
+            'debt_collection' => 'Возврат долга',
+        ],
+        'debt' => [
+            'i_owe' => 'Я должен',
+            'owed_to_me' => 'Мне должны',
+        ],
+        'budget_period' => [
+            'weekly' => 'Неделя',
+            'monthly' => 'Месяц',
+            'yearly' => 'Год',
+            'one_time' => 'Разовый',
+        ],
+        'frequency' => [
+            'daily' => 'Ежедневно',
+            'weekly' => 'Еженедельно',
+            'monthly' => 'Ежемесячно',
+            'yearly' => 'Ежегодно',
+        ],
+        'trigger' => [
+            'on_transaction_create' => 'При создании транзакции',
+            'on_transaction_update' => 'При изменении транзакции',
+        ],
+        'trigger_description' => [
+            'on_transaction_create' => 'Срабатывает при создании новой транзакции',
+            'on_transaction_update' => 'Срабатывает при изменении транзакции',
+        ],
+    ],
+
+    'reports' => [
+        'week' => 'Нед. :date',
+        'week_num' => ':week нед. :date',
+        'total' => 'Итого',
+    ],
+
+    'automation' => [
+        'auto_transfer' => 'Автоперевод по правилу',
     ],
 
     'validation' => [
@@ -81,5 +227,6 @@ return [
         'upload_not_found' => 'Загруженный файл не найден.',
         'custom_range_exceeded' => 'Свой период не может быть длиннее :days дн.',
         'invalid_period_value' => 'Неверный формат period_value для period_type «:type».',
+        'debt_amount_gt' => 'Сумма долга должна быть больше нуля.',
     ],
 ];

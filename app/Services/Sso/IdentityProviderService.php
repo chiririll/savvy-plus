@@ -128,7 +128,7 @@ class IdentityProviderService
                 : filled($config[$field['key']] ?? null);
 
             if (! $present) {
-                throw SsoException::make('missing_field', "Missing required field: {$field['label']}.", 422);
+                throw SsoException::make('missing_field', __('messages.sso.missing_field', ['field' => $field['label']]), 422);
             }
         }
     }

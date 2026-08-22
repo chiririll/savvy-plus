@@ -27,7 +27,7 @@ class PresetRegistry
         $key = $preset instanceof SsoPreset ? $preset->value : $preset;
 
         return $this->instances[$key]
-            ?? throw SsoException::make('unknown_preset', "Unknown SSO preset: {$key}", 404);
+            ?? throw SsoException::make('unknown_preset', __('messages.sso.unknown_preset', ['key' => $key]), 404);
     }
 
     /**

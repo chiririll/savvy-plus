@@ -48,13 +48,13 @@ class UploadManager
     public function signPart(Upload $upload, int $partNumber): array
     {
         if (! $upload->isPending()) {
-            throw new UploadException('This upload is no longer accepting parts.', 409);
+            throw new UploadException(__('messages.upload.not_accepting'), 409);
         }
 
         $maxParts = (int) config('uploads.max_parts');
 
         if ($partNumber < 1 || $partNumber > $maxParts) {
-            throw new UploadException('Part number is out of range.');
+            throw new UploadException(__('messages.upload.part_out_of_range'));
         }
 
         $ttl = (int) config('uploads.url_ttl');
@@ -78,13 +78,13 @@ class UploadManager
     public function storePart(Upload $upload, int $partNumber, $stream): array
     {
         if (! $upload->isPending()) {
-            throw new UploadException('This upload is no longer accepting parts.', 409);
+            throw new UploadException(__('messages.upload.not_accepting'), 409);
         }
 
         $maxParts = (int) config('uploads.max_parts');
 
         if ($partNumber < 1 || $partNumber > $maxParts) {
-            throw new UploadException('Part number is out of range.');
+            throw new UploadException(__('messages.upload.part_out_of_range'));
         }
 
         return $this->store->putPart($upload->disk, $upload->id, $partNumber, $stream);
@@ -108,11 +108,11 @@ class UploadManager
         }
 
         if (! $upload->isPending()) {
-            throw new UploadException('This upload cannot be completed.', 409);
+            throw new UploadException(__('messages.upload.cannot_complete'), 409);
         }
 
         if ($parts === []) {
-            throw new UploadException('At least one part is required to complete an upload.');
+            throw new UploadException(__('messages.upload.part_required'));
         }
 
         $ordered = collect($parts)
@@ -172,7 +172,7 @@ class UploadManager
     private function assertReadable(Upload $upload): void
     {
         if (! $upload->isCompleted() || ! $upload->path) {
-            throw new UploadException('Upload is not ready to be read.', 409);
+            throw new UploadException(__('messages.upload.not_ready'), 409);
         }
     }
 
@@ -218,13 +218,13 @@ class UploadManager
     {
         if ($size !== null) {
             if ($size < 1) {
-                throw new UploadException('File is empty.');
+                throw new UploadException(__('messages.upload.empty'));
             }
 
             $maxSize = (int) ($bucket['max_size'] ?? PHP_INT_MAX);
 
             if ($size > $maxSize) {
-                throw new UploadException('File exceeds the maximum allowed size of '.$this->humanBytes($maxSize).'.');
+                throw new UploadException(__('messages.upload.too_large', ['size' => $this->humanBytes($maxSize)]));
             }
         }
 
@@ -234,14 +234,14 @@ class UploadManager
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
             if (! in_array($extension, $extensions, true)) {
-                throw new UploadException('File type is not allowed. Allowed: '.implode(', ', $extensions).'.');
+                throw new UploadException(__('messages.upload.type_not_allowed', ['types' => implode(', ', $extensions)]));
             }
         }
 
         $mimeTypes = $bucket['allowed_mime_types'] ?? [];
 
         if ($mimeTypes !== [] && $mimeType !== null && $mimeType !== '' && ! in_array($mimeType, $mimeTypes, true)) {
-            throw new UploadException('File content type is not allowed.');
+            throw new UploadException(__('messages.upload.content_type'));
         }
     }
 

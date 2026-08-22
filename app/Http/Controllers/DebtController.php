@@ -58,7 +58,7 @@ class DebtController extends Controller
     public function show(Account $debt): DebtResource|JsonResponse
     {
         if (! $debt->isDebt()) {
-            return response()->json(['message' => 'Account is not a debt.'], 404);
+            return response()->json(['message' => __('messages.debts.not_a_debt')], 404);
         }
 
         $debt->load('currency');
@@ -75,7 +75,7 @@ class DebtController extends Controller
     public function update(UpdateDebtRequest $request, Account $debt): DebtResource|JsonResponse
     {
         if (! $debt->isDebt()) {
-            return response()->json(['message' => 'Account is not a debt.'], 404);
+            return response()->json(['message' => __('messages.debts.not_a_debt')], 404);
         }
 
         $validated = $request->validated();
@@ -100,7 +100,7 @@ class DebtController extends Controller
     public function destroy(Account $debt): JsonResponse
     {
         if (! $debt->isDebt()) {
-            return response()->json(['message' => 'Account is not a debt.'], 404);
+            return response()->json(['message' => __('messages.debts.not_a_debt')], 404);
         }
 
         try {
@@ -118,7 +118,7 @@ class DebtController extends Controller
     public function payment(DebtPaymentRequest $request, Account $debt): TransactionResource|JsonResponse
     {
         if (! $debt->isDebt()) {
-            return response()->json(['message' => 'Account is not a debt.'], 404);
+            return response()->json(['message' => __('messages.debts.not_a_debt')], 404);
         }
 
         try {
@@ -142,7 +142,7 @@ class DebtController extends Controller
     public function collect(DebtPaymentRequest $request, Account $debt): TransactionResource|JsonResponse
     {
         if (! $debt->isDebt()) {
-            return response()->json(['message' => 'Account is not a debt.'], 404);
+            return response()->json(['message' => __('messages.debts.not_a_debt')], 404);
         }
 
         try {
@@ -174,7 +174,7 @@ class DebtController extends Controller
     public function reopen(Account $debt): DebtResource|JsonResponse
     {
         if (! $debt->isDebt()) {
-            return response()->json(['message' => 'Account is not a debt.'], 404);
+            return response()->json(['message' => __('messages.debts.not_a_debt')], 404);
         }
 
         try {

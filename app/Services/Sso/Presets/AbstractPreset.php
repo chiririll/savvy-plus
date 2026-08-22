@@ -35,8 +35,8 @@ abstract class AbstractPreset implements PresetContract
     protected function clientFields(): array
     {
         return [
-            ['key' => 'client_id', 'label' => 'Client ID', 'type' => 'text', 'required' => true, 'group' => 'config'],
-            ['key' => 'client_secret', 'label' => 'Client secret', 'type' => 'password', 'required' => true, 'secret' => true, 'group' => 'secrets'],
+            ['key' => 'client_id', 'label' => __('messages.sso.fields.client_id'), 'type' => 'text', 'required' => true, 'group' => 'config'],
+            ['key' => 'client_secret', 'label' => __('messages.sso.fields.client_secret'), 'type' => 'password', 'required' => true, 'secret' => true, 'group' => 'secrets'],
         ];
     }
 }

@@ -12,10 +12,10 @@ enum BudgetPeriod: string
     public function label(): string
     {
         return match ($this) {
-            self::Weekly => 'Weekly',
-            self::Monthly => 'Monthly',
-            self::Yearly => 'Yearly',
-            self::OneTime => 'One-time',
+            self::Weekly => __('messages.enums.budget_period.weekly'),
+            self::Monthly => __('messages.enums.budget_period.monthly'),
+            self::Yearly => __('messages.enums.budget_period.yearly'),
+            self::OneTime => __('messages.enums.budget_period.one_time'),
         };
     }
 }

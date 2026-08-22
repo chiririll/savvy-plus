@@ -26,7 +26,7 @@ class GitlabPreset extends AbstractOidcPreset
     public function fields(): array
     {
         return [
-            ['key' => 'base_url', 'label' => 'GitLab base URL', 'type' => 'url', 'required' => true, 'group' => 'config', 'placeholder' => 'https://gitlab.com'],
+            ['key' => 'base_url', 'label' => __('messages.sso.fields.gitlab_base_url'), 'type' => 'url', 'required' => true, 'group' => 'config', 'placeholder' => 'https://gitlab.com'],
             ...$this->clientFields(),
         ];
     }

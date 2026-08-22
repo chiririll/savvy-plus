@@ -47,13 +47,13 @@ class OAuth2Connector extends AbstractConnector
         $state = (string) $request->input('state');
 
         if (blank($code) || blank($state)) {
-            throw SsoException::make('invalid_request', 'Missing authorization code or state.');
+            throw SsoException::make('invalid_request', __('messages.sso.invalid_request'));
         }
 
         $stateRow = $this->states->consume($state);
 
         if (! $stateRow || $stateRow->identity_provider_id !== $provider->id) {
-            throw SsoException::make('invalid_state', 'SSO state is invalid or expired. Please try again.');
+            throw SsoException::make('invalid_state', __('messages.sso.invalid_state'));
         }
 
         $conn = $this->connection($provider);
@@ -85,7 +85,7 @@ class OAuth2Connector extends AbstractConnector
                 'error' => $response->json('error'),
                 'error_description' => $response->json('error_description'),
             ]);
-            throw SsoException::make('token_exchange_failed', 'Failed to exchange authorization code.', 502);
+            throw SsoException::make('token_exchange_failed', __('messages.sso.token_exchange_failed'), 502);
         }
 
         return (string) $response->json('access_token');
@@ -99,7 +99,7 @@ class OAuth2Connector extends AbstractConnector
             ->get($url);
 
         if (! $response->successful()) {
-            throw SsoException::make('userinfo_failed', 'Failed to fetch user profile from provider.', 502);
+            throw SsoException::make('userinfo_failed', __('messages.sso.userinfo_failed'), 502);
         }
 
         return (array) $response->json();

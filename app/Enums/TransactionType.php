@@ -13,11 +13,11 @@ enum TransactionType: string
     public function label(): string
     {
         return match ($this) {
-            self::Income => 'Income',
-            self::Expense => 'Expense',
-            self::Transfer => 'Transfer',
-            self::DebtPayment => 'Debt Payment',
-            self::DebtCollection => 'Debt Collection',
+            self::Income => __('messages.enums.transaction.income'),
+            self::Expense => __('messages.enums.transaction.expense'),
+            self::Transfer => __('messages.enums.transaction.transfer'),
+            self::DebtPayment => __('messages.enums.transaction.debt_payment'),
+            self::DebtCollection => __('messages.enums.transaction.debt_collection'),
         };
     }
 

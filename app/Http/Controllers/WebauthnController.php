@@ -79,7 +79,7 @@ class WebauthnController extends Controller
         );
 
         return response()->json([
-            'message' => 'Passkey registered.',
+            'message' => __('messages.passkey.registered'),
             'credential' => [
                 'id' => $credential->id,
                 'name' => $credential->name,
@@ -100,7 +100,7 @@ class WebauthnController extends Controller
 
         $credential->update(['name' => $data['name']]);
 
-        return response()->json(['message' => 'Passkey renamed.']);
+        return response()->json(['message' => __('messages.passkey.renamed')]);
     }
 
     public function destroy(Request $request, WebauthnCredential $credential): JsonResponse
@@ -109,7 +109,7 @@ class WebauthnController extends Controller
 
         $credential->delete();
 
-        return response()->json(['message' => 'Passkey removed.']);
+        return response()->json(['message' => __('messages.passkey.removed')]);
     }
 
     public function loginOptions(Request $request): JsonResponse
@@ -123,7 +123,7 @@ class WebauthnController extends Controller
             : null;
 
         if (isset($data['two_factor_token']) && $user === null) {
-            return response()->json(['message' => 'Invalid or expired token.'], 401);
+            return response()->json(['message' => __('messages.two_factor.invalid_token')], 401);
         }
 
         $options = $this->webauthn->serialize($this->webauthn->requestOptions($user));
@@ -156,7 +156,7 @@ class WebauthnController extends Controller
             $pending = $this->twoFactorChallenges->resolve($data['two_factor_token']);
 
             if ($pending === null || $pending->id !== $user->id) {
-                return response()->json(['message' => 'Invalid or expired token.'], 401);
+                return response()->json(['message' => __('messages.two_factor.invalid_token')], 401);
             }
 
             $this->twoFactorChallenges->consume($data['two_factor_token']);

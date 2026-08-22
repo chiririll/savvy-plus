@@ -83,7 +83,7 @@ class LocalMultipartStore
         $out = fopen($fs->path($objectKey), 'wb');
 
         if ($out === false) {
-            throw new UploadException('Unable to assemble upload.', 500);
+            throw new UploadException(__('messages.upload.assemble_failed'), 500);
         }
 
         $verifyEtags = (bool) config('uploads.verify_etags', false);
@@ -93,7 +93,7 @@ class LocalMultipartStore
                 $partPath = $this->partPath($uploadId, $part['number']);
 
                 if (! $fs->exists($partPath)) {
-                    throw new UploadException("Part {$part['number']} was never uploaded.", 422);
+                    throw new UploadException(__('messages.upload.part_missing', ['number' => $part['number']]), 422);
                 }
 
                 if ($verifyEtags && ! empty($part['etag'])) {
@@ -101,7 +101,7 @@ class LocalMultipartStore
                     $actual = md5_file($fs->path($partPath));
 
                     if ($expected !== $actual) {
-                        throw new UploadException("ETag mismatch for part {$part['number']}.", 422);
+                        throw new UploadException(__('messages.upload.etag_mismatch', ['number' => $part['number']]), 422);
                     }
                 }
 

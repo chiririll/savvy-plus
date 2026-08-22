@@ -15,10 +15,10 @@ class CustomSamlPreset extends AbstractPreset
     public function fields(): array
     {
         return [
-            ['key' => 'idp_entity_id', 'label' => 'IdP Entity ID', 'type' => 'text', 'required' => true, 'group' => 'config'],
-            ['key' => 'idp_sso_url', 'label' => 'IdP SSO URL', 'type' => 'url', 'required' => true, 'group' => 'config'],
-            ['key' => 'idp_x509_cert', 'label' => 'IdP X.509 certificate', 'type' => 'textarea', 'required' => true, 'group' => 'config'],
-            ['key' => 'idp_x509_cert_standby', 'label' => 'Standby certificate (rotation)', 'type' => 'textarea', 'required' => false, 'group' => 'config'],
+            ['key' => 'idp_entity_id', 'label' => __('messages.sso.fields.idp_entity_id'), 'type' => 'text', 'required' => true, 'group' => 'config'],
+            ['key' => 'idp_sso_url', 'label' => __('messages.sso.fields.idp_sso_url'), 'type' => 'url', 'required' => true, 'group' => 'config'],
+            ['key' => 'idp_x509_cert', 'label' => __('messages.sso.fields.idp_x509_cert'), 'type' => 'textarea', 'required' => true, 'group' => 'config'],
+            ['key' => 'idp_x509_cert_standby', 'label' => __('messages.sso.fields.idp_x509_cert_standby'), 'type' => 'textarea', 'required' => false, 'group' => 'config'],
         ];
     }
 

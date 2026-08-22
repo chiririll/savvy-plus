@@ -10,6 +10,6 @@ class ProviderResolver
     public function enabled(string $slug): IdentityProvider
     {
         return IdentityProvider::where('slug', $slug)->where('enabled', true)->first()
-            ?? throw SsoException::make('provider_not_found', 'Unknown or disabled identity provider.', 404);
+            ?? throw SsoException::make('provider_not_found', __('messages.sso.provider_not_found'), 404);
     }
 }

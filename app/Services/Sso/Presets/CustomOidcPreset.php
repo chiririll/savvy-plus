@@ -15,8 +15,8 @@ class CustomOidcPreset extends AbstractOidcPreset
     public function fields(): array
     {
         return [
-            ['key' => 'discovery_url', 'label' => 'Discovery URL', 'type' => 'url', 'required' => true, 'group' => 'config', 'placeholder' => 'https://idp.example.com/.well-known/openid-configuration'],
-            ['key' => 'scopes', 'label' => 'Scopes (space-separated)', 'type' => 'text', 'required' => false, 'group' => 'config', 'placeholder' => 'openid profile email'],
+            ['key' => 'discovery_url', 'label' => __('messages.sso.fields.discovery_url'), 'type' => 'url', 'required' => true, 'group' => 'config', 'placeholder' => 'https://idp.example.com/.well-known/openid-configuration'],
+            ['key' => 'scopes', 'label' => __('messages.sso.fields.scopes'), 'type' => 'text', 'required' => false, 'group' => 'config', 'placeholder' => __('messages.sso.placeholders.scopes')],
             ...$this->clientFields(),
         ];
     }

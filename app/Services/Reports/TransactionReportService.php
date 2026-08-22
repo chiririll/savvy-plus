@@ -100,7 +100,7 @@ class TransactionReportService
         $datasets = [
             [
                 'id' => 0,
-                'name' => 'Total',
+                'name' => __('messages.reports.total'),
                 'color' => $type === 'expense' ? '#ef4444' : '#22c55e',
                 'data' => $totalData,
             ],

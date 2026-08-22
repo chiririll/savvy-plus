@@ -15,7 +15,7 @@ class EntraPreset extends AbstractOidcPreset
     public function fields(): array
     {
         return [
-            ['key' => 'tenant', 'label' => 'Tenant ID', 'type' => 'text', 'required' => true, 'group' => 'config', 'placeholder' => 'common / organizations / <tenant-guid>'],
+            ['key' => 'tenant', 'label' => __('messages.sso.fields.tenant'), 'type' => 'text', 'required' => true, 'group' => 'config', 'placeholder' => 'common / organizations / <tenant-guid>'],
             ...$this->clientFields(),
         ];
     }

@@ -32,6 +32,11 @@ return [
         'delete_in_use' => 'Cannot delete currency that is used by accounts.',
         'delete_base' => 'Cannot delete base currency. Set another currency as base first.',
         'delete_last' => 'Cannot delete the last currency.',
+        'auto_update_disabled' => 'Auto-update disabled',
+        'no_base' => 'No base currency set',
+        'no_api_match' => 'No matching currencies found in API',
+        'updated' => 'Updated :updated currencies, skipped :skipped',
+        'updated_via' => 'Updated :updated currencies via :ref, skipped :skipped',
     ],
 
     'debts' => [
@@ -47,6 +52,64 @@ return [
 
     'sso' => [
         'delete_sso_only_users' => 'Cannot delete: SSO-only users would be left without a way to sign in.',
+        'invalid_ticket' => 'Login ticket is invalid or expired.',
+        'provider_not_found' => 'Unknown or disabled identity provider.',
+        'unknown_preset' => 'Unknown SSO preset: :key',
+        'missing_field' => 'Missing required field: :field.',
+        'invalid_state' => 'SSO state is invalid or expired. Please try again.',
+        'saml_invalid' => 'Failed to process the SAML response.',
+        'saml_assertion_invalid' => 'SAML assertion is invalid.',
+        'saml_metadata_invalid' => 'Invalid SP metadata: :errors',
+        'saml_no_subject' => 'SAML assertion has no usable subject.',
+        'discovery_failed' => 'Invalid OIDC discovery document.',
+        'jwks_empty' => 'JWKS endpoint returned no keys.',
+        'metadata_unreachable' => 'Failed to reach identity provider metadata.',
+        'invalid_request' => 'Missing authorization code or state.',
+        'missing_id_token' => 'Identity provider did not return an id_token.',
+        'token_exchange_failed' => 'Failed to exchange authorization code.',
+        'no_jwks' => 'Discovery document has no jwks_uri.',
+        'invalid_id_token' => 'Could not verify the id_token signature.',
+        'invalid_issuer' => 'id_token issuer mismatch.',
+        'invalid_audience' => 'id_token audience mismatch.',
+        'invalid_azp' => 'id_token authorized party mismatch.',
+        'invalid_multi_aud' => 'id_token has multiple audiences without an authorized party.',
+        'invalid_nonce' => 'id_token nonce mismatch.',
+        'userinfo_failed' => 'Failed to fetch user profile from provider.',
+        'missing_subject' => 'Identity provider did not return a subject identifier.',
+        'unsupported_protocol' => 'No SSO connector for protocol: :protocol',
+        'no_admin' => 'Complete the initial setup before using SSO.',
+        'user_missing' => 'Linked account no longer exists.',
+        'signup_disabled' => 'This account is not provisioned. Contact an administrator.',
+        'no_email' => 'Identity provider did not return an email address.',
+        'email_unverified' => 'Your identity provider has not verified this email address.',
+        'email_in_use' => 'An account with this email already exists.',
+        'presets' => [
+            'custom_oidc' => 'Custom OIDC',
+            'custom_saml' => 'Custom SAML',
+        ],
+        'fields' => [
+            'client_id' => 'Client ID',
+            'client_secret' => 'Client secret',
+            'tenant' => 'Tenant ID',
+            'domain' => 'Okta domain',
+            'auth_server_id' => 'Authorization server ID',
+            'base_url' => 'Base URL',
+            'gitlab_base_url' => 'GitLab base URL',
+            'keycloak_base_url' => 'Keycloak base URL',
+            'authentik_base_url' => 'Authentik base URL',
+            'realm' => 'Realm',
+            'app_slug' => 'Application slug',
+            'discovery_url' => 'Discovery URL',
+            'scopes' => 'Scopes (space-separated)',
+            'idp_entity_id' => 'IdP Entity ID',
+            'idp_sso_url' => 'IdP SSO URL',
+            'idp_x509_cert' => 'IdP X.509 certificate',
+            'idp_x509_cert_standby' => 'Standby certificate (rotation)',
+        ],
+        'placeholders' => [
+            'auth_server_id' => 'default (leave blank for the org server)',
+            'scopes' => 'openid profile email',
+        ],
     ],
 
     'two_factor' => [
@@ -65,6 +128,89 @@ return [
         'verification_failed' => 'Passkey verification failed.',
         'not_registered' => 'This passkey is not registered.',
         'limit_reached' => 'You can register at most :max passkeys.',
+        'registered' => 'Passkey registered.',
+        'renamed' => 'Passkey renamed.',
+        'removed' => 'Passkey removed.',
+    ],
+
+    'backup' => [
+        'restored' => 'Database restored successfully',
+    ],
+
+    'import' => [
+        'file_not_ready' => 'The uploaded file is not ready for import.',
+        'file_gone' => 'The uploaded file is no longer available.',
+        'file_gone_reupload' => 'The uploaded file is no longer available. Please re-upload.',
+        'file_unavailable' => 'Uploaded file is not available.',
+        'session_required' => 'Import session ID is required.',
+        'session_invalid' => 'Invalid import session ID.',
+        'date_mapping_required' => 'Date column mapping is required.',
+        'amount_mapping_required' => 'Amount column mapping is required.',
+        'select_account' => 'Please select a default account.',
+        'account_missing' => 'Selected account does not exist.',
+        'invalid_date' => "Invalid date format: ':value'",
+        'invalid_amount' => "Invalid amount format: ':value'",
+        'date_unmapped' => 'Date column not mapped or empty',
+        'amount_unmapped' => 'Amount column not mapped or empty',
+    ],
+
+    'upload' => [
+        'not_accepting' => 'This upload is no longer accepting parts.',
+        'part_out_of_range' => 'Part number is out of range.',
+        'cannot_complete' => 'This upload cannot be completed.',
+        'part_required' => 'At least one part is required to complete an upload.',
+        'not_ready' => 'Upload is not ready to be read.',
+        'empty' => 'File is empty.',
+        'too_large' => 'File exceeds the maximum allowed size of :size.',
+        'type_not_allowed' => 'File type is not allowed. Allowed: :types.',
+        'content_type' => 'File content type is not allowed.',
+        'assemble_failed' => 'Unable to assemble upload.',
+        'part_missing' => 'Part :number was never uploaded.',
+        'etag_mismatch' => 'ETag mismatch for part :number.',
+    ],
+
+    'enums' => [
+        'transaction' => [
+            'income' => 'Income',
+            'expense' => 'Expense',
+            'transfer' => 'Transfer',
+            'debt_payment' => 'Debt Payment',
+            'debt_collection' => 'Debt Collection',
+        ],
+        'debt' => [
+            'i_owe' => 'I Owe',
+            'owed_to_me' => 'Owed To Me',
+        ],
+        'budget_period' => [
+            'weekly' => 'Weekly',
+            'monthly' => 'Monthly',
+            'yearly' => 'Yearly',
+            'one_time' => 'One-time',
+        ],
+        'frequency' => [
+            'daily' => 'Daily',
+            'weekly' => 'Weekly',
+            'monthly' => 'Monthly',
+            'yearly' => 'Yearly',
+        ],
+        'trigger' => [
+            'on_transaction_create' => 'On Transaction Create',
+            'on_transaction_update' => 'On Transaction Update',
+        ],
+        'trigger_description' => [
+            'on_transaction_create' => 'Triggers when a new transaction is created',
+            'on_transaction_update' => 'Triggers when a transaction is updated',
+        ],
+    ],
+
+    'reports' => [
+        'week' => 'Week :date',
+        'week_num' => 'W:week :date',
+        'total' => 'Total',
+    ],
+
+    'automation' => [
+        'auto_transfer' => 'Auto-transfer by automation rule',
     ],
 
     'validation' => [
@@ -81,5 +227,6 @@ return [
         'upload_not_found' => 'The uploaded file could not be found.',
         'custom_range_exceeded' => 'Custom range cannot exceed :days days.',
         'invalid_period_value' => 'Invalid period_value format for period_type ":type".',
+        'debt_amount_gt' => 'Debt amount must be greater than zero.',
     ],
 ];

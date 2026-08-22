@@ -56,7 +56,7 @@ class BackupController extends Controller
     {
         $this->backupService->restore($backup);
 
-        return response()->json(['message' => 'Database restored successfully']);
+        return response()->json(['message' => __('messages.backup.restored')]);
     }
 
     public function destroy(Backup $backup): JsonResponse

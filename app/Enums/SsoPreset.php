@@ -29,8 +29,8 @@ enum SsoPreset: string
             self::Gitlab => 'GitLab',
             self::Keycloak => 'Keycloak',
             self::Authentik => 'Authentik',
-            self::CustomOidc => 'Custom OIDC',
-            self::CustomSaml => 'Custom SAML',
+            self::CustomOidc => __('messages.sso.presets.custom_oidc'),
+            self::CustomSaml => __('messages.sso.presets.custom_saml'),
         };
     }
 

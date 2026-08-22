@@ -26,6 +26,6 @@ class ConnectorFactory
     public function for(IdentityProvider $provider): SsoConnector
     {
         return $this->connectors[$provider->protocol->value]
-            ?? throw SsoException::make('unsupported_protocol', "No SSO connector for protocol: {$provider->protocol->value}", 500);
+            ?? throw SsoException::make('unsupported_protocol', __('messages.sso.unsupported_protocol', ['protocol' => $provider->protocol->value]), 500);
     }
 }

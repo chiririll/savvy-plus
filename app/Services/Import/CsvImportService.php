@@ -443,12 +443,12 @@ class CsvImportService
             $result['date'] = $this->formatDetector->parseDate($dateValue, $options['date_format']);
 
             if (! $result['date']) {
-                $result['error'] = "Invalid date format: '{$dateValue}'";
+                $result['error'] = __('messages.import.invalid_date', ['value' => $dateValue]);
 
                 return $result;
             }
         } else {
-            $result['error'] = 'Date column not mapped or empty';
+            $result['error'] = __('messages.import.date_unmapped');
 
             return $result;
         }
@@ -459,7 +459,7 @@ class CsvImportService
             $result['amount'] = $this->formatDetector->parseAmount($amountValue, $options['amount_format']);
 
             if ($result['amount'] === null) {
-                $result['error'] = "Invalid amount format: '{$amountValue}'";
+                $result['error'] = __('messages.import.invalid_amount', ['value' => $amountValue]);
 
                 return $result;
             }
@@ -475,7 +475,7 @@ class CsvImportService
                 }
             }
         } else {
-            $result['error'] = 'Amount column not mapped or empty';
+            $result['error'] = __('messages.import.amount_unmapped');
 
             return $result;
         }

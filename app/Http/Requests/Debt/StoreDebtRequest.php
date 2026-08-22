@@ -29,7 +29,7 @@ class StoreDebtRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'amount.gt' => 'Debt amount must be greater than zero.',
+            'amount.gt' => __('messages.validation.debt_amount_gt'),
         ];
     }
 }

@@ -25,10 +25,16 @@ class ParseImportJob implements ShouldQueue
     public function __construct(
         public string $importId,
         public string $uploadId,
-    ) {}
+        public string $locale = 'en',
+    ) {
+        $this->locale = app()->getLocale();
+    }
 
     public function handle(CsvImportService $service): void
     {
+        app()->setLocale($this->locale);
+        \Carbon\Carbon::setLocale($this->locale);
+
         $import = TransactionImport::find($this->importId);
 
         if (! $import) {
@@ -40,7 +46,7 @@ class ParseImportJob implements ShouldQueue
         if (! $upload || ! $upload->isCompleted()) {
             $import->update([
                 'status' => TransactionImport::STATUS_FAILED,
-                'message' => 'Uploaded file is not available.',
+                'message' => __('messages.import.file_unavailable'),
             ]);
 
             return;

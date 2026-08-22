@@ -15,8 +15,8 @@ class AuthentikPreset extends AbstractOidcPreset
     public function fields(): array
     {
         return [
-            ['key' => 'base_url', 'label' => 'Authentik base URL', 'type' => 'url', 'required' => true, 'group' => 'config', 'placeholder' => 'https://auth.example.com'],
-            ['key' => 'app_slug', 'label' => 'Application slug', 'type' => 'text', 'required' => true, 'group' => 'config'],
+            ['key' => 'base_url', 'label' => __('messages.sso.fields.authentik_base_url'), 'type' => 'url', 'required' => true, 'group' => 'config', 'placeholder' => 'https://auth.example.com'],
+            ['key' => 'app_slug', 'label' => __('messages.sso.fields.app_slug'), 'type' => 'text', 'required' => true, 'group' => 'config'],
             ...$this->clientFields(),
         ];
     }

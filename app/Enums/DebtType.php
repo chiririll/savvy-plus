@@ -10,8 +10,8 @@ enum DebtType: string
     public function label(): string
     {
         return match ($this) {
-            self::IOwe => 'I Owe',
-            self::OwedToMe => 'Owed To Me',
+            self::IOwe => __('messages.enums.debt.i_owe'),
+            self::OwedToMe => __('messages.enums.debt.owed_to_me'),
         };
     }
 

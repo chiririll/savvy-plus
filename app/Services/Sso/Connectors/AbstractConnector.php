@@ -81,7 +81,7 @@ abstract class AbstractConnector implements SsoConnector
         $subject = $overrides['subject'] ?? $read('subject');
 
         if (blank($subject)) {
-            throw SsoException::make('missing_subject', 'Identity provider did not return a subject identifier.', 422);
+            throw SsoException::make('missing_subject', __('messages.sso.missing_subject'), 422);
         }
 
         $groupsPath = $mappings['groups'] ?? null;

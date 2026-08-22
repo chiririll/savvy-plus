@@ -82,7 +82,7 @@ class SsoController extends Controller
         $ticket = $this->tickets->consume($data['ticket']);
 
         if (! $ticket) {
-            return response()->json(['message' => 'Login ticket is invalid or expired.', 'error' => 'invalid_ticket'], 410);
+            return response()->json(['message' => __('messages.sso.invalid_ticket'), 'error' => 'invalid_ticket'], 410);
         }
 
         if ($ticket->requires_2fa) {

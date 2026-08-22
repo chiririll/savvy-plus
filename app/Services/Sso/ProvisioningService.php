@@ -28,7 +28,7 @@ class ProvisioningService
 
             // Never let SSO seize a fresh instance before a local admin exists.
             if (User::count() === 0) {
-                throw SsoException::make('no_admin', 'Complete the initial setup before using SSO.', 403);
+                throw SsoException::make('no_admin', __('messages.sso.no_admin'), 403);
             }
 
             $user = $this->linkByEmail($provider, $identity)
@@ -45,7 +45,7 @@ class ProvisioningService
         $user = $link->user;
 
         if (! $user) {
-            throw SsoException::make('user_missing', 'Linked account no longer exists.', 403);
+            throw SsoException::make('user_missing', __('messages.sso.user_missing'), 403);
         }
 
         if ($provider->sync_role_on_login) {
@@ -79,20 +79,20 @@ class ProvisioningService
     private function justInTimeProvision(IdentityProvider $provider, NormalizedIdentity $identity): User
     {
         if (! $provider->allow_jit || ! settings('sso_allow_signup', true)) {
-            throw SsoException::make('signup_disabled', 'This account is not provisioned. Contact an administrator.', 403);
+            throw SsoException::make('signup_disabled', __('messages.sso.signup_disabled'), 403);
         }
 
         if (blank($identity->email)) {
-            throw SsoException::make('no_email', 'Identity provider did not return an email address.', 422);
+            throw SsoException::make('no_email', __('messages.sso.no_email'), 422);
         }
 
         if (settings('sso_require_verified_email', false) && ! $identity->emailVerified) {
-            throw SsoException::make('email_unverified', 'Your identity provider has not verified this email address.', 422);
+            throw SsoException::make('email_unverified', __('messages.sso.email_unverified'), 422);
         }
 
         if ($this->findUserByEmail($identity->email)) {
             // Email belongs to a local account but linking is disabled for this provider.
-            throw SsoException::make('email_in_use', 'An account with this email already exists.', 409);
+            throw SsoException::make('email_in_use', __('messages.sso.email_in_use'), 409);
         }
 
         return User::create([

@@ -28,7 +28,7 @@ class TransactionImportController extends Controller
         abort_unless($upload->user_id === auth()->id(), 403);
 
         if ($upload->bucket !== 'transaction-imports' || ! $upload->isCompleted()) {
-            return response()->json(['message' => 'The uploaded file is not ready for import.'], 422);
+            return response()->json(['message' => __('messages.import.file_not_ready')], 422);
         }
 
         $import = TransactionImport::create([
@@ -66,7 +66,7 @@ class TransactionImportController extends Controller
         $upload = $import->upload_id ? Upload::find($import->upload_id) : null;
 
         if (! $upload || ! $upload->isCompleted()) {
-            return response()->json(['message' => 'The uploaded file is no longer available. Please re-upload.'], 422);
+            return response()->json(['message' => __('messages.import.file_gone_reupload')], 422);
         }
 
         $result = $this->importService->preview(

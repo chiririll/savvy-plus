@@ -31,10 +31,14 @@ class ImportSliceJob implements ShouldQueue
         public int $start,
         public int $end,
         public bool $isFirstRange,
+        public string $locale = 'en',
     ) {}
 
     public function handle(CsvImportService $service): void
     {
+        app()->setLocale($this->locale);
+        \Carbon\Carbon::setLocale($this->locale);
+
         if ($this->batch()?->cancelled()) {
             return;
         }

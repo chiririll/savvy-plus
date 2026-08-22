@@ -21,8 +21,8 @@ class OktaPreset extends AbstractOidcPreset
     public function fields(): array
     {
         return [
-            ['key' => 'domain', 'label' => 'Okta domain', 'type' => 'text', 'required' => true, 'group' => 'config', 'placeholder' => 'example.okta.com'],
-            ['key' => 'auth_server_id', 'label' => 'Authorization server ID', 'type' => 'text', 'required' => false, 'group' => 'config', 'placeholder' => 'default (leave blank for the org server)'],
+            ['key' => 'domain', 'label' => __('messages.sso.fields.domain'), 'type' => 'text', 'required' => true, 'group' => 'config', 'placeholder' => 'example.okta.com'],
+            ['key' => 'auth_server_id', 'label' => __('messages.sso.fields.auth_server_id'), 'type' => 'text', 'required' => false, 'group' => 'config', 'placeholder' => __('messages.sso.placeholders.auth_server_id')],
             ...$this->clientFields(),
         ];
     }
