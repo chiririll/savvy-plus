@@ -48,13 +48,13 @@ class OverviewRequest extends FormRequest
 
             if ($periodValue !== null && isset(self::PERIOD_VALUE_FORMATS[$periodType])
                 && ! preg_match(self::PERIOD_VALUE_FORMATS[$periodType], $periodValue)) {
-                $validator->errors()->add('period_value', "Invalid period_value format for period_type \"{$periodType}\".");
+                $validator->errors()->add('period_value', __('messages.validation.invalid_period_value', ['type' => $periodType]));
             }
 
             if ($periodType === 'custom' && $this->filled('start_date') && $this->filled('end_date')) {
                 $span = Carbon::parse($this->input('start_date'))->diffInDays(Carbon::parse($this->input('end_date')));
                 if ($span > self::MAX_CUSTOM_RANGE_DAYS) {
-                    $validator->errors()->add('end_date', 'Custom range cannot exceed '.self::MAX_CUSTOM_RANGE_DAYS.' days.');
+                    $validator->errors()->add('end_date', __('messages.validation.custom_range_exceeded', ['days' => self::MAX_CUSTOM_RANGE_DAYS]));
                 }
             }
         });

@@ -2,6 +2,7 @@ import { CheckCircle2, XCircle, AlertTriangle, Copy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { cn, formatCurrency } from '@/lib/utils'
+import { intlLocale } from '@/lib/i18n'
 import type { ImportPreviewResult } from '@/types/import'
 
 interface PreviewStepProps {
@@ -16,7 +17,7 @@ export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
 
     const isSampled = summary.totalRows !== null && summary.sampled < summary.totalRows
     const createEstimate = isSampled ? (summary.totalRows as number) : summary.willCreate
-    const nf = (n: number) => n.toLocaleString()
+    const nf = (n: number) => n.toLocaleString(intlLocale())
 
     const statusConfig = {
         new: {

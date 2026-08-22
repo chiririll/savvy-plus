@@ -16,7 +16,9 @@
         "activeHelp": "Неактивные счета скрыты в списках"
     },
     "categories": {
-        "namePlaceholder": "Продукты"
+        "namePlaceholder": "Продукты",
+        "preview": "Превью:",
+        "previewName": "Название категории"
     },
     "tags": {
         "label": "Теги",

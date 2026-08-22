@@ -26,7 +26,7 @@ class TwoFactorController extends Controller
 
         if ($user->hasTwoFactorEnabled()) {
             return response()->json([
-                'message' => 'Two-factor authentication is already enabled.',
+                'message' => __('messages.two_factor.already_enabled'),
             ], 400);
         }
 
@@ -51,7 +51,7 @@ class TwoFactorController extends Controller
 
         if (! $this->twoFactor->needsConfirmation($user)) {
             return response()->json([
-                'message' => 'Two-factor authentication is not pending confirmation.',
+                'message' => __('messages.two_factor.not_pending'),
             ], 400);
         }
 
@@ -59,12 +59,12 @@ class TwoFactorController extends Controller
 
         if ($recoveryCodes === null) {
             return response()->json([
-                'message' => 'Invalid verification code.',
+                'message' => __('messages.two_factor.invalid_code'),
             ], 422);
         }
 
         return response()->json([
-            'message' => 'Two-factor authentication has been enabled.',
+            'message' => __('messages.two_factor.enabled'),
             'recovery_codes' => $recoveryCodes,
         ]);
     }
@@ -82,18 +82,18 @@ class TwoFactorController extends Controller
 
         if (! $user->hasTwoFactorEnabled()) {
             return response()->json([
-                'message' => 'Two-factor authentication is not enabled.',
+                'message' => __('messages.two_factor.not_enabled'),
             ], 400);
         }
 
         if (! $this->twoFactor->disable($user, $request->code)) {
             return response()->json([
-                'message' => 'Invalid verification code.',
+                'message' => __('messages.two_factor.invalid_code'),
             ], 422);
         }
 
         return response()->json([
-            'message' => 'Two-factor authentication has been disabled.',
+            'message' => __('messages.two_factor.disabled'),
         ]);
     }
 
@@ -111,7 +111,7 @@ class TwoFactorController extends Controller
 
         if (! $user) {
             return response()->json([
-                'message' => 'Invalid or expired token.',
+                'message' => __('messages.two_factor.invalid_token'),
             ], 401);
         }
 
@@ -120,7 +120,7 @@ class TwoFactorController extends Controller
 
         if (! $verified) {
             return response()->json([
-                'message' => 'Invalid verification code.',
+                'message' => __('messages.two_factor.invalid_code'),
             ], 422);
         }
 
@@ -138,7 +138,7 @@ class TwoFactorController extends Controller
 
         if (! $user->hasTwoFactorEnabled()) {
             return response()->json([
-                'message' => 'Two-factor authentication is not enabled.',
+                'message' => __('messages.two_factor.not_enabled'),
             ], 400);
         }
 
@@ -160,7 +160,7 @@ class TwoFactorController extends Controller
 
         if (! $user->hasTwoFactorEnabled()) {
             return response()->json([
-                'message' => 'Two-factor authentication is not enabled.',
+                'message' => __('messages.two_factor.not_enabled'),
             ], 400);
         }
 
@@ -168,12 +168,12 @@ class TwoFactorController extends Controller
 
         if ($codes === null) {
             return response()->json([
-                'message' => 'Invalid verification code.',
+                'message' => __('messages.two_factor.invalid_code'),
             ], 422);
         }
 
         return response()->json([
-            'message' => 'Recovery codes have been regenerated.',
+            'message' => __('messages.two_factor.codes_regenerated'),
             'recovery_codes' => $codes,
         ]);
     }

@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Debt } from '@/types'
 import { formatCurrency } from '@/lib/utils'
-import i18n from '@/lib/i18n'
+import i18n, { intlLocale } from '@/lib/i18n'
 
 const DEBT_TYPE_CONFIG = {
     i_owe: {
@@ -138,7 +138,7 @@ export const createDebtColumns = (
 
             return (
                 <span className={isOverdue ? 'text-red-600 font-medium' : ''}>
-                    {dueDate.toLocaleDateString()}
+                    {dueDate.toLocaleDateString(intlLocale())}
                 </span>
             )
         },

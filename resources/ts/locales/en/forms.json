@@ -16,7 +16,9 @@
         "activeHelp": "Inactive accounts are hidden from lists"
     },
     "categories": {
-        "namePlaceholder": "Groceries"
+        "namePlaceholder": "Groceries",
+        "preview": "Preview:",
+        "previewName": "Category name"
     },
     "tags": {
         "label": "Tags",

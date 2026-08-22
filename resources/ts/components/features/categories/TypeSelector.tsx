@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { CATEGORY_TYPE_OPTIONS } from '@/constants/categories'
 import { CategoryType } from '@/types'
@@ -10,9 +11,11 @@ interface TypeSelectorProps {
 }
 
 export function TypeSelector({ value, onChange, error }: TypeSelectorProps) {
+    const { t } = useTranslation()
+
     return (
         <div className="space-y-2">
-            <label className="text-sm font-medium">Type</label>
+            <label className="text-sm font-medium">{t('fields.type')}</label>
             <div className="flex gap-2">
                 {CATEGORY_TYPE_OPTIONS.map((option) => (
                     <Button
@@ -27,7 +30,7 @@ export function TypeSelector({ value, onChange, error }: TypeSelectorProps) {
                                     : 'bg-red-600 hover:bg-red-700')
                         )}
                     >
-                        {option.label}
+                        {t(`pages:categories.types.${option.value}`)}
                     </Button>
                 ))}
             </div>

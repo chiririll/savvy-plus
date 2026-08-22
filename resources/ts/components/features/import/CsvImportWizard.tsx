@@ -11,6 +11,7 @@ import { UploadStep } from './steps/UploadStep'
 import { MappingStep } from './steps/MappingStep'
 import { PreviewStep } from './steps/PreviewStep'
 import { ResultStep } from './steps/ResultStep'
+import { intlLocale } from '@/lib/i18n'
 import type {
     ImportStep,
     CsvParseResult,
@@ -272,7 +273,7 @@ export function CsvImportWizard() {
                                             const sampled = s.totalRows !== null && s.sampled < s.totalRows
                                             return t('import.importCount', {
                                                 tilde: sampled ? '~' : '',
-                                                count: (sampled ? (s.totalRows as number) : s.willCreate).toLocaleString(),
+                                                count: (sampled ? (s.totalRows as number) : s.willCreate).toLocaleString(intlLocale()),
                                             })
                                         })()}
                                     </>

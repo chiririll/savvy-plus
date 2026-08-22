@@ -21,8 +21,8 @@ class ParseCsvRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'upload_id.required' => 'An uploaded file is required to start an import.',
-            'upload_id.exists' => 'The uploaded file could not be found.',
+            'upload_id.required' => __('messages.validation.upload_required'),
+            'upload_id.exists' => __('messages.validation.upload_not_found'),
         ];
     }
 }

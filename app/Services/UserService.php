@@ -44,7 +44,7 @@ class UserService
         if ($newRole && $newRole !== UserRole::Admin->value && $user->isAdmin()) {
             $adminCount = User::where('role', UserRole::Admin)->count();
             if ($adminCount <= 1) {
-                throw new DomainException('Cannot demote the last admin.');
+                throw new DomainException(__('messages.users.demote_last_admin'));
             }
         }
 
@@ -56,14 +56,14 @@ class UserService
     public function delete(User $user, int $currentUserId): void
     {
         if ($user->id === $currentUserId) {
-            throw new DomainException('Cannot delete yourself.');
+            throw new DomainException(__('messages.users.delete_self'));
         }
 
         // Prevent deleting the last admin
         if ($user->isAdmin()) {
             $adminCount = User::where('role', UserRole::Admin)->count();
             if ($adminCount <= 1) {
-                throw new DomainException('Cannot delete the last admin.');
+                throw new DomainException(__('messages.users.delete_last_admin'));
             }
         }
 

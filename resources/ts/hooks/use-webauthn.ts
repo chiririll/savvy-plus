@@ -77,10 +77,10 @@ export function useDeletePasskey() {
 export function passkeyErrorMessage(error: unknown, fallback: string): string {
     if (error instanceof Error) {
         if (error.name === 'NotAllowedError' || error.name === 'AbortError') {
-            return 'Passkey prompt was cancelled'
+            return i18n.t('toasts.passkey.cancelled')
         }
         if (error.name === 'InvalidStateError') {
-            return 'This device already has a passkey for this account'
+            return i18n.t('toasts.passkey.alreadyRegistered')
         }
         return error.message || fallback
     }

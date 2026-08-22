@@ -45,11 +45,11 @@ class CurrencyService
             }
 
             if ($currency->is_base && isset($data['is_base']) && ! $data['is_base']) {
-                throw new DomainException('Cannot unset base currency. Set another currency as base first.');
+                throw new DomainException(__('messages.currencies.cannot_unset_base'));
             }
 
             if ($currency->is_base && isset($data['rate']) && $data['rate'] != 1) {
-                throw new DomainException('Base currency rate must always be 1.');
+                throw new DomainException(__('messages.currencies.base_rate_must_be_one'));
             }
 
             $currency->update($data);
@@ -61,15 +61,15 @@ class CurrencyService
     public function delete(Currency $currency): void
     {
         if ($currency->accounts()->exists()) {
-            throw new DomainException('Cannot delete currency that is used by accounts.');
+            throw new DomainException(__('messages.currencies.delete_in_use'));
         }
 
         if ($currency->is_base) {
-            throw new DomainException('Cannot delete base currency. Set another currency as base first.');
+            throw new DomainException(__('messages.currencies.delete_base'));
         }
 
         if (Currency::count() <= 1) {
-            throw new DomainException('Cannot delete the last currency.');
+            throw new DomainException(__('messages.currencies.delete_last'));
         }
 
         $currency->delete();

@@ -69,10 +69,10 @@ class AutomationRuleRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'conditions.required' => 'At least one condition is required.',
-            'conditions.conditions.required' => 'At least one condition is required.',
-            'actions.required' => 'At least one action is required.',
-            'actions.min' => 'At least one action is required.',
+            'conditions.required' => __('messages.validation.condition_required'),
+            'conditions.conditions.required' => __('messages.validation.condition_required'),
+            'actions.required' => __('messages.validation.action_required'),
+            'actions.min' => __('messages.validation.action_required'),
         ];
     }
 }

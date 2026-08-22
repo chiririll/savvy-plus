@@ -139,6 +139,10 @@
     "theme": {
         "toggle": "Toggle theme"
     },
+    "sidebar": {
+        "toggle": "Toggle sidebar"
+    },
+    "searchEmoji": "Search emoji...",
     "toasts": {
         "created": "Created successfully",
         "updated": "Updated successfully",
@@ -277,7 +281,9 @@
             "removed": "Passkey removed",
             "addFailed": "Failed to add passkey",
             "renameFailed": "Failed to rename passkey",
-            "removeFailed": "Failed to remove passkey"
+            "removeFailed": "Failed to remove passkey",
+            "cancelled": "Passkey prompt was cancelled",
+            "alreadyRegistered": "This device already has a passkey for this account"
         },
         "twoFactor": {
             "enabled": "Two-factor authentication enabled",

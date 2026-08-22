@@ -59,7 +59,7 @@ class UpdateTransactionRequest extends FormRequest
                 : $transaction->to_account_id;
 
             if (! $toAccountId) {
-                $validator->errors()->add('to_account_id', 'Destination account is required for transfers.');
+                $validator->errors()->add('to_account_id', __('messages.validation.transfer_destination'));
             }
         }
     }
@@ -73,7 +73,7 @@ class UpdateTransactionRequest extends FormRequest
             : $transaction->category_id;
 
         if ($type === TransactionType::Transfer->value && $categoryId) {
-            $validator->errors()->add('category_id', 'Category should not be set for transfers.');
+            $validator->errors()->add('category_id', __('messages.validation.transfer_no_category'));
 
             return;
         }
@@ -81,7 +81,7 @@ class UpdateTransactionRequest extends FormRequest
         if ($type !== TransactionType::Transfer->value && $categoryId) {
             $category = Category::find($categoryId);
             if ($category && $category->type !== $type) {
-                $validator->errors()->add('category_id', 'Category type must match transaction type.');
+                $validator->errors()->add('category_id', __('messages.validation.category_type_mismatch'));
             }
         }
     }
@@ -101,7 +101,7 @@ class UpdateTransactionRequest extends FormRequest
         $amount = $this->input('amount') ?? $this->route('transaction')->amount;
 
         if (abs($itemsTotal - $amount) > 0.01) {
-            $validator->errors()->add('items', "Items total ({$itemsTotal}) must equal transaction amount ({$amount}).");
+            $validator->errors()->add('items', __('messages.validation.items_total', ['items' => $itemsTotal, 'amount' => $amount]));
         }
     }
 
@@ -140,7 +140,7 @@ class UpdateTransactionRequest extends FormRequest
         }
 
         if ($currentBalance < $newAmount) {
-            $validator->errors()->add('amount', 'Insufficient funds. Available balance: '.number_format($currentBalance, 2));
+            $validator->errors()->add('amount', __('messages.validation.insufficient_funds', ['available' => number_format($currentBalance, 2)]));
         }
     }
 }

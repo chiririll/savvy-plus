@@ -6,6 +6,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { FormControl } from '@/components/ui/form'
+import { useTranslation } from 'react-i18next'
 import { useAccounts } from '@/hooks'
 import { ACCOUNT_TYPE_CONFIG } from '@/constants'
 import { cn } from '@/lib/utils'
@@ -28,9 +29,10 @@ export function AccountSelect({
     excludeId,
     excludeDebts = true,
     activeOnly = true,
-    placeholder = 'Select account',
+    placeholder,
     disabled,
 }: AccountSelectProps) {
+    const { t } = useTranslation('forms')
     const { data: accounts } = useAccounts({ active: activeOnly, exclude_debts: excludeDebts })
 
     const filteredAccounts = accounts?.filter(a => {
@@ -46,7 +48,7 @@ export function AccountSelect({
         >
             <FormControl>
                 <SelectTrigger>
-                    <SelectValue placeholder={placeholder} />
+                    <SelectValue placeholder={placeholder ?? t('selectAccount')} />
                 </SelectTrigger>
             </FormControl>
             <SelectContent>

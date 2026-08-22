@@ -29,7 +29,7 @@ export function isAppLocale(value: string): value is AppLocale {
     return (SUPPORTED_LOCALES as readonly string[]).includes(value)
 }
 
-/** BCP 47 tag for Intl formatters. Currency wiring stays on the currencies branch. */
+/** BCP 47 tag for Intl formatters. */
 export function intlLocale(locale: string = i18n.resolvedLanguage ?? i18n.language): string {
     return locale.startsWith('ru') ? 'ru-RU' : 'en-US'
 }

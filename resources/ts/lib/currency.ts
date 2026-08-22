@@ -1,4 +1,5 @@
 import { getCurrency } from '@/stores/currencies'
+import { intlLocale } from '@/lib/i18n'
 
 type CurrencyInput = {
     symbol?: string | null
@@ -25,7 +26,7 @@ function resolve(currency?: CurrencyInput): { symbol?: string; decimals: number 
 }
 
 function formatNumber(value: number, decimals: number, compact: boolean): string {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat(intlLocale(), {
         style: 'decimal',
         useGrouping: true,
         minimumFractionDigits: compact ? 0 : decimals,

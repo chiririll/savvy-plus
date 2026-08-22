@@ -49,7 +49,7 @@ class AccountService
     public function delete(Account $account): void
     {
         if ($account->transactions()->exists()) {
-            throw new \DomainException('Cannot delete account that has transactions.');
+            throw new \DomainException(__('messages.accounts.delete_has_transactions'));
         }
 
         $account->delete();

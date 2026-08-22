@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
     Select,
     SelectContent,
@@ -22,10 +23,11 @@ export function CategorySelect({
     value,
     onChange,
     type,
-    placeholder = 'Select category',
+    placeholder,
     disabled,
     sortByPopularity = true,
 }: CategorySelectProps) {
+    const { t } = useTranslation('forms')
     const { data: categories } = useCategories()
 
     const filteredCategories = useMemo(() => {
@@ -44,7 +46,7 @@ export function CategorySelect({
         >
             <FormControl>
                 <SelectTrigger>
-                    <SelectValue placeholder={placeholder} />
+                    <SelectValue placeholder={placeholder ?? t('selectCategory')} />
                 </SelectTrigger>
             </FormControl>
             <SelectContent>

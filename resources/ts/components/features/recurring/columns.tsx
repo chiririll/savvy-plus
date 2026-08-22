@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { RecurringTransaction } from '@/types'
 import { cn, formatCurrency } from '@/lib/utils'
-import i18n from '@/lib/i18n'
+import i18n, { intlLocale } from '@/lib/i18n'
 
 const typeConfig = {
     income: { icon: ArrowDownLeft, color: 'text-green-500', label: 'Income' },
@@ -124,11 +124,11 @@ export const createRecurringColumns = ({
             return (
                 <div>
                     <p className={cn('font-medium', isToday && 'text-orange-500')}>
-                        {isToday ? i18n.t('pages:recurring.today') : isTomorrow ? i18n.t('pages:recurring.tomorrow') : date.toLocaleDateString()}
+                        {isToday ? i18n.t('pages:recurring.today') : isTomorrow ? i18n.t('pages:recurring.tomorrow') : date.toLocaleDateString(intlLocale())}
                     </p>
                     {row.original.lastRunDate && (
                         <p className="text-xs text-muted-foreground">
-                            {i18n.t('pages:recurring.lastRun', { date: new Date(row.original.lastRunDate).toLocaleDateString() })}
+                            {i18n.t('pages:recurring.lastRun', { date: new Date(row.original.lastRunDate).toLocaleDateString(intlLocale()) })}
                         </p>
                     )}
                 </div>

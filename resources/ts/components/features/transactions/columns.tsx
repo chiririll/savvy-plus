@@ -22,7 +22,7 @@ import {
 import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn, formatCurrency } from '@/lib/utils'
-import i18n from '@/lib/i18n'
+import i18n, { intlLocale } from '@/lib/i18n'
 
 const TYPE_CONFIG = {
     income: { icon: ArrowDownLeft, color: 'text-green-600', bg: 'bg-green-100', label: 'Income' },
@@ -67,7 +67,7 @@ export function createTransactionColumns(
             header: () => i18n.t('pages:transactions.columns.date'),
             cell: ({ row }) => (
                 <span className="font-mono text-sm">
-                    {new Date(row.original.date).toLocaleDateString()}
+                    {new Date(row.original.date).toLocaleDateString(intlLocale())}
                 </span>
             ),
         },

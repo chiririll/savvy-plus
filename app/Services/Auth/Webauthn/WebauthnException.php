@@ -8,21 +8,21 @@ class WebauthnException extends RuntimeException
 {
     public static function invalidChallenge(): self
     {
-        return new self('Passkey challenge is invalid or has expired.');
+        return new self(__('messages.passkey.challenge_invalid'));
     }
 
     public static function verificationFailed(): self
     {
-        return new self('Passkey verification failed.');
+        return new self(__('messages.passkey.verification_failed'));
     }
 
     public static function unknownCredential(): self
     {
-        return new self('This passkey is not registered.');
+        return new self(__('messages.passkey.not_registered'));
     }
 
     public static function limitReached(int $max): self
     {
-        return new self("You can register at most {$max} passkeys.");
+        return new self(__('messages.passkey.limit_reached', ['max' => $max]));
     }
 }

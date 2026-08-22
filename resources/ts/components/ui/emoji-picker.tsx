@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import EmojiPickerReact, { EmojiClickData, Theme } from 'emoji-picker-react'
 import { Popover, PopoverContent, PopoverTrigger } from './popover'
 import { Button } from './button'
@@ -10,6 +11,7 @@ interface EmojiPickerProps {
 }
 
 export function EmojiPicker({ value, onChange, disabled }: EmojiPickerProps) {
+    const { t } = useTranslation()
     const [open, setOpen] = useState(false)
 
     const handleEmojiClick = (emojiData: EmojiClickData) => {
@@ -36,7 +38,7 @@ export function EmojiPicker({ value, onChange, disabled }: EmojiPickerProps) {
                     theme={Theme.LIGHT}
                     width={350}
                     height={400}
-                    searchPlaceHolder="Search emoji..."
+                    searchPlaceHolder={t('searchEmoji')}
                     previewConfig={{ showPreview: false }}
                 />
             </PopoverContent>

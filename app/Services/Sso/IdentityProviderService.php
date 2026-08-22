@@ -74,7 +74,7 @@ class IdentityProviderService
             ->exists();
 
         if ($orphans) {
-            throw new DomainException('Cannot delete: SSO-only users would be left without a way to sign in.');
+            throw new DomainException(__('messages.sso.delete_sso_only_users'));
         }
 
         $provider->delete();

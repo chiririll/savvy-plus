@@ -70,7 +70,7 @@ class DebtService
     public function update(Account $debt, DebtData $data): Account
     {
         if (! $debt->isDebt()) {
-            throw new DomainException('Account is not a debt.');
+            throw new DomainException(__('messages.debts.not_a_debt'));
         }
 
         $debt->update([
@@ -94,19 +94,19 @@ class DebtService
     public function makePayment(Account $debt, Account $sourceAccount, DebtPaymentData $data): Transaction
     {
         if (! $debt->isDebt()) {
-            throw new DomainException('Account is not a debt.');
+            throw new DomainException(__('messages.debts.not_a_debt'));
         }
 
         if ($debt->debt_type !== DebtType::IOwe) {
-            throw new DomainException('Payment can only be made for "I owe" debts.');
+            throw new DomainException(__('messages.debts.payment_i_owe_only'));
         }
 
         if ($debt->is_paid_off) {
-            throw new DomainException('Debt is already paid off.');
+            throw new DomainException(__('messages.debts.already_paid_off'));
         }
 
         if ($sourceAccount->isDebt()) {
-            throw new DomainException('Cannot use debt account as payment source.');
+            throw new DomainException(__('messages.debts.cannot_use_debt_source'));
         }
 
         return DB::transaction(function () use ($debt, $sourceAccount, $data) {
@@ -137,19 +137,19 @@ class DebtService
     public function collectPayment(Account $debt, Account $targetAccount, DebtPaymentData $data): Transaction
     {
         if (! $debt->isDebt()) {
-            throw new DomainException('Account is not a debt.');
+            throw new DomainException(__('messages.debts.not_a_debt'));
         }
 
         if ($debt->debt_type !== DebtType::OwedToMe) {
-            throw new DomainException('Collection can only be made for "Owed to me" debts.');
+            throw new DomainException(__('messages.debts.collection_owed_only'));
         }
 
         if ($debt->is_paid_off) {
-            throw new DomainException('Debt is already paid off.');
+            throw new DomainException(__('messages.debts.already_paid_off'));
         }
 
         if ($targetAccount->isDebt()) {
-            throw new DomainException('Cannot use debt account as target.');
+            throw new DomainException(__('messages.debts.cannot_use_debt_target'));
         }
 
         return DB::transaction(function () use ($debt, $targetAccount, $data) {
@@ -218,13 +218,13 @@ class DebtService
     public function delete(Account $debt): void
     {
         if (! $debt->isDebt()) {
-            throw new DomainException('Account is not a debt.');
+            throw new DomainException(__('messages.debts.not_a_debt'));
         }
 
         $hasPayments = Transaction::where('to_account_id', $debt->id)->exists();
 
         if ($hasPayments) {
-            throw new DomainException('Cannot delete debt with payment history.');
+            throw new DomainException(__('messages.debts.delete_with_history'));
         }
 
         $debt->delete();
@@ -233,11 +233,11 @@ class DebtService
     public function reopen(Account $debt): Account
     {
         if (! $debt->isDebt()) {
-            throw new DomainException('Account is not a debt.');
+            throw new DomainException(__('messages.debts.not_a_debt'));
         }
 
         if (! $debt->is_paid_off) {
-            throw new DomainException('Debt is not paid off.');
+            throw new DomainException(__('messages.debts.not_paid_off'));
         }
 
         $debt->update(['is_paid_off' => false]);

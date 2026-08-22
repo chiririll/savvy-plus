@@ -64,7 +64,7 @@ class AuthController extends Controller
 
         if ($this->passwordLoginDisabled()) {
             throw ValidationException::withMessages([
-                'email' => ['Password sign-in is disabled. Use single sign-on instead.'],
+                'email' => [__('messages.password_signin_disabled')],
             ]);
         }
 
@@ -72,7 +72,7 @@ class AuthController extends Controller
 
         if (! $user || $user->is_sso_only || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Invalid credentials.'],
+                'email' => [__('messages.invalid_credentials')],
             ]);
         }
 

@@ -39,7 +39,7 @@ class DebtPaymentRequest extends FormRequest
     {
         $account = Account::find($this->input('account_id'));
         if ($account && $account->isDebt()) {
-            $validator->errors()->add('account_id', 'Cannot use debt account for payments.');
+            $validator->errors()->add('account_id', __('messages.validation.cannot_use_debt_account'));
         }
     }
 
@@ -57,7 +57,7 @@ class DebtPaymentRequest extends FormRequest
             if ($account && $account->current_balance < $this->input('amount')) {
                 $validator->errors()->add(
                     'amount',
-                    'Insufficient funds. Available: '.number_format($account->current_balance, 2)
+                    __('messages.validation.insufficient_funds', ['available' => number_format($account->current_balance, 2)])
                 );
             }
         }
@@ -77,7 +77,7 @@ class DebtPaymentRequest extends FormRequest
         if ($amount > $remainingDebt) {
             $validator->errors()->add(
                 'amount',
-                "Payment amount ({$amount}) exceeds remaining debt ({$remainingDebt})."
+                __('messages.validation.payment_exceeds_remaining', ['amount' => $amount, 'remaining' => $remainingDebt])
             );
         }
     }

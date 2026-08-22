@@ -41,12 +41,12 @@ class CategoryService
     public function delete(Category $category): void
     {
         if ($category->transactions()->exists()) {
-            throw new \DomainException('Cannot delete category that has transactions.');
+            throw new \DomainException(__('messages.categories.delete_has_transactions'));
         }
 
         $countSameType = Category::where('type', $category->type)->count();
         if ($countSameType <= 1) {
-            throw new \DomainException('Cannot delete the last category of this type.');
+            throw new \DomainException(__('messages.categories.delete_last'));
         }
 
         $category->delete();
