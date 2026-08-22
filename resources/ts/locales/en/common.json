@@ -1,0 +1,199 @@
+{
+    "appName": "Savvy",
+    "appTagline": "Finance Tracker",
+    "actions": {
+        "create": "Create",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "save": "Save",
+        "back": "Back",
+        "retry": "Try again",
+        "logout": "Log out",
+        "confirm": "Confirm"
+    },
+    "table": {
+        "emptyTitle": "No data",
+        "emptyDescription": "No data found",
+        "rowsPerPage": "Rows per page",
+        "pageOf": "Page {{current}} of {{total}}",
+        "showing": "Showing {{from}} to {{to}} of {{total}} {{label}}",
+        "items": "items",
+        "previous": "Previous",
+        "next": "Next",
+        "morePages": "More pages",
+        "goPrevious": "Go to previous page",
+        "goNext": "Go to next page"
+    },
+    "confirm": {
+        "cannotUndo": "This action cannot be undone."
+    },
+    "errors": {
+        "generic": "An error occurred",
+        "unexpected": "An unexpected error occurred. Please try again or contact support if the problem persists.",
+        "somethingWrong": "Something went wrong"
+    },
+    "roles": {
+        "admin": "Admin",
+        "read-write": "Read & write",
+        "read-only": "Read only"
+    },
+    "na": "N/A",
+    "yes": "Yes",
+    "no": "No",
+    "language": {
+        "label": "Language",
+        "description": "Choose the interface language. Saved on this device."
+    },
+    "theme": {
+        "toggle": "Toggle theme"
+    },
+    "toasts": {
+        "created": "Created successfully",
+        "updated": "Updated successfully",
+        "deleted": "Deleted successfully",
+        "account": {
+            "created": "Account created",
+            "updated": "Account updated",
+            "deleted": "Account deleted",
+            "createFailed": "Failed to create account",
+            "updateFailed": "Failed to update account",
+            "deleteFailed": "Failed to delete account"
+        },
+        "category": {
+            "created": "Category created",
+            "updated": "Category updated",
+            "deleted": "Category deleted",
+            "createFailed": "Failed to create category",
+            "updateFailed": "Failed to update category",
+            "deleteFailed": "Failed to delete category"
+        },
+        "tag": {
+            "created": "Tag created",
+            "updated": "Tag updated",
+            "deleted": "Tag deleted",
+            "createFailed": "Failed to create tag",
+            "updateFailed": "Failed to update tag",
+            "deleteFailed": "Failed to delete tag"
+        },
+        "transaction": {
+            "created": "Transaction created",
+            "updated": "Transaction updated",
+            "deleted": "Transaction deleted",
+            "duplicated": "Transaction duplicated",
+            "createFailed": "Failed to create transaction",
+            "updateFailed": "Failed to update transaction",
+            "deleteFailed": "Failed to delete transaction",
+            "duplicateFailed": "Failed to duplicate transaction"
+        },
+        "recurring": {
+            "created": "Recurring transaction created",
+            "updated": "Recurring transaction updated",
+            "deleted": "Recurring transaction deleted",
+            "skipped": "Skipped next occurrence",
+            "createFailed": "Failed to create recurring transaction",
+            "updateFailed": "Failed to update recurring transaction",
+            "deleteFailed": "Failed to delete recurring transaction",
+            "skipFailed": "Failed to skip"
+        },
+        "budget": {
+            "created": "Budget created",
+            "updated": "Budget updated",
+            "deleted": "Budget deleted",
+            "createFailed": "Failed to create budget",
+            "updateFailed": "Failed to update budget",
+            "deleteFailed": "Failed to delete budget"
+        },
+        "debt": {
+            "created": "Debt created",
+            "updated": "Debt updated",
+            "deleted": "Debt deleted",
+            "payment": "Payment recorded",
+            "collection": "Collection recorded",
+            "reopened": "Debt reopened",
+            "createFailed": "Failed to create debt",
+            "updateFailed": "Failed to update debt",
+            "deleteFailed": "Failed to delete debt",
+            "paymentFailed": "Failed to record payment",
+            "collectionFailed": "Failed to record collection",
+            "reopenFailed": "Failed to reopen debt"
+        },
+        "currency": {
+            "created": "Currency created",
+            "updated": "Currency updated",
+            "deleted": "Currency deleted",
+            "baseUpdated": "Base currency updated",
+            "createFailed": "Failed to create currency",
+            "updateFailed": "Failed to update currency",
+            "deleteFailed": "Failed to delete currency",
+            "baseFailed": "Failed to set base currency"
+        },
+        "user": {
+            "created": "User created",
+            "updated": "User updated",
+            "deleted": "User deleted",
+            "createFailed": "Failed to create user",
+            "updateFailed": "Failed to update user",
+            "deleteFailed": "Failed to delete user"
+        },
+        "automation": {
+            "created": "Automation rule created",
+            "updated": "Automation rule updated",
+            "deleted": "Automation rule deleted",
+            "enabled": "Rule enabled",
+            "disabled": "Rule disabled",
+            "reordered": "Rules reordered",
+            "createFailed": "Failed to create automation rule",
+            "updateFailed": "Failed to update automation rule",
+            "deleteFailed": "Failed to delete automation rule",
+            "toggleFailed": "Failed to toggle rule",
+            "reorderFailed": "Failed to reorder rules",
+            "testFailed": "Failed to test rule"
+        },
+        "settings": {
+            "updated": "Settings updated",
+            "updateFailed": "Failed to update settings"
+        },
+        "sso": {
+            "created": "Identity provider created",
+            "updated": "Identity provider updated",
+            "deleted": "Identity provider deleted",
+            "testOk": "Connection looks good",
+            "createFailed": "Failed to create provider",
+            "updateFailed": "Failed to update provider",
+            "deleteFailed": "Failed to delete provider",
+            "testFailed": "Connection test failed"
+        },
+        "backup": {
+            "created": "Backup created",
+            "uploaded": "Backup uploaded",
+            "restored": "Database restored successfully",
+            "deleted": "Backup deleted",
+            "createFailed": "Failed to create backup",
+            "uploadFailed": "Failed to upload backup",
+            "restoreFailed": "Failed to restore backup",
+            "deleteFailed": "Failed to delete backup"
+        },
+        "import": {
+            "success": "Successfully imported {{count}} transactions",
+            "parseFailed": "Failed to parse CSV file",
+            "previewFailed": "Failed to preview import",
+            "executeFailed": "Failed to execute import"
+        },
+        "passkey": {
+            "added": "Passkey added",
+            "renamed": "Passkey renamed",
+            "removed": "Passkey removed",
+            "addFailed": "Failed to add passkey",
+            "renameFailed": "Failed to rename passkey",
+            "removeFailed": "Failed to remove passkey"
+        },
+        "twoFactor": {
+            "enabled": "Two-factor authentication enabled",
+            "disabled": "Two-factor authentication disabled",
+            "codesRegenerated": "Recovery codes regenerated",
+            "enableFailed": "Failed to enable 2FA",
+            "invalidCode": "Invalid verification code"
+        }
+    }
+}

@@ -1,11 +1,13 @@
 import { useParams } from 'react-router-dom'
 import { useQueryState, parseAsStringLiteral } from 'nuqs'
+import { useTranslation } from 'react-i18next'
 import { FormPage } from '@/components/shared'
 import { TransactionForm } from '@/components/features/transactions'
 import { useTransaction, useUpdateTransaction } from '@/hooks'
 import { TransactionType } from '@/types'
 
 export default function TransactionEditPage() {
+    const { t } = useTranslation('pages')
     const { id } = useParams<{ id: string }>()
     const [type, setType] = useQueryState(
         'type',
@@ -35,7 +37,7 @@ export default function TransactionEditPage() {
         : undefined
 
     return (
-        <FormPage title="Edit Transaction" backLink="/transactions" isLoading={isLoading}>
+        <FormPage title={t('transactions.editTitle')} backLink="/transactions" isLoading={isLoading}>
             <TransactionForm
                 defaultValues={defaultValues}
                 onTypeChange={setType}

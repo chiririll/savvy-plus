@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { RecurringTransaction } from '@/types'
 import { cn } from '@/lib/utils'
+import i18n from '@/lib/i18n'
 
 const typeConfig = {
     income: { icon: ArrowDownLeft, color: 'text-green-500', label: 'Income' },
@@ -50,7 +51,7 @@ export const createRecurringColumns = ({
 }: ColumnsOptions): ColumnDef<RecurringTransaction>[] => [
     {
         accessorKey: 'description',
-        header: 'Transaction',
+        header: () => i18n.t('pages:recurring.columns.transaction'),
         cell: ({ row }) => {
             const config = typeConfig[row.original.type]
             const Icon = config.icon
@@ -76,7 +77,7 @@ export const createRecurringColumns = ({
     },
     {
         accessorKey: 'amount',
-        header: 'Amount',
+        header: () => i18n.t('pages:recurring.columns.amount'),
         cell: ({ row }) => (
             <span className={cn(
                 'font-mono font-medium',
@@ -90,7 +91,7 @@ export const createRecurringColumns = ({
     },
     {
         accessorKey: 'category',
-        header: 'Category',
+        header: () => i18n.t('pages:recurring.columns.category'),
         cell: ({ row }) => {
             if (!row.original.category) return <span className="text-muted-foreground">-</span>
             return (
@@ -108,7 +109,7 @@ export const createRecurringColumns = ({
     },
     {
         accessorKey: 'frequency',
-        header: 'Frequency',
+        header: () => i18n.t('pages:recurring.columns.frequency'),
         cell: ({ row }) => {
             const interval = row.original.interval
             const freq = frequencyLabels[row.original.frequency]
@@ -118,7 +119,7 @@ export const createRecurringColumns = ({
     },
     {
         accessorKey: 'nextRunDate',
-        header: 'Next Run',
+        header: () => i18n.t('pages:recurring.columns.nextRun'),
         cell: ({ row }) => {
             const date = new Date(row.original.nextRunDate)
             const isToday = date.toDateString() === new Date().toDateString()
@@ -140,10 +141,12 @@ export const createRecurringColumns = ({
     },
     {
         accessorKey: 'isActive',
-        header: 'Status',
+        header: () => i18n.t('pages:recurring.columns.status'),
         cell: ({ row }) => (
             <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
-                {row.original.isActive ? 'Active' : 'Paused'}
+                {row.original.isActive
+                    ? i18n.t('pages:recurring.status.active')
+                    : i18n.t('pages:recurring.status.paused')}
             </Badge>
         ),
     },
@@ -161,7 +164,7 @@ export const createRecurringColumns = ({
                     <DropdownMenuItem asChild>
                         <Link to={`/recurring/${row.original.id}/edit`}>
                             <Pencil className="mr-2 h-4 w-4" />
-                            Edit
+                            {i18n.t('actions.edit')}
                         </Link>
                     </DropdownMenuItem>
                     {!isReadOnly && row.original.isActive && (
@@ -180,24 +183,23 @@ export const createRecurringColumns = ({
                                 className="text-destructive focus:text-destructive"
                             >
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
+                                {i18n.t('actions.delete')}
                             </DropdownMenuItem>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Delete recurring transaction?</AlertDialogTitle>
+                                <AlertDialogTitle>{i18n.t('pages:recurring.deleteTitle')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone. This recurring transaction will be
-                                    permanently deleted. Existing transactions created from it will not be affected.
+                                    {i18n.t('pages:recurring.deleteDescription')}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={() => onDelete(row.original.id)}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
-                                    Delete
+                                    {i18n.t('actions.delete')}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

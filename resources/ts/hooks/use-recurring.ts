@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { recurringApi } from '@/api'
 import { RecurringFormData } from '@/types'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['recurring']
 
@@ -36,11 +37,11 @@ export function useCreateRecurring(redirectTo?: string) {
         mutationFn: (data: RecurringFormData) => recurringApi.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Recurring transaction created')
+            toast.success(i18n.t('toasts.recurring.created'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create recurring transaction')
+            toast.error(error.message || i18n.t('toasts.recurring.createFailed'))
         },
     })
 }
@@ -54,11 +55,11 @@ export function useUpdateRecurring(redirectTo?: string) {
             recurringApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Recurring transaction updated')
+            toast.success(i18n.t('toasts.recurring.updated'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update recurring transaction')
+            toast.error(error.message || i18n.t('toasts.recurring.updateFailed'))
         },
     })
 }
@@ -70,10 +71,10 @@ export function useDeleteRecurring() {
         mutationFn: (id: string | number) => recurringApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Recurring transaction deleted')
+            toast.success(i18n.t('toasts.recurring.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete recurring transaction')
+            toast.error(error.message || i18n.t('toasts.recurring.deleteFailed'))
         },
     })
 }
@@ -85,10 +86,10 @@ export function useSkipRecurring() {
         mutationFn: (id: string | number) => recurringApi.skip(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Skipped next occurrence')
+            toast.success(i18n.t('toasts.recurring.skipped'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to skip')
+            toast.error(error.message || i18n.t('toasts.recurring.skipFailed'))
         },
     })
 }

@@ -1,0 +1,193 @@
+{
+    "accounts": {
+        "title": "Счета",
+        "description": "Банковские счета, наличные и криптокошельки",
+        "create": "Новый счёт",
+        "createTitle": "Создать счёт",
+        "editTitle": "Изменить счёт",
+        "columns": {
+            "account": "Счёт",
+            "type": "Тип",
+            "balance": "Баланс",
+            "status": "Статус"
+        },
+        "types": {
+            "bank": "Банк",
+            "cash": "Наличные",
+            "crypto": "Крипто",
+            "debt": "Долг"
+        },
+        "status": {
+            "active": "Активен",
+            "inactive": "Неактивен"
+        },
+        "initial": "Начальный: {{amount}}",
+        "deleteTitle": "Удалить счёт?",
+        "deleteDescription": "Это действие нельзя отменить. Счёт «{{name}}» будет удалён навсегда."
+    },
+    "categories": {
+        "title": "Категории",
+        "description": "Категории доходов и расходов",
+        "create": "Новая категория",
+        "createTitle": "Создать категорию",
+        "editTitle": "Изменить категорию",
+        "columns": {
+            "category": "Категория",
+            "type": "Тип"
+        },
+        "types": {
+            "income": "Доход",
+            "expense": "Расход"
+        },
+        "deleteTitle": "Удалить категорию?",
+        "deleteDescription": "Это действие нельзя отменить. Категория «{{name}}» будет удалена навсегда."
+    },
+    "tags": {
+        "title": "Теги",
+        "description": "Помечайте транзакции тегами",
+        "create": "Новый тег",
+        "createTitle": "Создать тег",
+        "editTitle": "Изменить тег",
+        "emptyTitle": "Тегов пока нет",
+        "emptyDescription": "Создайте первый тег, чтобы группировать транзакции",
+        "columns": {
+            "name": "Название",
+            "transactions": "Транзакции"
+        },
+        "deleteTitle": "Удалить тег?",
+        "deleteDescription": "Это действие нельзя отменить. Тег «{{name}}» будет удалён навсегда."
+    },
+    "users": {
+        "title": "Пользователи",
+        "description": "Управление аккаунтами",
+        "create": "Новый пользователь",
+        "createTitle": "Создать пользователя",
+        "editTitle": "Изменить пользователя",
+        "columns": {
+            "user": "Пользователь",
+            "email": "Эл. почта",
+            "role": "Роль"
+        },
+        "deleteTitle": "Удалить пользователя?",
+        "deleteDescription": "Это действие нельзя отменить. Пользователь «{{name}}» будет удалён навсегда."
+    },
+    "currencies": {
+        "title": "Валюты",
+        "description": "Валюты и курсы обмена",
+        "create": "Новая валюта",
+        "createTitle": "Создать валюту",
+        "editTitle": "Изменить валюту",
+        "columns": {
+            "code": "Код",
+            "name": "Название",
+            "rate": "Курс",
+            "decimals": "Знаки",
+            "base": "Базовая"
+        },
+        "deleteTitle": "Удалить валюту?",
+        "deleteDescription": "Это действие нельзя отменить. Валюта «{{name}}» будет удалена навсегда."
+    },
+    "transactions": {
+        "title": "Транзакции",
+        "createTitle": "Новая транзакция",
+        "editTitle": "Изменить транзакцию",
+        "columns": {
+            "date": "Дата",
+            "type": "Тип",
+            "description": "Описание",
+            "amount": "Сумма"
+        },
+        "types": {
+            "income": "Доход",
+            "expense": "Расход",
+            "transfer": "Перевод",
+            "debt_payment": "Платёж по долгу"
+        },
+        "deleteTitle": "Удалить транзакцию?",
+        "deleteDescription": "Это действие нельзя отменить."
+    },
+    "recurring": {
+        "title": "Регулярные платежи",
+        "description": "Автоматически повторяющиеся транзакции",
+        "create": "Новый платёж",
+        "createTitle": "Новый регулярный платёж",
+        "editTitle": "Изменить регулярный платёж",
+        "columns": {
+            "transaction": "Транзакция",
+            "amount": "Сумма",
+            "category": "Категория",
+            "frequency": "Период",
+            "nextRun": "Следующий запуск",
+            "status": "Статус"
+        },
+        "status": {
+            "active": "Активен",
+            "paused": "Пауза"
+        },
+        "deleteTitle": "Удалить регулярный платёж?",
+        "deleteDescription": "Это действие нельзя отменить."
+    },
+    "budgets": {
+        "title": "Бюджеты",
+        "description": "Лимиты расходов по категориям",
+        "create": "Новый бюджет",
+        "createTitle": "Создать бюджет",
+        "editTitle": "Изменить бюджет",
+        "columns": {
+            "budget": "Бюджет",
+            "limit": "Лимит",
+            "period": "Период",
+            "progress": "Прогресс",
+            "status": "Статус"
+        },
+        "deleteTitle": "Удалить бюджет?",
+        "deleteDescription": "Это действие нельзя отменить."
+    },
+    "debts": {
+        "title": "Долги",
+        "description": "Деньги, которые вы должны, и которые должны вам",
+        "create": "Новый долг",
+        "createTitle": "Создать долг",
+        "editTitle": "Изменить долг",
+        "netPosition": "Чистая позиция",
+        "inYourFavor": "в вашу пользу",
+        "youOwe": "вы должны",
+        "showCompleted": "Показать закрытые долги",
+        "columns": {
+            "debt": "Долг",
+            "type": "Тип",
+            "progress": "Прогресс",
+            "total": "Всего",
+            "remaining": "Остаток",
+            "dueDate": "Срок",
+            "status": "Статус"
+        },
+        "types": {
+            "i_owe": "Я должен",
+            "owed_to_me": "Мне должны"
+        },
+        "deleteTitle": "Удалить долг?",
+        "deleteDescription": "Это действие нельзя отменить."
+    },
+    "automation": {
+        "title": "Правила автоматизации",
+        "description": "Автоматическая обработка транзакций",
+        "create": "Новое правило",
+        "createTitle": "Новое правило",
+        "editTitle": "Изменить правило",
+        "columns": {
+            "order": "№",
+            "name": "Название",
+            "trigger": "Триггер",
+            "conditions": "Условия",
+            "actions": "Действия",
+            "runs": "Запуски",
+            "active": "Активно"
+        },
+        "deleteTitle": "Удалить правило?",
+        "deleteDescription": "Это действие нельзя отменить."
+    },
+    "reports": {
+        "title": "Отчёты"
+    }
+}

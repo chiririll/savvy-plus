@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Page, PageHeader } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -49,6 +50,7 @@ function formatDate(dateString: string): string {
 }
 
 export default function BackupsPage() {
+    const { t } = useTranslation('settings')
     const isReadOnly = useReadOnly()
     const { data: backups, isLoading } = useBackups()
     const createBackup = useCreateBackup()
@@ -122,9 +124,9 @@ export default function BackupsPage() {
     }
 
     return (
-        <Page title="Backups">
+        <Page title={t('backups.title')}>
             <PageHeader
-                title="Backups"
+                title={t('backups.title')}
                 description="Manage database backups"
             />
 

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/api/client'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
+import i18n from '@/lib/i18n'
 
 interface UseCrudOptions<T> {
     endpoint: string
@@ -25,7 +26,7 @@ export function useCrud<T extends { id: number | string }>({
     const create = useMutation({
         mutationFn: (data: Partial<T>) => api.post<T, Partial<T>>(endpoint, data),
         onSuccess: () => {
-            toast.success('Created successfully')
+            toast.success(i18n.t('toasts.created'))
             qc.invalidateQueries({ queryKey })
             if (redirectTo) navigate(redirectTo)
         },
@@ -35,7 +36,7 @@ export function useCrud<T extends { id: number | string }>({
         mutationFn: ({ id, data }: { id: string | number; data: Partial<T> }) =>
             api.patch<T, Partial<T>>(`${endpoint}/${id}`, data),
         onSuccess: () => {
-            toast.success('Updated successfully')
+            toast.success(i18n.t('toasts.updated'))
             qc.invalidateQueries({ queryKey })
             if (redirectTo) navigate(redirectTo)
         },
@@ -44,7 +45,7 @@ export function useCrud<T extends { id: number | string }>({
     const remove = useMutation({
         mutationFn: (id: string | number) => api.delete<void>(`${endpoint}/${id}`),
         onSuccess: () => {
-            toast.success('Deleted successfully')
+            toast.success(i18n.t('toasts.deleted'))
             qc.invalidateQueries({ queryKey })
         },
     })

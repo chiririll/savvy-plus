@@ -1,10 +1,12 @@
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { FormPage } from '@/components/shared'
 import { RecurringForm } from '@/components/features/recurring'
 import { useRecurringById, useUpdateRecurring } from '@/hooks'
 import { RecurringFormData } from '@/types'
 
 export default function RecurringEditPage() {
+    const { t } = useTranslation('pages')
     const { id } = useParams<{ id: string }>()
     const { data: recurring, isLoading } = useRecurringById(id!)
     const updateRecurring = useUpdateRecurring('/recurring')
@@ -28,7 +30,7 @@ export default function RecurringEditPage() {
     } : undefined
 
     return (
-        <FormPage title="Edit Recurring Transaction" backLink="/recurring" isLoading={isLoading}>
+        <FormPage title={t('recurring.editTitle')} backLink="/recurring" isLoading={isLoading}>
             <RecurringForm
                 defaultValues={defaultValues}
                 onSubmit={(data) => updateRecurring.mutate({ id: id!, data })}

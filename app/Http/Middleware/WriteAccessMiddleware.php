@@ -13,7 +13,7 @@ class WriteAccessMiddleware
         $user = $request->user();
 
         if ($user && $user->isReadOnly() && ! $request->isMethod('GET')) {
-            return response()->json(['message' => 'Read-only access'], 403);
+            return response()->json(['message' => __('messages.read_only')], 403);
         }
 
         return $next($request);

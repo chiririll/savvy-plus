@@ -21,7 +21,7 @@ class VerifyCsrfToken
         $header = (string) $request->header(config('auth_session.csrf_header'));
 
         if (! $session instanceof AuthSession || $header === '' || ! hash_equals($session->csrf, $header)) {
-            return response()->json(['message' => 'CSRF token mismatch.'], 419);
+            return response()->json(['message' => __('messages.csrf')], 419);
         }
 
         return $next($request);

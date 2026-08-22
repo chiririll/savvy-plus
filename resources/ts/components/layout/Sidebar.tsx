@@ -30,37 +30,40 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { APP_VERSION } from '@/version'
+import { useTranslation } from 'react-i18next'
+
 interface MenuItem {
     to: string
     icon: LucideIcon
-    label: string
+    labelKey: string
 }
 
 const mainItems: MenuItem[] = [
-    { to: '/', icon: Home, label: 'Dashboard' },
-    { to: '/transactions', icon: Receipt, label: 'Transactions' },
-    { to: '/recurring', icon: Repeat, label: 'Recurring' },
-    { to: '/automation', icon: Zap, label: 'Automation' },
-    { to: '/budgets', icon: PiggyBank, label: 'Budgets' },
-    { to: '/debts', icon: HandCoins, label: 'Debts' },
-    { to: '/reports', icon: BarChart3, label: 'Reports' },
+    { to: '/', icon: Home, labelKey: 'dashboard' },
+    { to: '/transactions', icon: Receipt, labelKey: 'transactions' },
+    { to: '/recurring', icon: Repeat, labelKey: 'recurring' },
+    { to: '/automation', icon: Zap, labelKey: 'automation' },
+    { to: '/budgets', icon: PiggyBank, labelKey: 'budgets' },
+    { to: '/debts', icon: HandCoins, labelKey: 'debts' },
+    { to: '/reports', icon: BarChart3, labelKey: 'reports' },
 ]
 
 const settingsItems: MenuItem[] = [
-    { to: '/settings/system', icon: Cog, label: 'System' },
-    { to: '/settings/monitoring', icon: Activity, label: 'Monitoring' },
-    { to: '/settings/security', icon: Shield, label: 'Security' },
-    { to: '/settings/providers', icon: KeyRound, label: 'SSO Providers' },
-    { to: '/settings/import', icon: Upload, label: 'Import' },
-    { to: '/settings/backups', icon: Database, label: 'Backups' },
-    { to: '/accounts', icon: CreditCard, label: 'Accounts' },
-    { to: '/categories', icon: FolderTree, label: 'Categories' },
-    { to: '/currencies', icon: Coins, label: 'Currencies' },
-    { to: '/tags', icon: Hash, label: 'Tags' },
-    { to: '/users', icon: Users, label: 'Users' },
+    { to: '/settings/system', icon: Cog, labelKey: 'system' },
+    { to: '/settings/monitoring', icon: Activity, labelKey: 'monitoring' },
+    { to: '/settings/security', icon: Shield, labelKey: 'security' },
+    { to: '/settings/providers', icon: KeyRound, labelKey: 'ssoProviders' },
+    { to: '/settings/import', icon: Upload, labelKey: 'import' },
+    { to: '/settings/backups', icon: Database, labelKey: 'backups' },
+    { to: '/accounts', icon: CreditCard, labelKey: 'accounts' },
+    { to: '/categories', icon: FolderTree, labelKey: 'categories' },
+    { to: '/currencies', icon: Coins, labelKey: 'currencies' },
+    { to: '/tags', icon: Hash, labelKey: 'tags' },
+    { to: '/users', icon: Users, labelKey: 'users' },
 ]
 
 export function AppSidebar() {
+    const { t } = useTranslation('nav')
     const location = useLocation()
     const settingsOpen = useUiStore((state) => state.settingsOpen)
     const setSettingsOpen = useUiStore((state) => state.setSettingsOpen)
@@ -87,8 +90,8 @@ export function AppSidebar() {
                                     <Logo className="size-5" />
                                 </div>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-semibold">Savvy</span>
-                                    <span className="truncate text-xs text-muted-foreground">Finance Tracker</span>
+                                    <span className="truncate font-semibold">{t('appName', { ns: 'common' })}</span>
+                                    <span className="truncate text-xs text-muted-foreground">{t('appTagline', { ns: 'common' })}</span>
                                 </div>
                             </NavLink>
                         </SidebarMenuButton>
@@ -98,10 +101,12 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel>Menu</SidebarGroupLabel>
+                    <SidebarGroupLabel>{t('menu')}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {mainItems.map(({ to, icon: Icon, label }) => (
+                            {mainItems.map(({ to, icon: Icon, labelKey }) => {
+                                const label = t(labelKey)
+                                return (
                                 <SidebarMenuItem key={to}>
                                     <SidebarMenuButton
                                         asChild
@@ -114,7 +119,8 @@ export function AppSidebar() {
                                         </NavLink>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
-                            ))}
+                                )
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -125,20 +131,20 @@ export function AppSidebar() {
                             <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen} className="group/collapsible">
                                 <SidebarMenuItem>
                                     <CollapsibleTrigger asChild>
-                                        <SidebarMenuButton tooltip="Settings">
+                                        <SidebarMenuButton tooltip={t('settings')}>
                                             <Settings />
-                                            <span>Settings</span>
+                                            <span>{t('settings')}</span>
                                             <ChevronDown className={`ml-auto transition-transform duration-200 ${settingsOpen ? '' : '-rotate-90'}`} />
                                         </SidebarMenuButton>
                                     </CollapsibleTrigger>
                                     <CollapsibleContent>
                                         <SidebarMenuSub>
-                                            {settingsItems.map(({ to, icon: Icon, label }) => (
+                                            {settingsItems.map(({ to, icon: Icon, labelKey }) => (
                                                 <SidebarMenuSubItem key={to}>
                                                     <SidebarMenuSubButton asChild isActive={isActive(to)}>
                                                         <NavLink to={to}>
                                                             <Icon />
-                                                            <span>{label}</span>
+                                                            <span>{t(labelKey)}</span>
                                                         </NavLink>
                                                     </SidebarMenuSubButton>
                                                 </SidebarMenuSubItem>
@@ -163,10 +169,10 @@ export function AppSidebar() {
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent side="top" align="start" className="w-64">
-                                <DropdownMenuLabel>About Savvy</DropdownMenuLabel>
+                                <DropdownMenuLabel>{t('about.title')}</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <div className="px-2 py-2 text-sm text-muted-foreground">
-                                    <p>Self-hosted personal finance tracker. Track expenses, manage budgets, and take control of your money.</p>
+                                    <p>{t('about.body')}</p>
                                 </div>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild>
@@ -177,7 +183,7 @@ export function AppSidebar() {
                                         className="cursor-pointer"
                                     >
                                         <Github className="mr-2 size-4" />
-                                        GitHub Repository
+                                        {t('about.github')}
                                         <ExternalLink className="ml-auto size-3" />
                                     </a>
                                 </DropdownMenuItem>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { tagsApi } from '@/api'
 import { TagFormData } from '@/types'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['tags']
 
@@ -29,11 +30,11 @@ export function useCreateTag(redirectTo?: string) {
         mutationFn: (data: TagFormData) => tagsApi.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Tag created')
+            toast.success(i18n.t('toasts.tag.created'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create tag')
+            toast.error(error.message || i18n.t('toasts.tag.createFailed'))
         },
     })
 }
@@ -47,11 +48,11 @@ export function useUpdateTag(redirectTo?: string) {
             tagsApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Tag updated')
+            toast.success(i18n.t('toasts.tag.updated'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update tag')
+            toast.error(error.message || i18n.t('toasts.tag.updateFailed'))
         },
     })
 }
@@ -63,10 +64,10 @@ export function useDeleteTag() {
         mutationFn: (id: string | number) => tagsApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Tag deleted')
+            toast.success(i18n.t('toasts.tag.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete tag')
+            toast.error(error.message || i18n.t('toasts.tag.deleteFailed'))
         },
     })
 }

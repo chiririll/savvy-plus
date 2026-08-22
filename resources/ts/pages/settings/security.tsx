@@ -1,5 +1,6 @@
 import { ReactNode, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Page, PageHeader, FormWrapper } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -104,6 +105,7 @@ function RowSkeleton() {
 }
 
 export default function SecuritySettingsPage() {
+    const { t } = useTranslation('settings')
     const { theme } = useTheme()
     const isReadOnly = useReadOnly()
     const { data: status, isLoading } = useTwoFactorStatus()
@@ -184,8 +186,8 @@ export default function SecuritySettingsPage() {
     }
 
     return (
-        <Page title="Security Settings">
-            <PageHeader title="Security" description="Manage your account security settings" />
+        <Page title={t('security.title')}>
+            <PageHeader title={t('security.heading')} description={t('security.description')} />
 
             <FormWrapper>
                 <div className="grid items-start gap-6 lg:grid-cols-2">

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 import { usersApi } from '@/api/users'
 import type { UserFormData } from '@/types/users'
 
@@ -29,11 +30,11 @@ export function useCreateUser(redirectTo?: string) {
         mutationFn: (data: UserFormData) => usersApi.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('User created')
+            toast.success(i18n.t('toasts.user.created'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create user')
+            toast.error(error.message || i18n.t('toasts.user.createFailed'))
         },
     })
 }
@@ -47,11 +48,11 @@ export function useUpdateUser(redirectTo?: string) {
             usersApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('User updated')
+            toast.success(i18n.t('toasts.user.updated'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update user')
+            toast.error(error.message || i18n.t('toasts.user.updateFailed'))
         },
     })
 }
@@ -63,10 +64,10 @@ export function useDeleteUser() {
         mutationFn: (id: string | number) => usersApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('User deleted')
+            toast.success(i18n.t('toasts.user.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete user')
+            toast.error(error.message || i18n.t('toasts.user.deleteFailed'))
         },
     })
 }

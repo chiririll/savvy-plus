@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import {
     Pagination,
     PaginationContent,
@@ -67,9 +68,11 @@ export function ServerPagination({
     meta,
     onPageChange,
     showInfo = true,
-    infoLabel = 'items',
+    infoLabel,
     delta = 1,
 }: ServerPaginationProps) {
+    const { t } = useTranslation()
+    const label = infoLabel ?? t('table.items')
     const { current_page, last_page, from, to, total } = meta
 
     if (last_page <= 1) return null
@@ -81,7 +84,7 @@ export function ServerPagination({
         <div className="flex items-center justify-between mt-4">
             {showInfo && from !== undefined && to !== undefined && total !== undefined ? (
                 <div className="text-sm text-muted-foreground">
-                    Showing {from} to {to} of {total} {infoLabel}
+                    {t('table.showing', { from, to, total, label })}
                 </div>
             ) : (
                 <div />

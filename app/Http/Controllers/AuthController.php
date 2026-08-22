@@ -36,7 +36,7 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         if (User::count() > 0) {
-            return response()->json(['message' => 'Registration is closed.'], 403);
+            return response()->json(['message' => __('messages.registration_closed')], 403);
         }
 
         $data = $request->validate([
@@ -114,7 +114,7 @@ class AuthController extends Controller
             $this->sessions->revoke($session);
         }
 
-        $response = response()->json(['message' => 'Logged out.']);
+        $response = response()->json(['message' => __('messages.logged_out')]);
 
         foreach ($this->cookies->forget($request) as $cookie) {
             $response->withCookie($cookie);

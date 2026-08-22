@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { debtsApi } from '@/api'
 import { DebtFormData, DebtPaymentFormData } from '@/types'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['debts']
 
@@ -44,11 +45,11 @@ export function useCreateDebt(redirectTo?: string) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
             queryClient.invalidateQueries({ queryKey: ['accounts'] })
-            toast.success('Debt created')
+            toast.success(i18n.t('toasts.debt.created'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create debt')
+            toast.error(error.message || i18n.t('toasts.debt.createFailed'))
         },
     })
 }
@@ -63,11 +64,11 @@ export function useUpdateDebt(redirectTo?: string) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
             queryClient.invalidateQueries({ queryKey: ['accounts'] })
-            toast.success('Debt updated')
+            toast.success(i18n.t('toasts.debt.updated'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update debt')
+            toast.error(error.message || i18n.t('toasts.debt.updateFailed'))
         },
     })
 }
@@ -80,10 +81,10 @@ export function useDeleteDebt() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
             queryClient.invalidateQueries({ queryKey: ['accounts'] })
-            toast.success('Debt deleted')
+            toast.success(i18n.t('toasts.debt.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete debt')
+            toast.error(error.message || i18n.t('toasts.debt.deleteFailed'))
         },
     })
 }
@@ -98,10 +99,10 @@ export function useDebtPayment() {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
             queryClient.invalidateQueries({ queryKey: ['accounts'] })
             queryClient.invalidateQueries({ queryKey: ['transactions'] })
-            toast.success('Payment recorded')
+            toast.success(i18n.t('toasts.debt.payment'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to record payment')
+            toast.error(error.message || i18n.t('toasts.debt.paymentFailed'))
         },
     })
 }
@@ -116,10 +117,10 @@ export function useDebtCollection() {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
             queryClient.invalidateQueries({ queryKey: ['accounts'] })
             queryClient.invalidateQueries({ queryKey: ['transactions'] })
-            toast.success('Collection recorded')
+            toast.success(i18n.t('toasts.debt.collection'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to record collection')
+            toast.error(error.message || i18n.t('toasts.debt.collectionFailed'))
         },
     })
 }
@@ -131,10 +132,10 @@ export function useReopenDebt() {
         mutationFn: (id: string | number) => debtsApi.reopen(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Debt reopened')
+            toast.success(i18n.t('toasts.debt.reopened'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to reopen debt')
+            toast.error(error.message || i18n.t('toasts.debt.reopenFailed'))
         },
     })
 }

@@ -1,10 +1,12 @@
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { FormPage } from '@/components/shared'
 import { BudgetForm } from '@/components/features/budgets'
 import { useBudget, useUpdateBudget } from '@/hooks'
 import { Loader2 } from 'lucide-react'
 
 export default function BudgetEditPage() {
+    const { t } = useTranslation('pages')
     const { id } = useParams<{ id: string }>()
     const { data: budget, isLoading } = useBudget(id!)
     const updateBudget = useUpdateBudget('/budgets')
@@ -22,7 +24,7 @@ export default function BudgetEditPage() {
     }
 
     return (
-        <FormPage title="Edit Budget" backLink="/budgets">
+        <FormPage title={t('budgets.editTitle')} backLink="/budgets">
             <BudgetForm
                 defaultValues={{
                     name: budget.name,

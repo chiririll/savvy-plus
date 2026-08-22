@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { authApi } from '@/api'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['two-factor-status']
 
@@ -15,7 +16,7 @@ export function useEnableTwoFactor() {
     return useMutation({
         mutationFn: authApi.twoFactorEnable,
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to enable 2FA')
+            toast.error(error.message || i18n.t('toasts.twoFactor.enableFailed'))
         },
     })
 }
@@ -27,10 +28,10 @@ export function useConfirmTwoFactor() {
         mutationFn: (code: string) => authApi.twoFactorConfirm(code),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Two-factor authentication enabled')
+            toast.success(i18n.t('toasts.twoFactor.enabled'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Invalid verification code')
+            toast.error(error.message || i18n.t('toasts.twoFactor.invalidCode'))
         },
     })
 }
@@ -42,10 +43,10 @@ export function useDisableTwoFactor() {
         mutationFn: (code: string) => authApi.twoFactorDisable(code),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Two-factor authentication disabled')
+            toast.success(i18n.t('toasts.twoFactor.disabled'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Invalid verification code')
+            toast.error(error.message || i18n.t('toasts.twoFactor.invalidCode'))
         },
     })
 }
@@ -55,7 +56,7 @@ export function useVerifyTwoFactor() {
         mutationFn: ({ token, code }: { token: string; code: string }) =>
             authApi.twoFactorVerify(token, code),
         onError: (error: Error) => {
-            toast.error(error.message || 'Invalid verification code')
+            toast.error(error.message || i18n.t('toasts.twoFactor.invalidCode'))
         },
     })
 }
@@ -74,10 +75,10 @@ export function useRegenerateRecoveryCodes() {
         mutationFn: (code: string) => authApi.twoFactorRegenerateRecoveryCodes(code),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Recovery codes regenerated')
+            toast.success(i18n.t('toasts.twoFactor.codesRegenerated'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Invalid verification code')
+            toast.error(error.message || i18n.t('toasts.twoFactor.invalidCode'))
         },
     })
 }

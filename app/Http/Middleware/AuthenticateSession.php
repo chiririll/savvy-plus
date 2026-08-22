@@ -21,7 +21,7 @@ class AuthenticateSession
         $session = $token ? $this->sessions->resolve($token) : null;
 
         if (! $session) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
+            return response()->json(['message' => __('messages.unauthenticated')], 401);
         }
 
         $request->setUserResolver(fn () => $session->user);

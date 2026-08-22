@@ -14,6 +14,7 @@ import {
     XCircle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Page, PageHeader } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -458,6 +459,7 @@ function MonitoringSkeleton() {
 }
 
 export default function MonitoringPage() {
+    const { t } = useTranslation('settings')
     const storage = useStorageMonitoring()
     const resources = useResourceMonitoring()
 
@@ -475,9 +477,9 @@ export default function MonitoringPage() {
     }
 
     return (
-        <Page title="Monitoring">
+        <Page title={t('monitoring.title')}>
             <PageHeader
-                title="Monitoring"
+                title={t('monitoring.title')}
                 description="Live view of resource usage and storage health"
                 actions={
                     <div className="flex items-center gap-3">

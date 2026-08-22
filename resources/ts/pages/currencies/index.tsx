@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next'
 import { ListPage } from '@/components/shared'
 import { createCurrencyColumns } from '@/components/features/currencies'
 import { useCurrencies, useDeleteCurrency, useSetBaseCurrency } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 
 export default function CurrenciesPage() {
+    const { t } = useTranslation('pages')
     const { data: currencies, isLoading } = useCurrencies()
     const deleteCurrency = useDeleteCurrency()
     const setBaseCurrency = useSetBaseCurrency()
@@ -19,10 +21,10 @@ export default function CurrenciesPage() {
 
     return (
         <ListPage
-            title="Currencies"
-            description="Manage currencies and exchange rates"
+            title={t('currencies.title')}
+            description={t('currencies.description')}
             createLink="/currencies/create"
-            createLabel="New Currency"
+            createLabel={t('currencies.create')}
             data={currencies ?? []}
             columns={columns}
             isLoading={isLoading}

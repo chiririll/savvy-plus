@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { accountsApi } from '@/api'
 import { AccountFormData } from '@/types'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['accounts']
 
@@ -51,11 +52,11 @@ export function useCreateAccount(redirectTo?: string) {
         mutationFn: (data: AccountFormData) => accountsApi.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Account created')
+            toast.success(i18n.t('toasts.account.created'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create account')
+            toast.error(error.message || i18n.t('toasts.account.createFailed'))
         },
     })
 }
@@ -69,11 +70,11 @@ export function useUpdateAccount(redirectTo?: string) {
             accountsApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Account updated')
+            toast.success(i18n.t('toasts.account.updated'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update account')
+            toast.error(error.message || i18n.t('toasts.account.updateFailed'))
         },
     })
 }
@@ -85,10 +86,10 @@ export function useDeleteAccount() {
         mutationFn: (id: string | number) => accountsApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Account deleted')
+            toast.success(i18n.t('toasts.account.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete account')
+            toast.error(error.message || i18n.t('toasts.account.deleteFailed'))
         },
     })
 }

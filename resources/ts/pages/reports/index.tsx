@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Page, PageHeader } from '@/components/shared'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -8,6 +9,7 @@ import { OverviewTab, CashFlowTab, ExpensesTab, IncomeTab, NetWorthTab } from '.
 import { DEFAULT_FILTERS, TABS, type ReportFilters, type ReportTab } from './types'
 
 export default function ReportsPage() {
+    const { t } = useTranslation('pages')
     const [filters, setFilters] = useState<ReportFilters>(DEFAULT_FILTERS)
     const [activeTab, setActiveTab] = useState<ReportTab>('overview')
 
@@ -30,9 +32,9 @@ export default function ReportsPage() {
     }
 
     return (
-        <Page title="Reports">
+        <Page title={t('reports.title')}>
             <PageHeader
-                title="Reports"
+                title={t('reports.title')}
                 description="Analyze your finances across different dimensions"
             />
 

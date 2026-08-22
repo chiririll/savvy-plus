@@ -22,6 +22,7 @@ import {
 import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import i18n from '@/lib/i18n'
 
 const TYPE_CONFIG = {
     income: { icon: ArrowDownLeft, color: 'text-green-600', bg: 'bg-green-100', label: 'Income' },
@@ -63,7 +64,7 @@ export function createTransactionColumns(
         },
         {
             accessorKey: 'date',
-            header: 'Date',
+            header: () => i18n.t('pages:transactions.columns.date'),
             cell: ({ row }) => (
                 <span className="font-mono text-sm">
                     {new Date(row.original.date).toLocaleDateString()}
@@ -72,7 +73,7 @@ export function createTransactionColumns(
         },
         {
             accessorKey: 'type',
-            header: 'Type',
+            header: () => i18n.t('pages:transactions.columns.type'),
             cell: ({ row }) => {
                 const type = row.original.type
                 const config = TYPE_CONFIG[type]
@@ -80,14 +81,14 @@ export function createTransactionColumns(
                 return (
                     <Badge variant="secondary" className={cn('gap-1', config.bg, config.color)}>
                         <Icon className="size-3" />
-                        {config.label}
+                        {i18n.t(`pages:transactions.types.${type}`, { defaultValue: config.label })}
                     </Badge>
                 )
             },
         },
         {
             accessorKey: 'description',
-            header: 'Description',
+            header: () => i18n.t('pages:transactions.columns.description'),
             cell: ({ row }) => {
                 const { description, category, account, toAccount, type, itemsCount, tags } = row.original
 
@@ -142,7 +143,7 @@ export function createTransactionColumns(
         },
         {
             accessorKey: 'amount',
-            header: () => <div className="text-right">Amount</div>,
+            header: () => <div className="text-right">{i18n.t('pages:transactions.columns.amount')}</div>,
             cell: ({ row }) => {
                 const { type, amount, toAmount, account, toAccount } = row.original
                 const isIncoming = type === 'income' || type === 'debt_collection'
@@ -181,7 +182,7 @@ export function createTransactionColumns(
                             <DropdownMenuItem asChild>
                                 <Link to={`/transactions/${transaction.id}/edit`}>
                                     <Pencil className="mr-2 size-4" />
-                                    Edit
+                                    {i18n.t('actions.edit')}
                                 </Link>
                             </DropdownMenuItem>
                             {!isReadOnly && (
@@ -197,24 +198,23 @@ export function createTransactionColumns(
                                         className="text-destructive focus:text-destructive"
                                     >
                                         <Trash2 className="mr-2 size-4" />
-                                        Delete
+                                        {i18n.t('actions.delete')}
                                     </DropdownMenuItem>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+                                        <AlertDialogTitle>{i18n.t('pages:transactions.deleteTitle')}</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete
-                                            this transaction and update account balances.
+                                            {i18n.t('pages:transactions.deleteDescription')}
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
                                         <AlertDialogAction
                                             onClick={() => onDelete(transaction.id)}
                                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                         >
-                                            Delete
+                                            {i18n.t('actions.delete')}
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>

@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next'
 import { ListPage } from '@/components/shared'
 import { createAutomationColumns } from '@/components/features/automation'
 import { useAutomationRules, useDeleteAutomationRule, useToggleAutomationRule } from '@/hooks/use-automation'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 
 export default function AutomationPage() {
+    const { t } = useTranslation('pages')
     const { data: rules, isLoading } = useAutomationRules()
     const deleteRule = useDeleteAutomationRule()
     const toggleRule = useToggleAutomationRule()
@@ -17,10 +19,10 @@ export default function AutomationPage() {
 
     return (
         <ListPage
-            title="Automation Rules"
-            description="Create rules to automatically process transactions"
+            title={t('automation.title')}
+            description={t('automation.description')}
             createLink="/automation/create"
-            createLabel="New Rule"
+            createLabel={t('automation.create')}
             data={rules ?? []}
             columns={columns}
             isLoading={isLoading}

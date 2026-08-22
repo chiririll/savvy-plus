@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -26,20 +27,20 @@ import {
     browserSupportsWebAuthnAutofill,
 } from '@simplewebauthn/browser'
 import { useAuthStore } from '@/stores/auth'
+import { LanguageSwitcher } from '@/components/shared'
 import { Logo } from '@/components/shared/Logo'
 import { SsoButtons } from '@/components/features/sso'
 import { authApi } from '@/api'
 import { passkeyErrorMessage, isPasskeyDomainSupported } from '@/hooks'
 import { toast } from 'sonner'
 
-const loginSchema = z.object({
-    email: z.string().email('Invalid email'),
-    password: z.string().min(1, 'Password is required'),
-})
-
-type LoginFormValues = z.infer<typeof loginSchema>
+type LoginFormValues = {
+    email: string
+    password: string
+}
 
 export default function LoginPage() {
+    const { t } = useTranslation('auth')
     const navigate = useNavigate()
     const location = useLocation()
     const [searchParams] = useSearchParams()
@@ -78,9 +79,9 @@ export default function LoginPage() {
     // Surface SSO errors bounced back to the login screen.
     useEffect(() => {
         if (searchParams.get('sso_error')) {
-            toast.error('Single sign-on failed. Please try again.')
+            toast.error(t('ssoFailed'))
         }
-    }, [searchParams])
+    }, [searchParams, t])
 
     useEffect(() => {
         if (checkingStatus || twoFactorToken || autofillStarted.current || !isPasskeyDomainSupported()) return
@@ -105,14 +106,19 @@ export default function LoginPage() {
         setPasskeyLoading(true)
         try {
             await loginWithPasskey({ twoFactorToken: stepUpToken })
-            toast.success('Welcome back!')
+            toast.success(t('welcomeToast'))
             navigate('/')
         } catch (error: unknown) {
-            toast.error(passkeyErrorMessage(error, 'Passkey sign-in failed'))
+            toast.error(passkeyErrorMessage(error, t('passkeyFailed')))
         } finally {
             setPasskeyLoading(false)
         }
     }
+
+    const loginSchema = useMemo(() => z.object({
+        email: z.string().email(t('validation.email')),
+        password: z.string().min(1, t('validation.passwordRequired')),
+    }), [t])
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -127,7 +133,7 @@ export default function LoginPage() {
         try {
             const result = await login(data)
             if (result.success) {
-                toast.success('Welcome back!')
+                toast.success(t('welcomeToast'))
                 navigate('/')
             } else if (result.requires_2fa) {
                 setTwoFactorToken(result.two_factor_token)
@@ -135,7 +141,7 @@ export default function LoginPage() {
         } catch (error: unknown) {
             const message = error && typeof error === 'object' && 'message' in error
                 ? (error as { message: string }).message
-                : 'Invalid credentials'
+                : t('invalidCredentials')
             toast.error(message)
         } finally {
             setIsLoading(false)
@@ -149,12 +155,12 @@ export default function LoginPage() {
         setIsLoading(true)
         try {
             await loginWith2FA(twoFactorToken, code)
-            toast.success('Welcome back!')
+            toast.success(t('welcomeToast'))
             navigate('/')
         } catch (error: unknown) {
             const message = error && typeof error === 'object' && 'message' in error
                 ? (error as { message: string }).message
-                : 'Invalid verification code'
+                : t('twoFactor.invalidCode')
             toast.error(message)
             if (useRecoveryCode) {
                 setRecoveryCode('')
@@ -192,18 +198,18 @@ export default function LoginPage() {
                                 <Logo className="size-7" />
                             </div>
                         </div>
-                        <CardTitle className="text-2xl">Two-Factor Authentication</CardTitle>
+                        <CardTitle className="text-2xl">{t('twoFactor.title')}</CardTitle>
                         <CardDescription>
                             {useRecoveryCode
-                                ? 'Enter one of your recovery codes'
-                                : 'Enter the 6-digit code from your authenticator app'}
+                                ? t('twoFactor.recoveryDescription')
+                                : t('twoFactor.otpDescription')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {useRecoveryCode ? (
                             <Input
                                 type="text"
-                                placeholder="xxxx-xxxx"
+                                placeholder={t('twoFactor.recoveryPlaceholder')}
                                 value={recoveryCode}
                                 onChange={(e) => setRecoveryCode(e.target.value)}
                                 className="text-center font-mono text-lg"
@@ -239,7 +245,7 @@ export default function LoginPage() {
                                 disabled={(!useRecoveryCode && otpValue.length !== 6) || (useRecoveryCode && !recoveryCode) || isLoading}
                             >
                                 {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
-                                Verify
+                                {t('twoFactor.verify')}
                             </Button>
                             {passkeySupported && (
                                 <Button
@@ -251,7 +257,7 @@ export default function LoginPage() {
                                     {passkeyLoading
                                         ? <Loader2 className="mr-2 size-4 animate-spin" />
                                         : <Fingerprint className="mr-2 size-4" />}
-                                    Use a passkey instead
+                                    {t('twoFactor.usePasskey')}
                                 </Button>
                             )}
                             <Button
@@ -264,7 +270,7 @@ export default function LoginPage() {
                                 className="w-full"
                             >
                                 <Key className="mr-2 size-4" />
-                                {useRecoveryCode ? 'Use authenticator code' : 'Use recovery code'}
+                                {useRecoveryCode ? t('twoFactor.useAuthenticator') : t('twoFactor.useRecovery')}
                             </Button>
                             <Button
                                 variant="ghost"
@@ -272,8 +278,9 @@ export default function LoginPage() {
                                 className="w-full"
                             >
                                 <ArrowLeft className="mr-2 size-4" />
-                                Back to login
+                                {t('twoFactor.backToLogin')}
                             </Button>
+                            <LanguageSwitcher variant="auth" className="pt-2" />
                         </div>
                     </CardContent>
                 </Card>
@@ -290,9 +297,9 @@ export default function LoginPage() {
                             <Logo className="size-7" />
                         </div>
                     </div>
-                    <CardTitle className="text-2xl">Welcome back</CardTitle>
+                    <CardTitle className="text-2xl">{t('welcomeBack')}</CardTitle>
                     <CardDescription>
-                        Sign in to your account to continue
+                        {t('signInDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -306,7 +313,7 @@ export default function LoginPage() {
                             {passkeyLoading
                                 ? <Loader2 className="mr-2 size-4 animate-spin" />
                                 : <Fingerprint className="mr-2 size-4" />}
-                            Sign in with a passkey
+                            {t('signInPasskey')}
                         </Button>
                     )}
                     <SsoButtons showDivider={passwordLoginEnabled} />
@@ -318,11 +325,11 @@ export default function LoginPage() {
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
+                                        <FormLabel>{t('email')}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="email"
-                                                placeholder="you@example.com"
+                                                placeholder={t('emailPlaceholder')}
                                                 autoComplete="username webauthn"
                                                 {...field}
                                             />
@@ -337,11 +344,11 @@ export default function LoginPage() {
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <FormLabel>{t('password')}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="password"
-                                                placeholder="Enter your password"
+                                                placeholder={t('passwordPlaceholder')}
                                                 autoComplete="current-password"
                                                 {...field}
                                             />
@@ -353,11 +360,12 @@ export default function LoginPage() {
 
                             <Button type="submit" className="w-full" disabled={isLoading}>
                                 {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
-                                Sign in
+                                {t('signIn')}
                             </Button>
                         </form>
                     </Form>
                     )}
+                    <LanguageSwitcher variant="auth" className="pt-2" />
                 </CardContent>
             </Card>
         </div>

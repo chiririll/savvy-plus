@@ -1,10 +1,12 @@
 import { useQueryState, parseAsStringLiteral, parseAsFloat, parseAsString } from 'nuqs'
+import { useTranslation } from 'react-i18next'
 import { FormPage } from '@/components/shared'
 import { TransactionForm } from '@/components/features/transactions'
 import { useCreateTransaction } from '@/hooks'
 import { TransactionType } from '@/types'
 
 export default function TransactionCreatePage() {
+    const { t } = useTranslation('pages')
     const [type, setType] = useQueryState(
         'type',
         parseAsStringLiteral(['income', 'expense', 'transfer'] as const).withDefault('expense')
@@ -15,7 +17,7 @@ export default function TransactionCreatePage() {
     const createTransaction = useCreateTransaction('/transactions')
 
     return (
-        <FormPage title="New Transaction" backLink="/transactions">
+        <FormPage title={t('transactions.createTitle')} backLink="/transactions">
             <TransactionForm
                 defaultValues={{
                     type: type as TransactionType,

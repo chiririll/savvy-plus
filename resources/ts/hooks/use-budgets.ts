@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { budgetsApi } from '@/api'
 import { BudgetFormData } from '@/types'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['budgets']
 
@@ -29,11 +30,11 @@ export function useCreateBudget(redirectTo?: string) {
         mutationFn: (data: BudgetFormData) => budgetsApi.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Budget created')
+            toast.success(i18n.t('toasts.budget.created'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create budget')
+            toast.error(error.message || i18n.t('toasts.budget.createFailed'))
         },
     })
 }
@@ -47,11 +48,11 @@ export function useUpdateBudget(redirectTo?: string) {
             budgetsApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Budget updated')
+            toast.success(i18n.t('toasts.budget.updated'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update budget')
+            toast.error(error.message || i18n.t('toasts.budget.updateFailed'))
         },
     })
 }
@@ -63,10 +64,10 @@ export function useDeleteBudget() {
         mutationFn: (id: string | number) => budgetsApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Budget deleted')
+            toast.success(i18n.t('toasts.budget.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete budget')
+            toast.error(error.message || i18n.t('toasts.budget.deleteFailed'))
         },
     })
 }

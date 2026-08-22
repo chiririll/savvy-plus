@@ -1,0 +1,193 @@
+{
+    "accounts": {
+        "title": "Accounts",
+        "description": "Manage your bank accounts, cash and crypto wallets",
+        "create": "New Account",
+        "createTitle": "Create Account",
+        "editTitle": "Edit Account",
+        "columns": {
+            "account": "Account",
+            "type": "Type",
+            "balance": "Balance",
+            "status": "Status"
+        },
+        "types": {
+            "bank": "Bank",
+            "cash": "Cash",
+            "crypto": "Crypto",
+            "debt": "Debt"
+        },
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive"
+        },
+        "initial": "Initial: {{amount}}",
+        "deleteTitle": "Delete account?",
+        "deleteDescription": "This action cannot be undone. The account \"{{name}}\" will be permanently deleted."
+    },
+    "categories": {
+        "title": "Categories",
+        "description": "Manage income and expense categories",
+        "create": "New Category",
+        "createTitle": "Create Category",
+        "editTitle": "Edit Category",
+        "columns": {
+            "category": "Category",
+            "type": "Type"
+        },
+        "types": {
+            "income": "Income",
+            "expense": "Expense"
+        },
+        "deleteTitle": "Delete category?",
+        "deleteDescription": "This action cannot be undone. The category \"{{name}}\" will be permanently deleted."
+    },
+    "tags": {
+        "title": "Tags",
+        "description": "Organize transactions with tags",
+        "create": "New Tag",
+        "createTitle": "Create Tag",
+        "editTitle": "Edit Tag",
+        "emptyTitle": "No tags found",
+        "emptyDescription": "Create your first tag to organize transactions",
+        "columns": {
+            "name": "Name",
+            "transactions": "Transactions"
+        },
+        "deleteTitle": "Delete tag?",
+        "deleteDescription": "This action cannot be undone. The tag \"{{name}}\" will be permanently deleted."
+    },
+    "users": {
+        "title": "Users",
+        "description": "Manage user accounts",
+        "create": "New User",
+        "createTitle": "Create User",
+        "editTitle": "Edit User",
+        "columns": {
+            "user": "User",
+            "email": "Email",
+            "role": "Role"
+        },
+        "deleteTitle": "Delete user?",
+        "deleteDescription": "This action cannot be undone. The user \"{{name}}\" will be permanently deleted."
+    },
+    "currencies": {
+        "title": "Currencies",
+        "description": "Manage currencies and exchange rates",
+        "create": "New Currency",
+        "createTitle": "Create Currency",
+        "editTitle": "Edit Currency",
+        "columns": {
+            "code": "Code",
+            "name": "Name",
+            "rate": "Rate",
+            "decimals": "Decimals",
+            "base": "Base"
+        },
+        "deleteTitle": "Delete currency?",
+        "deleteDescription": "This action cannot be undone. The currency \"{{name}}\" will be permanently deleted."
+    },
+    "transactions": {
+        "title": "Transactions",
+        "createTitle": "New Transaction",
+        "editTitle": "Edit Transaction",
+        "columns": {
+            "date": "Date",
+            "type": "Type",
+            "description": "Description",
+            "amount": "Amount"
+        },
+        "types": {
+            "income": "Income",
+            "expense": "Expense",
+            "transfer": "Transfer",
+            "debt_payment": "Debt Payment"
+        },
+        "deleteTitle": "Delete transaction?",
+        "deleteDescription": "This action cannot be undone."
+    },
+    "recurring": {
+        "title": "Recurring Transactions",
+        "description": "Manage automatically repeating transactions",
+        "create": "New Recurring",
+        "createTitle": "New Recurring Transaction",
+        "editTitle": "Edit Recurring Transaction",
+        "columns": {
+            "transaction": "Transaction",
+            "amount": "Amount",
+            "category": "Category",
+            "frequency": "Frequency",
+            "nextRun": "Next Run",
+            "status": "Status"
+        },
+        "status": {
+            "active": "Active",
+            "paused": "Paused"
+        },
+        "deleteTitle": "Delete recurring transaction?",
+        "deleteDescription": "This action cannot be undone."
+    },
+    "budgets": {
+        "title": "Budgets",
+        "description": "Set spending limits for categories",
+        "create": "New Budget",
+        "createTitle": "Create Budget",
+        "editTitle": "Edit Budget",
+        "columns": {
+            "budget": "Budget",
+            "limit": "Limit",
+            "period": "Period",
+            "progress": "Progress",
+            "status": "Status"
+        },
+        "deleteTitle": "Delete budget?",
+        "deleteDescription": "This action cannot be undone."
+    },
+    "debts": {
+        "title": "Debts",
+        "description": "Track money you owe and money owed to you",
+        "create": "New Debt",
+        "createTitle": "Create Debt",
+        "editTitle": "Edit Debt",
+        "netPosition": "Net Position",
+        "inYourFavor": "in your favor",
+        "youOwe": "you owe",
+        "showCompleted": "Show completed debts",
+        "columns": {
+            "debt": "Debt",
+            "type": "Type",
+            "progress": "Progress",
+            "total": "Total",
+            "remaining": "Remaining",
+            "dueDate": "Due Date",
+            "status": "Status"
+        },
+        "types": {
+            "i_owe": "I Owe",
+            "owed_to_me": "Owed To Me"
+        },
+        "deleteTitle": "Delete debt?",
+        "deleteDescription": "This action cannot be undone."
+    },
+    "automation": {
+        "title": "Automation Rules",
+        "description": "Create rules to automatically process transactions",
+        "create": "New Rule",
+        "createTitle": "New Automation Rule",
+        "editTitle": "Edit Automation Rule",
+        "columns": {
+            "order": "#",
+            "name": "Name",
+            "trigger": "Trigger",
+            "conditions": "Conditions",
+            "actions": "Actions",
+            "runs": "Runs",
+            "active": "Active"
+        },
+        "deleteTitle": "Delete rule?",
+        "deleteDescription": "This action cannot be undone."
+    },
+    "reports": {
+        "title": "Reports"
+    }
+}

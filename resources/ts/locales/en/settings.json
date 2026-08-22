@@ -1,0 +1,50 @@
+{
+    "system": {
+        "title": "System Settings",
+        "heading": "System",
+        "description": "Configure system settings",
+        "language": {
+            "title": "Interface",
+            "description": "Appearance and language"
+        },
+        "currencyRates": {
+            "title": "Currency Rates",
+            "description": "Configure how currency exchange rates are managed",
+            "autoUpdate": "Auto-update currency rates",
+            "autoUpdateDescription": "When enabled, rates are pulled daily from an external API and manual rate editing is disabled."
+        },
+        "authentication": {
+            "title": "Authentication",
+            "description": "Control how users sign in to Savvy",
+            "passwordLogin": "Password sign-in",
+            "passwordLoginLocked": "Add and enable at least one SSO provider before you can turn this off — it keeps the instance from locking everyone out.",
+            "passwordLoginOpen": "When off, users can only sign in through SSO. Active sessions stay signed in.",
+            "passwordLoginError": "Enable at least one SSO provider before turning off password sign-in.",
+            "locked": "Locked",
+            "jit": "Just-in-time provisioning",
+            "jitDescription": "Automatically create an account on first SSO sign-in. When off, only existing or linked users can sign in.",
+            "verifiedEmail": "Require a verified email",
+            "verifiedEmailOn": "New SSO sign-ups must arrive with an email the provider has verified.",
+            "verifiedEmailOff": "Turn on just-in-time provisioning to enforce this."
+        }
+    },
+    "security": {
+        "title": "Security Settings",
+        "heading": "Security",
+        "description": "Manage your account security settings"
+    },
+    "providers": {
+        "title": "Identity Providers",
+        "create": "Add Identity Provider",
+        "edit": "Edit Identity Provider"
+    },
+    "import": {
+        "title": "Import Transactions"
+    },
+    "monitoring": {
+        "title": "Monitoring"
+    },
+    "backups": {
+        "title": "Backups"
+    }
+}

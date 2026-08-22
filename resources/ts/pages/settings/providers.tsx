@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next'
 import { Page, PageHeader } from '@/components/shared'
 import { ProviderCard, ProvidersEmptyState, ProviderGridSkeleton } from '@/components/features/sso'
 import { useIdentityProviders, useDeleteIdentityProvider, useTestIdentityProvider } from '@/hooks/use-sso'
 
 export default function ProvidersPage() {
+    const { t } = useTranslation('settings')
     const { data: providers, isLoading } = useIdentityProviders()
     const deleteProvider = useDeleteIdentityProvider()
     const testProvider = useTestIdentityProvider()
@@ -10,9 +12,9 @@ export default function ProvidersPage() {
     const hasProviders = !!providers?.length
 
     return (
-        <Page title="Identity Providers">
+        <Page title={t('providers.title')}>
             <PageHeader
-                title="Identity Providers"
+                title={t('providers.title')}
                 description="Configure OIDC and SAML single sign-on"
                 createLink={hasProviders ? '/settings/providers/create' : undefined}
                 createLabel="Add Provider"

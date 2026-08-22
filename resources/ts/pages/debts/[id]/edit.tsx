@@ -1,9 +1,11 @@
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { FormPage } from '@/components/shared'
 import { DebtForm } from '@/components/features/debts'
 import { useDebt, useUpdateDebt } from '@/hooks'
 
 export default function DebtEditPage() {
+    const { t } = useTranslation('pages')
     const { id } = useParams<{ id: string }>()
     const { data: debt, isLoading } = useDebt(id!)
     const updateDebt = useUpdateDebt('/debts')
@@ -21,7 +23,7 @@ export default function DebtEditPage() {
         : undefined
 
     return (
-        <FormPage title="Edit Debt" backLink="/debts" isLoading={isLoading}>
+        <FormPage title={t('debts.editTitle')} backLink="/debts" isLoading={isLoading}>
             <DebtForm
                 defaultValues={defaultValues}
                 onSubmit={(data) => updateDebt.mutate({ id: id!, data })}

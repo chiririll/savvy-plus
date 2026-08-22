@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Plus, HandCoins, Banknote, TrendingDown, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -11,6 +12,7 @@ import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { Debt, DebtPaymentFormData } from '@/types'
 
 export default function DebtsPage() {
+    const { t } = useTranslation('pages')
     const [includeCompleted, setIncludeCompleted] = useState(false)
     const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
     const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null)
@@ -69,13 +71,13 @@ export default function DebtsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold">Debts</h1>
-                    <p className="text-muted-foreground">Track money you owe and money owed to you</p>
+                    <h1 className="text-3xl font-bold">{t('debts.title')}</h1>
+                    <p className="text-muted-foreground">{t('debts.description')}</p>
                 </div>
                 <Button asChild>
                     <Link to="/debts/create">
                         <Plus className="mr-2 size-4" />
-                        New Debt
+                        {t('debts.create')}
                     </Link>
                 </Button>
             </div>
@@ -88,7 +90,7 @@ export default function DebtsPage() {
                                 <TrendingDown className="size-5 text-red-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">I Owe</p>
+                                <p className="text-sm text-muted-foreground">{t('debts.types.i_owe')}</p>
                                 <p className="text-2xl font-bold text-red-600">
                                     {formatCurrency(summary.total_i_owe)}
                                 </p>
@@ -101,7 +103,7 @@ export default function DebtsPage() {
                                 <TrendingUp className="size-5 text-green-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Owed to Me</p>
+                                <p className="text-sm text-muted-foreground">{t('debts.types.owed_to_me')}</p>
                                 <p className="text-2xl font-bold text-green-600">
                                     {formatCurrency(summary.total_owed_to_me)}
                                 </p>
@@ -118,10 +120,10 @@ export default function DebtsPage() {
                                 )}
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Net Position</p>
+                                <p className="text-sm text-muted-foreground">{t('debts.netPosition')}</p>
                                 <p className={`text-2xl font-bold ${summary.net_debt >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     {formatCurrency(Math.abs(summary.net_debt))}
-                                    {summary.net_debt >= 0 ? ' in your favor' : ' you owe'}
+                                    {' '}{summary.net_debt >= 0 ? t('debts.inYourFavor') : t('debts.youOwe')}
                                 </p>
                             </div>
                         </div>
@@ -135,15 +137,13 @@ export default function DebtsPage() {
                     checked={includeCompleted}
                     onCheckedChange={setIncludeCompleted}
                 />
-                <Label htmlFor="include-completed">Show completed debts</Label>
+                <Label htmlFor="include-completed">{t('debts.showCompleted')}</Label>
             </div>
 
             <DataTable
                 columns={columns}
                 data={debts}
                 isLoading={isLoading}
-                searchColumn="name"
-                searchPlaceholder="Search debts..."
             />
 
             <DebtPaymentDialog

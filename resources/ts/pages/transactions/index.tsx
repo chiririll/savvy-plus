@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf, parseAsStringLiteral } from 'nuqs'
 import { Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Filter, ArrowUpDown, X } from 'lucide-react'
@@ -83,6 +84,7 @@ const transactionSearchParams = {
 }
 
 export default function TransactionsPage() {
+    const { t } = useTranslation('pages')
     const [params, setParams] = useQueryStates(transactionSearchParams)
     const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -153,9 +155,9 @@ export default function TransactionsPage() {
     ) ?? []
 
     return (
-        <Page title="Transactions">
+        <Page title={t('transactions.title')}>
             <PageHeader
-                title="Transactions"
+                title={t('transactions.title')}
                 description="Track your income, expenses and transfers"
                 createLink={params.type ? `/transactions/create?type=${params.type}` : '/transactions/create'}
                 createLabel="New Transaction"

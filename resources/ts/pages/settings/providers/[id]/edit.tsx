@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import { FormPage } from '@/components/shared'
 import { IdentityProviderForm, SelectedPresetBanner } from '@/components/features/sso'
@@ -15,6 +16,7 @@ function toStringFields(config: Record<string, unknown>): Record<string, string>
 }
 
 export default function ProviderEditPage() {
+    const { t } = useTranslation('settings')
     const { id } = useParams<{ id: string }>()
     const { data: provider, isLoading } = useIdentityProvider(id!)
     const updateProvider = useUpdateIdentityProvider('/settings/providers')
@@ -41,7 +43,7 @@ export default function ProviderEditPage() {
     }
 
     return (
-        <FormPage title="Edit Identity Provider" backLink="/settings/providers">
+        <FormPage title={t('providers.edit')} backLink="/settings/providers">
             <div className="space-y-6">
                 <SelectedPresetBanner preset={provider.preset} />
 

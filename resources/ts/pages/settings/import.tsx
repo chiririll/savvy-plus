@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Page, PageHeader } from '@/components/shared'
 import { CsvImportWizard } from '@/components/features/import/CsvImportWizard'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
@@ -5,12 +6,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ShieldAlert } from 'lucide-react'
 
 export default function ImportSettingsPage() {
+    const { t } = useTranslation('settings')
     const isReadOnly = useReadOnly()
 
     return (
-        <Page title="Import Transactions">
+        <Page title={t('import.title')}>
             <PageHeader
-                title="Import Transactions"
+                title={t('import.title')}
                 description="Import transactions from a CSV file"
             />
             {isReadOnly ? (
