@@ -16,7 +16,6 @@ export default function UserEditPage() {
                 defaultValues={user}
                 onSubmit={(data) => updateUser.mutate({ id: id!, data })}
                 isSubmitting={updateUser.isPending}
-                submitLabel="Save"
                 isEdit
             />
         </FormPage>

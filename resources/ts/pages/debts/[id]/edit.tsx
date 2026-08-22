@@ -28,7 +28,6 @@ export default function DebtEditPage() {
                 defaultValues={defaultValues}
                 onSubmit={(data) => updateDebt.mutate({ id: id!, data })}
                 isSubmitting={updateDebt.isPending}
-                submitLabel="Save"
             />
         </FormPage>
     )

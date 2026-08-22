@@ -17,7 +17,6 @@ export default function CurrencyEditPage() {
                 defaultValues={currency}
                 onSubmit={(data) => updateCurrency.mutate({ id: id!, data })}
                 isSubmitting={updateCurrency.isPending}
-                submitLabel="Save"
                 isEditing
                 autoUpdateEnabled={settings?.auto_update_currencies}
                 isBase={currency?.isBase}

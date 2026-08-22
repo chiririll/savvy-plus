@@ -48,6 +48,7 @@
         "create": "New Tag",
         "createTitle": "Create Tag",
         "editTitle": "Edit Tag",
+        "createDescription": "Add a new tag",
         "emptyTitle": "No tags found",
         "emptyDescription": "Create your first tag to organize transactions",
         "columns": {
@@ -89,8 +90,37 @@
     },
     "transactions": {
         "title": "Transactions",
+        "description": "Track your income, expenses and transfers",
+        "create": "New Transaction",
         "createTitle": "New Transaction",
         "editTitle": "Edit Transaction",
+        "emptyTitle": "No transactions found",
+        "emptyDescription": "Create your first transaction to start tracking",
+        "itemLabel": "transactions",
+        "filters": "Filters",
+        "clear": "Clear",
+        "dateRange": "Date Range",
+        "to": "to",
+        "categories": "Categories",
+        "tags": "Tags",
+        "sort": {
+            "dateNewest": "Date (Newest)",
+            "dateOldest": "Date (Oldest)",
+            "amountHigh": "Amount (High to Low)",
+            "amountLow": "Amount (Low to High)"
+        },
+        "items": {
+            "item": "Item",
+            "qty": "Qty",
+            "price": "Price",
+            "total": "Total",
+            "count_one": "{{count}} item",
+            "count_other": "{{count}} items"
+        },
+        "fallback": {
+            "payment": "Payment: {{name}}",
+            "collection": "Collection: {{name}}"
+        },
         "columns": {
             "date": "Date",
             "type": "Type",
@@ -101,7 +131,8 @@
             "income": "Income",
             "expense": "Expense",
             "transfer": "Transfer",
-            "debt_payment": "Debt Payment"
+            "debt_payment": "Debt Payment",
+            "debt_collection": "Debt Collection"
         },
         "deleteTitle": "Delete transaction?",
         "deleteDescription": "This action cannot be undone."
@@ -124,6 +155,10 @@
             "active": "Active",
             "paused": "Paused"
         },
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "lastRun": "Last: {{date}}",
+        "everyInterval": "Every {{count}} {{frequency}}",
         "deleteTitle": "Delete recurring transaction?",
         "deleteDescription": "This action cannot be undone."
     },
@@ -133,6 +168,22 @@
         "create": "New Budget",
         "createTitle": "Create Budget",
         "editTitle": "Edit Budget",
+        "notFound": "Budget not found",
+        "allExpenses": "All expenses",
+        "noCategories": "No categories",
+        "spent": "{{amount}} spent",
+        "remaining": "{{amount}} remaining",
+        "exceededBy": "Exceeded by {{amount}}",
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive"
+        },
+        "periods": {
+            "weekly": "Weekly",
+            "monthly": "Monthly",
+            "yearly": "Yearly",
+            "one_time": "One-time"
+        },
         "columns": {
             "budget": "Budget",
             "limit": "Limit",
@@ -153,6 +204,16 @@
         "inYourFavor": "in your favor",
         "youOwe": "you owe",
         "showCompleted": "Show completed debts",
+        "notFound": "Debt not found",
+        "paidOff": "Paid Off",
+        "makePayment": "Make Payment",
+        "collectPayment": "Collect Payment",
+        "reopen": "Reopen",
+        "status": {
+            "completed": "Completed",
+            "active": "Active",
+            "inactive": "Inactive"
+        },
         "columns": {
             "debt": "Debt",
             "type": "Type",
@@ -174,7 +235,14 @@
         "description": "Create rules to automatically process transactions",
         "create": "New Rule",
         "createTitle": "New Automation Rule",
+        "createDescription": "Set up conditions and actions for automatic processing",
         "editTitle": "Edit Automation Rule",
+        "notFound": "Rule not found",
+        "logsTitle": "Logs: {{name}}",
+        "logsFallbackName": "Rule",
+        "logsDescription": "Execution history for this automation rule",
+        "logsEmpty": "No logs yet. The rule hasn't been triggered.",
+        "logsActions": "Actions: {{actions}}",
         "columns": {
             "order": "#",
             "name": "Name",

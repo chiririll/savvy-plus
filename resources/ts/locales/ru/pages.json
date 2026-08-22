@@ -48,6 +48,7 @@
         "create": "Новый тег",
         "createTitle": "Создать тег",
         "editTitle": "Изменить тег",
+        "createDescription": "Добавьте новый тег",
         "emptyTitle": "Тегов пока нет",
         "emptyDescription": "Создайте первый тег, чтобы группировать транзакции",
         "columns": {
@@ -82,15 +83,46 @@
             "name": "Название",
             "rate": "Курс",
             "decimals": "Знаки",
-            "base": "Базовая"
+            "base": "Основная"
         },
         "deleteTitle": "Удалить валюту?",
         "deleteDescription": "Это действие нельзя отменить. Валюта «{{name}}» будет удалена навсегда."
     },
     "transactions": {
         "title": "Транзакции",
+        "description": "Доходы, расходы и переводы",
+        "create": "Новая транзакция",
         "createTitle": "Новая транзакция",
         "editTitle": "Изменить транзакцию",
+        "emptyTitle": "Транзакций нет",
+        "emptyDescription": "Создайте первую транзакцию, чтобы начать учёт",
+        "itemLabel": "транзакций",
+        "filters": "Фильтры",
+        "clear": "Сбросить",
+        "dateRange": "Период",
+        "to": "—",
+        "categories": "Категории",
+        "tags": "Теги",
+        "sort": {
+            "dateNewest": "Дата (сначала новые)",
+            "dateOldest": "Дата (сначала старые)",
+            "amountHigh": "Сумма (по убыванию)",
+            "amountLow": "Сумма (по возрастанию)"
+        },
+        "items": {
+            "item": "Позиция",
+            "qty": "Кол-во",
+            "price": "Цена",
+            "total": "Итого",
+            "count_one": "{{count}} позиция",
+            "count_few": "{{count}} позиции",
+            "count_many": "{{count}} позиций",
+            "count_other": "{{count}} позиций"
+        },
+        "fallback": {
+            "payment": "Платёж: {{name}}",
+            "collection": "Возврат: {{name}}"
+        },
         "columns": {
             "date": "Дата",
             "type": "Тип",
@@ -101,7 +133,8 @@
             "income": "Доход",
             "expense": "Расход",
             "transfer": "Перевод",
-            "debt_payment": "Платёж по долгу"
+            "debt_payment": "Платёж по долгу",
+            "debt_collection": "Возврат долга"
         },
         "deleteTitle": "Удалить транзакцию?",
         "deleteDescription": "Это действие нельзя отменить."
@@ -124,6 +157,10 @@
             "active": "Активен",
             "paused": "Пауза"
         },
+        "today": "Сегодня",
+        "tomorrow": "Завтра",
+        "lastRun": "Последний: {{date}}",
+        "everyInterval": "Каждые {{count}} {{frequency}}",
         "deleteTitle": "Удалить регулярный платёж?",
         "deleteDescription": "Это действие нельзя отменить."
     },
@@ -133,6 +170,22 @@
         "create": "Новый бюджет",
         "createTitle": "Создать бюджет",
         "editTitle": "Изменить бюджет",
+        "notFound": "Бюджет не найден",
+        "allExpenses": "Все расходы",
+        "noCategories": "Нет категорий",
+        "spent": "{{amount}} потрачено",
+        "remaining": "{{amount}} осталось",
+        "exceededBy": "Превышение на {{amount}}",
+        "status": {
+            "active": "Активен",
+            "inactive": "Неактивен"
+        },
+        "periods": {
+            "weekly": "Неделя",
+            "monthly": "Месяц",
+            "yearly": "Год",
+            "one_time": "Разовый"
+        },
         "columns": {
             "budget": "Бюджет",
             "limit": "Лимит",
@@ -153,6 +206,16 @@
         "inYourFavor": "в вашу пользу",
         "youOwe": "вы должны",
         "showCompleted": "Показать закрытые долги",
+        "notFound": "Долг не найден",
+        "paidOff": "Погашен",
+        "makePayment": "Внести платёж",
+        "collectPayment": "Принять платёж",
+        "reopen": "Открыть снова",
+        "status": {
+            "completed": "Закрыт",
+            "active": "Активен",
+            "inactive": "Неактивен"
+        },
         "columns": {
             "debt": "Долг",
             "type": "Тип",
@@ -174,7 +237,14 @@
         "description": "Автоматическая обработка транзакций",
         "create": "Новое правило",
         "createTitle": "Новое правило",
+        "createDescription": "Задайте условия и действия для автоматической обработки",
         "editTitle": "Изменить правило",
+        "notFound": "Правило не найдено",
+        "logsTitle": "Журнал: {{name}}",
+        "logsFallbackName": "Правило",
+        "logsDescription": "История запусков этого правила",
+        "logsEmpty": "Записей пока нет. Правило ещё не срабатывало.",
+        "logsActions": "Действия: {{actions}}",
         "columns": {
             "order": "№",
             "name": "Название",

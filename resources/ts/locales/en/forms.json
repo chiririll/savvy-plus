@@ -74,7 +74,19 @@
         "counterpartyHelp": "Who you owe to or who owes you",
         "dueDate": "Due date",
         "dueDateHelp": "Optional deadline for the debt",
-        "notesPlaceholder": "Additional notes about this debt..."
+        "notesPlaceholder": "Additional notes about this debt...",
+        "payment": {
+            "makeTitle": "Make Payment",
+            "collectTitle": "Collect Payment",
+            "makeDescription": "Record a payment towards this debt",
+            "collectDescription": "Record a payment you received",
+            "payTo": "Pay to",
+            "receiveFrom": "Receive from",
+            "accountPayFrom": "Account to pay from",
+            "accountReceiveInto": "Account to receive into",
+            "fullAmount": "Full Amount",
+            "half": "Half"
+        }
     },
     "recurring": {
         "frequency": "Frequency",

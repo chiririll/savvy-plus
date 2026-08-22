@@ -26,7 +26,7 @@ export default function EditAutomationPage() {
     if (!rule) {
         return (
             <FormPage title={t('automation.editTitle')} backLink="/automation">
-                <p className="text-muted-foreground">Rule not found</p>
+                <p className="text-muted-foreground">{t('automation.notFound')}</p>
             </FormPage>
         )
     }
@@ -50,7 +50,7 @@ export default function EditAutomationPage() {
                 }}
                 onSubmit={(data) => updateRule.mutate({ id: id!, data })}
                 isSubmitting={updateRule.isPending}
-                submitLabel="Update Rule"
+                submitLabel={t('common:actions.save')}
             />
         </FormPage>
     )

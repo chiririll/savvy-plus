@@ -4,25 +4,30 @@ import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ssoApi } from '@/api/sso'
 import { useAuthStore } from '@/stores/auth'
+import i18n from '@/lib/i18n'
 
-const SSO_ERROR_MESSAGES: Record<string, string> = {
-    invalid_issuer: 'The provider’s token issuer did not match. Check the tenant / issuer setting.',
-    invalid_audience: 'The token was issued for a different application. Check the Client ID.',
-    invalid_nonce: 'Sign-in could not be verified (nonce mismatch). Please try again.',
-    invalid_id_token: 'The identity token signature could not be verified.',
-    invalid_state: 'The sign-in session expired or was tampered with. Please try again.',
-    token_exchange_failed: 'The provider rejected the authorization code. Check the Client Secret and Redirect URL.',
-    jwks_failed: 'Could not load the provider’s signing keys.',
-    metadata_unreachable: 'Could not reach the provider’s metadata endpoint.',
-    idp_error: 'The identity provider returned an error.',
-    no_email: 'The provider did not return an email address.',
-    email_in_use: 'An account with this email already exists. Ask an admin to enable email linking.',
-    signup_disabled: 'This account is not provisioned. Contact an administrator.',
-    no_admin: 'Complete the initial setup before using SSO.',
-}
+const SSO_ERROR_CODES = [
+    'invalid_issuer',
+    'invalid_audience',
+    'invalid_nonce',
+    'invalid_id_token',
+    'invalid_state',
+    'token_exchange_failed',
+    'jwks_failed',
+    'metadata_unreachable',
+    'idp_error',
+    'no_email',
+    'email_in_use',
+    'signup_disabled',
+    'no_admin',
+] as const
 
 function ssoErrorMessage(code: string): string {
-    return SSO_ERROR_MESSAGES[code] ?? `Single sign-on failed (${code}).`
+    if ((SSO_ERROR_CODES as readonly string[]).includes(code)) {
+        return i18n.t(`auth:sso.errors.${code}`)
+    }
+
+    return i18n.t('auth:sso.errors.unknown', { code })
 }
 
 export default function SsoCallbackPage() {
@@ -39,7 +44,7 @@ export default function SsoCallbackPage() {
         const ticket = params.get('ticket')
 
         if (error || !ticket) {
-            toast.error(error ? ssoErrorMessage(error) : 'Single sign-on failed. Please try again.')
+            toast.error(error ? ssoErrorMessage(error) : i18n.t('auth:ssoFailed'))
             navigate('/login', { replace: true })
             return
         }
@@ -53,11 +58,11 @@ export default function SsoCallbackPage() {
                 }
 
                 setUser(res.user)
-                toast.success('Welcome back!')
+                toast.success(i18n.t('auth:welcomeToast'))
                 navigate('/', { replace: true })
             })
             .catch(() => {
-                toast.error('Single sign-on failed. Please try again.')
+                toast.error(i18n.t('auth:ssoFailed'))
                 navigate('/login', { replace: true })
             })
     }, [params, navigate, setUser])

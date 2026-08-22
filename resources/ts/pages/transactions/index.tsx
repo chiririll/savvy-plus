@@ -27,14 +27,22 @@ import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { TransactionType, Transaction } from '@/types'
 import { cn, formatCurrency } from '@/lib/utils'
 
-const TYPE_FILTERS: { value: TransactionType | null; label: string; icon?: typeof ArrowDownLeft }[] = [
-    { value: null, label: 'All' },
-    { value: 'income', label: 'Income', icon: ArrowDownLeft },
-    { value: 'expense', label: 'Expense', icon: ArrowUpRight },
-    { value: 'transfer', label: 'Transfer', icon: ArrowLeftRight },
+const TYPE_FILTERS: { value: TransactionType | null; labelKey: string; icon?: typeof ArrowDownLeft }[] = [
+    { value: null, labelKey: 'all' },
+    { value: 'income', labelKey: 'income', icon: ArrowDownLeft },
+    { value: 'expense', labelKey: 'expense', icon: ArrowUpRight },
+    { value: 'transfer', labelKey: 'transfer', icon: ArrowLeftRight },
 ]
 
+const SORT_OPTIONS = [
+    { value: 'date:desc', labelKey: 'dateNewest' },
+    { value: 'date:asc', labelKey: 'dateOldest' },
+    { value: 'amount:desc', labelKey: 'amountHigh' },
+    { value: 'amount:asc', labelKey: 'amountLow' },
+] as const
+
 function TransactionItems({ row }: { row: Row<Transaction> }) {
+    const { t } = useTranslation('pages')
     const items = row.original.items
     const currency = row.original.account.currency
     if (!items || items.length === 0) return null
@@ -44,10 +52,10 @@ function TransactionItems({ row }: { row: Row<Transaction> }) {
             <table className="w-full text-sm">
                 <thead>
                     <tr className="text-muted-foreground text-xs">
-                        <th className="text-left font-medium pb-2">Item</th>
-                        <th className="text-right font-medium pb-2 w-20">Qty</th>
-                        <th className="text-right font-medium pb-2 w-24">Price</th>
-                        <th className="text-right font-medium pb-2 w-24">Total</th>
+                        <th className="text-left font-medium pb-2">{t('transactions.items.item')}</th>
+                        <th className="text-right font-medium pb-2 w-20">{t('transactions.items.qty')}</th>
+                        <th className="text-right font-medium pb-2 w-24">{t('transactions.items.price')}</th>
+                        <th className="text-right font-medium pb-2 w-24">{t('transactions.items.total')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -64,13 +72,6 @@ function TransactionItems({ row }: { row: Row<Transaction> }) {
         </div>
     )
 }
-
-const SORT_OPTIONS = [
-    { value: 'date:desc', label: 'Date (Newest)' },
-    { value: 'date:asc', label: 'Date (Oldest)' },
-    { value: 'amount:desc', label: 'Amount (High to Low)' },
-    { value: 'amount:asc', label: 'Amount (Low to High)' },
-]
 
 const transactionSearchParams = {
     type: parseAsStringLiteral(['income', 'expense', 'transfer'] as const),
@@ -158,23 +159,23 @@ export default function TransactionsPage() {
         <Page title={t('transactions.title')}>
             <PageHeader
                 title={t('transactions.title')}
-                description="Track your income, expenses and transfers"
+                description={t('transactions.description')}
                 createLink={params.type ? `/transactions/create?type=${params.type}` : '/transactions/create'}
-                createLabel="New Transaction"
+                createLabel={t('transactions.create')}
             />
 
             {/* Type Filter & Sort */}
             <div className="flex items-center justify-between gap-4 mb-4">
                 <div className="flex gap-2">
-                    {TYPE_FILTERS.map(({ value, label, icon: Icon }) => (
+                    {TYPE_FILTERS.map(({ value, labelKey, icon: Icon }) => (
                         <Button
-                            key={label}
+                            key={labelKey}
                             variant={params.type === value ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => setParams({ type: value, page: 1 })}
                         >
                             {Icon && <Icon className="size-4 mr-1" />}
-                            {label}
+                            {labelKey === 'all' ? t('common:actions.all') : t(`transactions.types.${labelKey}`)}
                         </Button>
                     ))}
                 </div>
@@ -193,7 +194,7 @@ export default function TransactionsPage() {
                         <SelectContent>
                             {SORT_OPTIONS.map(opt => (
                                 <SelectItem key={opt.value} value={opt.value}>
-                                    {opt.label}
+                                    {t(`transactions.sort.${opt.labelKey}`)}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -207,7 +208,7 @@ export default function TransactionsPage() {
                     <CollapsibleTrigger asChild>
                         <Button variant="outline" size="sm">
                             <Filter className="size-4 mr-2" />
-                            Filters
+                            {t('transactions.filters')}
                             {activeFiltersCount > 0 && (
                                 <Badge variant="secondary" className="ml-2 px-1.5 py-0 text-xs">
                                     {activeFiltersCount}
@@ -218,7 +219,7 @@ export default function TransactionsPage() {
                     {activeFiltersCount > 0 && (
                         <Button variant="ghost" size="sm" onClick={clearFilters}>
                             <X className="size-4 mr-1" />
-                            Clear
+                            {t('transactions.clear')}
                         </Button>
                     )}
                 </div>
@@ -227,7 +228,7 @@ export default function TransactionsPage() {
                         <CardContent className="pt-4 space-y-4">
                             {/* Date Range */}
                             <div>
-                                <label className="text-sm font-medium mb-2 block">Date Range</label>
+                                <label className="text-sm font-medium mb-2 block">{t('transactions.dateRange')}</label>
                                 <div className="flex items-center gap-2">
                                     <Input
                                         type="date"
@@ -238,7 +239,7 @@ export default function TransactionsPage() {
                                         })}
                                         className="w-auto"
                                     />
-                                    <span className="text-muted-foreground">to</span>
+                                    <span className="text-muted-foreground">{t('transactions.to')}</span>
                                     <Input
                                         type="date"
                                         value={params.endDate ?? ''}
@@ -254,7 +255,7 @@ export default function TransactionsPage() {
                             {/* Categories */}
                             {filteredCategories.length > 0 && (
                                 <div>
-                                    <label className="text-sm font-medium mb-2 block">Categories</label>
+                                    <label className="text-sm font-medium mb-2 block">{t('transactions.categories')}</label>
                                     <div className="flex flex-wrap gap-2">
                                         {filteredCategories.map((category) => {
                                             const isSelected = params.categoryIds.includes(category.id)
@@ -279,7 +280,7 @@ export default function TransactionsPage() {
                             {/* Tags */}
                             {tags && tags.length > 0 && (
                                 <div>
-                                    <label className="text-sm font-medium mb-2 block">Tags</label>
+                                    <label className="text-sm font-medium mb-2 block">{t('transactions.tags')}</label>
                                     <div className="flex flex-wrap gap-2">
                                         {tags.map((tag) => {
                                             const isSelected = params.tagIds.includes(tag.id)
@@ -309,13 +310,13 @@ export default function TransactionsPage() {
                 data={transactions}
                 columns={columns}
                 isLoading={isLoading}
-                emptyTitle="No transactions found"
-                emptyDescription="Create your first transaction to start tracking"
+                emptyTitle={t('transactions.emptyTitle')}
+                emptyDescription={t('transactions.emptyDescription')}
                 emptyAction={
                     <Button asChild>
                         <Link to={params.type ? `/transactions/create?type=${params.type}` : '/transactions/create'}>
                             <Plus className="size-4" />
-                            New Transaction
+                            {t('transactions.create')}
                         </Link>
                     </Button>
                 }
@@ -328,7 +329,7 @@ export default function TransactionsPage() {
                 <ServerPagination
                     meta={meta}
                     onPageChange={(page) => setParams({ page })}
-                    infoLabel="transactions"
+                    infoLabel={t('transactions.itemLabel')}
                 />
             )}
         </Page>

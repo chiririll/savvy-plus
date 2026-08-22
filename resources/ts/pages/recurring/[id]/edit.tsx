@@ -35,7 +35,6 @@ export default function RecurringEditPage() {
                 defaultValues={defaultValues}
                 onSubmit={(data) => updateRecurring.mutate({ id: id!, data })}
                 isSubmitting={updateRecurring.isPending}
-                submitLabel="Save"
             />
         </FormPage>
     )

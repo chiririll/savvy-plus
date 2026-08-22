@@ -20,7 +20,7 @@ export default function BudgetEditPage() {
     }
 
     if (!budget) {
-        return <div>Budget not found</div>
+        return <div>{t('budgets.notFound')}</div>
     }
 
     return (
@@ -41,7 +41,7 @@ export default function BudgetEditPage() {
                 }}
                 onSubmit={(data) => updateBudget.mutate({ id: id!, data })}
                 isSubmitting={updateBudget.isPending}
-                submitLabel="Update"
+                submitLabel={t('common:actions.save')}
             />
         </FormPage>
     )

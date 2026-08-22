@@ -10,13 +10,13 @@ export default function CreateAutomationPage() {
     return (
         <FormPage
             title={t('automation.createTitle')}
-            description="Set up conditions and actions for automatic processing"
+            description={t('automation.createDescription')}
             backLink="/automation"
         >
             <AutomationRuleForm
                 onSubmit={createRule.mutate}
                 isSubmitting={createRule.isPending}
-                submitLabel="Create Rule"
+                submitLabel={t('common:actions.create')}
             />
         </FormPage>
     )

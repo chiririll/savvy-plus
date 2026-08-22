@@ -74,7 +74,19 @@
         "counterpartyHelp": "Кому вы должны или кто должен вам",
         "dueDate": "Срок",
         "dueDateHelp": "Необязательный срок погашения",
-        "notesPlaceholder": "Дополнительные заметки об этом долге..."
+        "notesPlaceholder": "Дополнительные заметки об этом долге...",
+        "payment": {
+            "makeTitle": "Внести платёж",
+            "collectTitle": "Принять платёж",
+            "makeDescription": "Запишите платёж по этому долгу",
+            "collectDescription": "Запишите полученный платёж",
+            "payTo": "Кому",
+            "receiveFrom": "От кого",
+            "accountPayFrom": "Счёт списания",
+            "accountReceiveInto": "Счёт зачисления",
+            "fullAmount": "Вся сумма",
+            "half": "Половина"
+        }
     },
     "recurring": {
         "frequency": "Периодичность",
@@ -116,8 +128,8 @@
         "period": "Период",
         "limit": "Лимит",
         "namePlaceholder": "Например, бюджет на продукты",
-        "baseCurrency": "Базовая валюта",
-        "baseSuffix": "Базовая",
+        "baseCurrency": "Основная валюта",
+        "baseSuffix": "Основная",
         "startDate": "Дата начала",
         "endDate": "Дата окончания",
         "global": "Общий бюджет",

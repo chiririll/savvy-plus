@@ -16,7 +16,6 @@ export default function CategoryEditPage() {
                 defaultValues={category}
                 onSubmit={(data) => updateCategory.mutate({ id: id!, data })}
                 isSubmitting={updateCategory.isPending}
-                submitLabel="Save"
             />
         </FormPage>
     )

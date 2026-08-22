@@ -43,7 +43,6 @@ export default function TransactionEditPage() {
                 onTypeChange={setType}
                 onSubmit={(data) => updateTransaction.mutate({ id: id!, data })}
                 isSubmitting={updateTransaction.isPending}
-                submitLabel="Save"
             />
         </FormPage>
     )

@@ -121,7 +121,7 @@ export const createDebtColumns = (
         cell: ({ row }) => (
             <div className={`font-mono text-right ${row.original.isPaidOff ? 'text-green-600' : 'text-orange-600'}`}>
                 {row.original.isPaidOff
-                    ? 'Paid Off'
+                    ? i18n.t('pages:debts.paidOff')
                     : formatCurrency(row.original.remainingDebt, row.original.currency)
                 }
             </div>
@@ -148,7 +148,11 @@ export const createDebtColumns = (
         header: () => i18n.t('pages:debts.columns.status'),
         cell: ({ row }) => (
             <Badge variant={row.original.isPaidOff ? 'default' : row.original.isActive ? 'secondary' : 'outline'}>
-                {row.original.isPaidOff ? 'Completed' : row.original.isActive ? 'Active' : 'Inactive'}
+                {row.original.isPaidOff
+                    ? i18n.t('pages:debts.status.completed')
+                    : row.original.isActive
+                        ? i18n.t('pages:debts.status.active')
+                        : i18n.t('pages:debts.status.inactive')}
             </Badge>
         ),
     },
@@ -171,12 +175,12 @@ export const createDebtColumns = (
                                 {debt.debtType === 'i_owe' ? (
                                     <DropdownMenuItem onClick={() => actions.onPayment(debt)}>
                                         <Banknote className="mr-2 size-4" />
-                                        Make Payment
+                                        {i18n.t('pages:debts.makePayment')}
                                     </DropdownMenuItem>
                                 ) : (
                                     <DropdownMenuItem onClick={() => actions.onCollect(debt)}>
                                         <HandCoins className="mr-2 size-4" />
-                                        Collect Payment
+                                        {i18n.t('pages:debts.collectPayment')}
                                     </DropdownMenuItem>
                                 )}
                                 <DropdownMenuSeparator />
@@ -186,7 +190,7 @@ export const createDebtColumns = (
                             <>
                                 <DropdownMenuItem onClick={() => actions.onReopen(debt.id)}>
                                     <RotateCcw className="mr-2 size-4" />
-                                    Reopen
+                                    {i18n.t('pages:debts.reopen')}
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                             </>

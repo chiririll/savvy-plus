@@ -94,8 +94,8 @@ export function createTransactionColumns(
 
                 const getDefaultDescription = () => {
                     if (type === 'transfer') return `${account.name} → ${toAccount?.name}`
-                    if (type === 'debt_payment') return `Payment: ${toAccount?.name}`
-                    if (type === 'debt_collection') return `Collection: ${toAccount?.name}`
+                    if (type === 'debt_payment') return i18n.t('pages:transactions.fallback.payment', { name: toAccount?.name })
+                    if (type === 'debt_collection') return i18n.t('pages:transactions.fallback.collection', { name: toAccount?.name })
                     return category?.name
                 }
 
@@ -125,7 +125,7 @@ export function createTransactionColumns(
                         <div className="text-xs text-muted-foreground">
                             {getSubDescription()}
                             {itemsCount != null && itemsCount > 0 && (
-                                <span className="ml-2 text-primary">({itemsCount} items)</span>
+                                <span className="ml-2 text-primary">({i18n.t('pages:transactions.items.count', { count: itemsCount })})</span>
                             )}
                         </div>
                         {tags && tags.length > 0 && (

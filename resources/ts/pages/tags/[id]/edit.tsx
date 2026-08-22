@@ -22,7 +22,6 @@ export default function TagEditPage() {
                 defaultValues={defaultValues}
                 onSubmit={(data) => updateTag.mutate({ id: id!, data })}
                 isSubmitting={updateTag.isPending}
-                submitLabel="Save"
             />
         </FormPage>
     )

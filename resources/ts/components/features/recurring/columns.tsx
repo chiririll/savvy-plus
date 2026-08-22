@@ -31,12 +31,6 @@ const typeConfig = {
     transfer: { icon: ArrowLeftRight, color: 'text-blue-500', label: 'Transfer' },
 }
 
-const frequencyLabels: Record<string, string> = {
-    daily: 'Daily',
-    weekly: 'Weekly',
-    monthly: 'Monthly',
-    yearly: 'Yearly',
-}
 
 interface ColumnsOptions {
     onDelete: (id: number) => void
@@ -62,7 +56,7 @@ export const createRecurringColumns = ({
                     </div>
                     <div>
                         <p className="font-medium">
-                            {row.original.description || config.label}
+                            {row.original.description || i18n.t(`pages:transactions.types.${row.original.type}`)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                             {row.original.account.name}
@@ -112,8 +106,10 @@ export const createRecurringColumns = ({
         header: () => i18n.t('pages:recurring.columns.frequency'),
         cell: ({ row }) => {
             const interval = row.original.interval
-            const freq = frequencyLabels[row.original.frequency]
-            const label = interval === 1 ? freq : `Every ${interval} ${freq.toLowerCase()}`
+            const freq = i18n.t(`forms:recurring.frequencies.${row.original.frequency}`)
+            const label = interval === 1
+                ? freq
+                : i18n.t('pages:recurring.everyInterval', { count: interval, frequency: freq.toLowerCase() })
             return <Badge variant="outline">{label}</Badge>
         },
     },
@@ -128,11 +124,11 @@ export const createRecurringColumns = ({
             return (
                 <div>
                     <p className={cn('font-medium', isToday && 'text-orange-500')}>
-                        {isToday ? 'Today' : isTomorrow ? 'Tomorrow' : date.toLocaleDateString()}
+                        {isToday ? i18n.t('pages:recurring.today') : isTomorrow ? i18n.t('pages:recurring.tomorrow') : date.toLocaleDateString()}
                     </p>
                     {row.original.lastRunDate && (
                         <p className="text-xs text-muted-foreground">
-                            Last: {new Date(row.original.lastRunDate).toLocaleDateString()}
+                            {i18n.t('pages:recurring.lastRun', { date: new Date(row.original.lastRunDate).toLocaleDateString() })}
                         </p>
                     )}
                 </div>

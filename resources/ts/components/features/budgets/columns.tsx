@@ -26,13 +26,6 @@ import { Budget } from '@/types'
 import { formatCurrency } from '@/lib/utils'
 import i18n from '@/lib/i18n'
 
-const periodLabels: Record<string, string> = {
-    weekly: 'Weekly',
-    monthly: 'Monthly',
-    yearly: 'Yearly',
-    one_time: 'One-time',
-}
-
 export const createBudgetColumns = (
     onDelete: (id: number) => void,
     isReadOnly?: boolean
@@ -45,8 +38,8 @@ export const createBudgetColumns = (
                 <p className="font-medium">{row.original.name}</p>
                 <p className="text-xs text-muted-foreground">
                     {row.original.isGlobal
-                        ? 'All expenses'
-                        : row.original.categories.map(c => c.name).join(', ') || 'No categories'}
+                        ? i18n.t('pages:budgets.allExpenses')
+                        : row.original.categories.map(c => c.name).join(', ') || i18n.t('pages:budgets.noCategories')}
                 </p>
             </div>
         ),
@@ -65,7 +58,7 @@ export const createBudgetColumns = (
         header: () => i18n.t('pages:budgets.columns.period'),
         cell: ({ row }) => (
             <Badge variant="outline">
-                {periodLabels[row.original.period] || row.original.period}
+                {i18n.t(`pages:budgets.periods.${row.original.period}`, { defaultValue: row.original.period })}
             </Badge>
         ),
     },
@@ -81,7 +74,7 @@ export const createBudgetColumns = (
             return (
                 <div className="w-44 space-y-1">
                     <div className="flex justify-between text-xs">
-                        <span>{formatCurrency(progress.spent, row.original.currency)} spent</span>
+                        <span>{i18n.t('pages:budgets.spent', { amount: formatCurrency(progress.spent, row.original.currency) })}</span>
                         <span className={isExceeded ? 'text-red-600 font-medium' : ''}>
                             {progress.percent.toFixed(0)}%
                         </span>
@@ -92,8 +85,8 @@ export const createBudgetColumns = (
                     />
                     <p className="text-xs text-muted-foreground">
                         {isExceeded
-                            ? `Exceeded by ${formatCurrency(progress.spent - row.original.amount, row.original.currency)}`
-                            : `${formatCurrency(progress.remaining, row.original.currency)} remaining`}
+                            ? i18n.t('pages:budgets.exceededBy', { amount: formatCurrency(progress.spent - row.original.amount, row.original.currency) })
+                            : i18n.t('pages:budgets.remaining', { amount: formatCurrency(progress.remaining, row.original.currency) })}
                     </p>
                 </div>
             )
@@ -104,7 +97,9 @@ export const createBudgetColumns = (
         header: () => i18n.t('pages:budgets.columns.status'),
         cell: ({ row }) => (
             <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
-                {row.original.isActive ? 'Active' : 'Inactive'}
+                {row.original.isActive
+                    ? i18n.t('pages:budgets.status.active')
+                    : i18n.t('pages:budgets.status.inactive')}
             </Badge>
         ),
     },

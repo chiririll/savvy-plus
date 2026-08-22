@@ -26,7 +26,6 @@ export default function AccountEditPage() {
                 defaultValues={defaultValues}
                 onSubmit={(data) => updateAccount.mutate({ id: id!, data })}
                 isSubmitting={updateAccount.isPending}
-                submitLabel="Save"
             />
         </FormPage>
     )

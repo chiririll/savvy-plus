@@ -22,7 +22,18 @@
         "viewLogs": "View logs",
         "setAsBase": "Set as base",
         "cannotDeleteLast": "Can't delete last",
-        "cannotDeleteSelf": "Can't delete yourself"
+        "cannotDeleteSelf": "Can't delete yourself",
+        "clear": "Clear",
+        "processing": "Processing..."
+    },
+    "readOnly": {
+        "banner": "You are in read-only mode. You can view all data but cannot make any changes.",
+        "close": "Close banner"
+    },
+    "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "completed": "Completed"
     },
     "fields": {
         "name": "Name",

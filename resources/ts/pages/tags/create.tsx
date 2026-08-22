@@ -11,7 +11,7 @@ export default function CreateTagPage() {
         <Page title={t('tags.createTitle')}>
             <PageHeader
                 title={t('tags.createTitle')}
-                description="Add a new tag"
+                description={t('tags.createDescription')}
                 backLink="/tags"
             />
 
@@ -19,7 +19,7 @@ export default function CreateTagPage() {
                 <TagForm
                     onSubmit={createTag.mutate}
                     isSubmitting={createTag.isPending}
-                    submitLabel="Create Tag"
+                    submitLabel={t('common:actions.create')}
                 />
             </FormPage>
         </Page>

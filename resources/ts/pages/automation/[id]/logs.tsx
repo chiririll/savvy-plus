@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAutomationRuleById, useAutomationRuleLogs } from '@/hooks/use-automation'
 import { PageHeader } from '@/components/shared'
 import { Button } from '@/components/ui/button'
@@ -8,6 +9,7 @@ import { ArrowLeft } from 'lucide-react'
 import { format } from 'date-fns'
 
 export default function AutomationLogsPage() {
+    const { t } = useTranslation('pages')
     const { id } = useParams<{ id: string }>()
     const { data: rule, isLoading: ruleLoading } = useAutomationRuleById(id!)
     const { data: logs, isLoading: logsLoading } = useAutomationRuleLogs(id!)
@@ -30,8 +32,8 @@ export default function AutomationLogsPage() {
                     </Link>
                 </Button>
                 <PageHeader
-                    title={`Logs: ${rule?.name ?? 'Rule'}`}
-                    description="Execution history for this automation rule"
+                    title={t('automation.logsTitle', { name: rule?.name ?? t('automation.logsFallbackName') })}
+                    description={t('automation.logsDescription')}
                 />
             </div>
 
@@ -72,7 +74,7 @@ export default function AutomationLogsPage() {
                                 )}
                                 {log.actions_executed && log.actions_executed.length > 0 && (
                                     <p className="text-sm text-muted-foreground">
-                                        Actions: {log.actions_executed.map(a => a.type).join(', ')}
+                                        {t('automation.logsActions', { actions: log.actions_executed.map(a => a.type).join(', ') })}
                                     </p>
                                 )}
                             </div>
@@ -84,7 +86,7 @@ export default function AutomationLogsPage() {
                 </div>
             ) : (
                 <div className="text-center py-12 text-muted-foreground">
-                    No logs yet. The rule hasn't been triggered.
+                    {t('automation.logsEmpty')}
                 </div>
             )}
         </div>

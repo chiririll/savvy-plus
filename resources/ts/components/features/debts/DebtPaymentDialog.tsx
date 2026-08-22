@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -49,6 +50,7 @@ export function DebtPaymentDialog({
     isSubmitting,
     mode,
 }: DebtPaymentDialogProps) {
+    const { t } = useTranslation('forms')
     const { data: accounts, isLoading: accountsLoading } = useAccounts({ active: true, exclude_debts: true })
 
     const form = useForm<DebtPaymentFormData>({
@@ -67,10 +69,10 @@ export function DebtPaymentDialog({
         }
     }
 
-    const title = mode === 'payment' ? 'Make Payment' : 'Collect Payment'
+    const title = mode === 'payment' ? t('debts.payment.makeTitle') : t('debts.payment.collectTitle')
     const description = mode === 'payment'
-        ? 'Record a payment towards this debt'
-        : 'Record a payment you received'
+        ? t('debts.payment.makeDescription')
+        : t('debts.payment.collectDescription')
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -83,17 +85,17 @@ export function DebtPaymentDialog({
                 {debt && (
                     <div className="rounded-lg bg-muted p-4 space-y-2">
                         <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Debt</span>
+                            <span className="text-muted-foreground">{t('pages:debts.columns.debt')}</span>
                             <span className="font-medium">{debt.name}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Remaining</span>
+                            <span className="text-muted-foreground">{t('pages:debts.columns.remaining')}</span>
                             <span className="font-mono">{formatCurrency(debt.remainingDebt, debt.currency)}</span>
                         </div>
                         {debt.counterparty && (
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">
-                                    {mode === 'payment' ? 'Pay to' : 'Receive from'}
+                                    {mode === 'payment' ? t('debts.payment.payTo') : t('debts.payment.receiveFrom')}
                                 </span>
                                 <span>{debt.counterparty}</span>
                             </div>
@@ -108,7 +110,7 @@ export function DebtPaymentDialog({
                             name="account_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Account</FormLabel>
+                                    <FormLabel>{t('common:fields.account')}</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={field.value?.toString()}
@@ -116,7 +118,7 @@ export function DebtPaymentDialog({
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select account" />
+                                                <SelectValue placeholder={t('selectAccount')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -137,8 +139,8 @@ export function DebtPaymentDialog({
                                     </Select>
                                     <FormDescription>
                                         {mode === 'payment'
-                                            ? 'Account to pay from'
-                                            : 'Account to receive into'
+                                            ? t('debts.payment.accountPayFrom')
+                                            : t('debts.payment.accountReceiveInto')
                                         }
                                     </FormDescription>
                                     <FormMessage />
@@ -151,7 +153,7 @@ export function DebtPaymentDialog({
                             name="amount"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Amount</FormLabel>
+                                    <FormLabel>{t('common:fields.amount')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
@@ -170,7 +172,7 @@ export function DebtPaymentDialog({
                                                 size="sm"
                                                 onClick={() => form.setValue('amount', debt.remainingDebt)}
                                             >
-                                                Full Amount
+                                                {t('debts.payment.fullAmount')}
                                             </Button>
                                             <Button
                                                 type="button"
@@ -178,7 +180,7 @@ export function DebtPaymentDialog({
                                                 size="sm"
                                                 onClick={() => form.setValue('amount', Math.round(debt.remainingDebt / 2 * 100) / 100)}
                                             >
-                                                Half
+                                                {t('debts.payment.half')}
                                             </Button>
                                         </div>
                                     )}
@@ -192,7 +194,7 @@ export function DebtPaymentDialog({
                             name="date"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Date</FormLabel>
+                                    <FormLabel>{t('common:fields.date')}</FormLabel>
                                     <FormControl>
                                         <Input type="date" {...field} />
                                     </FormControl>
@@ -206,10 +208,10 @@ export function DebtPaymentDialog({
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Description</FormLabel>
+                                    <FormLabel>{t('common:fields.description')}</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Optional notes..."
+                                            placeholder={t('debts.notesPlaceholder')}
                                             {...field}
                                         />
                                     </FormControl>
@@ -224,12 +226,12 @@ export function DebtPaymentDialog({
                                 variant="outline"
                                 onClick={() => onOpenChange(false)}
                             >
-                                Cancel
+                                {t('common:actions.cancel')}
                             </Button>
                             <Button type="submit" disabled={isSubmitting}>
                                 {isSubmitting
-                                    ? 'Processing...'
-                                    : mode === 'payment' ? 'Make Payment' : 'Collect Payment'
+                                    ? t('common:actions.processing')
+                                    : mode === 'payment' ? t('debts.payment.makeTitle') : t('debts.payment.collectTitle')
                                 }
                             </Button>
                         </DialogFooter>
