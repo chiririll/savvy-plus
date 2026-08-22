@@ -141,7 +141,7 @@ export function AutomationRuleForm({
                                         <SelectContent>
                                             {triggers?.map((trigger) => (
                                                 <SelectItem key={trigger.value} value={trigger.value}>
-                                                    {trigger.label}
+                                                    {t(`forms:automation.triggers.${trigger.value}`)}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -152,7 +152,7 @@ export function AutomationRuleForm({
                                                 <HelpCircle className="size-4 text-muted-foreground cursor-help" />
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                <p>{selectedTrigger.description}</p>
+                                                <p>{t(`forms:automation.triggerDescriptions.${selectedTrigger.value}`)}</p>
                                             </TooltipContent>
                                         </Tooltip>
                                     )}

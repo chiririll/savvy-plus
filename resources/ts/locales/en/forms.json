@@ -155,7 +155,61 @@
         "namePlaceholder": "e.g., Auto-categorize groceries",
         "descriptionPlaceholder": "Describe what this rule does...",
         "selectTrigger": "Select trigger",
-        "stopProcessing": "Stop processing other rules"
+        "stopProcessing": "Stop processing other rules",
+        "matchAll": "Match ALL conditions",
+        "matchAny": "Match ANY condition",
+        "addCondition": "Add Condition",
+        "addAction": "Add Action",
+        "noActions": "No actions. Click \"Add Action\" to create one.",
+        "and": "and",
+        "enterValue": "Enter value...",
+        "descriptionTemplate": "Description template...",
+        "toAccount": "To account",
+        "amountOrFormula": "Amount or formula",
+        "fields": {
+            "type": "Transaction Type",
+            "amount": "Amount",
+            "description": "Description",
+            "account_id": "Account",
+            "category_id": "Category",
+            "tags": "Tags"
+        },
+        "operators": {
+            "equals": "Equals",
+            "not_equals": "Not Equals",
+            "in": "Is One Of",
+            "not_in": "Is Not One Of",
+            "gt": "Greater Than",
+            "gte": "Greater Than or Equal",
+            "lt": "Less Than",
+            "lte": "Less Than or Equal",
+            "between": "Between",
+            "contains": "Contains",
+            "not_contains": "Does Not Contain",
+            "starts_with": "Starts With",
+            "ends_with": "Ends With",
+            "matches": "Matches Regex",
+            "is_null": "Is Empty",
+            "is_not_null": "Is Not Empty",
+            "has_any": "Has Any Of",
+            "has_all": "Has All Of",
+            "has_none": "Has None Of"
+        },
+        "actionTypes": {
+            "set_category": "Set Category",
+            "add_tags": "Add Tags",
+            "remove_tags": "Remove Tags",
+            "set_description": "Set Description",
+            "create_transfer": "Create Transfer"
+        },
+        "triggers": {
+            "on_transaction_create": "On Transaction Create",
+            "on_transaction_update": "On Transaction Update"
+        },
+        "triggerDescriptions": {
+            "on_transaction_create": "Triggers when a new transaction is created",
+            "on_transaction_update": "Triggers when a transaction is updated"
+        }
     },
     "sso": {
         "connection": "Connection",

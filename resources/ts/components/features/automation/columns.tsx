@@ -47,7 +47,7 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
             accessorKey: 'trigger_type',
             header: () => i18n.t('pages:automation.columns.trigger'),
             cell: ({ row }) => (
-                <Badge variant="outline">{row.original.trigger_label}</Badge>
+                <Badge variant="outline">{i18n.t(`forms:automation.triggers.${row.original.trigger_type}`)}</Badge>
             ),
         },
         {
@@ -55,7 +55,7 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
             header: () => i18n.t('pages:automation.columns.conditions'),
             cell: ({ row }) => (
                 <span className="text-sm text-muted-foreground">
-                    {row.original.conditions.conditions.length} condition(s)
+                    {i18n.t('pages:automation.conditionCount', { count: row.original.conditions.conditions.length })}
                 </span>
             ),
         },
@@ -64,7 +64,7 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
             header: () => i18n.t('pages:automation.columns.actions'),
             cell: ({ row }) => (
                 <span className="text-sm text-muted-foreground">
-                    {row.original.actions.length} action(s)
+                    {i18n.t('pages:automation.actionCount', { count: row.original.actions.length })}
                 </span>
             ),
         },

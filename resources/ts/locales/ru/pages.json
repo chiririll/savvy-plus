@@ -245,6 +245,12 @@
         "logsDescription": "История запусков этого правила",
         "logsEmpty": "Записей пока нет. Правило ещё не срабатывало.",
         "logsActions": "Действия: {{actions}}",
+        "logsEntity": "{{type}} №{{id}}",
+        "logsStatus": {
+            "success": "Успех",
+            "error": "Ошибка",
+            "skipped": "Пропущено"
+        },
         "columns": {
             "order": "№",
             "name": "Название",
@@ -255,7 +261,15 @@
             "active": "Активно"
         },
         "deleteTitle": "Удалить правило?",
-        "deleteDescription": "Это действие нельзя отменить."
+        "deleteDescription": "Это действие нельзя отменить.",
+        "conditionCount_one": "{{count}} условие",
+        "conditionCount_few": "{{count}} условия",
+        "conditionCount_many": "{{count}} условий",
+        "conditionCount_other": "{{count}} условий",
+        "actionCount_one": "{{count}} действие",
+        "actionCount_few": "{{count}} действия",
+        "actionCount_many": "{{count}} действий",
+        "actionCount_other": "{{count}} действий"
     },
     "reports": {
         "title": "Отчёты",

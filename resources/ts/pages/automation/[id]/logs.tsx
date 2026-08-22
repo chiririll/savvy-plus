@@ -61,11 +61,11 @@ export default function AutomationLogsPage() {
                                                   : 'secondary'
                                         }
                                     >
-                                        {log.status}
+                                        {t(`automation.logsStatus.${log.status}`)}
                                     </Badge>
                                     {log.trigger_entity_type && (
                                         <span className="text-sm text-muted-foreground">
-                                            {log.trigger_entity_type} #{log.trigger_entity_id}
+                                            {t('automation.logsEntity', { type: log.trigger_entity_type, id: log.trigger_entity_id })}
                                         </span>
                                     )}
                                 </div>
@@ -74,7 +74,11 @@ export default function AutomationLogsPage() {
                                 )}
                                 {log.actions_executed && log.actions_executed.length > 0 && (
                                     <p className="text-sm text-muted-foreground">
-                                        {t('automation.logsActions', { actions: log.actions_executed.map(a => a.type).join(', ') })}
+                                        {t('automation.logsActions', {
+                                            actions: log.actions_executed
+                                                .map(a => t(`forms:automation.actionTypes.${a.type}`, { defaultValue: a.type }))
+                                                .join(', '),
+                                        })}
                                     </p>
                                 )}
                             </div>

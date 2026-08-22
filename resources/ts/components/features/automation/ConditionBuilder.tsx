@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -18,47 +19,19 @@ interface ConditionBuilderProps {
     onChange: (value: ConditionGroup) => void
 }
 
-const OPERATORS: Record<string, { value: ConditionOperator; label: string }[]> = {
-    equals: [
-        { value: 'equals', label: 'Equals' },
-        { value: 'not_equals', label: 'Not Equals' },
-    ],
-    in: [
-        { value: 'in', label: 'Is One Of' },
-        { value: 'not_in', label: 'Is Not One Of' },
-    ],
-    gt: [
-        { value: 'gt', label: 'Greater Than' },
-        { value: 'gte', label: 'Greater Than or Equal' },
-        { value: 'lt', label: 'Less Than' },
-        { value: 'lte', label: 'Less Than or Equal' },
-        { value: 'between', label: 'Between' },
-    ],
-    contains: [
-        { value: 'contains', label: 'Contains' },
-        { value: 'not_contains', label: 'Does Not Contain' },
-        { value: 'starts_with', label: 'Starts With' },
-        { value: 'ends_with', label: 'Ends With' },
-        { value: 'matches', label: 'Matches Regex' },
-    ],
-    is_null: [
-        { value: 'is_null', label: 'Is Empty' },
-        { value: 'is_not_null', label: 'Is Not Empty' },
-    ],
-    has_any: [
-        { value: 'has_any', label: 'Has Any Of' },
-        { value: 'has_all', label: 'Has All Of' },
-        { value: 'has_none', label: 'Has None Of' },
-    ],
+const OPERATORS: Record<string, ConditionOperator[]> = {
+    equals: ['equals', 'not_equals'],
+    in: ['in', 'not_in'],
+    gt: ['gt', 'gte', 'lt', 'lte', 'between'],
+    contains: ['contains', 'not_contains', 'starts_with', 'ends_with', 'matches'],
+    is_null: ['is_null', 'is_not_null'],
+    has_any: ['has_any', 'has_all', 'has_none'],
 }
 
-const TRANSACTION_TYPES = [
-    { value: 'income', label: 'Income' },
-    { value: 'expense', label: 'Expense' },
-    { value: 'transfer', label: 'Transfer' },
-]
+const TRANSACTION_TYPES = ['income', 'expense', 'transfer'] as const
 
 export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
+    const { t } = useTranslation(['forms', 'pages', 'common'])
     const { data: accounts } = useAccounts()
     const { data: categories } = useCategories()
     const { data: tags } = useTags()
@@ -87,16 +60,11 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
         })
     }
 
-    const getOperatorsForField = (field: string) => {
+    const getOperatorsForField = (field: string): ConditionOperator[] => {
         const fieldConfig = CONDITION_FIELDS.find(f => f.value === field)
         if (!fieldConfig) return []
 
-        const operators: { value: ConditionOperator; label: string }[] = []
-        fieldConfig.operators.forEach(op => {
-            const opGroup = OPERATORS[op]
-            if (opGroup) operators.push(...opGroup)
-        })
-        return operators
+        return fieldConfig.operators.flatMap(op => OPERATORS[op] ?? [])
     }
 
     const renderValueInput = (condition: Condition, index: number) => {
@@ -112,19 +80,19 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                     <div className="flex flex-wrap gap-1">
                         {TRANSACTION_TYPES.map(type => (
                             <Button
-                                key={type.value}
+                                key={type}
                                 type="button"
-                                variant={(condition.value as string[])?.includes(type.value) ? 'default' : 'outline'}
+                                variant={(condition.value as string[])?.includes(type) ? 'default' : 'outline'}
                                 size="sm"
                                 onClick={() => {
                                     const current = (condition.value as string[]) || []
-                                    const newValue = current.includes(type.value)
-                                        ? current.filter(v => v !== type.value)
-                                        : [...current, type.value]
+                                    const newValue = current.includes(type)
+                                        ? current.filter(v => v !== type)
+                                        : [...current, type]
                                     updateCondition(index, { value: newValue })
                                 }}
                             >
-                                {type.label}
+                                {t(`pages:transactions.types.${type}`)}
                             </Button>
                         ))}
                     </div>
@@ -140,8 +108,8 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                     </SelectTrigger>
                     <SelectContent>
                         {TRANSACTION_TYPES.map(type => (
-                            <SelectItem key={type.value} value={type.value}>
-                                {type.label}
+                            <SelectItem key={type} value={type}>
+                                {t(`pages:transactions.types.${type}`)}
                             </SelectItem>
                         ))}
                     </SelectContent>
@@ -156,7 +124,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                     onValueChange={(val) => updateCondition(index, { value: Number(val) })}
                 >
                     <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Select account" />
+                        <SelectValue placeholder={t('selectAccount')} />
                     </SelectTrigger>
                     <SelectContent>
                         {accounts?.map(account => (
@@ -176,7 +144,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                     onValueChange={(val) => updateCondition(index, { value: Number(val) })}
                 >
                     <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t('selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
                         {categories?.map(category => (
@@ -224,7 +192,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                             value={min}
                             onChange={(e) => updateCondition(index, { value: [Number(e.target.value), max] })}
                         />
-                        <span className="text-muted-foreground">and</span>
+                        <span className="text-muted-foreground">{t('automation.and')}</span>
                         <Input
                             type="number"
                             className="w-24"
@@ -249,7 +217,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                 className="w-48"
                 value={condition.value as string}
                 onChange={(e) => updateCondition(index, { value: e.target.value })}
-                placeholder="Enter value..."
+                placeholder={t('automation.enterValue')}
             />
         )
     }
@@ -261,8 +229,8 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                 onValueChange={(match) => onChange({ ...value, match: match as 'all' | 'any' })}
             >
                 <TabsList>
-                    <TabsTrigger value="all">Match ALL conditions</TabsTrigger>
-                    <TabsTrigger value="any">Match ANY condition</TabsTrigger>
+                    <TabsTrigger value="all">{t('automation.matchAll')}</TabsTrigger>
+                    <TabsTrigger value="any">{t('automation.matchAny')}</TabsTrigger>
                 </TabsList>
             </Tabs>
 
@@ -275,7 +243,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                                 const operators = getOperatorsForField(field)
                                 updateCondition(index, {
                                     field,
-                                    op: operators[0]?.value || 'equals',
+                                    op: operators[0] || 'equals',
                                     value: null,
                                 })
                             }}
@@ -286,7 +254,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                             <SelectContent>
                                 {CONDITION_FIELDS.map(field => (
                                     <SelectItem key={field.value} value={field.value}>
-                                        {field.label}
+                                        {t(`automation.fields.${field.value}`)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -301,8 +269,8 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                             </SelectTrigger>
                             <SelectContent>
                                 {getOperatorsForField(condition.field).map(op => (
-                                    <SelectItem key={op.value} value={op.value}>
-                                        {op.label}
+                                    <SelectItem key={op} value={op}>
+                                        {t(`automation.operators.${op}`)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -324,7 +292,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
 
             <Button type="button" variant="outline" size="sm" onClick={addCondition}>
                 <Plus className="size-4 mr-2" />
-                Add Condition
+                {t('automation.addCondition')}
             </Button>
         </div>
     )

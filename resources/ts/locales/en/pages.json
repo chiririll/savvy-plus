@@ -243,6 +243,12 @@
         "logsDescription": "Execution history for this automation rule",
         "logsEmpty": "No logs yet. The rule hasn't been triggered.",
         "logsActions": "Actions: {{actions}}",
+        "logsEntity": "{{type}} #{{id}}",
+        "logsStatus": {
+            "success": "Success",
+            "error": "Error",
+            "skipped": "Skipped"
+        },
         "columns": {
             "order": "#",
             "name": "Name",
@@ -253,7 +259,11 @@
             "active": "Active"
         },
         "deleteTitle": "Delete rule?",
-        "deleteDescription": "This action cannot be undone."
+        "deleteDescription": "This action cannot be undone.",
+        "conditionCount_one": "{{count}} condition",
+        "conditionCount_other": "{{count}} conditions",
+        "actionCount_one": "{{count}} action",
+        "actionCount_other": "{{count}} actions"
     },
     "reports": {
         "title": "Reports",

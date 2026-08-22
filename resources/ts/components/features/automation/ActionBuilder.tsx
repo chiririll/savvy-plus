@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -18,6 +19,7 @@ interface ActionBuilderProps {
 }
 
 export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
+    const { t } = useTranslation('forms')
     const { data: accounts } = useAccounts()
     const { data: categories } = useCategories()
     const { data: tags } = useTags()
@@ -49,7 +51,7 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
                         onValueChange={(val) => updateAction(index, { category_id: Number(val) })}
                     >
                         <SelectTrigger className="w-48">
-                            <SelectValue placeholder="Select category" />
+                            <SelectValue placeholder={t('selectCategory')} />
                         </SelectTrigger>
                         <SelectContent>
                             {categories?.map(category => (
@@ -91,7 +93,7 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
                         className="w-64"
                         value={(action.template || action.description || '') as string}
                         onChange={(e) => updateAction(index, { template: e.target.value })}
-                        placeholder="Description template..."
+                        placeholder={t('automation.descriptionTemplate')}
                     />
                 )
 
@@ -103,7 +105,7 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
                             onValueChange={(val) => updateAction(index, { to_account_id: Number(val) })}
                         >
                             <SelectTrigger className="w-40">
-                                <SelectValue placeholder="To account" />
+                                <SelectValue placeholder={t('automation.toAccount')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {accounts?.map(account => (
@@ -117,7 +119,7 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
                             className="w-40"
                             value={String(action.amount_formula ?? '')}
                             onChange={(e) => updateAction(index, { amount_formula: e.target.value })}
-                            placeholder="Amount or formula"
+                            placeholder={t('automation.amountOrFormula')}
                         />
                     </div>
                 )
@@ -142,7 +144,7 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
                             <SelectContent>
                                 {ACTION_TYPES.map(actionType => (
                                     <SelectItem key={actionType.value} value={actionType.value}>
-                                        {actionType.label}
+                                        {t(`automation.actionTypes.${actionType.value}`)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -164,12 +166,12 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
 
             <Button type="button" variant="outline" size="sm" onClick={addAction}>
                 <Plus className="size-4 mr-2" />
-                Add Action
+                {t('automation.addAction')}
             </Button>
 
             {value.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg border-dashed">
-                    No actions. Click "Add Action" to create one.
+                    {t('automation.noActions')}
                 </p>
             )}
         </div>

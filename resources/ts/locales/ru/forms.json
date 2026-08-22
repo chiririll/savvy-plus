@@ -155,7 +155,61 @@
         "namePlaceholder": "Например, автокатегория «Продукты»",
         "descriptionPlaceholder": "Опишите, что делает это правило...",
         "selectTrigger": "Выберите триггер",
-        "stopProcessing": "Не обрабатывать другие правила"
+        "stopProcessing": "Не обрабатывать другие правила",
+        "matchAll": "Все условия",
+        "matchAny": "Любое условие",
+        "addCondition": "Добавить условие",
+        "addAction": "Добавить действие",
+        "noActions": "Нет действий. Нажмите «Добавить действие», чтобы создать.",
+        "and": "и",
+        "enterValue": "Введите значение...",
+        "descriptionTemplate": "Шаблон описания...",
+        "toAccount": "Счёт назначения",
+        "amountOrFormula": "Сумма или формула",
+        "fields": {
+            "type": "Тип транзакции",
+            "amount": "Сумма",
+            "description": "Описание",
+            "account_id": "Счёт",
+            "category_id": "Категория",
+            "tags": "Теги"
+        },
+        "operators": {
+            "equals": "Равно",
+            "not_equals": "Не равно",
+            "in": "Одно из",
+            "not_in": "Не одно из",
+            "gt": "Больше",
+            "gte": "Больше или равно",
+            "lt": "Меньше",
+            "lte": "Меньше или равно",
+            "between": "Между",
+            "contains": "Содержит",
+            "not_contains": "Не содержит",
+            "starts_with": "Начинается с",
+            "ends_with": "Заканчивается на",
+            "matches": "Совпадает с regex",
+            "is_null": "Пусто",
+            "is_not_null": "Не пусто",
+            "has_any": "Есть любое из",
+            "has_all": "Есть все из",
+            "has_none": "Нет ни одного из"
+        },
+        "actionTypes": {
+            "set_category": "Задать категорию",
+            "add_tags": "Добавить теги",
+            "remove_tags": "Убрать теги",
+            "set_description": "Задать описание",
+            "create_transfer": "Создать перевод"
+        },
+        "triggers": {
+            "on_transaction_create": "При создании транзакции",
+            "on_transaction_update": "При изменении транзакции"
+        },
+        "triggerDescriptions": {
+            "on_transaction_create": "Срабатывает при создании новой транзакции",
+            "on_transaction_update": "Срабатывает при изменении транзакции"
+        }
     },
     "sso": {
         "connection": "Подключение",
