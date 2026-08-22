@@ -43,6 +43,11 @@ class Currency extends Model
         return static::base()->first();
     }
 
+    public static function baseCode(): ?string
+    {
+        return static::getBase()?->code;
+    }
+
     public function convertToBase(float $amount): float
     {
         if ($this->is_base) {

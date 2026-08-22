@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useNetWorthHistory } from '@/hooks'
+import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { defaultGroupBy } from '../types'
 import type { ReportFilters } from '../types'
 import type { CashFlowGroupBy } from '@/api/reports'
@@ -19,7 +20,7 @@ export function NetWorthChart({ filters }: NetWorthChartProps) {
     }, [filters.periodType, filters.customStartDate, filters.customEndDate])
     const { data, isLoading } = useNetWorthHistory(filters, groupBy)
 
-    const currency = data?.currency || '$'
+    const currency = data?.currency
 
     const chartOption = useMemo(() => {
         if (!data) return {}
@@ -30,7 +31,7 @@ export function NetWorthChart({ filters }: NetWorthChartProps) {
                 formatter: (params: { value: number; axisValue: string }[]) => {
                     const p = params[0]
                     return `<div class="font-medium mb-1">${p.axisValue}</div>
-                        <div>Net Worth: <strong>${currency}${p.value.toLocaleString()}</strong></div>`
+                        <div>Net Worth: <strong>${formatCurrency(p.value, currency)}</strong></div>`
                 },
             },
             grid: {
@@ -56,10 +57,7 @@ export function NetWorthChart({ filters }: NetWorthChartProps) {
             yAxis: {
                 type: 'value',
                 axisLabel: {
-                    formatter: (val: number) => {
-                        if (val >= 1000) return `${currency}${(val / 1000).toFixed(0)}k`
-                        return `${currency}${val}`
-                    },
+                    formatter: (val: number) => formatCurrencyCompact(val, currency),
                     fontSize: 11,
                     color: '#64748b',
                 },

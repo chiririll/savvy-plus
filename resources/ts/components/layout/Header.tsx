@@ -16,6 +16,7 @@ import { useTotalBalance } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth'
 import { getUserAvatarUrl, getUserInitials } from '@/lib/avatar'
+import { formatCurrency } from '@/lib/utils'
 export function Header() {
     const { theme, toggleTheme } = useTheme()
     const { data: balance, isLoading: balanceLoading } = useTotalBalance()
@@ -73,7 +74,7 @@ export function Header() {
                         <div className="flex items-center gap-2 text-sm">
                             <Wallet className="size-4 text-muted-foreground" />
                             <span className="font-mono font-medium">
-                                {(balance.total_balance ?? 0).toFixed(balance.decimals ?? 2)} {balance.currency}
+                                {formatCurrency(balance.total_balance ?? 0, balance.currency)}
                             </span>
                         </div>
                     ) : null}

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCashFlowOverTime } from '@/hooks'
+import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { defaultGroupBy } from '../types'
 import type { ReportFilters } from '../types'
 import type { CashFlowGroupBy } from '@/api/reports'
@@ -164,11 +165,7 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
             )
         }
 
-        const formatValue = (val: number) => {
-            const absVal = Math.abs(val)
-            if (absVal >= 1000) return `${currency}${(val / 1000).toFixed(0)}k`
-            return `${currency}${val}`
-        }
+        const formatValue = (val: number) => formatCurrencyCompact(val, currency)
 
         return {
             tooltip: {
@@ -191,15 +188,15 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
                     html += `<div class="space-y-1">`
                     html += `<div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span>Income: <strong>${currency}${income.toLocaleString()}</strong></span>
+                        <span>Income: <strong>${formatCurrency(income, currency)}</strong></span>
                     </div>`
                     html += `<div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                        <span>Expenses: <strong>${currency}${expenses.toLocaleString()}</strong></span>
+                        <span>Expenses: <strong>${formatCurrency(expenses, currency)}</strong></span>
                     </div>`
                     html += `<div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                        <span>Balance: <strong>${currency}${balance.toLocaleString()}</strong></span>
+                        <span>Balance: <strong>${formatCurrency(balance, currency)}</strong></span>
                     </div>`
                     html += `</div>`
 
@@ -211,13 +208,13 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
                         html += `<div class="mt-2 pt-2 border-t border-gray-200 space-y-1 opacity-70">`
                         html += `<div class="text-xs text-gray-500 mb-1">Previous Period</div>`
                         html += `<div class="flex items-center gap-2 text-sm">
-                            <span>Income: ${currency}${prevIncome.toLocaleString()}</span>
+                            <span>Income: ${formatCurrency(prevIncome, currency)}</span>
                         </div>`
                         html += `<div class="flex items-center gap-2 text-sm">
-                            <span>Expenses: ${currency}${prevExpenses.toLocaleString()}</span>
+                            <span>Expenses: ${formatCurrency(prevExpenses, currency)}</span>
                         </div>`
                         html += `<div class="flex items-center gap-2 text-sm">
-                            <span>Balance: ${currency}${prevBalance.toLocaleString()}</span>
+                            <span>Balance: ${formatCurrency(prevBalance, currency)}</span>
                         </div>`
                         html += `</div>`
                     }

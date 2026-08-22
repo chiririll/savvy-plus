@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import { TrendingUp, TrendingDown, AlertTriangle, ChevronRight } from 'lucide-react'
 import { useExpensesByCategory } from '@/hooks'
 import type { ReportFilters } from '../types'
@@ -19,10 +19,6 @@ export function ExpensesByCategory({ filters }: ExpensesByCategoryProps) {
         if (!data?.categories.length) return 0
         return Math.max(...data.categories.flatMap(c => [c.current, c.previous]))
     }, [data])
-
-    const formatCurrency = (val: number, currency: string) => {
-        return `${currency}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-    }
 
     const handleCategoryClick = (categoryId: number) => {
         navigate(`/transactions?category_ids=${categoryId}`)

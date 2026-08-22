@@ -23,6 +23,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Budget } from '@/types'
+import { formatCurrency } from '@/lib/utils'
 
 const periodLabels: Record<string, string> = {
     weekly: 'Weekly',
@@ -54,7 +55,7 @@ export const createBudgetColumns = (
         header: 'Limit',
         cell: ({ row }) => (
             <span className="font-mono font-medium">
-                {row.original.amount.toLocaleString()} {row.original.currency?.symbol ?? ''}
+                {formatCurrency(row.original.amount, row.original.currency)}
             </span>
         ),
     },
@@ -76,12 +77,10 @@ export const createBudgetColumns = (
 
             const isExceeded = progress.is_exceeded
             const percent = Math.min(progress.percent, 100)
-            const symbol = row.original.currency?.symbol ?? ''
-
             return (
                 <div className="w-44 space-y-1">
                     <div className="flex justify-between text-xs">
-                        <span>{progress.spent.toLocaleString()} {symbol} spent</span>
+                        <span>{formatCurrency(progress.spent, row.original.currency)} spent</span>
                         <span className={isExceeded ? 'text-red-600 font-medium' : ''}>
                             {progress.percent.toFixed(0)}%
                         </span>
@@ -92,8 +91,8 @@ export const createBudgetColumns = (
                     />
                     <p className="text-xs text-muted-foreground">
                         {isExceeded
-                            ? `Exceeded by ${(progress.spent - row.original.amount).toLocaleString()} ${symbol}`
-                            : `${progress.remaining.toLocaleString()} ${symbol} remaining`}
+                            ? `Exceeded by ${formatCurrency(progress.spent - row.original.amount, row.original.currency)}`
+                            : `${formatCurrency(progress.remaining, row.original.currency)} remaining`}
                     </p>
                 </div>
             )

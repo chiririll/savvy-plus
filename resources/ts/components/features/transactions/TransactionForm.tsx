@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/form'
 import { transactionSchema, TransactionFormValues } from '@/schemas/transactions'
 import { useAccounts, useCategories, useTags } from '@/hooks'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { AccountSelect } from '@/components/shared/AccountSelect'
@@ -209,8 +209,7 @@ export function TransactionForm({
             currentBalance,
             newBalance,
             insufficientFunds,
-            currency: selectedAccount.currency?.symbol ?? '',
-            decimals: selectedAccount.currency?.decimals ?? 2,
+            currency: selectedAccount.currency,
         }
     }, [selectedAccount, amount, transactionType])
 
@@ -225,8 +224,7 @@ export function TransactionForm({
         return {
             currentBalance,
             newBalance,
-            currency: selectedToAccount.currency?.symbol ?? '',
-            decimals: selectedToAccount.currency?.decimals ?? 2,
+            currency: selectedToAccount.currency,
         }
     }, [selectedToAccount, toAmount, amount, transactionType])
 
@@ -322,7 +320,7 @@ export function TransactionForm({
                         <div className="flex-1">
                             <span className="text-muted-foreground">Balance: </span>
                             <span className="font-mono font-medium">
-                                {balancePreview.currentBalance.toFixed(balancePreview.decimals)} {balancePreview.currency}
+                                {formatCurrency(balancePreview.currentBalance, balancePreview.currency)}
                             </span>
                         </div>
                         <span className="text-muted-foreground">→</span>
@@ -333,7 +331,7 @@ export function TransactionForm({
                                 balancePreview.insufficientFunds ? 'text-destructive' :
                                     balancePreview.newBalance > balancePreview.currentBalance ? 'text-green-600' : 'text-foreground'
                             )}>
-                                {balancePreview.newBalance.toFixed(balancePreview.decimals)} {balancePreview.currency}
+                                {formatCurrency(balancePreview.newBalance, balancePreview.currency)}
                             </span>
                         </div>
                         {balancePreview.insufficientFunds && (
@@ -348,14 +346,14 @@ export function TransactionForm({
                         <div className="flex-1">
                             <span className="text-muted-foreground">To Balance: </span>
                             <span className="font-mono font-medium">
-                                {toBalancePreview.currentBalance.toFixed(toBalancePreview.decimals)} {toBalancePreview.currency}
+                                {formatCurrency(toBalancePreview.currentBalance, toBalancePreview.currency)}
                             </span>
                         </div>
                         <span className="text-muted-foreground">→</span>
                         <div className="flex-1 text-right">
                             <span className="text-muted-foreground">After: </span>
                             <span className="font-mono font-medium text-green-600">
-                                {toBalancePreview.newBalance.toFixed(toBalancePreview.decimals)} {toBalancePreview.currency}
+                                {formatCurrency(toBalancePreview.newBalance, toBalancePreview.currency)}
                             </span>
                         </div>
                     </div>
@@ -587,7 +585,7 @@ export function TransactionForm({
                                                         />
                                                     </td>
                                                     <td className="p-2 text-right font-mono text-muted-foreground">
-                                                        {total.toFixed(selectedAccount?.currency?.decimals ?? 2)}
+                                                        {formatCurrency(total, selectedAccount?.currency, { showSymbol: false })}
                                                     </td>
                                                     <td className="p-1">
                                                         <Button
@@ -610,7 +608,7 @@ export function TransactionForm({
                                                 Total:
                                             </td>
                                             <td className="p-2 text-right font-mono font-semibold">
-                                                {itemsTotal.toFixed(selectedAccount?.currency?.decimals ?? 2)}
+                                                {formatCurrency(itemsTotal, selectedAccount?.currency, { showSymbol: false })}
                                             </td>
                                             <td></td>
                                         </tr>

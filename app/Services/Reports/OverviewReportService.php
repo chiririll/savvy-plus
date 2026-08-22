@@ -42,7 +42,7 @@ class OverviewReportService
                 'previous' => $previous['savingsRate'] ?? null,
                 'sparkline' => $sparkline['savingsRate'],
             ],
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 

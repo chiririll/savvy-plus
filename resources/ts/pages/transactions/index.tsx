@@ -24,7 +24,7 @@ import { createTransactionColumns } from '@/components/features/transactions'
 import { useTransactions, useDeleteTransaction, useDuplicateTransaction, useCategories, useTags } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { TransactionType, Transaction } from '@/types'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 
 const TYPE_FILTERS: { value: TransactionType | null; label: string; icon?: typeof ArrowDownLeft }[] = [
     { value: null, label: 'All' },
@@ -35,7 +35,7 @@ const TYPE_FILTERS: { value: TransactionType | null; label: string; icon?: typeo
 
 function TransactionItems({ row }: { row: Row<Transaction> }) {
     const items = row.original.items
-    const decimals = row.original.account.currency?.decimals ?? 2
+    const currency = row.original.account.currency
     if (!items || items.length === 0) return null
 
     return (
@@ -54,8 +54,8 @@ function TransactionItems({ row }: { row: Row<Transaction> }) {
                         <tr key={item.id ?? idx} className="border-t border-border/50">
                             <td className="py-1.5">{item.name}</td>
                             <td className="py-1.5 text-right font-mono">{item.quantity}</td>
-                            <td className="py-1.5 text-right font-mono">{item.pricePerUnit.toFixed(decimals)}</td>
-                            <td className="py-1.5 text-right font-mono font-medium">{item.totalPrice.toFixed(decimals)}</td>
+                            <td className="py-1.5 text-right font-mono">{formatCurrency(item.pricePerUnit, currency, { showSymbol: false })}</td>
+                            <td className="py-1.5 text-right font-mono font-medium">{formatCurrency(item.totalPrice, currency, { showSymbol: false })}</td>
                         </tr>
                     ))}
                 </tbody>

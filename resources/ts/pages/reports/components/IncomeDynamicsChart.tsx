@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { LineChart, BarChart3, ChevronDown } from 'lucide-react'
 import { useTransactionReportDynamics } from '@/hooks'
+import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { defaultGroupBy } from '../types'
 import type { ReportFilters } from '../types'
 import type { CashFlowGroupBy } from '@/api/reports'
@@ -62,7 +63,7 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
     const enabledSources = sources.filter(s => s.enabled)
     const enabledCount = enabledSources.length
 
-    const currency = data?.currency || '$'
+    const currency = data?.currency
 
     const chartData = useMemo(() => {
         if (!data) return { labels: [], datasets: [] }
@@ -124,7 +125,7 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
                     params.forEach(p => {
                         html += `<div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full" style="background:${p.color}"></span>
-                            <span>${p.seriesName}: <strong>${currency}${p.value.toLocaleString()}</strong></span>
+                            <span>${p.seriesName}: <strong>${formatCurrency(p.value, currency)}</strong></span>
                         </div>`
                     })
                     return html
@@ -161,10 +162,7 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
             yAxis: {
                 type: 'value',
                 axisLabel: {
-                    formatter: (val: number) => {
-                        if (val >= 1000) return `${currency}${(val / 1000).toFixed(0)}k`
-                        return `${currency}${val}`
-                    },
+                    formatter: (val: number) => formatCurrencyCompact(val, currency),
                     fontSize: 11,
                     color: '#64748b',
                 },

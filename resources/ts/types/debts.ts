@@ -43,7 +43,7 @@ export interface DebtSummary {
     total_owed_to_me: number
     net_debt: number
     debts_count: number
-    currency: string
+    currency: string | null
     decimals: number
 }
 

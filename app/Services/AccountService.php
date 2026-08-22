@@ -59,7 +59,7 @@ class AccountService
     {
         $baseCurrency = Currency::getBase();
         if (! $baseCurrency) {
-            return ['dates' => [], 'series' => [], 'currency' => '$', 'decimals' => 2];
+            return ['dates' => [], 'series' => [], 'currency' => null, 'decimals' => 2];
         }
 
         $decimals = $baseCurrency->decimals;
@@ -174,7 +174,7 @@ class AccountService
         return [
             'dates' => $dates,
             'series' => $series,
-            'currency' => $baseCurrency->symbol,
+            'currency' => $baseCurrency->code,
             'decimals' => $decimals,
         ];
     }
@@ -262,7 +262,7 @@ class AccountService
             'total_balance' => round($totalRegularBalance, $decimals),
             'debts_impact' => round($debtsImpact, $decimals),
             'net_worth' => round($netWorth, $decimals),
-            'currency' => $baseCurrency->symbol,
+            'currency' => $baseCurrency->code,
             'currency_code' => $baseCurrency->code,
             'decimals' => $decimals,
             'accounts_count' => $regularAccounts->count(),
@@ -277,7 +277,7 @@ class AccountService
             return [
                 'current' => 0,
                 'previous' => null,
-                'currency' => '$',
+                'currency' => null,
                 'decimals' => 2,
             ];
         }
@@ -304,7 +304,7 @@ class AccountService
         return [
             'current' => $currentBalance,
             'previous' => $previousBalance,
-            'currency' => $baseCurrency->symbol,
+            'currency' => $baseCurrency->code,
             'decimals' => $baseCurrency->decimals,
         ];
     }

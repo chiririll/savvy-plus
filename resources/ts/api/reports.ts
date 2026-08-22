@@ -12,7 +12,7 @@ export interface OverviewMetrics {
     expenses: MetricData
     netCashFlow: MetricData
     savingsRate: MetricData
-    currency: string
+    currency: string | null
 }
 
 export interface SankeyNode {
@@ -34,7 +34,7 @@ export interface MoneyFlowData {
         expenses: number
         savings: number
     }
-    currency: string
+    currency: string | null
 }
 
 export interface ExpensePaceMonth {
@@ -50,7 +50,7 @@ export interface ExpensePaceMonth {
 
 export interface ExpensePaceData {
     months: ExpensePaceMonth[]
-    currency: string
+    currency: string | null
 }
 
 export interface CategoryExpense {
@@ -64,7 +64,7 @@ export interface CategoryExpense {
 
 export interface ExpensesByCategoryData {
     categories: CategoryExpense[]
-    currency: string
+    currency: string | null
 }
 
 export interface CashFlowDataPoint {
@@ -79,7 +79,7 @@ export interface CashFlowDataPoint {
 
 export interface CashFlowOverTimeData {
     items: CashFlowDataPoint[]
-    currency: string
+    currency: string | null
 }
 
 export type CashFlowGroupBy = 'day' | 'week' | 'month'
@@ -93,7 +93,7 @@ export interface HeatmapDataPoint {
 export interface ActivityHeatmapData {
     items: HeatmapDataPoint[]
     max: number
-    currency: string
+    currency: string | null
 }
 
 // Transaction Reports (Expenses/Income)
@@ -107,7 +107,7 @@ export interface TransactionSummaryData {
     prevAvgPerDay: number | null
     prevAvgPerWeek: number | null
     daysInPeriod: number
-    currency: string
+    currency: string | null
 }
 
 export interface TransactionCategoryItem {
@@ -122,7 +122,7 @@ export interface TransactionCategoryItem {
 export interface TransactionsByCategoryData {
     items: TransactionCategoryItem[]
     total: number
-    currency: string
+    currency: string | null
 }
 
 export interface TransactionDynamicsDataset {
@@ -135,7 +135,7 @@ export interface TransactionDynamicsDataset {
 export interface TransactionDynamicsData {
     labels: string[]
     datasets: TransactionDynamicsDataset[]
-    currency: string
+    currency: string | null
 }
 
 export interface TopTransactionItem {
@@ -157,7 +157,7 @@ export interface TopTransactionItem {
 
 export interface TopTransactionsData {
     items: TopTransactionItem[]
-    currency: string
+    currency: string | null
 }
 
 // Net Worth
@@ -175,13 +175,13 @@ export interface NetWorthData {
     change: number
     changePercent: number
     accounts: NetWorthAccount[]
-    currency: string
+    currency: string | null
 }
 
 export interface NetWorthHistoryData {
     labels: string[]
     values: number[]
-    currency: string
+    currency: string | null
 }
 
 function buildParams(filters: ReportFilters): Record<string, string | string[]> {

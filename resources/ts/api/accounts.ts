@@ -5,7 +5,7 @@ const ENDPOINT = '/accounts'
 
 export interface AccountsSummary {
     total_balance: number
-    currency: string
+    currency: string | null
     currency_code: string
     decimals: number
     accounts_count: number
@@ -25,14 +25,14 @@ export interface BalanceHistorySeries {
 export interface BalanceHistoryResponse {
     dates: string[]
     series: BalanceHistorySeries[]
-    currency: string
+    currency: string | null
     decimals: number
 }
 
 export interface BalanceComparisonResponse {
     current: number
     previous: number | null
-    currency: string
+    currency: string | null
     decimals: number
 }
 

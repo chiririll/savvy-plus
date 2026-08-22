@@ -3,7 +3,7 @@ import ReactECharts from 'echarts-for-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
 import { useExpensePace } from '@/hooks'
 import type { ReportFilters } from '../types'
@@ -86,7 +86,7 @@ function processMonthData(month: ExpensePaceMonth): MonthChartData {
     }
 }
 
-function buildChartOption(chartData: MonthChartData, currency: string) {
+function buildChartOption(chartData: MonthChartData, currency: string | null) {
     const { days, idealPace, actualExpenses, currentDay, currentActual, budget, daysInMonth, hasBudget, forecastTotal } = chartData
 
     const maxValue = Math.max(
@@ -96,14 +96,7 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
         100
     )
 
-    const formatYAxis = (val: number) => {
-        if (maxValue >= 10000) {
-            return `${currency}${(val / 1000).toFixed(0)}k`
-        } else if (maxValue >= 1000) {
-            return `${currency}${(val / 1000).toFixed(1)}k`
-        }
-        return `${currency}${val}`
-    }
+    const formatYAxis = (val: number) => formatCurrencyCompact(val, currency)
 
     const series: any[] = []
 
@@ -187,7 +180,7 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
                 label: {
                     show: true,
                     position: 'end',
-                    formatter: `Budget: ${currency}${budget.toLocaleString()}`,
+                    formatter: `Budget: ${formatCurrency(budget, currency)}`,
                     fontSize: 11,
                     color: '#22c55e',
                 },
@@ -213,7 +206,7 @@ function buildChartOption(chartData: MonthChartData, currency: string) {
                         const color = colors[p.seriesName] || '#64748b'
                         html += `<div class="flex items-center gap-2">
                             <span style="background:${color}" class="w-2 h-2 rounded-full inline-block"></span>
-                            <span>${p.seriesName}: <strong>${currency}${p.value.toLocaleString()}</strong></span>
+                            <span>${p.seriesName}: <strong>${formatCurrency(p.value, currency)}</strong></span>
                         </div>`
                     }
                 })
@@ -259,9 +252,7 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
         return buildChartOption(currentMonthData, data.currency)
     }, [currentMonthData, data])
 
-    const formatCurrency = (val: number) => {
-        return `${data?.currency ?? '$'}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-    }
+    const currency = data?.currency
 
     if (error) {
         return (
@@ -298,8 +289,8 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
                                     : 'text-slate-700'
                             )}>
                                 {currentMonthData.hasBudget
-                                    ? formatCurrency(currentMonthData.budgetRemaining)
-                                    : formatCurrency(currentMonthData.currentActual)
+                                    ? formatCurrency(currentMonthData.budgetRemaining, currency)
+                                    : formatCurrency(currentMonthData.currentActual, currency)
                                 }
                             </p>
                         </div>
@@ -347,7 +338,7 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
                                             {currentMonthData.currentDay ? 'Projected by end of month' : 'Total spent'}
                                         </p>
                                         <p className="text-lg font-semibold">
-                                            {currentMonthData.currentDay ? formatCurrency(currentMonthData.forecastTotal) : formatCurrency(currentMonthData.totalSpent)}
+                                            {currentMonthData.currentDay ? formatCurrency(currentMonthData.forecastTotal, currency) : formatCurrency(currentMonthData.totalSpent, currency)}
                                         </p>
                                     </div>
                                     {currentMonthData.hasBudget && (
@@ -357,18 +348,18 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
                                         )}>
                                             {currentMonthData.isOverBudget ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
                                             <span className="text-sm font-medium">
-                                                {currentMonthData.isOverBudget ? '+' : ''}{formatCurrency(Math.abs(currentMonthData.forecastDiff))} {currentMonthData.isOverBudget ? 'over' : 'under'} budget
+                                                {currentMonthData.isOverBudget ? '+' : ''}{formatCurrency(Math.abs(currentMonthData.forecastDiff), currency)} {currentMonthData.isOverBudget ? 'over' : 'under'} budget
                                             </span>
                                         </div>
                                     )}
                                 </div>
                                 {currentMonthData.currentDay ? (
                                     <p className="text-xs text-muted-foreground mt-2">
-                                        {formatCurrency(currentMonthData.currentActual)} spent in {currentMonthData.currentDay} days = {formatCurrency(currentMonthData.dailyAverage)}/day avg × {currentMonthData.daysInMonth} days
+                                        {formatCurrency(currentMonthData.currentActual, currency)} spent in {currentMonthData.currentDay} days = {formatCurrency(currentMonthData.dailyAverage, currency)}/day avg × {currentMonthData.daysInMonth} days
                                     </p>
                                 ) : (
                                     <p className="text-xs text-muted-foreground mt-2">
-                                        {formatCurrency(currentMonthData.totalSpent)} spent over {currentMonthData.daysInMonth} days = {formatCurrency(currentMonthData.dailyAverage)}/day avg
+                                        {formatCurrency(currentMonthData.totalSpent, currency)} spent over {currentMonthData.daysInMonth} days = {formatCurrency(currentMonthData.dailyAverage, currency)}/day avg
                                     </p>
                                 )}
                             </div>

@@ -55,7 +55,7 @@ class NetWorthReportService
             'change' => round($change, 2),
             'changePercent' => $changePercent,
             'accounts' => $accounts,
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 
@@ -82,7 +82,7 @@ class NetWorthReportService
         return [
             'labels' => $labels,
             'values' => $data,
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 

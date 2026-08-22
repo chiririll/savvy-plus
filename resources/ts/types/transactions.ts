@@ -67,5 +67,5 @@ export interface TransactionSummary {
     expense: number
     balance: number
     transactions_count: number
-    currency: string
+    currency: string | null
 }

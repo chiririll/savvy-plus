@@ -85,7 +85,7 @@ class CategoryController extends Controller
         return response()->json([
             'data' => CategoryResource::collection($summary),
             'total' => $summary->sum('total_amount'),
-            'currency' => $baseCurrency?->symbol ?? '',
+            'currency' => $baseCurrency?->code,
         ]);
     }
 }

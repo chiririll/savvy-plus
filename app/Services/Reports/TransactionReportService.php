@@ -49,7 +49,7 @@ class TransactionReportService
             'prevAvgPerDay' => $prevAvgPerDay,
             'prevAvgPerWeek' => $prevAvgPerWeek,
             'daysInPeriod' => $daysInPeriod,
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 
@@ -75,7 +75,7 @@ class TransactionReportService
         return [
             'items' => $items,
             'total' => round($total, 2),
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 
@@ -131,7 +131,7 @@ class TransactionReportService
         return [
             'labels' => $labels,
             'datasets' => $datasets,
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 
@@ -142,7 +142,7 @@ class TransactionReportService
 
         return [
             'items' => $items,
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 }

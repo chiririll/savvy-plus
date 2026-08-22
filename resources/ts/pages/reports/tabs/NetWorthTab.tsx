@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react'
 import { NetWorthChart } from '../components/NetWorthChart'
 import { useNetWorth } from '@/hooks'
@@ -16,10 +16,6 @@ export function NetWorthTab({ filters }: NetWorthTabProps) {
     const { data, isLoading } = useNetWorth(filters)
 
     const isPositive = (data?.change ?? 0) >= 0
-
-    const formatCurrency = (val: number, currency: string = '$') => {
-        return `${currency}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-    }
 
     return (
         <div className="space-y-6">

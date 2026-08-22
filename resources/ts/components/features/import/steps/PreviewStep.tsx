@@ -1,7 +1,7 @@
 import { CheckCircle2, XCircle, AlertTriangle, Copy } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import type { ImportPreviewResult } from '@/types/import'
 
 interface PreviewStepProps {
@@ -146,7 +146,7 @@ export function PreviewStep({ previewResult, isLoading }: PreviewStepProps) {
                                             </Badge>
                                         </td>
                                         <td className="px-4 py-2 text-right font-mono">
-                                            {tx.amount?.toFixed(2) || '-'}
+                                            {tx.amount != null ? formatCurrency(tx.amount) : '-'}
                                         </td>
                                         <td className="px-4 py-2 truncate max-w-[200px]">
                                             {tx.description || '-'}

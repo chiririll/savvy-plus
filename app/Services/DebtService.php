@@ -184,7 +184,7 @@ class DebtService
                 'total_owed_to_me' => 0,
                 'net_debt' => 0,
                 'debts_count' => 0,
-                'currency' => '$',
+                'currency' => null,
                 'decimals' => 2,
             ];
         }
@@ -210,7 +210,7 @@ class DebtService
             'total_owed_to_me' => round($totalOwedToMe, $decimals),
             'net_debt' => round($totalOwedToMe - $totalIOwe, $decimals),
             'debts_count' => $debts->count(),
-            'currency' => $baseCurrency->symbol,
+            'currency' => $baseCurrency->code,
             'decimals' => $decimals,
         ];
     }

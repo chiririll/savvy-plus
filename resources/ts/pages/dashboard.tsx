@@ -34,7 +34,7 @@ import { Progress } from '@/components/ui/progress'
 import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison, useUpcomingRecurring } from '@/hooks'
 import { useOverviewMetrics } from '@/hooks/use-reports'
 import type { ReportFilters } from '@/pages/reports/types'
-import { cn, formatAmount } from '@/lib/utils'
+import { cn, formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { useMemo, useState } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { useTheme } from '@/hooks/use-theme'
@@ -193,8 +193,7 @@ export default function DashboardPage() {
     const summary = monthData?.summary
 
     const totalBalance = balance?.total_balance ?? 0
-    const currency = balance?.currency ?? '$'
-    const decimals = balance?.decimals ?? 2
+    const currency = balance?.currency
     const monthIncome = Number(summary?.income) || 0
     const monthExpense = Number(summary?.expense) || 0
 
@@ -312,13 +311,12 @@ export default function DashboardPage() {
                 splitLine: { lineStyle: { color: isDark ? '#374151' : '#e5e7eb' } },
                 axisLabel: {
                     color: isDark ? '#9ca3af' : '#6b7280',
-                    formatter: (value: number) =>
-                        value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value.toString(),
+                    formatter: (value: number) => formatCurrencyCompact(value, currency, { showSymbol: false }),
                 },
             },
             series,
         }
-    }, [historyData, theme])
+    }, [historyData, theme, currency])
 
     const pieChartOption = useMemo(() => {
         if (!expensesByCategory?.data.length) return {}
@@ -340,7 +338,7 @@ export default function DashboardPage() {
                 borderColor: isDark ? '#374151' : '#e5e7eb',
                 textStyle: { color: isDark ? '#f3f4f6' : '#1f2937' },
                 formatter: (params: { name: string; value: number; percent: number }) =>
-                    `${params.name}<br/>${params.value.toFixed(decimals)} ${categoryCurrency} (${params.percent.toFixed(1)}%)`,
+                    `${params.name}<br/>${formatCurrency(params.value, categoryCurrency)} (${params.percent.toFixed(1)}%)`,
             },
             legend: {
                 orient: 'horizontal',
@@ -377,7 +375,7 @@ export default function DashboardPage() {
                 },
             ],
         }
-    }, [expensesByCategory, theme, currency, decimals])
+    }, [expensesByCategory, theme, currency])
 
     const handlePeriodChange = (value: PeriodPreset) => {
         setChartPeriod(value)
@@ -404,7 +402,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold font-mono">
-                            {totalBalance.toFixed(decimals)} {currency}
+                            {formatCurrency(totalBalance, currency)}
                         </div>
                         {balanceChange !== null && (
                             <div className={cn(
@@ -431,7 +429,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold font-mono text-green-600">
-                            +{monthIncome.toFixed(decimals)} {currency}
+                            +{formatCurrency(monthIncome, currency)}
                         </div>
                         {incomeChange !== null && (
                             <div className={cn(
@@ -458,7 +456,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold font-mono text-red-600">
-                            -{monthExpense.toFixed(decimals)} {currency}
+                            -{formatCurrency(monthExpense, currency)}
                         </div>
                         {expenseChange !== null && (
                             <div className={cn(
@@ -563,7 +561,7 @@ export default function DashboardPage() {
                                         <div className="flex items-center gap-2">
                                             <div className="text-right">
                                                 <p className="text-sm font-mono font-medium">
-                                                    {(account.currentBalance ?? 0).toFixed(account.currency?.decimals ?? 2)}
+                                                    {formatCurrency(account.currentBalance ?? 0, account.currency, { showSymbol: false })}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
                                                     {account.currency?.symbol ?? ''}
@@ -683,7 +681,7 @@ export default function DashboardPage() {
                                                 className={`text-sm font-mono font-medium ${getTransactionColor(transaction.type)}`}
                                             >
                                                 {getTransactionSign(transaction.type)}
-                                                {transaction.amount.toFixed(transaction.account.currency?.decimals ?? 2)}
+                                                {formatCurrency(transaction.amount, transaction.account.currency, { showSymbol: false })}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
                                                 {transaction.account.currency?.symbol ?? ''}
@@ -721,7 +719,6 @@ export default function DashboardPage() {
                                 const progress = budget.progress
                                 const percent = progress ? Math.min(progress.percent, 100) : 0
                                 const isExceeded = progress?.is_exceeded ?? false
-                                const symbol = budget.currency?.symbol ?? ''
 
                                 return (
                                     <Link
@@ -740,8 +737,8 @@ export default function DashboardPage() {
                                             className={`h-2 mb-2 ${isExceeded ? '[&>div]:bg-red-500' : ''}`}
                                         />
                                         <div className="flex justify-between text-xs text-muted-foreground">
-                                            <span>{progress?.spent.toLocaleString() ?? 0} {symbol}</span>
-                                            <span>{budget.amount.toLocaleString()} {symbol}</span>
+                                            <span>{formatCurrency(progress?.spent ?? 0, budget.currency)}</span>
+                                            <span>{formatCurrency(budget.amount, budget.currency)}</span>
                                         </div>
                                         <p className="text-xs text-muted-foreground mt-1">
                                             {budget.isGlobal
@@ -791,7 +788,7 @@ export default function DashboardPage() {
                                     <div>
                                         <p className="text-xs text-muted-foreground">I Owe</p>
                                         <p className="font-mono font-semibold text-red-600">
-                                            {debtSummary.total_i_owe.toFixed(decimals)} {debtSummary.currency}
+                                            {formatCurrency(debtSummary.total_i_owe, debtSummary.currency)}
                                         </p>
                                     </div>
                                 </div>
@@ -802,7 +799,7 @@ export default function DashboardPage() {
                                     <div>
                                         <p className="text-xs text-muted-foreground">Owed to Me</p>
                                         <p className="font-mono font-semibold text-green-600">
-                                            {debtSummary.total_owed_to_me.toFixed(decimals)} {debtSummary.currency}
+                                            {formatCurrency(debtSummary.total_owed_to_me, debtSummary.currency)}
                                         </p>
                                     </div>
                                 </div>
@@ -817,7 +814,7 @@ export default function DashboardPage() {
                                     <div>
                                         <p className="text-xs text-muted-foreground">Net Position</p>
                                         <p className={`font-mono font-semibold ${debtSummary.net_debt >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                            {Math.abs(debtSummary.net_debt).toFixed(decimals)} {debtSummary.currency}
+                                            {formatCurrency(Math.abs(debtSummary.net_debt), debtSummary.currency)}
                                         </p>
                                     </div>
                                 </div>
@@ -848,7 +845,7 @@ export default function DashboardPage() {
                                                     {debt.paymentProgress.toFixed(0)}% paid
                                                 </span>
                                                 <span className={debt.debtType === 'i_owe' ? 'text-red-600' : 'text-green-600'}>
-                                                    {debt.remainingDebt.toFixed(debt.currency?.decimals ?? 2)} {debt.currency?.symbol}
+                                                    {formatCurrency(debt.remainingDebt, debt.currency)}
                                                 </span>
                                             </div>
                                             {debt.counterparty && (
@@ -915,7 +912,7 @@ export default function DashboardPage() {
                                         recurring.type === 'expense' ? 'text-red-600' : ''
                                     }`}>
                                         {recurring.type === 'income' ? '+' : recurring.type === 'expense' ? '-' : ''}
-                                        {recurring.amount.toFixed(recurring.account.currency?.decimals ?? 2)} {recurring.account.currency?.symbol}
+                                        {formatCurrency(recurring.amount, recurring.account.currency)}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-1">
                                         {new Date(recurring.nextRunDate).toLocaleDateString('en-US', {

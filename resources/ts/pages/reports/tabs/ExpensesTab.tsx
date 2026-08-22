@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Calendar, CalendarDays } from 'lucide-react'
 import { ExpensesStructureChart } from '../components/ExpensesStructureChart'
 import { ExpensesDynamicsChart } from '../components/ExpensesDynamicsChart'
@@ -20,10 +20,6 @@ export function ExpensesTab({ filters }: ExpensesTabProps) {
         : 0
     const absoluteChange = data ? data.total - (data.previous || 0) : 0
     const isIncrease = percentChange > 0
-
-    const formatCurrency = (val: number, currency: string = '$') => {
-        return `${currency}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-    }
 
     return (
         <div className="space-y-6">

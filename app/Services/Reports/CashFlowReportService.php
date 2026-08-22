@@ -36,7 +36,7 @@ class CashFlowReportService
                 'expenses' => round($totalExpenses, 2),
                 'savings' => round(max(0, $totalIncome - $totalExpenses), 2),
             ],
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 
@@ -74,7 +74,7 @@ class CashFlowReportService
 
         return [
             'items' => $result,
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 

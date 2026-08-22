@@ -4,6 +4,7 @@ import ReactECharts from 'echarts-for-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useMoneyFlow } from '@/hooks'
+import { formatCurrency } from '@/lib/utils'
 import type { ReportFilters } from '../types'
 
 interface SankeyDiagramProps {
@@ -24,11 +25,11 @@ export function SankeyDiagram({ filters }: SankeyDiagramProps) {
                 formatter: (params: { data: { source?: string; target?: string; value: number }; name?: string; value?: number }) => {
                     if (params.data.source && params.data.target) {
                         // Link tooltip
-                        return `${params.data.source} → ${params.data.target}<br/><strong>${data.currency}${params.data.value.toLocaleString()}</strong>`
+                        return `${params.data.source} → ${params.data.target}<br/><strong>${formatCurrency(params.data.value, data.currency)}</strong>`
                     }
                     // Node tooltip - params.value contains the calculated sum from ECharts
                     const nodeValue = params.value ?? params.data.value ?? 0
-                    return `${params.name}: <strong>${data.currency}${nodeValue.toLocaleString()}</strong>`
+                    return `${params.name}: <strong>${formatCurrency(nodeValue, data.currency)}</strong>`
                 },
             },
             series: [{

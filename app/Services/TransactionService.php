@@ -147,7 +147,7 @@ class TransactionService
             'expense' => round($expense, 2),
             'balance' => round($income - $expense, 2),
             'transactions_count' => $transactions->count(),
-            'currency' => $baseCurrency?->symbol ?? '$',
+            'currency' => $baseCurrency?->code,
         ];
     }
 

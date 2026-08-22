@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Sparkline } from '@/components/ui/sparkline'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import type { CompareType } from '../types'
 
@@ -15,7 +15,7 @@ interface MetricCardProps {
     currency?: string
 }
 
-export function MetricCard({ title, value, previousValue, sparklineData, type, compareWith, suffix, currency = '$' }: MetricCardProps) {
+export function MetricCard({ title, value, previousValue, sparklineData, type, compareWith, suffix, currency }: MetricCardProps) {
     const absoluteChange = previousValue != null ? value - previousValue : null
     const percentChange = previousValue && previousValue !== 0
         ? ((value - previousValue) / previousValue) * 100
@@ -29,26 +29,18 @@ export function MetricCard({ title, value, previousValue, sparklineData, type, c
 
     const sparklineColor = type === 'income' ? 'success' : type === 'expense' ? 'danger' : 'default'
 
-    const formatCurrency = (val: number) => {
-        const formatted = new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(Math.abs(val))
-        return `${val < 0 ? '-' : ''}${currency}${formatted}`
-    }
-
     const formatValue = (val: number) => {
         if (type === 'percent') {
             return `${val.toFixed(1)}%`
         }
-        return formatCurrency(val)
+        return formatCurrency(val, currency)
     }
 
     const formatChangeValue = (val: number) => {
         if (type === 'percent') {
             return `${val > 0 ? '+' : ''}${val.toFixed(1)}pp`
         }
-        return `${val > 0 ? '+' : ''}${formatCurrency(val)}`
+        return `${val > 0 ? '+' : ''}${formatCurrency(val, currency)}`
     }
 
     return (

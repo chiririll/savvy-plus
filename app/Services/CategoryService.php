@@ -104,7 +104,7 @@ class CategoryService
             ->get()
             ->map(function ($category) use ($totals, $baseCurrency) {
                 $category->total_amount = (float) ($totals[$category->id] ?? 0);
-                $category->currency = $baseCurrency?->symbol ?? '';
+                $category->currency = $baseCurrency?->code;
 
                 return $category;
             });

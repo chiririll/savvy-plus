@@ -22,7 +22,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { RecurringTransaction } from '@/types'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 
 const typeConfig = {
     income: { icon: ArrowDownLeft, color: 'text-green-500', label: 'Income' },
@@ -84,7 +84,7 @@ export const createRecurringColumns = ({
                 row.original.type === 'expense' && 'text-red-600'
             )}>
                 {row.original.type === 'expense' && '-'}
-                {row.original.amount.toLocaleString()} {row.original.account.currency?.symbol}
+                {formatCurrency(row.original.amount, row.original.account.currency)}
             </span>
         ),
     },

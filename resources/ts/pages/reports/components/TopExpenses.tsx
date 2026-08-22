@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronRight } from 'lucide-react'
 import { useTransactionReportTop } from '@/hooks'
+import { formatCurrency } from '@/lib/utils'
 import type { ReportFilters } from '../types'
 
 interface TopExpensesProps {
@@ -16,15 +17,11 @@ export function TopExpenses({ filters, limit = 10 }: TopExpensesProps) {
     const { data, isLoading } = useTransactionReportTop(filters, 'expense', limit)
 
     const transactions = data?.items || []
-    const currency = data?.currency || '$'
+    const currency = data?.currency
 
     const totalTop = useMemo(() => {
         return transactions.reduce((sum, t) => sum + t.amount, 0)
     }, [transactions])
-
-    const formatCurrency = (val: number) => {
-        return `${currency}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-    }
 
     const formatDate = (dateStr: string) => {
         if (!dateStr) return ''
@@ -52,7 +49,7 @@ export function TopExpenses({ filters, limit = 10 }: TopExpensesProps) {
                     {!isLoading && transactions.length > 0 && (
                         <div className="text-right">
                             <p className="text-sm text-muted-foreground">Top {transactions.length} total</p>
-                            <p className="text-lg font-semibold text-red-600">{formatCurrency(totalTop)}</p>
+                            <p className="text-lg font-semibold text-red-600">{formatCurrency(totalTop, currency)}</p>
                         </div>
                     )}
                 </div>
@@ -106,7 +103,7 @@ export function TopExpenses({ filters, limit = 10 }: TopExpensesProps) {
                                 {/* Amount */}
                                 <div className="text-right flex-shrink-0">
                                     <p className="font-semibold text-red-600">
-                                        -{formatCurrency(transaction.amount)}
+                                        -{formatCurrency(transaction.amount, currency)}
                                     </p>
                                 </div>
 

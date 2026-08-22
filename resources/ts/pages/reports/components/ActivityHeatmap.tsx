@@ -2,7 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import { useActivityHeatmap } from '@/hooks'
 import type { ReportFilters } from '../types'
 
@@ -93,10 +93,6 @@ export function ActivityHeatmap({ filters }: ActivityHeatmapProps) {
         ro.observe(el)
         return () => ro.disconnect()
     }, [count])
-
-    const formatCurrency = (val: number, currency: string) => {
-        return `${currency}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-    }
 
     if (error) {
         return (

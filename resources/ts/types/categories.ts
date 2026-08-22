@@ -21,5 +21,5 @@ export interface CategoryFormData {
 export interface CategorySummaryResponse {
     data: Category[]
     total: number
-    currency: string
+    currency: string | null
 }

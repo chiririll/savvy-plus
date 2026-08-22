@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PieChart, BarChart3, LayoutGrid } from 'lucide-react'
 import { useTransactionReportByCategory } from '@/hooks'
+import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import type { ReportFilters } from '../types'
 
 type ViewMode = 'donut' | 'bar' | 'treemap'
@@ -27,11 +28,7 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
     }, [data])
 
     const total = data?.total || 0
-    const currency = data?.currency || '$'
-
-    const formatCurrency = (val: number) => {
-        return `${currency}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-    }
+    const currency = data?.currency
 
     // Donut chart option
     const donutOption = useMemo(() => ({
@@ -39,7 +36,7 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
             trigger: 'item',
             formatter: (params: { name: string; value: number; percent: number }) => {
                 return `<div class="font-medium">${params.name}</div>
-                    <div>${formatCurrency(params.value)} (${params.percent.toFixed(1)}%)</div>`
+                    <div>${formatCurrency(params.value, currency)} (${params.percent.toFixed(1)}%)</div>`
             },
         },
         legend: {
@@ -96,7 +93,7 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
             left: '35%',
             top: '45%',
             style: {
-                text: formatCurrency(total),
+                text: formatCurrency(total, currency),
                 textAlign: 'center',
                 fontSize: 24,
                 fontWeight: 'bold',
@@ -129,7 +126,7 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
                     const item = params[0]
                     const percent = ((item.value / total) * 100).toFixed(1)
                     return `<div class="font-medium">${item.name}</div>
-                        <div>${formatCurrency(item.value)} (${percent}%)</div>`
+                        <div>${formatCurrency(item.value, currency)} (${percent}%)</div>`
                 },
             },
             grid: {
@@ -141,7 +138,7 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
             xAxis: {
                 type: 'value',
                 axisLabel: {
-                    formatter: (val: number) => `${currency}${(val / 1000).toFixed(1)}k`,
+                    formatter: (val: number) => formatCurrencyCompact(val, currency),
                     fontSize: 11,
                     color: '#64748b',
                 },
@@ -172,7 +169,7 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
                 label: {
                     show: true,
                     position: 'right',
-                    formatter: (params: { value: number }) => formatCurrency(params.value),
+                    formatter: (params: { value: number }) => formatCurrency(params.value, currency),
                     fontSize: 11,
                     color: '#64748b',
                 },
@@ -186,7 +183,7 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
             formatter: (params: { name: string; value: number }) => {
                 const percent = ((params.value / total) * 100).toFixed(1)
                 return `<div class="font-medium">${params.name}</div>
-                    <div>${formatCurrency(params.value)} (${percent}%)</div>`
+                    <div>${formatCurrency(params.value, currency)} (${percent}%)</div>`
             },
         },
         series: [{
@@ -200,7 +197,7 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
                 show: true,
                 formatter: (params: { name: string; value: number }) => {
                     const percent = ((params.value / total) * 100).toFixed(0)
-                    return `{name|${params.name}}\n{value|${formatCurrency(params.value)}}\n{percent|${percent}%}`
+                    return `{name|${params.name}}\n{value|${formatCurrency(params.value, currency)}}\n{percent|${percent}%}`
                 },
                 rich: {
                     name: {

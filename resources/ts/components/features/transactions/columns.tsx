@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 
 const TYPE_CONFIG = {
     income: { icon: ArrowDownLeft, color: 'text-green-600', bg: 'bg-green-100', label: 'Income' },
@@ -155,11 +155,11 @@ export function createTransactionColumns(
                             'font-mono font-semibold',
                             isIncoming ? 'text-green-600' : isTransfer ? 'text-blue-600' : isDebtPayment ? 'text-orange-600' : 'text-red-600'
                         )}>
-                            {isIncoming ? '+' : '-'}{amount.toFixed(account.currency?.decimals ?? 2)} {account.currency?.symbol}
+                            {isIncoming ? '+' : '-'}{formatCurrency(amount, account.currency)}
                         </div>
                         {isTransfer && toAmount && toAccount && (
                             <div className="text-xs text-muted-foreground font-mono">
-                                → +{toAmount.toFixed(toAccount.currency?.decimals ?? 2)} {toAccount.currency?.symbol}
+                                → +{formatCurrency(toAmount, toAccount.currency)}
                             </div>
                         )}
                     </div>

@@ -68,7 +68,7 @@ class ExpenseReportService
 
         return [
             'months' => $monthsData,
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 
@@ -103,7 +103,7 @@ class ExpenseReportService
 
         return [
             'categories' => $categories,
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 
@@ -139,7 +139,7 @@ class ExpenseReportService
         return [
             'items' => $data,
             'max' => round($max, 2),
-            'currency' => Currency::getBase()?->symbol ?? '$',
+            'currency' => Currency::baseCode(),
         ];
     }
 }
