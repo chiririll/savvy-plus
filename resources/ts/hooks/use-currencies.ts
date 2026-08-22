@@ -1,16 +1,31 @@
+import { useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { currenciesApi } from '@/api'
-import { CurrencyFormData } from '@/types'
+import { useCurrenciesStore } from '@/stores/currencies'
+import { Currency, CurrencyFormData } from '@/types'
 import { toast } from 'sonner'
 
 const QUERY_KEY = ['currencies']
 
 export function useCurrencies() {
-    return useQuery({
+    const query = useQuery({
         queryKey: QUERY_KEY,
-        queryFn: currenciesApi.getAll,
+        queryFn: async () => {
+            const data = await currenciesApi.getAll()
+            useCurrenciesStore.getState().setAll(data)
+            return data
+        },
     })
+
+    const synced = useRef<Currency[] | undefined>(undefined)
+
+    if (query.data && query.data !== synced.current) {
+        synced.current = query.data
+        useCurrenciesStore.getState().setAll(query.data)
+    }
+
+    return query
 }
 
 export function useCurrencyCatalog(enabled = true) {
@@ -86,7 +101,6 @@ export function useSetBaseCurrency() {
     return useMutation({
         mutationFn: (id: string | number) => currenciesApi.setBase(id),
         onSuccess: () => {
-            // Invalidate all related queries since rates changed
             queryClient.invalidateQueries()
             toast.success('Base currency updated')
         },

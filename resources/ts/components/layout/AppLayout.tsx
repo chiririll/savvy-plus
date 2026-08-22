@@ -3,9 +3,11 @@ import { AppSidebar } from './Sidebar'
 import { Header } from './Header'
 import { ReadOnlyBanner } from './ReadOnlyBanner'
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
+import { useCurrencies } from '@/hooks/use-currencies'
 import { useUiStore } from '@/stores/ui'
 
 export function AppLayout() {
+    useCurrencies()
     const sidebarOpen = useUiStore((state) => state.sidebarOpen)
     const setSidebarOpen = useUiStore((state) => state.setSidebarOpen)
 

@@ -12,7 +12,7 @@ interface MetricCardProps {
     type: 'income' | 'expense' | 'net' | 'percent'
     compareWith: CompareType
     suffix?: string
-    currency?: string
+    currency?: string | null
 }
 
 export function MetricCard({ title, value, previousValue, sparklineData, type, compareWith, suffix, currency }: MetricCardProps) {
