@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { MetricCard } from '../components/MetricCard'
 import { CashFlowChart } from '../components/CashFlowChart'
 import { useOverviewMetrics } from '@/hooks'
@@ -9,12 +10,13 @@ interface CashFlowTabProps {
 }
 
 export function CashFlowTab({ filters }: CashFlowTabProps) {
+    const { t } = useTranslation('pages')
     const { data, isLoading, error } = useOverviewMetrics(filters)
 
     if (error) {
         return (
             <div className="text-center py-8 text-red-500">
-                Failed to load cash flow metrics
+                {t('reports.errors.cashflow')}
             </div>
         )
     }
@@ -32,7 +34,7 @@ export function CashFlowTab({ filters }: CashFlowTabProps) {
                 ) : data ? (
                     <>
                         <MetricCard
-                            title="Inflow"
+                            title={t('reports.metrics.inflow')}
                             value={data.income.value}
                             previousValue={data.income.previous}
                             sparklineData={data.income.sparkline}
@@ -41,7 +43,7 @@ export function CashFlowTab({ filters }: CashFlowTabProps) {
                             currency={data.currency}
                         />
                         <MetricCard
-                            title="Outflow"
+                            title={t('reports.metrics.outflow')}
                             value={data.expenses.value}
                             previousValue={data.expenses.previous}
                             sparklineData={data.expenses.sparkline}
@@ -50,7 +52,7 @@ export function CashFlowTab({ filters }: CashFlowTabProps) {
                             currency={data.currency}
                         />
                         <MetricCard
-                            title="Net Cash Flow"
+                            title={t('reports.metrics.netCashFlow')}
                             value={data.netCashFlow.value}
                             previousValue={data.netCashFlow.previous}
                             sparklineData={data.netCashFlow.sparkline}

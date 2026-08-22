@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -34,26 +35,23 @@ interface DebtFormProps {
 const DEBT_TYPES = [
     {
         value: 'i_owe',
-        label: 'I Owe',
         icon: Banknote,
-        description: 'Money you owe to someone',
         color: 'text-red-600'
     },
     {
         value: 'owed_to_me',
-        label: 'Owed to Me',
         icon: HandCoins,
-        description: 'Money someone owes to you',
         color: 'text-green-600'
     },
-]
+] as const
 
 export function DebtForm({
     defaultValues,
     onSubmit,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
 }: DebtFormProps) {
+    const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: currencies, isLoading: currenciesLoading } = useCurrencies()
 
     const form = useForm<DebtFormData>({
@@ -79,9 +77,9 @@ export function DebtForm({
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>{t('fields.name')}</FormLabel>
                             <FormControl>
-                                <Input placeholder="Car Loan" {...field} />
+                                <Input placeholder={t('forms:debts.namePlaceholder')} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -93,11 +91,11 @@ export function DebtForm({
                     name="debt_type"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Type</FormLabel>
+                            <FormLabel>{t('fields.type')}</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select debt type" />
+                                        <SelectValue placeholder={t('forms:selectDebtType')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -107,7 +105,7 @@ export function DebtForm({
                                             <SelectItem key={type.value} value={type.value}>
                                                 <div className="flex items-center gap-2">
                                                     <Icon className={`size-4 ${type.color}`} />
-                                                    <span>{type.label}</span>
+                                                    <span>{t(`pages:debts.types.${type.value}`)}</span>
                                                 </div>
                                             </SelectItem>
                                         )
@@ -116,8 +114,8 @@ export function DebtForm({
                             </Select>
                             <FormDescription>
                                 {form.watch('debt_type') === 'i_owe'
-                                    ? 'Money you need to pay back'
-                                    : 'Money you expect to receive'
+                                    ? t('forms:debts.iOweHelp')
+                                    : t('forms:debts.owedToMeHelp')
                                 }
                             </FormDescription>
                             <FormMessage />
@@ -130,7 +128,7 @@ export function DebtForm({
                     name="currency_id"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Currency</FormLabel>
+                            <FormLabel>{t('fields.currency')}</FormLabel>
                             <Select
                                 onValueChange={field.onChange}
                                 defaultValue={field.value?.toString()}
@@ -138,7 +136,7 @@ export function DebtForm({
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select currency" />
+                                        <SelectValue placeholder={t('forms:selectCurrency')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -165,7 +163,7 @@ export function DebtForm({
                     name="amount"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Amount</FormLabel>
+                            <FormLabel>{t('fields.amount')}</FormLabel>
                             <FormControl>
                                 <Input
                                     type="number"
@@ -176,7 +174,7 @@ export function DebtForm({
                                 />
                             </FormControl>
                             <FormDescription>
-                                Total debt amount
+                                {t('forms:debts.amountHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -188,12 +186,12 @@ export function DebtForm({
                     name="counterparty"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Counterparty</FormLabel>
+                            <FormLabel>{t('forms:debts.counterparty')}</FormLabel>
                             <FormControl>
-                                <Input placeholder="John Doe / Bank Name" {...field} />
+                                <Input placeholder={t('forms:debts.counterpartyPlaceholder')} {...field} />
                             </FormControl>
                             <FormDescription>
-                                Who you owe to or who owes you
+                                {t('forms:debts.counterpartyHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -205,12 +203,12 @@ export function DebtForm({
                     name="due_date"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Due Date</FormLabel>
+                            <FormLabel>{t('forms:debts.dueDate')}</FormLabel>
                             <FormControl>
                                 <Input type="date" {...field} />
                             </FormControl>
                             <FormDescription>
-                                Optional deadline for the debt
+                                {t('forms:debts.dueDateHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -222,10 +220,10 @@ export function DebtForm({
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Description</FormLabel>
+                            <FormLabel>{t('fields.description')}</FormLabel>
                             <FormControl>
                                 <Textarea
-                                    placeholder="Additional notes about this debt..."
+                                    placeholder={t('forms:debts.notesPlaceholder')}
                                     {...field}
                                 />
                             </FormControl>
@@ -235,7 +233,7 @@ export function DebtForm({
                 />
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? 'Saving...' : submitLabel}
+                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                 </Button>
             </form>
         </Form>

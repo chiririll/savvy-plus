@@ -11,6 +11,7 @@ import {
 import { MoreHorizontal, Pencil, Trash2, History } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { AutomationRule } from '@/types/automation'
+import i18n from '@/lib/i18n'
 
 interface ColumnOptions {
     onDelete: (id: number) => void
@@ -22,7 +23,7 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
     return [
         {
             accessorKey: 'priority',
-            header: '#',
+            header: () => i18n.t('pages:automation.columns.order'),
             cell: ({ row }) => (
                 <span className="text-muted-foreground text-sm">{row.original.priority}</span>
             ),
@@ -30,7 +31,7 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
         },
         {
             accessorKey: 'name',
-            header: 'Name',
+            header: () => i18n.t('pages:automation.columns.name'),
             cell: ({ row }) => (
                 <div>
                     <div className="font-medium">{row.original.name}</div>
@@ -44,14 +45,14 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
         },
         {
             accessorKey: 'trigger_type',
-            header: 'Trigger',
+            header: () => i18n.t('pages:automation.columns.trigger'),
             cell: ({ row }) => (
                 <Badge variant="outline">{row.original.trigger_label}</Badge>
             ),
         },
         {
             accessorKey: 'conditions',
-            header: 'Conditions',
+            header: () => i18n.t('pages:automation.columns.conditions'),
             cell: ({ row }) => (
                 <span className="text-sm text-muted-foreground">
                     {row.original.conditions.conditions.length} condition(s)
@@ -60,7 +61,7 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
         },
         {
             accessorKey: 'actions',
-            header: 'Actions',
+            header: () => i18n.t('pages:automation.columns.actions'),
             cell: ({ row }) => (
                 <span className="text-sm text-muted-foreground">
                     {row.original.actions.length} action(s)
@@ -69,14 +70,14 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
         },
         {
             accessorKey: 'runs_count',
-            header: 'Runs',
+            header: () => i18n.t('pages:automation.columns.runs'),
             cell: ({ row }) => (
                 <span className="text-sm">{row.original.runs_count}</span>
             ),
         },
         {
             accessorKey: 'is_active',
-            header: 'Active',
+            header: () => i18n.t('pages:automation.columns.active'),
             cell: ({ row }) => (
                 <Switch
                     checked={row.original.is_active}
@@ -98,13 +99,13 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
                         <DropdownMenuItem asChild>
                             <Link to={`/automation/${row.original.id}/edit`}>
                                 <Pencil className="size-4 mr-2" />
-                                Edit
+                                {i18n.t('actions.edit')}
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Link to={`/automation/${row.original.id}/logs`}>
                                 <History className="size-4 mr-2" />
-                                View Logs
+                                {i18n.t('actions.viewLogs')}
                             </Link>
                         </DropdownMenuItem>
                         {!isReadOnly && (
@@ -113,7 +114,7 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
                             onClick={() => onDelete(row.original.id)}
                         >
                             <Trash2 className="size-4 mr-2" />
-                            Delete
+                            {i18n.t('actions.delete')}
                         </DropdownMenuItem>
                         )}
                     </DropdownMenuContent>

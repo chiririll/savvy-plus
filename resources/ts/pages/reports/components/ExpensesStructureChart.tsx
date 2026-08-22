@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactECharts from 'echarts-for-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -6,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { PieChart, BarChart3, LayoutGrid } from 'lucide-react'
 import { useTransactionReportByCategory } from '@/hooks'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
+import i18n from '@/lib/i18n'
 import type { ReportFilters } from '../types'
 
 type ViewMode = 'donut' | 'bar' | 'treemap'
@@ -15,6 +17,7 @@ interface ExpensesStructureChartProps {
 }
 
 export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps) {
+    const { t, i18n: i18nInstance } = useTranslation('pages')
     const [viewMode, setViewMode] = useState<ViewMode>('donut')
     const { data, isLoading } = useTransactionReportByCategory(filters, 'expense')
 
@@ -104,13 +107,13 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
             left: '35%',
             top: '55%',
             style: {
-                text: 'Total',
+                text: i18n.t('pages:reports.series.total'),
                 textAlign: 'center',
                 fontSize: 12,
                 fill: '#64748b',
             },
         }],
-    }), [chartData, total, currency])
+    }), [chartData, total, currency, i18nInstance.language])
 
     // Bar chart option
     const barOption = useMemo(() => {
@@ -239,7 +242,7 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
                 },
             })),
         }],
-    }), [chartData, total, currency])
+    }), [chartData, total, currency, i18nInstance.language])
 
     const getOption = () => {
         switch (viewMode) {
@@ -253,9 +256,9 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
     }
 
     const viewModes: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
-        { value: 'donut', label: 'Donut', icon: <PieChart className="size-3.5" /> },
-        { value: 'bar', label: 'Bar', icon: <BarChart3 className="size-3.5" /> },
-        { value: 'treemap', label: 'Treemap', icon: <LayoutGrid className="size-3.5" /> },
+        { value: 'donut', label: t('reports.views.donut'), icon: <PieChart className="size-3.5" /> },
+        { value: 'bar', label: t('reports.views.bar'), icon: <BarChart3 className="size-3.5" /> },
+        { value: 'treemap', label: t('reports.views.treemap'), icon: <LayoutGrid className="size-3.5" /> },
     ]
 
     return (
@@ -263,9 +266,9 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
             <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                     <div>
-                        <CardTitle className="text-lg">Expenses Structure</CardTitle>
+                        <CardTitle className="text-lg">{t('reports.expensesStructure.title')}</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            Breakdown by category
+                            {t('reports.expensesStructure.subtitle')}
                         </p>
                     </div>
                     <div className="flex gap-1">
@@ -288,7 +291,7 @@ export function ExpensesStructureChart({ filters }: ExpensesStructureChartProps)
                     <Skeleton className="h-[350px]" />
                 ) : chartData.length === 0 ? (
                     <div className="h-[350px] flex items-center justify-center text-muted-foreground">
-                        No expenses for selected period
+                        {t('reports.expensesStructure.noData')}
                     </div>
                 ) : (
                     <ReactECharts

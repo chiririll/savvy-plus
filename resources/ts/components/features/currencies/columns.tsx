@@ -23,6 +23,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Currency } from '@/types'
+import i18n from '@/lib/i18n'
 
 interface ColumnOptions {
     onDelete: (id: number) => void
@@ -41,14 +42,14 @@ export const createCurrencyColumns = ({
 }: ColumnOptions): ColumnDef<Currency>[] => [
     {
         accessorKey: 'code',
-        header: 'Code',
+        header: () => i18n.t('pages:currencies.columns.code'),
         cell: ({ row }) => (
             <div className="flex items-center gap-2">
                 <span className="font-mono font-semibold">{row.original.code}</span>
                 {row.original.isBase && (
                     <Badge variant="secondary" className="gap-1">
                         <Star className="size-3 fill-current" />
-                        Base
+                        {i18n.t('pages:currencies.columns.base')}
                     </Badge>
                 )}
             </div>
@@ -56,7 +57,7 @@ export const createCurrencyColumns = ({
     },
     {
         accessorKey: 'name',
-        header: 'Name',
+        header: () => i18n.t('pages:currencies.columns.name'),
         cell: ({ row }) => (
             <div>
                 <p className="font-medium">{row.original.name}</p>
@@ -68,7 +69,7 @@ export const createCurrencyColumns = ({
     },
     {
         accessorKey: 'rate',
-        header: 'Rate',
+        header: () => i18n.t('pages:currencies.columns.rate'),
         cell: ({ row }) => (
             <div className="font-mono">
                 {row.original.isBase ? (
@@ -81,14 +82,14 @@ export const createCurrencyColumns = ({
     },
     {
         accessorKey: 'decimals',
-        header: 'Decimals',
+        header: () => i18n.t('pages:currencies.columns.decimals'),
         cell: ({ row }) => (
             <span className="text-muted-foreground">{row.original.decimals}</span>
         ),
     },
     {
         id: 'isBase',
-        header: 'Base',
+        header: () => i18n.t('pages:currencies.columns.base'),
         cell: ({ row }) => (
             <Switch
                 checked={row.original.isBase}
@@ -115,7 +116,7 @@ export const createCurrencyColumns = ({
                         <DropdownMenuItem asChild>
                             <Link to={`/currencies/${row.original.id}/edit`}>
                                 <Pencil className="mr-2 size-4" />
-                                Edit
+                                {i18n.t('actions.edit')}
                             </Link>
                         </DropdownMenuItem>
                         {!isReadOnly && (
@@ -129,24 +130,23 @@ export const createCurrencyColumns = ({
                                     disabled={cannotDelete}
                                 >
                                     <Trash2 className="mr-2 size-4" />
-                                    {isLast ? "Can't delete last" : 'Delete'}
+                                    {isLast ? i18n.t('actions.cannotDeleteLast') : i18n.t('actions.delete')}
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete currency?</AlertDialogTitle>
+                                    <AlertDialogTitle>{i18n.t('pages:currencies.deleteTitle')}</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        This action cannot be undone. The currency "{row.original.name}" ({row.original.code})
-                                        will be permanently deleted.
+                                        {i18n.t('pages:currencies.deleteDescription', { name: row.original.name })}
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
                                     <AlertDialogAction
                                         onClick={() => onDelete(row.original.id)}
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     >
-                                        Delete
+                                        {i18n.t('actions.delete')}
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>

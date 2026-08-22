@@ -1,8 +1,9 @@
 import { ReactNode } from 'react'
 import { toast } from 'sonner'
-import { Coins, ShieldCheck, Lock } from 'lucide-react'
+import { Coins, ShieldCheck, Lock, Languages } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { Page, PageHeader, FormWrapper } from '@/components/shared'
+import { Page, PageHeader, FormWrapper, LanguageSwitcher } from '@/components/shared'
+import { useTranslation } from 'react-i18next'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -75,6 +76,7 @@ function RowSkeleton() {
 }
 
 export default function SystemSettingsPage() {
+    const { t } = useTranslation('settings')
     const { data: settings, isLoading } = useSettings()
     const { data: ssoProviders } = useSsoProviders()
     const updateSettings = useUpdateSettings()
@@ -92,7 +94,7 @@ export default function SystemSettingsPage() {
 
     const handlePasswordLoginChange = (checked: boolean) => {
         if (!checked && !hasSso) {
-            toast.error('Enable at least one SSO provider before turning off password sign-in.')
+            toast.error(t('system.authentication.passwordLoginError'))
             return
         }
         updateSettings.mutate({ password_login_enabled: checked })
@@ -107,15 +109,25 @@ export default function SystemSettingsPage() {
     }
 
     return (
-        <Page title="System Settings">
-            <PageHeader title="System" description="Configure system settings" />
+        <Page title={t('system.title')}>
+            <PageHeader title={t('system.heading')} description={t('system.description')} />
 
             <FormWrapper>
                 <div className="grid items-start gap-6 lg:grid-cols-2">
                     <Section
+                        icon={Languages}
+                        title={t('system.language.title')}
+                        description={t('system.language.description')}
+                    >
+                        <div className="rounded-lg border">
+                            <LanguageSwitcher variant="select" />
+                        </div>
+                    </Section>
+
+                    <Section
                         icon={Coins}
-                        title="Currency Rates"
-                        description="Configure how currency exchange rates are managed"
+                        title={t('system.currencyRates.title')}
+                        description={t('system.currencyRates.description')}
                     >
                         <div className="rounded-lg border">
                             {isLoading ? (
@@ -123,8 +135,8 @@ export default function SystemSettingsPage() {
                             ) : (
                                 <ToggleRow
                                     id="auto-update"
-                                    label="Auto-update currency rates"
-                                    description="When enabled, rates are pulled daily from an external API and manual rate editing is disabled."
+                                    label={t('system.currencyRates.autoUpdate')}
+                                    description={t('system.currencyRates.autoUpdateDescription')}
                                     checked={autoUpdate}
                                     disabled={updateSettings.isPending}
                                     onChange={handleAutoUpdateChange}
@@ -135,8 +147,8 @@ export default function SystemSettingsPage() {
 
                     <Section
                         icon={ShieldCheck}
-                        title="Authentication"
-                        description="Control how users sign in to Savvy"
+                        title={t('system.authentication.title')}
+                        description={t('system.authentication.description')}
                     >
                         <div className="divide-y rounded-lg border">
                             {isLoading ? (
@@ -149,11 +161,11 @@ export default function SystemSettingsPage() {
                                 <>
                                     <ToggleRow
                                         id="password-login"
-                                        label="Password sign-in"
+                                        label={t('system.authentication.passwordLogin')}
                                         description={
                                             passwordLoginLocked
-                                                ? 'Add and enable at least one SSO provider before you can turn this off — it keeps the instance from locking everyone out.'
-                                                : 'When off, users can only sign in through SSO. Active sessions stay signed in.'
+                                                ? t('system.authentication.passwordLoginLocked')
+                                                : t('system.authentication.passwordLoginOpen')
                                         }
                                         checked={passwordLoginEnabled}
                                         disabled={updateSettings.isPending || passwordLoginLocked}
@@ -161,7 +173,7 @@ export default function SystemSettingsPage() {
                                             passwordLoginLocked ? (
                                                 <span className="inline-flex items-center gap-1 rounded-full border bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                                                     <Lock className="size-2.5" />
-                                                    Locked
+                                                    {t('system.authentication.locked')}
                                                 </span>
                                             ) : undefined
                                         }
@@ -170,8 +182,8 @@ export default function SystemSettingsPage() {
 
                                     <ToggleRow
                                         id="sso-signup"
-                                        label="Just-in-time provisioning"
-                                        description="Automatically create an account on first SSO sign-in. When off, only existing or linked users can sign in."
+                                        label={t('system.authentication.jit')}
+                                        description={t('system.authentication.jitDescription')}
                                         checked={ssoAllowSignup}
                                         disabled={updateSettings.isPending}
                                         onChange={handleSignupChange}
@@ -179,11 +191,11 @@ export default function SystemSettingsPage() {
 
                                     <ToggleRow
                                         id="sso-verified-email"
-                                        label="Require a verified email"
+                                        label={t('system.authentication.verifiedEmail')}
                                         description={
                                             ssoAllowSignup
-                                                ? 'New SSO sign-ups must arrive with an email the provider has verified.'
-                                                : 'Turn on just-in-time provisioning to enforce this.'
+                                                ? t('system.authentication.verifiedEmailOn')
+                                                : t('system.authentication.verifiedEmailOff')
                                         }
                                         checked={requireVerifiedEmail}
                                         disabled={updateSettings.isPending || !ssoAllowSignup}

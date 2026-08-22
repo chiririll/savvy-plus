@@ -22,6 +22,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Category } from '@/types'
+import i18n from '@/lib/i18n'
 
 export const createCategoryColumns = (
     onDelete: (id: number) => void,
@@ -30,7 +31,7 @@ export const createCategoryColumns = (
 ): ColumnDef<Category>[] => [
     {
         accessorKey: 'name',
-        header: 'Category',
+        header: () => i18n.t('pages:categories.columns.category'),
         cell: ({ row }) => (
             <div className="flex items-center gap-3">
                 <div
@@ -42,7 +43,7 @@ export const createCategoryColumns = (
                 <div>
                     <p className="font-medium">{row.original.name}</p>
                     <p className="text-xs text-muted-foreground capitalize">
-                        {row.original.type}
+                        {i18n.t(`pages:categories.types.${row.original.type}`)}
                     </p>
                 </div>
             </div>
@@ -50,7 +51,7 @@ export const createCategoryColumns = (
     },
     {
         accessorKey: 'type',
-        header: 'Type',
+        header: () => i18n.t('pages:categories.columns.type'),
         cell: ({ row }) => (
             <Badge
                 variant="secondary"
@@ -60,7 +61,7 @@ export const createCategoryColumns = (
                         : 'bg-red-100 text-red-700'
                 }
             >
-                {row.original.type === 'income' ? 'Income' : 'Expense'}
+                {i18n.t(`pages:categories.types.${row.original.type}`)}
             </Badge>
         ),
     },
@@ -81,7 +82,7 @@ export const createCategoryColumns = (
                         <DropdownMenuItem asChild>
                             <Link to={`/categories/${row.original.id}/edit`}>
                                 <Pencil className="mr-2 size-4" />
-                                Edit
+                                {i18n.t('actions.edit')}
                             </Link>
                         </DropdownMenuItem>
                         {!isReadOnly && (
@@ -95,24 +96,23 @@ export const createCategoryColumns = (
                                     disabled={isLastOfType}
                                 >
                                     <Trash2 className="mr-2 size-4" />
-                                    {isLastOfType ? "Can't delete last" : 'Delete'}
+                                    {isLastOfType ? i18n.t('actions.cannotDeleteLast') : i18n.t('actions.delete')}
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete category?</AlertDialogTitle>
+                                    <AlertDialogTitle>{i18n.t('pages:categories.deleteTitle')}</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        This action cannot be undone. The category "{row.original.name}"
-                                        will be permanently deleted.
+                                        {i18n.t('pages:categories.deleteDescription', { name: row.original.name })}
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
                                     <AlertDialogAction
                                         onClick={() => onDelete(row.original.id)}
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     >
-                                        Delete
+                                        {i18n.t('actions.delete')}
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>

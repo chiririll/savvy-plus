@@ -34,6 +34,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { FileX, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface DataTableProps<T> {
     data: T[]
@@ -101,6 +102,7 @@ function DataTableEmpty({
 }
 
 function DataTablePagination<T>({ table }: { table: ReturnType<typeof useReactTable<T>> }) {
+    const { t } = useTranslation()
     const pageIndex = table.getState().pagination.pageIndex
     const pageCount = table.getPageCount()
     const pageSize = table.getState().pagination.pageSize
@@ -110,7 +112,7 @@ function DataTablePagination<T>({ table }: { table: ReturnType<typeof useReactTa
     return (
         <div className="flex items-center justify-between px-4 py-3 border-t">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Rows per page</span>
+                <span>{t('table.rowsPerPage')}</span>
                 <Select
                     value={String(pageSize)}
                     onValueChange={(value) => table.setPageSize(Number(value))}
@@ -130,7 +132,7 @@ function DataTablePagination<T>({ table }: { table: ReturnType<typeof useReactTa
 
             <div className="flex items-center gap-4">
                 <span className="text-sm text-muted-foreground">
-                    Page {pageIndex + 1} of {pageCount}
+                    {t('table.pageOf', { current: pageIndex + 1, total: pageCount })}
                 </span>
                 <div className="flex items-center gap-1">
                     <Button
@@ -179,14 +181,17 @@ export function DataTable<T>({
     data,
     columns,
     isLoading,
-    emptyTitle = 'No data',
-    emptyDescription = 'No data found',
+    emptyTitle: emptyTitleProp,
+    emptyDescription: emptyDescriptionProp,
     emptyAction,
     renderSubComponent,
     getRowCanExpand,
     getRowClassName,
     manualPagination = false,
 }: DataTableProps<T>) {
+    const { t } = useTranslation()
+    const emptyTitle = emptyTitleProp ?? t('table.emptyTitle')
+    const emptyDescription = emptyDescriptionProp ?? t('table.emptyDescription')
     const table = useReactTable({
         data,
         columns,

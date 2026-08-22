@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -12,6 +13,7 @@ interface ExpensesByCategoryProps {
 }
 
 export function ExpensesByCategory({ filters }: ExpensesByCategoryProps) {
+    const { t } = useTranslation('pages')
     const navigate = useNavigate()
     const { data, isLoading, error } = useExpensesByCategory(filters)
 
@@ -28,7 +30,7 @@ export function ExpensesByCategory({ filters }: ExpensesByCategoryProps) {
         return (
             <Card>
                 <CardContent className="py-8 text-center text-red-500">
-                    Failed to load expenses by category
+                    {t('reports.errors.expensesByCategory')}
                 </CardContent>
             </Card>
         )
@@ -37,9 +39,9 @@ export function ExpensesByCategory({ filters }: ExpensesByCategoryProps) {
     return (
         <Card>
             <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Expenses by Category</CardTitle>
+                <CardTitle className="text-lg">{t('reports.expensesByCategory.title')}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                    Compare spending across categories
+                    {t('reports.expensesByCategory.subtitle')}
                 </p>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -51,7 +53,7 @@ export function ExpensesByCategory({ filters }: ExpensesByCategoryProps) {
                     </div>
                 ) : !data?.categories.length ? (
                     <div className="py-8 text-center text-muted-foreground">
-                        No expense data for selected period
+                        {t('reports.expensesByCategory.noData')}
                     </div>
                 ) : (
                     data.categories.map((category) => {
@@ -97,7 +99,7 @@ export function ExpensesByCategory({ filters }: ExpensesByCategoryProps) {
                                                 {filters.compareWith !== 'none' && category.previous > 0 && (
                                                     <>
                                                         <span className="text-muted-foreground">
-                                                            vs {formatCurrency(category.previous, data.currency)}
+                                                            {t('reports.vsAmount', { amount: formatCurrency(category.previous, data.currency) })}
                                                         </span>
                                                         <span className={cn(
                                                             'flex items-center gap-0.5 text-xs font-medium',

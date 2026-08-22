@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Debt } from '@/types'
 import { formatCurrency } from '@/lib/utils'
+import i18n from '@/lib/i18n'
 
 const DEBT_TYPE_CONFIG = {
     i_owe: {
@@ -53,7 +54,7 @@ export const createDebtColumns = (
 ): ColumnDef<Debt>[] => [
     {
         accessorKey: 'name',
-        header: 'Debt',
+        header: () => i18n.t('pages:debts.columns.debt'),
         cell: ({ row }) => {
             const config = DEBT_TYPE_CONFIG[row.original.debtType]
             const Icon = config.icon
@@ -77,19 +78,19 @@ export const createDebtColumns = (
     },
     {
         accessorKey: 'debtType',
-        header: 'Type',
+        header: () => i18n.t('pages:debts.columns.type'),
         cell: ({ row }) => {
             const config = DEBT_TYPE_CONFIG[row.original.debtType]
             return (
                 <Badge variant="secondary" className={`${config.color} ${config.textColor}`}>
-                    {config.label}
+                    {i18n.t(`pages:debts.types.${row.original.debtType}`)}
                 </Badge>
             )
         },
     },
     {
         accessorKey: 'progress',
-        header: 'Progress',
+        header: () => i18n.t('pages:debts.columns.progress'),
         cell: ({ row }) => {
             const debt = row.original
             const progress = debt.paymentProgress
@@ -107,7 +108,7 @@ export const createDebtColumns = (
     },
     {
         accessorKey: 'targetAmount',
-        header: 'Total',
+        header: () => i18n.t('pages:debts.columns.total'),
         cell: ({ row }) => (
             <div className="font-mono text-right">
                 {formatCurrency(row.original.targetAmount, row.original.currency)}
@@ -116,7 +117,7 @@ export const createDebtColumns = (
     },
     {
         accessorKey: 'remainingDebt',
-        header: 'Remaining',
+        header: () => i18n.t('pages:debts.columns.remaining'),
         cell: ({ row }) => (
             <div className={`font-mono text-right ${row.original.isPaidOff ? 'text-green-600' : 'text-orange-600'}`}>
                 {row.original.isPaidOff
@@ -128,7 +129,7 @@ export const createDebtColumns = (
     },
     {
         accessorKey: 'dueDate',
-        header: 'Due Date',
+        header: () => i18n.t('pages:debts.columns.dueDate'),
         cell: ({ row }) => {
             if (!row.original.dueDate) return <span className="text-muted-foreground">-</span>
 
@@ -144,7 +145,7 @@ export const createDebtColumns = (
     },
     {
         accessorKey: 'isActive',
-        header: 'Status',
+        header: () => i18n.t('pages:debts.columns.status'),
         cell: ({ row }) => (
             <Badge variant={row.original.isPaidOff ? 'default' : row.original.isActive ? 'secondary' : 'outline'}>
                 {row.original.isPaidOff ? 'Completed' : row.original.isActive ? 'Active' : 'Inactive'}
@@ -193,7 +194,7 @@ export const createDebtColumns = (
                         <DropdownMenuItem asChild>
                             <Link to={`/debts/${debt.id}/edit`}>
                                 <Pencil className="mr-2 size-4" />
-                                Edit
+                                {i18n.t('actions.edit')}
                             </Link>
                         </DropdownMenuItem>
                         {!actions.isReadOnly && (
@@ -206,24 +207,23 @@ export const createDebtColumns = (
                                     className="text-destructive focus:text-destructive"
                                 >
                                     <Trash2 className="mr-2 size-4" />
-                                    Delete
+                                    {i18n.t('actions.delete')}
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete debt?</AlertDialogTitle>
+                                    <AlertDialogTitle>{i18n.t('pages:debts.deleteTitle')}</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        This action cannot be undone. The debt "{debt.name}"
-                                        will be permanently deleted.
+                                        {i18n.t('pages:debts.deleteDescription')}
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
                                     <AlertDialogAction
                                         onClick={() => actions.onDelete(debt.id)}
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     >
-                                        Delete
+                                        {i18n.t('actions.delete')}
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>

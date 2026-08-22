@@ -1,10 +1,12 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ListPage } from '@/components/shared'
 import { createCategoryColumns } from '@/components/features/categories'
 import { useCategories, useDeleteCategory } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 
 export default function CategoriesPage() {
+    const { t } = useTranslation('pages')
     const { data: categories, isLoading } = useCategories()
     const deleteCategory = useDeleteCategory()
     const isReadOnly = useReadOnly()
@@ -22,10 +24,10 @@ export default function CategoriesPage() {
 
     return (
         <ListPage
-            title="Categories"
-            description="Manage income and expense categories"
+            title={t('categories.title')}
+            description={t('categories.description')}
             createLink="/categories/create"
-            createLabel="New Category"
+            createLabel={t('categories.create')}
             data={categories ?? []}
             columns={columns}
             isLoading={isLoading}

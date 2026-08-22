@@ -1,32 +1,33 @@
 import { z } from 'zod'
+import i18n from '@/lib/i18n'
 
 export const recurringSchema = z.object({
     type: z.enum(['income', 'expense', 'transfer'], {
-        message: 'Please select a type',
+        message: i18n.t('validation.selectType'),
     }),
 
     account_id: z.coerce.number({
-        message: 'Please select an account',
-    }).min(1, 'Please select an account'),
+        message: i18n.t('validation.selectAccount'),
+    }).min(1, i18n.t('validation.selectAccount')),
 
     to_account_id: z.coerce.number().nullable().optional(),
 
     category_id: z.coerce.number().nullable().optional(),
 
     amount: z.coerce.number()
-        .min(0.01, 'Amount must be greater than 0'),
+        .min(0.01, i18n.t('validation.amountGreaterThanZero')),
 
     to_amount: z.coerce.number().nullable().optional(),
 
     description: z.string().max(255).nullable().optional(),
 
     frequency: z.enum(['daily', 'weekly', 'monthly', 'yearly'], {
-        message: 'Please select a frequency',
+        message: i18n.t('validation.selectFrequency'),
     }),
 
     interval: z.coerce.number()
-        .min(1, 'Interval must be at least 1')
-        .max(365, 'Interval must be less than 365')
+        .min(1, i18n.t('validation.intervalMin'))
+        .max(365, i18n.t('validation.intervalMax'))
         .default(1),
 
     day_of_week: z.coerce.number().min(0).max(6).nullable().optional(),
@@ -34,7 +35,7 @@ export const recurringSchema = z.object({
     day_of_month: z.coerce.number().min(1).max(31).nullable().optional(),
 
     start_date: z.string({
-        message: 'Please select a start date',
+        message: i18n.t('validation.selectStartDate'),
     }),
 
     end_date: z.string().nullable().optional(),
@@ -47,7 +48,7 @@ export const recurringSchema = z.object({
     if ((data.type === 'income' || data.type === 'expense') && !data.category_id) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Please select a category',
+            message: i18n.t('validation.selectCategory'),
             path: ['category_id'],
         })
     }
@@ -56,7 +57,7 @@ export const recurringSchema = z.object({
     if (data.type === 'transfer' && !data.to_account_id) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Please select destination account',
+            message: i18n.t('validation.selectDestination'),
             path: ['to_account_id'],
         })
     }
@@ -65,7 +66,7 @@ export const recurringSchema = z.object({
     if (data.type === 'transfer' && data.account_id === data.to_account_id) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Destination must be different from source',
+            message: i18n.t('validation.destinationDifferent'),
             path: ['to_account_id'],
         })
     }

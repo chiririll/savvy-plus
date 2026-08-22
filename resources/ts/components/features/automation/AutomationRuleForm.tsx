@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -30,7 +31,7 @@ import { automationRuleSchema, type AutomationRuleSchema } from '@/schemas/autom
 import { useAutomationTriggers } from '@/hooks/use-automation'
 import { ConditionBuilder } from './ConditionBuilder'
 import { ActionBuilder } from './ActionBuilder'
-import type { AutomationRuleFormData, TriggerType } from '@/types/automation'
+import type { AutomationRuleFormData } from '@/types/automation'
 import { FormWrapper } from '@/components/shared/FormWrapper'
 
 interface AutomationRuleFormProps {
@@ -44,8 +45,9 @@ export function AutomationRuleForm({
     defaultValues,
     onSubmit,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
 }: AutomationRuleFormProps) {
+    const { t } = useTranslation(['common', 'forms'])
     const { data: triggers } = useAutomationTriggers()
 
     const form = useForm<AutomationRuleSchema>({
@@ -77,9 +79,9 @@ export function AutomationRuleForm({
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Name</FormLabel>
+                                <FormLabel>{t('fields.name')}</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g., Auto-categorize groceries" {...field} />
+                                    <Input placeholder={t('forms:automation.namePlaceholder')} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -91,11 +93,11 @@ export function AutomationRuleForm({
                         name="priority"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Priority</FormLabel>
+                                <FormLabel>{t('forms:automation.priority')}</FormLabel>
                                 <FormControl>
                                     <Input type="number" min={1} max={100} {...field} />
                                 </FormControl>
-                                <FormDescription>Lower number = higher priority (1-100)</FormDescription>
+                                <FormDescription>{t('forms:automation.priorityHelp')}</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -107,10 +109,10 @@ export function AutomationRuleForm({
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Description</FormLabel>
+                            <FormLabel>{t('fields.description')}</FormLabel>
                             <FormControl>
                                 <Textarea
-                                    placeholder="Describe what this rule does..."
+                                    placeholder={t('forms:automation.descriptionPlaceholder')}
                                     className="resize-none h-20"
                                     {...field}
                                     value={field.value ?? ''}
@@ -125,15 +127,15 @@ export function AutomationRuleForm({
                     control={form.control}
                     name="trigger_type"
                     render={({ field }) => {
-                        const selectedTrigger = triggers?.find(t => t.value === field.value)
+                        const selectedTrigger = triggers?.find(tr => tr.value === field.value)
                         return (
                             <FormItem>
-                                <FormLabel>Trigger</FormLabel>
+                                <FormLabel>{t('forms:automation.trigger')}</FormLabel>
                                 <div className="flex items-center gap-2">
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select trigger" />
+                                                <SelectValue placeholder={t('forms:automation.selectTrigger')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -162,7 +164,7 @@ export function AutomationRuleForm({
                 />
 
                 <div className="space-y-4 p-4 border rounded-lg">
-                    <h3 className="font-medium">Conditions</h3>
+                    <h3 className="font-medium">{t('forms:automation.conditions')}</h3>
                     <FormField
                         control={form.control}
                         name="conditions"
@@ -179,7 +181,7 @@ export function AutomationRuleForm({
                 </div>
 
                 <div className="space-y-4 p-4 border rounded-lg">
-                    <h3 className="font-medium">Actions</h3>
+                    <h3 className="font-medium">{t('forms:automation.actions')}</h3>
                     <FormField
                         control={form.control}
                         name="actions"
@@ -207,7 +209,7 @@ export function AutomationRuleForm({
                                         onCheckedChange={field.onChange}
                                     />
                                 </FormControl>
-                                <FormLabel className="cursor-pointer">Active</FormLabel>
+                                <FormLabel className="cursor-pointer">{t('fields.active')}</FormLabel>
                             </FormItem>
                         )}
                     />
@@ -223,14 +225,14 @@ export function AutomationRuleForm({
                                         onCheckedChange={field.onChange}
                                     />
                                 </FormControl>
-                                <FormLabel className="cursor-pointer">Stop processing other rules</FormLabel>
+                                <FormLabel className="cursor-pointer">{t('forms:automation.stopProcessing')}</FormLabel>
                             </FormItem>
                         )}
                     />
                 </div>
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? 'Saving...' : submitLabel}
+                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                 </Button>
             </form>
         </Form>

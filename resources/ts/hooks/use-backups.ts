@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { backupsApi } from '@/api/backups'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['backups']
 
@@ -18,10 +19,10 @@ export function useCreateBackup() {
         mutationFn: (note?: string) => backupsApi.create(note),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Backup created')
+            toast.success(i18n.t('toasts.backup.created'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create backup')
+            toast.error(error.message || i18n.t('toasts.backup.createFailed'))
         },
     })
 }
@@ -34,10 +35,10 @@ export function useUploadBackup() {
             backupsApi.upload(file, note),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Backup uploaded')
+            toast.success(i18n.t('toasts.backup.uploaded'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to upload backup')
+            toast.error(error.message || i18n.t('toasts.backup.uploadFailed'))
         },
     })
 }
@@ -49,10 +50,10 @@ export function useRestoreBackup() {
         mutationFn: (id: number) => backupsApi.restore(id),
         onSuccess: () => {
             queryClient.invalidateQueries()
-            toast.success('Database restored successfully')
+            toast.success(i18n.t('toasts.backup.restored'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to restore backup')
+            toast.error(error.message || i18n.t('toasts.backup.restoreFailed'))
         },
     })
 }
@@ -64,10 +65,10 @@ export function useDeleteBackup() {
         mutationFn: (id: number) => backupsApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Backup deleted')
+            toast.success(i18n.t('toasts.backup.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete backup')
+            toast.error(error.message || i18n.t('toasts.backup.deleteFailed'))
         },
     })
 }

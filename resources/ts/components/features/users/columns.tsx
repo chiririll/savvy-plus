@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { User } from '@/types/users'
 import { getUserAvatarUrl, getUserInitials } from '@/lib/avatar'
+import i18n from '@/lib/i18n'
 
 export const createUserColumns = (
     onDelete: (id: number) => void,
@@ -31,7 +32,7 @@ export const createUserColumns = (
 ): ColumnDef<User>[] => [
     {
         accessorKey: 'name',
-        header: 'User',
+        header: () => i18n.t('pages:users.columns.user'),
         cell: ({ row }) => (
             <div className="flex items-center gap-3">
                 <Avatar className="size-10">
@@ -47,16 +48,16 @@ export const createUserColumns = (
     },
     {
         accessorKey: 'email',
-        header: 'Email',
+        header: () => i18n.t('pages:users.columns.email'),
         cell: ({ row }) => (
             <span className="text-muted-foreground">{row.original.email}</span>
         ),
     },
     {
         accessorKey: 'role',
-        header: 'Role',
+        header: () => i18n.t('pages:users.columns.role'),
         cell: ({ row }) => (
-            <span className="capitalize">{row.original.role}</span>
+            <span>{i18n.t(`roles.${row.original.role}`)}</span>
         ),
     },
     {
@@ -76,7 +77,7 @@ export const createUserColumns = (
                         <DropdownMenuItem asChild>
                             <Link to={`/users/${row.original.id}/edit`}>
                                 <Pencil className="mr-2 size-4" />
-                                Edit
+                                {i18n.t('actions.edit')}
                             </Link>
                         </DropdownMenuItem>
                         {!isReadOnly && (
@@ -90,24 +91,23 @@ export const createUserColumns = (
                                     disabled={isCurrentUser}
                                 >
                                     <Trash2 className="mr-2 size-4" />
-                                    {isCurrentUser ? "Can't delete yourself" : 'Delete'}
+                                    {isCurrentUser ? i18n.t('actions.cannotDeleteSelf') : i18n.t('actions.delete')}
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete user?</AlertDialogTitle>
+                                    <AlertDialogTitle>{i18n.t('pages:users.deleteTitle')}</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        This action cannot be undone. The user "{row.original.name}"
-                                        will be permanently deleted.
+                                        {i18n.t('pages:users.deleteDescription', { name: row.original.name })}
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
                                     <AlertDialogAction
                                         onClick={() => onDelete(row.original.id)}
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     >
-                                        Delete
+                                        {i18n.t('actions.delete')}
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { importApi } from '@/api/import'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 import type {
     ColumnMapping,
     ImportOptions,
@@ -30,7 +31,7 @@ export function useParseImport() {
             return { ...state.parse, importId: state.importId }
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to parse CSV file')
+            toast.error(error.message || i18n.t('toasts.import.parseFailed'))
         },
     })
 }
@@ -47,7 +48,7 @@ export function usePreviewImport() {
             options: ImportOptions
         }) => importApi.preview(importId, mapping, options),
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to preview import')
+            toast.error(error.message || i18n.t('toasts.import.previewFailed'))
         },
     })
 }
@@ -95,11 +96,11 @@ export function useExecuteImport() {
             queryClient.invalidateQueries({ queryKey: ['tags'] })
 
             if (data.created > 0) {
-                toast.success(`Successfully imported ${data.created} transactions`)
+                toast.success(i18n.t('toasts.import.success', { count: data.created }))
             }
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to execute import')
+            toast.error(error.message || i18n.t('toasts.import.executeFailed'))
         },
     })
 

@@ -1,6 +1,7 @@
 import { Component, ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
+import i18n from '@/lib/i18n'
 
 interface Props {
     children: ReactNode
@@ -13,6 +14,10 @@ interface State {
 }
 
 export class ErrorBoundary extends Component<Props, State> {
+    private onLanguageChange = () => {
+        this.forceUpdate()
+    }
+
     constructor(props: Props) {
         super(props)
         this.state = { hasError: false }
@@ -20,6 +25,14 @@ export class ErrorBoundary extends Component<Props, State> {
 
     static getDerivedStateFromError(error: Error): State {
         return { hasError: true, error }
+    }
+
+    componentDidMount() {
+        i18n.on('languageChanged', this.onLanguageChange)
+    }
+
+    componentWillUnmount() {
+        i18n.off('languageChanged', this.onLanguageChange)
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
@@ -41,9 +54,9 @@ export class ErrorBoundary extends Component<Props, State> {
                     <div className="rounded-full bg-destructive/10 p-4 mb-4">
                         <AlertTriangle className="h-8 w-8 text-destructive" />
                     </div>
-                    <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
+                    <h2 className="text-xl font-semibold mb-2">{i18n.t('errors.somethingWrong')}</h2>
                     <p className="text-muted-foreground text-center mb-4 max-w-md">
-                        An unexpected error occurred. Please try again or contact support if the problem persists.
+                        {i18n.t('errors.unexpected')}
                     </p>
                     {this.state.error && (
                         <pre className="text-xs bg-muted p-3 rounded-md mb-4 max-w-md overflow-auto">
@@ -52,7 +65,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     )}
                     <Button onClick={this.handleReset}>
                         <RefreshCw className="mr-2 h-4 w-4" />
-                        Try again
+                        {i18n.t('actions.retry')}
                     </Button>
                 </div>
             )

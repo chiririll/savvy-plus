@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Trash2, MoreHorizontal, PlugZap, ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -25,6 +26,7 @@ import { BrandTile, brandVars } from './BrandIcon'
 import type { IdentityProvider } from '@/types/sso'
 
 function StatusPill({ enabled }: { enabled: boolean }) {
+    const { t } = useTranslation('settings')
     if (enabled) {
         return (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -32,7 +34,7 @@ function StatusPill({ enabled }: { enabled: boolean }) {
                     <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-60" />
                     <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
                 </span>
-                Active
+                {t('providers.active')}
             </span>
         )
     }
@@ -40,7 +42,7 @@ function StatusPill({ enabled }: { enabled: boolean }) {
     return (
         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
             <span className="size-2 rounded-full border border-muted-foreground/50" />
-            Disabled
+            {t('providers.disabled')}
         </span>
     )
 }
@@ -53,6 +55,8 @@ interface ProviderCardProps {
 }
 
 export function ProviderCard({ provider, index, onDelete, onTest }: ProviderCardProps) {
+    const { t } = useTranslation('settings')
+    const { t: tCommon } = useTranslation('common')
     return (
         <div
             style={{ ...brandVars(provider.preset), animationDelay: `${index * 45}ms` }}
@@ -67,7 +71,7 @@ export function ProviderCard({ provider, index, onDelete, onTest }: ProviderCard
                 to={`/settings/providers/${provider.id}/edit`}
                 className="absolute inset-0 z-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-                <span className="sr-only">Edit {provider.name}</span>
+                <span className="sr-only">{t('providers.editAria', { name: provider.name })}</span>
             </Link>
 
             <div className="relative z-10 flex items-start justify-between gap-3">
@@ -90,7 +94,7 @@ export function ProviderCard({ provider, index, onDelete, onTest }: ProviderCard
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem onSelect={() => onTest(provider.id)}>
                             <PlugZap className="mr-2 size-4" />
-                            Test connection
+                            {t('providers.testConnection')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <AlertDialog>
@@ -100,23 +104,23 @@ export function ProviderCard({ provider, index, onDelete, onTest }: ProviderCard
                                     className="text-destructive focus:text-destructive"
                                 >
                                     <Trash2 className="mr-2 size-4" />
-                                    Delete
+                                    {tCommon('actions.delete')}
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete provider?</AlertDialogTitle>
+                                    <AlertDialogTitle>{t('providers.deleteTitle')}</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        This action cannot be undone. "{provider.name}" will be permanently removed.
+                                        {t('providers.deleteDescription', { name: provider.name })}
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
                                     <AlertDialogAction
                                         onClick={() => onDelete(provider.id)}
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     >
-                                        Delete
+                                        {tCommon('actions.delete')}
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
@@ -143,6 +147,7 @@ export function ProviderCard({ provider, index, onDelete, onTest }: ProviderCard
 const EMPTY_BRANDS = ['github', 'google', 'entra', 'okta', 'gitlab']
 
 export function ProvidersEmptyState() {
+    const { t } = useTranslation('settings')
     return (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-center">
             <div className="mb-8 flex items-end">
@@ -163,15 +168,14 @@ export function ProvidersEmptyState() {
                 })}
             </div>
 
-            <h3 className="text-lg font-semibold tracking-tight">Connect your first identity provider</h3>
+            <h3 className="text-lg font-semibold tracking-tight">{t('providers.emptyTitle')}</h3>
             <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                Let your team sign in with the accounts they already have — Microsoft, Google, GitHub, Okta and any
-                OIDC or SAML provider. Endpoints come pre-filled for the popular ones.
+                {t('providers.emptyDescription')}
             </p>
 
             <Button asChild className="mt-6">
                 <Link to="/settings/providers/create">
-                    Add Provider
+                    {t('providers.add')}
                     <ArrowUpRight className="size-4" />
                 </Link>
             </Button>

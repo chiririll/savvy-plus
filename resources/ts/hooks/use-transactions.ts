@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { transactionsApi } from '@/api'
 import { TransactionFormData, TransactionFilters } from '@/types'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['transactions']
 
@@ -33,11 +34,11 @@ export function useCreateTransaction(redirectTo?: string) {
             queryClient.invalidateQueries({ queryKey: ['budgets'] })
             queryClient.invalidateQueries({ queryKey: ['categories'] })
             queryClient.invalidateQueries({ queryKey: ['reports'] })
-            toast.success('Transaction created')
+            toast.success(i18n.t('toasts.transaction.created'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create transaction')
+            toast.error(error.message || i18n.t('toasts.transaction.createFailed'))
         },
     })
 }
@@ -55,11 +56,11 @@ export function useUpdateTransaction(redirectTo?: string) {
             queryClient.invalidateQueries({ queryKey: ['budgets'] })
             queryClient.invalidateQueries({ queryKey: ['categories'] })
             queryClient.invalidateQueries({ queryKey: ['reports'] })
-            toast.success('Transaction updated')
+            toast.success(i18n.t('toasts.transaction.updated'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update transaction')
+            toast.error(error.message || i18n.t('toasts.transaction.updateFailed'))
         },
     })
 }
@@ -75,10 +76,10 @@ export function useDeleteTransaction() {
             queryClient.invalidateQueries({ queryKey: ['budgets'] })
             queryClient.invalidateQueries({ queryKey: ['categories'] })
             queryClient.invalidateQueries({ queryKey: ['reports'] })
-            toast.success('Transaction deleted')
+            toast.success(i18n.t('toasts.transaction.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete transaction')
+            toast.error(error.message || i18n.t('toasts.transaction.deleteFailed'))
         },
     })
 }
@@ -94,10 +95,10 @@ export function useDuplicateTransaction() {
             queryClient.invalidateQueries({ queryKey: ['budgets'] })
             queryClient.invalidateQueries({ queryKey: ['categories'] })
             queryClient.invalidateQueries({ queryKey: ['reports'] })
-            toast.success('Transaction duplicated')
+            toast.success(i18n.t('toasts.transaction.duplicated'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to duplicate transaction')
+            toast.error(error.message || i18n.t('toasts.transaction.duplicateFailed'))
         },
     })
 }

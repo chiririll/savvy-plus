@@ -1,3 +1,4 @@
+export { LanguageSwitcher } from './LanguageSwitcher'
 export { Page } from './Page'
 export { PageHeader } from './PageHeader'
 export { DataTable } from './DataTable'

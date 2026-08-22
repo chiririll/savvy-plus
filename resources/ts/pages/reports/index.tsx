@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Page, PageHeader } from '@/components/shared'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -8,6 +9,7 @@ import { OverviewTab, CashFlowTab, ExpensesTab, IncomeTab, NetWorthTab } from '.
 import { DEFAULT_FILTERS, TABS, type ReportFilters, type ReportTab } from './types'
 
 export default function ReportsPage() {
+    const { t } = useTranslation('pages')
     const [filters, setFilters] = useState<ReportFilters>(DEFAULT_FILTERS)
     const [activeTab, setActiveTab] = useState<ReportTab>('overview')
 
@@ -30,10 +32,10 @@ export default function ReportsPage() {
     }
 
     return (
-        <Page title="Reports">
+        <Page title={t('reports.title')}>
             <PageHeader
-                title="Reports"
-                description="Analyze your finances across different dimensions"
+                title={t('reports.title')}
+                description={t('reports.description')}
             />
 
             {/* Global Filters Bar */}
@@ -49,7 +51,7 @@ export default function ReportsPage() {
                 <TabsList className="h-auto flex-wrap md:flex-nowrap md:h-9 md:w-fit">
                     {TABS.map(tab => (
                         <TabsTrigger key={tab.value} value={tab.value}>
-                            {tab.label}
+                            {t(`reports.tabs.${tab.value}`)}
                         </TabsTrigger>
                     ))}
                 </TabsList>

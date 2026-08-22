@@ -1,10 +1,12 @@
 import { useState, useMemo, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactECharts from 'echarts-for-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCashFlowOverTime } from '@/hooks'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
+import i18n from '@/lib/i18n'
 import { defaultGroupBy } from '../types'
 import type { ReportFilters } from '../types'
 import type { CashFlowGroupBy } from '@/api/reports'
@@ -14,6 +16,7 @@ interface CashFlowChartProps {
 }
 
 export function CashFlowChart({ filters }: CashFlowChartProps) {
+    const { t, i18n: i18nInstance } = useTranslation('pages')
     const [groupBy, setGroupBy] = useState<CashFlowGroupBy>(() => defaultGroupBy(filters))
     useEffect(() => {
         setGroupBy(defaultGroupBy(filters))
@@ -24,7 +27,7 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
 
     const { hasIncome, hasExpenses, noDataMessage } = useMemo(() => {
         if (!data?.items?.length) {
-            return { hasIncome: false, hasExpenses: false, noDataMessage: 'No data for selected period' }
+            return { hasIncome: false, hasExpenses: false, noDataMessage: t('reports.noData') }
         }
 
         const totalIncome = data.items.reduce((sum, d) => sum + d.income, 0)
@@ -35,15 +38,15 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
 
         let noDataMessage = null
         if (!hasIncome && !hasExpenses) {
-            noDataMessage = 'No income or expenses for selected period'
+            noDataMessage = t('reports.cashFlowChart.noIncomeOrExpenses')
         } else if (!hasIncome) {
-            noDataMessage = 'No income data for selected period'
+            noDataMessage = t('reports.cashFlowChart.noIncome')
         } else if (!hasExpenses) {
-            noDataMessage = 'No expenses data for selected period'
+            noDataMessage = t('reports.cashFlowChart.noExpenses')
         }
 
         return { hasIncome, hasExpenses, noDataMessage }
-    }, [data])
+    }, [data, t])
 
     const chartOption = useMemo(() => {
         if (!data?.items?.length || !hasIncome || !hasExpenses) return null
@@ -56,10 +59,19 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
         const expensesData = chartData.map(d => -d.expenses) // Negative for downward bars
         const balanceData = chartData.map(d => d.balance)
 
+        const nameIncome = i18n.t('pages:reports.series.income')
+        const nameExpenses = i18n.t('pages:reports.series.expenses')
+        const nameBalance = i18n.t('pages:reports.series.balance')
+        const namePrevIncome = i18n.t('pages:reports.series.prevIncome')
+        const namePrevExpenses = i18n.t('pages:reports.series.prevExpenses')
+        const namePrevBalance = i18n.t('pages:reports.series.prevBalance')
+        const nameFlow = i18n.t('pages:reports.series.flow')
+        const namePreviousPeriod = i18n.t('pages:reports.series.previousPeriod')
+
         const series: any[] = [
             // Income bars (green, upward)
             {
-                name: 'Income',
+                name: nameIncome,
                 type: 'bar',
                 stack: 'current',
                 data: incomeData,
@@ -71,7 +83,7 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
             },
             // Expenses bars (red, downward)
             {
-                name: 'Expenses',
+                name: nameExpenses,
                 type: 'bar',
                 stack: 'current',
                 data: expensesData,
@@ -83,7 +95,7 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
             },
             // Cumulative balance line
             {
-                name: 'Balance',
+                name: nameBalance,
                 type: 'line',
                 yAxisIndex: 1,
                 data: balanceData,
@@ -124,7 +136,7 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
             series.push(
                 // Previous income (semi-transparent)
                 {
-                    name: 'Prev Income',
+                    name: namePrevIncome,
                     type: 'bar',
                     stack: 'previous',
                     data: prevIncomeData,
@@ -137,7 +149,7 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
                 },
                 // Previous expenses (semi-transparent)
                 {
-                    name: 'Prev Expenses',
+                    name: namePrevExpenses,
                     type: 'bar',
                     stack: 'previous',
                     data: prevExpensesData,
@@ -149,7 +161,7 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
                 },
                 // Previous balance line (dashed)
                 {
-                    name: 'Prev Balance',
+                    name: namePrevBalance,
                     type: 'line',
                     yAxisIndex: 1,
                     data: prevBalanceData,
@@ -181,40 +193,40 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
                     let html = `<div class="font-medium mb-2">${label}</div>`
 
                     // Current period
-                    const income = params.find((p: any) => p.seriesName === 'Income')?.value || 0
-                    const expenses = Math.abs(params.find((p: any) => p.seriesName === 'Expenses')?.value || 0)
-                    const balance = params.find((p: any) => p.seriesName === 'Balance')?.value || 0
+                    const income = params.find((p: any) => p.seriesName === nameIncome)?.value || 0
+                    const expenses = Math.abs(params.find((p: any) => p.seriesName === nameExpenses)?.value || 0)
+                    const balance = params.find((p: any) => p.seriesName === nameBalance)?.value || 0
 
                     html += `<div class="space-y-1">`
                     html += `<div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span>Income: <strong>${formatCurrency(income, currency)}</strong></span>
+                        <span>${nameIncome}: <strong>${formatCurrency(income, currency)}</strong></span>
                     </div>`
                     html += `<div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                        <span>Expenses: <strong>${formatCurrency(expenses, currency)}</strong></span>
+                        <span>${nameExpenses}: <strong>${formatCurrency(expenses, currency)}</strong></span>
                     </div>`
                     html += `<div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                        <span>Balance: <strong>${formatCurrency(balance, currency)}</strong></span>
+                        <span>${nameBalance}: <strong>${formatCurrency(balance, currency)}</strong></span>
                     </div>`
                     html += `</div>`
 
                     if (showComparison) {
-                        const prevIncome = params.find((p: any) => p.seriesName === 'Prev Income')?.value || 0
-                        const prevExpenses = Math.abs(params.find((p: any) => p.seriesName === 'Prev Expenses')?.value || 0)
-                        const prevBalance = params.find((p: any) => p.seriesName === 'Prev Balance')?.value || 0
+                        const prevIncome = params.find((p: any) => p.seriesName === namePrevIncome)?.value || 0
+                        const prevExpenses = Math.abs(params.find((p: any) => p.seriesName === namePrevExpenses)?.value || 0)
+                        const prevBalance = params.find((p: any) => p.seriesName === namePrevBalance)?.value || 0
 
                         html += `<div class="mt-2 pt-2 border-t border-gray-200 space-y-1 opacity-70">`
-                        html += `<div class="text-xs text-gray-500 mb-1">Previous Period</div>`
+                        html += `<div class="text-xs text-gray-500 mb-1">${namePreviousPeriod}</div>`
                         html += `<div class="flex items-center gap-2 text-sm">
-                            <span>Income: ${formatCurrency(prevIncome, currency)}</span>
+                            <span>${nameIncome}: ${formatCurrency(prevIncome, currency)}</span>
                         </div>`
                         html += `<div class="flex items-center gap-2 text-sm">
-                            <span>Expenses: ${formatCurrency(prevExpenses, currency)}</span>
+                            <span>${nameExpenses}: ${formatCurrency(prevExpenses, currency)}</span>
                         </div>`
                         html += `<div class="flex items-center gap-2 text-sm">
-                            <span>Balance: ${formatCurrency(prevBalance, currency)}</span>
+                            <span>${nameBalance}: ${formatCurrency(prevBalance, currency)}</span>
                         </div>`
                         html += `</div>`
                     }
@@ -223,7 +235,7 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
                 },
             },
             legend: {
-                data: ['Income', 'Expenses', 'Balance'],
+                data: [nameIncome, nameExpenses, nameBalance],
                 bottom: 0,
                 textStyle: {
                     fontSize: 12,
@@ -254,7 +266,7 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
                 // Left Y-axis for bars (income/expenses)
                 {
                     type: 'value',
-                    name: 'Flow',
+                    name: nameFlow,
                     position: 'left',
                     axisLabel: {
                         formatter: formatValue,
@@ -268,7 +280,7 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
                 // Right Y-axis for balance line
                 {
                     type: 'value',
-                    name: 'Balance',
+                    name: nameBalance,
                     position: 'right',
                     axisLabel: {
                         formatter: formatValue,
@@ -280,13 +292,13 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
             ],
             series,
         }
-    }, [data, showComparison, groupBy, hasIncome, hasExpenses])
+    }, [data, showComparison, groupBy, hasIncome, hasExpenses, i18nInstance.language])
 
     if (error) {
         return (
             <Card>
                 <CardContent className="py-8 text-center text-red-500">
-                    Failed to load cash flow data
+                    {t('reports.errors.cashflowChart')}
                 </CardContent>
             </Card>
         )
@@ -297,9 +309,9 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
             <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                     <div>
-                        <CardTitle className="text-lg">Cash Flow Over Time</CardTitle>
+                        <CardTitle className="text-lg">{t('reports.cashFlowChart.title')}</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            Income, expenses, and running balance
+                            {t('reports.cashFlowChart.subtitle')}
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
@@ -309,10 +321,10 @@ export function CashFlowChart({ filters }: CashFlowChartProps) {
                                 <Badge
                                     key={g}
                                     variant={groupBy === g ? 'default' : 'outline'}
-                                    className="cursor-pointer capitalize"
+                                    className="cursor-pointer"
                                     onClick={() => setGroupBy(g)}
                                 >
-                                    {g}
+                                    {t(`reports.groupBy.${g}`)}
                                 </Badge>
                             ))}
                         </div>

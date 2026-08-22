@@ -1,4 +1,5 @@
 import { CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Loader2, ChevronRight } from 'lucide-react'
 import { useSsoPresets } from '@/hooks/use-sso'
 import { isCustomPreset } from './presetMeta'
@@ -40,6 +41,7 @@ function PresetCard({ preset, onSelect }: { preset: SsoPresetCatalogEntry; onSel
 }
 
 export function PresetChooser({ onSelect }: PresetChooserProps) {
+    const { t } = useTranslation('settings')
     const { data: presets, isLoading } = useSsoPresets()
 
     if (isLoading || !presets) {
@@ -57,11 +59,11 @@ export function PresetChooser({ onSelect }: PresetChooserProps) {
         <div className="max-w-3xl space-y-8">
             <section className="space-y-3">
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold">Quick setup</span>
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Recommended</span>
+                    <span className="text-sm font-semibold">{t('providers.quickSetup')}</span>
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{t('providers.recommended')}</span>
                 </div>
                 <p className="-mt-1 text-sm text-muted-foreground">
-                    Pick a provider and connect it in seconds — endpoints and scopes are pre-filled for you.
+                    {t('providers.quickSetupDescription')}
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {builtIn.map((preset) => (
@@ -71,7 +73,7 @@ export function PresetChooser({ onSelect }: PresetChooserProps) {
             </section>
 
             <section className="space-y-3">
-                <span className="text-sm font-semibold">Bring your own</span>
+                <span className="text-sm font-semibold">{t('providers.bringYourOwn')}</span>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {custom.map((preset) => (
                         <PresetCard key={preset.key} preset={preset} onSelect={onSelect} />

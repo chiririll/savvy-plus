@@ -1,0 +1,31 @@
+{
+    "menu": "Меню",
+    "dashboard": "Обзор",
+    "transactions": "Транзакции",
+    "recurring": "Регулярные",
+    "automation": "Автоматизация",
+    "budgets": "Бюджеты",
+    "debts": "Долги",
+    "reports": "Отчёты",
+    "settings": "Настройки",
+    "system": "Система",
+    "monitoring": "Мониторинг",
+    "security": "Безопасность",
+    "ssoProviders": "SSO-провайдеры",
+    "import": "Импорт",
+    "backups": "Резервные копии",
+    "accounts": "Счета",
+    "categories": "Категории",
+    "currencies": "Валюты",
+    "tags": "Теги",
+    "users": "Пользователи",
+    "newTransaction": "Транзакция",
+    "income": "Доход",
+    "expense": "Расход",
+    "transfer": "Перевод",
+    "about": {
+        "title": "О Savvy",
+        "body": "Самостоятельно размещаемый трекер личных финансов. Следите за расходами, ведите бюджеты и контролируйте деньги.",
+        "github": "Репозиторий на GitHub"
+    }
+}

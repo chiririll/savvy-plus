@@ -27,7 +27,7 @@ class SettingsController extends Controller
 
         if (($data['password_login_enabled'] ?? true) === false && ! IdentityProvider::where('enabled', true)->exists()) {
             return response()->json([
-                'message' => 'Enable at least one SSO provider before turning off password sign-in.',
+                'message' => __('messages.password_login_locked'),
                 'error' => 'sso_required',
             ], 422);
         }

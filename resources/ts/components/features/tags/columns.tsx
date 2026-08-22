@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import i18n from '@/lib/i18n'
 
 export function createTagColumns(
     onDelete: (id: number) => void,
@@ -28,14 +29,14 @@ export function createTagColumns(
     return [
         {
             accessorKey: 'name',
-            header: 'Name',
+            header: () => i18n.t('pages:tags.columns.name'),
             cell: ({ row }) => (
                 <span className="font-medium">#{row.original.name}</span>
             ),
         },
         {
             accessorKey: 'transactionsCount',
-            header: 'Transactions',
+            header: () => i18n.t('pages:tags.columns.transactions'),
             cell: ({ row }) => (
                 <span className="text-muted-foreground">
                     {row.original.transactionsCount ?? 0}
@@ -57,7 +58,7 @@ export function createTagColumns(
                             <DropdownMenuItem asChild>
                                 <Link to={`/tags/${tag.id}/edit`}>
                                     <Pencil className="mr-2 size-4" />
-                                    Edit
+                                    {i18n.t('actions.edit')}
                                 </Link>
                             </DropdownMenuItem>
                             {!isReadOnly && (
@@ -68,24 +69,23 @@ export function createTagColumns(
                                         className="text-destructive focus:text-destructive"
                                     >
                                         <Trash2 className="mr-2 size-4" />
-                                        Delete
+                                        {i18n.t('actions.delete')}
                                     </DropdownMenuItem>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Delete tag?</AlertDialogTitle>
+                                        <AlertDialogTitle>{i18n.t('pages:tags.deleteTitle')}</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This will remove the tag from all transactions.
-                                            This action cannot be undone.
+                                            {i18n.t('pages:tags.deleteDescription', { name: tag.name })}
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
                                         <AlertDialogAction
                                             onClick={() => onDelete(tag.id)}
                                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                         >
-                                            Delete
+                                            {i18n.t('actions.delete')}
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>

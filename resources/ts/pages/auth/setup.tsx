@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -16,23 +17,20 @@ import {
 } from '@/components/ui/form'
 import { Loader2, Sparkles } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth'
+import { LanguageSwitcher } from '@/components/shared'
 import { Logo } from '@/components/shared/Logo'
 import { authApi } from '@/api'
 import { toast } from 'sonner'
 
-const setupSchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    email: z.string().email('Invalid email'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    password_confirmation: z.string(),
-}).refine((data) => data.password === data.password_confirmation, {
-    message: "Passwords don't match",
-    path: ['password_confirmation'],
-})
-
-type SetupFormValues = z.infer<typeof setupSchema>
+type SetupFormValues = {
+    name: string
+    email: string
+    password: string
+    password_confirmation: string
+}
 
 export default function SetupPage() {
+    const { t } = useTranslation('auth')
     const navigate = useNavigate()
     const register = useAuthStore((state) => state.register)
     const [isLoading, setIsLoading] = useState(false)
@@ -45,6 +43,16 @@ export default function SetupPage() {
             }
         }).finally(() => setCheckingStatus(false))
     }, [navigate])
+
+    const setupSchema = useMemo(() => z.object({
+        name: z.string().min(1, t('setup.validation.name')),
+        email: z.string().email(t('setup.validation.email')),
+        password: z.string().min(6, t('setup.validation.passwordMin')),
+        password_confirmation: z.string(),
+    }).refine((data) => data.password === data.password_confirmation, {
+        message: t('setup.validation.passwordMatch'),
+        path: ['password_confirmation'],
+    }), [t])
 
     const form = useForm<SetupFormValues>({
         resolver: zodResolver(setupSchema),
@@ -64,12 +72,12 @@ export default function SetupPage() {
                 email: data.email,
                 password: data.password,
             })
-            toast.success('Account created!')
+            toast.success(t('setup.created'))
             navigate('/setup-2fa')
         } catch (error: unknown) {
             const message = error && typeof error === 'object' && 'message' in error
                 ? (error as { message: string }).message
-                : 'Setup failed'
+                : t('setup.failed')
             toast.error(message)
         } finally {
             setIsLoading(false)
@@ -95,10 +103,10 @@ export default function SetupPage() {
                     </div>
                     <CardTitle className="text-2xl flex items-center justify-center gap-2">
                         <Sparkles className="size-5 text-primary" />
-                        Welcome to Savvy
+                        {t('setup.title')}
                     </CardTitle>
                     <CardDescription>
-                        Let's set up your account to get started
+                        {t('setup.description')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -109,10 +117,10 @@ export default function SetupPage() {
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Your Name</FormLabel>
+                                        <FormLabel>{t('setup.name')}</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="John Doe"
+                                                placeholder={t('setup.namePlaceholder')}
                                                 autoComplete="name"
                                                 {...field}
                                             />
@@ -127,11 +135,11 @@ export default function SetupPage() {
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
+                                        <FormLabel>{t('email')}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="email"
-                                                placeholder="you@example.com"
+                                                placeholder={t('emailPlaceholder')}
                                                 autoComplete="email"
                                                 {...field}
                                             />
@@ -146,11 +154,11 @@ export default function SetupPage() {
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <FormLabel>{t('password')}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="password"
-                                                placeholder="Create a password"
+                                                placeholder={t('setup.passwordPlaceholder')}
                                                 autoComplete="new-password"
                                                 {...field}
                                             />
@@ -165,11 +173,11 @@ export default function SetupPage() {
                                 name="password_confirmation"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Confirm Password</FormLabel>
+                                        <FormLabel>{t('setup.confirmPassword')}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="password"
-                                                placeholder="Confirm your password"
+                                                placeholder={t('setup.confirmPlaceholder')}
                                                 autoComplete="new-password"
                                                 {...field}
                                             />
@@ -181,10 +189,11 @@ export default function SetupPage() {
 
                             <Button type="submit" className="w-full" disabled={isLoading}>
                                 {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
-                                Complete Setup
+                                {t('setup.submit')}
                             </Button>
                         </form>
                     </Form>
+                    <LanguageSwitcher variant="auth" className="pt-4" />
                 </CardContent>
             </Card>
         </div>

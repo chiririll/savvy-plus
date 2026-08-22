@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { startRegistration } from '@simplewebauthn/browser'
 import { webauthnApi } from '@/api'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['webauthn-credentials']
 
@@ -34,10 +35,10 @@ export function useRegisterPasskey() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Passkey added')
+            toast.success(i18n.t('toasts.passkey.added'))
         },
         onError: (error: unknown) => {
-            toast.error(passkeyErrorMessage(error, 'Failed to add passkey'))
+            toast.error(passkeyErrorMessage(error, i18n.t('toasts.passkey.addFailed')))
         },
     })
 }
@@ -50,10 +51,10 @@ export function useRenamePasskey() {
             webauthnApi.renameCredential(id, name),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Passkey renamed')
+            toast.success(i18n.t('toasts.passkey.renamed'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to rename passkey')
+            toast.error(error.message || i18n.t('toasts.passkey.renameFailed'))
         },
     })
 }
@@ -65,10 +66,10 @@ export function useDeletePasskey() {
         mutationFn: (id: number) => webauthnApi.deleteCredential(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Passkey removed')
+            toast.success(i18n.t('toasts.passkey.removed'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to remove passkey')
+            toast.error(error.message || i18n.t('toasts.passkey.removeFailed'))
         },
     })
 }

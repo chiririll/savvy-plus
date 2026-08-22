@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
 import { Plus, ArrowLeft } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
+
 interface Props {
     title: string
     description?: string
@@ -15,10 +17,12 @@ export function PageHeader({
                                title,
                                description,
                                createLink,
-                               createLabel = 'Create',
+                               createLabel,
                                backLink,
                                actions
                            }: Props) {
+    const { t } = useTranslation()
+    const label = createLabel ?? t('actions.create')
     return (
         <div className="mb-8">
             <div className="flex items-center justify-between">
@@ -43,7 +47,7 @@ export function PageHeader({
                         <Button asChild>
                             <Link to={createLink}>
                                 <Plus className="mr-2 h-4 w-4" />
-                                {createLabel}
+                                {label}
                             </Link>
                         </Button>
                     )}

@@ -1,10 +1,12 @@
 import { useState, useMemo, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactECharts from 'echarts-for-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useNetWorthHistory } from '@/hooks'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
+import i18n from '@/lib/i18n'
 import { defaultGroupBy } from '../types'
 import type { ReportFilters } from '../types'
 import type { CashFlowGroupBy } from '@/api/reports'
@@ -14,6 +16,7 @@ interface NetWorthChartProps {
 }
 
 export function NetWorthChart({ filters }: NetWorthChartProps) {
+    const { t, i18n: i18nInstance } = useTranslation('pages')
     const [groupBy, setGroupBy] = useState<CashFlowGroupBy>(() => defaultGroupBy(filters))
     useEffect(() => {
         setGroupBy(defaultGroupBy(filters))
@@ -30,8 +33,9 @@ export function NetWorthChart({ filters }: NetWorthChartProps) {
                 trigger: 'axis',
                 formatter: (params: { value: number; axisValue: string }[]) => {
                     const p = params[0]
+                    const netWorth = i18n.t('pages:reports.series.netWorth')
                     return `<div class="font-medium mb-1">${p.axisValue}</div>
-                        <div>Net Worth: <strong>${formatCurrency(p.value, currency)}</strong></div>`
+                        <div>${netWorth}: <strong>${formatCurrency(p.value, currency)}</strong></div>`
                 },
             },
             grid: {
@@ -66,7 +70,7 @@ export function NetWorthChart({ filters }: NetWorthChartProps) {
                 },
             },
             series: [{
-                name: 'Net Worth',
+                name: i18n.t('pages:reports.series.netWorth'),
                 type: 'line',
                 data: data.values,
                 smooth: true,
@@ -96,16 +100,16 @@ export function NetWorthChart({ filters }: NetWorthChartProps) {
                 },
             }],
         }
-    }, [data, groupBy, currency])
+    }, [data, groupBy, currency, i18nInstance.language])
 
     return (
         <Card>
             <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                     <div>
-                        <CardTitle className="text-lg">Net Worth Over Time</CardTitle>
+                        <CardTitle className="text-lg">{t('reports.netWorth.chartTitle')}</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            Track your wealth growth
+                            {t('reports.netWorth.chartSubtitle')}
                         </p>
                     </div>
                     <div className="flex gap-1">
@@ -113,10 +117,10 @@ export function NetWorthChart({ filters }: NetWorthChartProps) {
                             <Badge
                                 key={g}
                                 variant={groupBy === g ? 'default' : 'outline'}
-                                className="cursor-pointer capitalize"
+                                className="cursor-pointer"
                                 onClick={() => setGroupBy(g)}
                             >
-                                {g}
+                                {t(`reports.groupBy.${g}`)}
                             </Badge>
                         ))}
                     </div>
@@ -127,7 +131,7 @@ export function NetWorthChart({ filters }: NetWorthChartProps) {
                     <Skeleton className="h-[350px]" />
                 ) : !data?.values?.length ? (
                     <div className="h-[350px] flex items-center justify-center text-muted-foreground">
-                        No data for selected period
+                        {t('reports.noData')}
                     </div>
                 ) : (
                     <ReactECharts

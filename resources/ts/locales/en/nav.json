@@ -1,0 +1,31 @@
+{
+    "menu": "Menu",
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "recurring": "Recurring",
+    "automation": "Automation",
+    "budgets": "Budgets",
+    "debts": "Debts",
+    "reports": "Reports",
+    "settings": "Settings",
+    "system": "System",
+    "monitoring": "Monitoring",
+    "security": "Security",
+    "ssoProviders": "SSO Providers",
+    "import": "Import",
+    "backups": "Backups",
+    "accounts": "Accounts",
+    "categories": "Categories",
+    "currencies": "Currencies",
+    "tags": "Tags",
+    "users": "Users",
+    "newTransaction": "Transaction",
+    "income": "Income",
+    "expense": "Expense",
+    "transfer": "Transfer",
+    "about": {
+        "title": "About Savvy",
+        "body": "Self-hosted personal finance tracker. Track expenses, manage budgets, and take control of your money.",
+        "github": "GitHub Repository"
+    }
+}

@@ -27,6 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
             '__Host-svy_session',
             'svy_csrf',
         ]);
+        $middleware->api(append: [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
         $middleware->alias([
             'session' => \App\Http\Middleware\AuthenticateSession::class,
             'csrf' => \App\Http\Middleware\VerifyCsrfToken::class,

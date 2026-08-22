@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Page, PageHeader } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,6 +36,7 @@ import { useBackups, useCreateBackup, useUploadBackup, useRestoreBackup, useDele
 import { backupsApi } from '@/api/backups'
 import { Backup } from '@/types/backup'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
+import { intlLocale } from '@/lib/i18n'
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B'
@@ -45,10 +47,12 @@ function formatBytes(bytes: number): string {
 }
 
 function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleString()
+    return new Date(dateString).toLocaleString(intlLocale())
 }
 
 export default function BackupsPage() {
+    const { t } = useTranslation('settings')
+    const { t: tCommon } = useTranslation('common')
     const isReadOnly = useReadOnly()
     const { data: backups, isLoading } = useBackups()
     const createBackup = useCreateBackup()
@@ -122,20 +126,20 @@ export default function BackupsPage() {
     }
 
     return (
-        <Page title="Backups">
+        <Page title={t('backups.title')}>
             <PageHeader
-                title="Backups"
-                description="Manage database backups"
+                title={t('backups.title')}
+                description={t('backups.description')}
             />
 
             <div className="flex gap-2 mb-6">
                 <Button onClick={() => setCreateDialogOpen(true)} disabled={isReadOnly}>
                     <Plus className="size-4 mr-2" />
-                    Create Backup
+                    {t('backups.create')}
                 </Button>
                 <Button variant="outline" onClick={() => setUploadDialogOpen(true)} disabled={isReadOnly}>
                     <Upload className="size-4 mr-2" />
-                    Upload Backup
+                    {t('backups.upload')}
                 </Button>
             </div>
 
@@ -143,10 +147,10 @@ export default function BackupsPage() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Size</TableHead>
-                            <TableHead>Note</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead>{t('backups.date')}</TableHead>
+                            <TableHead>{t('backups.size')}</TableHead>
+                            <TableHead>{t('backups.note')}</TableHead>
+                            <TableHead className="text-right">{t('backups.actions')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -162,7 +166,7 @@ export default function BackupsPage() {
                         ) : backups?.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                                    No backups yet. Create your first backup to get started.
+                                    {t('backups.empty')}
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -179,7 +183,7 @@ export default function BackupsPage() {
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => handleDownload(backup)}
-                                                title="Download"
+                                                title={t('backups.download')}
                                             >
                                                 <Download className="size-4" />
                                             </Button>
@@ -190,7 +194,7 @@ export default function BackupsPage() {
                                                     setSelectedBackup(backup)
                                                     setRestoreDialogOpen(true)
                                                 }}
-                                                title="Restore"
+                                                title={t('backups.restore')}
                                                 disabled={isReadOnly}
                                             >
                                                 <RotateCcw className="size-4" />
@@ -202,7 +206,7 @@ export default function BackupsPage() {
                                                     setSelectedBackup(backup)
                                                     setDeleteDialogOpen(true)
                                                 }}
-                                                title="Delete"
+                                                title={tCommon('actions.delete')}
                                                 disabled={isReadOnly}
                                             >
                                                 <Trash2 className="size-4" />
@@ -216,21 +220,20 @@ export default function BackupsPage() {
                 </Table>
             </div>
 
-            {/* Create Backup Dialog */}
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Create Backup</DialogTitle>
+                        <DialogTitle>{t('backups.createTitle')}</DialogTitle>
                         <DialogDescription>
-                            Create a new backup of the current database.
+                            {t('backups.createDescription')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="note">Note (optional)</Label>
+                            <Label htmlFor="note">{t('backups.noteOptional')}</Label>
                             <Input
                                 id="note"
-                                placeholder="e.g., Before major update"
+                                placeholder={t('backups.notePlaceholder')}
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
                             />
@@ -238,28 +241,27 @@ export default function BackupsPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                            Cancel
+                            {tCommon('actions.cancel')}
                         </Button>
                         <Button onClick={handleCreate} disabled={createBackup.isPending}>
                             {createBackup.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
-                            Create
+                            {tCommon('actions.create')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Upload Backup Dialog */}
             <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Upload Backup</DialogTitle>
+                        <DialogTitle>{t('backups.uploadTitle')}</DialogTitle>
                         <DialogDescription>
-                            Upload a SQLite backup file.
+                            {t('backups.uploadDescription')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="file">Backup File</Label>
+                            <Label htmlFor="file">{t('backups.backupFile')}</Label>
                             <Input
                                 id="file"
                                 type="file"
@@ -268,10 +270,10 @@ export default function BackupsPage() {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="upload-note">Note (optional)</Label>
+                            <Label htmlFor="upload-note">{t('backups.noteOptional')}</Label>
                             <Input
                                 id="upload-note"
-                                placeholder="e.g., Backup from old device"
+                                placeholder={t('backups.uploadNotePlaceholder')}
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
                             />
@@ -279,60 +281,59 @@ export default function BackupsPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>
-                            Cancel
+                            {tCommon('actions.cancel')}
                         </Button>
                         <Button onClick={handleUpload} disabled={!uploadFile || uploadBackup.isPending}>
                             {uploadBackup.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
-                            Upload
+                            {t('backups.upload')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Restore Confirmation */}
             <AlertDialog open={restoreDialogOpen} onOpenChange={setRestoreDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Restore Backup?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('backups.restoreTitle')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will replace all current data with the backup from{' '}
-                            {selectedBackup && formatDate(selectedBackup.createdAt)}.
-                            This action cannot be undone.
+                            {t('backups.restoreDescription', {
+                                date: selectedBackup ? formatDate(selectedBackup.createdAt) : '',
+                            })}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleRestore}
                             disabled={restoreBackup.isPending}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                             {restoreBackup.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
-                            Restore
+                            {t('backups.restore')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Delete Confirmation */}
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Backup?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('backups.deleteTitle')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will permanently delete the backup from{' '}
-                            {selectedBackup && formatDate(selectedBackup.createdAt)}.
+                            {t('backups.deleteDescription', {
+                                date: selectedBackup ? formatDate(selectedBackup.createdAt) : '',
+                            })}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
                             disabled={deleteBackup.isPending}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                             {deleteBackup.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
-                            Delete
+                            {tCommon('actions.delete')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

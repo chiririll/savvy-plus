@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { categoriesApi } from '@/api'
 import { CategoryFormData, CategoryType } from '@/types'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['categories']
 
@@ -41,11 +42,11 @@ export function useCreateCategory(redirectTo?: string) {
         mutationFn: (data: CategoryFormData) => categoriesApi.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Category created')
+            toast.success(i18n.t('toasts.category.created'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create category')
+            toast.error(error.message || i18n.t('toasts.category.createFailed'))
         },
     })
 }
@@ -59,11 +60,11 @@ export function useUpdateCategory(redirectTo?: string) {
             categoriesApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Category updated')
+            toast.success(i18n.t('toasts.category.updated'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update category')
+            toast.error(error.message || i18n.t('toasts.category.updateFailed'))
         },
     })
 }
@@ -75,10 +76,10 @@ export function useDeleteCategory() {
         mutationFn: (id: string | number) => categoriesApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Category deleted')
+            toast.success(i18n.t('toasts.category.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete category')
+            toast.error(error.message || i18n.t('toasts.category.deleteFailed'))
         },
     })
 }

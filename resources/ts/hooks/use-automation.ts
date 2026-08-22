@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { automationApi } from '@/api/automation'
 import type { AutomationRuleFormData } from '@/types/automation'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['automation-rules']
 
@@ -45,11 +46,11 @@ export function useCreateAutomationRule(redirectTo?: string) {
         mutationFn: (data: AutomationRuleFormData) => automationApi.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Automation rule created')
+            toast.success(i18n.t('toasts.automation.created'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create automation rule')
+            toast.error(error.message || i18n.t('toasts.automation.createFailed'))
         },
     })
 }
@@ -63,11 +64,11 @@ export function useUpdateAutomationRule(redirectTo?: string) {
             automationApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Automation rule updated')
+            toast.success(i18n.t('toasts.automation.updated'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update automation rule')
+            toast.error(error.message || i18n.t('toasts.automation.updateFailed'))
         },
     })
 }
@@ -79,10 +80,10 @@ export function useDeleteAutomationRule() {
         mutationFn: (id: string | number) => automationApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Automation rule deleted')
+            toast.success(i18n.t('toasts.automation.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete automation rule')
+            toast.error(error.message || i18n.t('toasts.automation.deleteFailed'))
         },
     })
 }
@@ -94,10 +95,10 @@ export function useToggleAutomationRule() {
         mutationFn: (id: string | number) => automationApi.toggle(id),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(`Rule ${data.is_active ? 'enabled' : 'disabled'}`)
+            toast.success(data.is_active ? i18n.t('toasts.automation.enabled') : i18n.t('toasts.automation.disabled'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to toggle rule')
+            toast.error(error.message || i18n.t('toasts.automation.toggleFailed'))
         },
     })
 }
@@ -109,10 +110,10 @@ export function useReorderAutomationRules() {
         mutationFn: (rules: Array<{ id: number; priority: number }>) => automationApi.reorder(rules),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Rules reordered')
+            toast.success(i18n.t('toasts.automation.reordered'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to reorder rules')
+            toast.error(error.message || i18n.t('toasts.automation.reorderFailed'))
         },
     })
 }
@@ -122,7 +123,7 @@ export function useTestAutomationRule() {
         mutationFn: ({ ruleId, transactionId }: { ruleId: string | number; transactionId: number }) =>
             automationApi.test(ruleId, transactionId),
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to test rule')
+            toast.error(error.message || i18n.t('toasts.automation.testFailed'))
         },
     })
 }

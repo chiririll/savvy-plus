@@ -5,6 +5,7 @@ import { currenciesApi } from '@/api'
 import { useCurrenciesStore } from '@/stores/currencies'
 import { Currency, CurrencyFormData } from '@/types'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['currencies']
 
@@ -53,11 +54,11 @@ export function useCreateCurrency(redirectTo?: string) {
         mutationFn: (data: CurrencyFormData) => currenciesApi.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Currency created')
+            toast.success(i18n.t('toasts.currency.created'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to create currency')
+            toast.error(error.message || i18n.t('toasts.currency.createFailed'))
         },
     })
 }
@@ -71,11 +72,11 @@ export function useUpdateCurrency(redirectTo?: string) {
             currenciesApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Currency updated')
+            toast.success(i18n.t('toasts.currency.updated'))
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update currency')
+            toast.error(error.message || i18n.t('toasts.currency.updateFailed'))
         },
     })
 }
@@ -87,10 +88,10 @@ export function useDeleteCurrency() {
         mutationFn: (id: string | number) => currenciesApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Currency deleted')
+            toast.success(i18n.t('toasts.currency.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to delete currency')
+            toast.error(error.message || i18n.t('toasts.currency.deleteFailed'))
         },
     })
 }
@@ -102,10 +103,10 @@ export function useSetBaseCurrency() {
         mutationFn: (id: string | number) => currenciesApi.setBase(id),
         onSuccess: () => {
             queryClient.invalidateQueries()
-            toast.success('Base currency updated')
+            toast.success(i18n.t('toasts.currency.baseUpdated'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to set base currency')
+            toast.error(error.message || i18n.t('toasts.currency.baseFailed'))
         },
     })
 }

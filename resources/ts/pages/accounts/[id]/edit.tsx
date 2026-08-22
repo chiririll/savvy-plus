@@ -1,9 +1,11 @@
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { FormPage } from '@/components/shared'
 import { AccountForm } from '@/components/features/accounts'
 import { useAccount, useUpdateAccount } from '@/hooks'
 
 export default function AccountEditPage() {
+    const { t } = useTranslation('pages')
     const { id } = useParams<{ id: string }>()
     const { data: account, isLoading } = useAccount(id!)
     const updateAccount = useUpdateAccount('/accounts')
@@ -19,7 +21,7 @@ export default function AccountEditPage() {
         : undefined
 
     return (
-        <FormPage title="Edit Account" backLink="/accounts" isLoading={isLoading}>
+        <FormPage title={t('accounts.editTitle')} backLink="/accounts" isLoading={isLoading}>
             <AccountForm
                 defaultValues={defaultValues}
                 onSubmit={(data) => updateAccount.mutate({ id: id!, data })}

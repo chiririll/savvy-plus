@@ -17,7 +17,11 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth'
 import { getUserAvatarUrl, getUserInitials } from '@/lib/avatar'
 import { formatCurrency } from '@/lib/utils'
+import { LanguageSwitcher } from '@/components/shared'
+import { useTranslation } from 'react-i18next'
 export function Header() {
+    const { t } = useTranslation()
+    const { t: tNav } = useTranslation('nav')
     const { theme, toggleTheme } = useTheme()
     const { data: balance, isLoading: balanceLoading } = useTotalBalance()
     const navigate = useNavigate()
@@ -46,21 +50,21 @@ export function Header() {
                         <DropdownMenuTrigger asChild>
                             <Button size="sm" className="gap-1">
                                 <Plus className="size-4" />
-                                <span className="hidden sm:inline">Transaction</span>
+                                <span className="hidden sm:inline">{tNav('newTransaction')}</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleCreateTransaction('income')}>
                                 <ArrowDownLeft className="size-4 mr-2 text-green-600" />
-                                Income
+                                {tNav('income')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleCreateTransaction('expense')}>
                                 <ArrowUpRight className="size-4 mr-2 text-red-600" />
-                                Expense
+                                {tNav('expense')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleCreateTransaction('transfer')}>
                                 <ArrowLeftRight className="size-4 mr-2 text-blue-600" />
-                                Transfer
+                                {tNav('transfer')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -79,11 +83,13 @@ export function Header() {
                         </div>
                     ) : null}
 
+                    <LanguageSwitcher />
+
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={toggleTheme}
-                        aria-label="Toggle theme"
+                        aria-label={t('theme.toggle')}
                     >
                         {theme === 'dark' ? (
                             <Sun className="h-5 w-5" />
@@ -112,14 +118,14 @@ export function Header() {
                                 </Avatar>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium truncate">{user.name}</p>
-                                    <p className="text-xs text-muted-foreground truncate">{user.role}</p>
+                                    <p className="text-xs text-muted-foreground truncate">{t(`roles.${user.role}`)}</p>
                                 </div>
                             </div>
                             )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={handleLogout}>
                                 <LogOut className="size-4 mr-2" />
-                                Logout
+                                {t('actions.logout')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

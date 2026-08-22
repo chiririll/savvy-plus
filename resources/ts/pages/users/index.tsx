@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ListPage } from '@/components/shared'
 import { createUserColumns } from '@/components/features/users'
 import { useUsers, useDeleteUser } from '@/hooks'
@@ -5,6 +6,7 @@ import { useUser as useCurrentUser } from '@/stores/auth'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 
 export default function UsersPage() {
+    const { t } = useTranslation('pages')
     const currentUser = useCurrentUser()
     const { data: users, isLoading } = useUsers()
     const deleteUser = useDeleteUser()
@@ -18,10 +20,10 @@ export default function UsersPage() {
 
     return (
         <ListPage
-            title="Users"
-            description="Manage user accounts"
+            title={t('users.title')}
+            description={t('users.description')}
             createLink="/users/create"
-            createLabel="New User"
+            createLabel={t('users.create')}
             data={users ?? []}
             columns={columns}
             isLoading={isLoading}

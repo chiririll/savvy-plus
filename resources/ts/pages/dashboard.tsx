@@ -35,7 +35,9 @@ import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCa
 import { useOverviewMetrics } from '@/hooks/use-reports'
 import type { ReportFilters } from '@/pages/reports/types'
 import { cn, formatCurrency, formatCurrencyCompact } from '@/lib/utils'
+import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactECharts from 'echarts-for-react'
 import { useTheme } from '@/hooks/use-theme'
 import { Link, useNavigate } from 'react-router-dom'
@@ -104,7 +106,7 @@ function getPresetDates(preset: PeriodPreset): { start_date: string; end_date: s
 
 function formatDate(dateString: string): string {
     const date = new Date(dateString)
-    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+    return date.toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short' })
 }
 
 function getTransactionSign(type: Transaction['type']): string {
@@ -130,6 +132,9 @@ function getTransactionColor(type: Transaction['type']): string {
 }
 
 export default function DashboardPage() {
+    const { t } = useTranslation('pages')
+    const { t: tCommon } = useTranslation('common')
+    const { t: tNav } = useTranslation('nav')
     const { theme } = useTheme()
     const navigate = useNavigate()
     const { data: balance } = useTotalBalance()
@@ -388,15 +393,15 @@ export default function DashboardPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-                <p className="text-muted-foreground">Welcome to your finance dashboard</p>
+                <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
+                <p className="text-muted-foreground">{t('dashboard.welcome')}</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Total Balance
+                            {t('dashboard.totalBalance')}
                         </CardTitle>
                         <Wallet className="size-4 text-muted-foreground" />
                     </CardHeader>
@@ -423,7 +428,7 @@ export default function DashboardPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Income this month
+                            {t('dashboard.incomeThisMonth')}
                         </CardTitle>
                         <ArrowDownLeft className="size-4 text-green-600" />
                     </CardHeader>
@@ -450,7 +455,7 @@ export default function DashboardPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Expenses this month
+                            {t('dashboard.expensesThisMonth')}
                         </CardTitle>
                         <ArrowUpRight className="size-4 text-red-600" />
                     </CardHeader>
@@ -478,7 +483,7 @@ export default function DashboardPage() {
             <div className="grid gap-4 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                     <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <CardTitle>Balance Dynamics</CardTitle>
+                        <CardTitle>{t('dashboard.balanceDynamics')}</CardTitle>
                         <div className="flex items-center gap-2">
                             <Calendar className="size-4 text-muted-foreground hidden sm:block" />
                             <Select value={chartPeriod} onValueChange={handlePeriodChange}>
@@ -486,12 +491,12 @@ export default function DashboardPage() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="this_month">This month</SelectItem>
-                                    <SelectItem value="last_month">Last month</SelectItem>
-                                    <SelectItem value="last_3_months">Last 3 months</SelectItem>
-                                    <SelectItem value="last_6_months">Last 6 months</SelectItem>
-                                    <SelectItem value="this_year">This year</SelectItem>
-                                    <SelectItem value="custom">Custom</SelectItem>
+                                    <SelectItem value="this_month">{t('dashboard.periods.this_month')}</SelectItem>
+                                    <SelectItem value="last_month">{t('dashboard.periods.last_month')}</SelectItem>
+                                    <SelectItem value="last_3_months">{t('dashboard.periods.last_3_months')}</SelectItem>
+                                    <SelectItem value="last_6_months">{t('dashboard.periods.last_6_months')}</SelectItem>
+                                    <SelectItem value="this_year">{t('dashboard.periods.this_year')}</SelectItem>
+                                    <SelectItem value="custom">{t('dashboard.periods.custom')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -523,7 +528,7 @@ export default function DashboardPage() {
                             />
                         ) : (
                             <div className="flex items-center justify-center h-[250px] sm:h-[300px] text-muted-foreground">
-                                No data for this period
+                                {t('dashboard.noDataPeriod')}
                             </div>
                         )}
                     </CardContent>
@@ -531,7 +536,7 @@ export default function DashboardPage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Account Balances</CardTitle>
+                        <CardTitle>{t('dashboard.accountBalances')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-3">
@@ -554,7 +559,7 @@ export default function DashboardPage() {
                                             <div className="min-w-0">
                                                 <p className="text-sm font-medium truncate">{account.name}</p>
                                                 <p className="text-xs text-muted-foreground capitalize">
-                                                    {ACCOUNT_TYPE_CONFIG[account.type as AccountType]?.label || account.type}
+                                                    {t(`accounts.types.${account.type}`, { defaultValue: account.type })}
                                                 </p>
                                             </div>
                                         </div>
@@ -578,19 +583,19 @@ export default function DashboardPage() {
                                                         onClick={() => navigate(`/transactions/create?type=income&account_id=${account.id}`)}
                                                     >
                                                         <ArrowDownLeft className="size-4 mr-2 text-green-600" />
-                                                        Income
+                                                        {tNav('income')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         onClick={() => navigate(`/transactions/create?type=expense&account_id=${account.id}`)}
                                                     >
                                                         <ArrowUpRight className="size-4 mr-2 text-red-600" />
-                                                        Expense
+                                                        {tNav('expense')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         onClick={() => navigate(`/transactions/create?type=transfer&account_id=${account.id}`)}
                                                     >
                                                         <ArrowLeftRight className="size-4 mr-2 text-blue-600" />
-                                                        Transfer
+                                                        {tNav('transfer')}
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
@@ -599,7 +604,7 @@ export default function DashboardPage() {
                                 ))
                             ) : (
                                 <div className="text-center text-muted-foreground py-4">
-                                    No active accounts
+                                    {t('dashboard.noAccounts')}
                                 </div>
                             )}
                         </div>
@@ -610,7 +615,7 @@ export default function DashboardPage() {
             <div className="grid gap-4 lg:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Expenses by Category</CardTitle>
+                        <CardTitle>{t('dashboard.expensesByCategory')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {expensesByCategory && expensesByCategory.data.some((c) => (c.totalAmount ?? 0) > 0) ? (
@@ -621,7 +626,7 @@ export default function DashboardPage() {
                             />
                         ) : (
                             <div className="flex items-center justify-center h-[280px] text-muted-foreground">
-                                No expenses this month
+                                {t('dashboard.noExpensesMonth')}
                             </div>
                         )}
                     </CardContent>
@@ -629,11 +634,11 @@ export default function DashboardPage() {
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between gap-2">
-                        <CardTitle className="truncate">Recent Transactions</CardTitle>
+                        <CardTitle className="truncate">{t('dashboard.recentTransactions')}</CardTitle>
                         <Button variant="ghost" size="sm" asChild className="shrink-0">
                             <Link to="/transactions">
-                                <span className="hidden sm:inline">View all</span>
-                                <span className="sm:hidden">All</span>
+                                <span className="hidden sm:inline">{tCommon('actions.viewAll')}</span>
+                                <span className="sm:hidden">{tCommon('actions.all')}</span>
                                 <ArrowRight className="ml-1 size-4" />
                             </Link>
                         </Button>
@@ -668,8 +673,8 @@ export default function DashboardPage() {
                                                     {transaction.category?.name ||
                                                         transaction.description ||
                                                         (transaction.type === 'transfer'
-                                                            ? 'Transfer'
-                                                            : 'Transaction')}
+                                                            ? t('transactions.types.transfer')
+                                                            : t('dashboard.transaction'))}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground truncate">
                                                     {formatDate(transaction.date)} · {transaction.account.name}
@@ -691,7 +696,7 @@ export default function DashboardPage() {
                                 ))
                             ) : (
                                 <div className="text-center text-muted-foreground py-4">
-                                    No transactions yet
+                                    {t('dashboard.noTransactions')}
                                 </div>
                             )}
                         </div>
@@ -703,11 +708,11 @@ export default function DashboardPage() {
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                         <PiggyBank className="size-5" />
-                        Budgets
+                        {t('dashboard.budgets')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
                         <Link to="/budgets">
-                            View all
+                            {tCommon('actions.viewAll')}
                             <ArrowRight className="ml-1 size-4" />
                         </Link>
                     </Button>
@@ -742,8 +747,8 @@ export default function DashboardPage() {
                                         </div>
                                         <p className="text-xs text-muted-foreground mt-1">
                                             {budget.isGlobal
-                                                ? 'All expenses'
-                                                : budget.categories.map(c => c.name).join(', ') || 'No categories'}
+                                                ? t('dashboard.allExpenses')
+                                                : budget.categories.map(c => c.name).join(', ') || t('dashboard.noCategories')}
                                         </p>
                                     </Link>
                                 )
@@ -752,11 +757,11 @@ export default function DashboardPage() {
                     ) : (
                         <div className="text-center py-8">
                             <PiggyBank className="size-12 mx-auto text-muted-foreground/50 mb-3" />
-                            <p className="text-muted-foreground mb-3">No budgets yet</p>
+                            <p className="text-muted-foreground mb-3">{t('dashboard.noBudgets')}</p>
                             <Button asChild size="sm">
                                 <Link to="/budgets/create">
                                     <Plus className="size-4 mr-1" />
-                                    Create Budget
+                                    {t('dashboard.createBudget')}
                                 </Link>
                             </Button>
                         </div>
@@ -768,11 +773,11 @@ export default function DashboardPage() {
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                         <HandCoins className="size-5" />
-                        Debts
+                        {t('dashboard.debts')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
                         <Link to="/debts">
-                            View all
+                            {tCommon('actions.viewAll')}
                             <ArrowRight className="ml-1 size-4" />
                         </Link>
                     </Button>
@@ -786,7 +791,7 @@ export default function DashboardPage() {
                                         <TrendingDown className="size-4 text-red-600" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">I Owe</p>
+                                        <p className="text-xs text-muted-foreground">{t('debts.types.i_owe')}</p>
                                         <p className="font-mono font-semibold text-red-600">
                                             {formatCurrency(debtSummary.total_i_owe, debtSummary.currency)}
                                         </p>
@@ -797,7 +802,7 @@ export default function DashboardPage() {
                                         <TrendingUp className="size-4 text-green-600" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">Owed to Me</p>
+                                        <p className="text-xs text-muted-foreground">{t('debts.types.owed_to_me')}</p>
                                         <p className="font-mono font-semibold text-green-600">
                                             {formatCurrency(debtSummary.total_owed_to_me, debtSummary.currency)}
                                         </p>
@@ -812,7 +817,7 @@ export default function DashboardPage() {
                                         )}
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">Net Position</p>
+                                        <p className="text-xs text-muted-foreground">{t('debts.netPosition')}</p>
                                         <p className={`font-mono font-semibold ${debtSummary.net_debt >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                             {formatCurrency(Math.abs(debtSummary.net_debt), debtSummary.currency)}
                                         </p>
@@ -842,7 +847,7 @@ export default function DashboardPage() {
                                             />
                                             <div className="flex justify-between text-xs">
                                                 <span className="text-muted-foreground">
-                                                    {debt.paymentProgress.toFixed(0)}% paid
+                                                    {t('dashboard.percentPaid', { percent: debt.paymentProgress.toFixed(0) })}
                                                 </span>
                                                 <span className={debt.debtType === 'i_owe' ? 'text-red-600' : 'text-green-600'}>
                                                     {formatCurrency(debt.remainingDebt, debt.currency)}
@@ -850,7 +855,9 @@ export default function DashboardPage() {
                                             </div>
                                             {debt.counterparty && (
                                                 <p className="text-xs text-muted-foreground mt-1 truncate">
-                                                    {debt.debtType === 'i_owe' ? 'To: ' : 'From: '}{debt.counterparty}
+                                                    {debt.debtType === 'i_owe'
+                                                        ? t('dashboard.toCounterparty', { name: debt.counterparty })
+                                                        : t('dashboard.fromCounterparty', { name: debt.counterparty })}
                                                 </p>
                                             )}
                                         </Link>
@@ -861,11 +868,11 @@ export default function DashboardPage() {
                     ) : (
                         <div className="text-center py-8">
                             <HandCoins className="size-12 mx-auto text-muted-foreground/50 mb-3" />
-                            <p className="text-muted-foreground mb-3">No active debts</p>
+                            <p className="text-muted-foreground mb-3">{t('dashboard.noDebts')}</p>
                             <Button asChild size="sm">
                                 <Link to="/debts/create">
                                     <Plus className="size-4 mr-1" />
-                                    Add Debt
+                                    {t('dashboard.addDebt')}
                                 </Link>
                             </Button>
                         </div>
@@ -877,11 +884,11 @@ export default function DashboardPage() {
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                         <Repeat className="size-5" />
-                        Upcoming Recurring
+                        {t('dashboard.upcoming')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
                         <Link to="/recurring">
-                            View all
+                            {tCommon('actions.viewAll')}
                             <ArrowRight className="ml-1 size-4" />
                         </Link>
                     </Button>
@@ -904,7 +911,7 @@ export default function DashboardPage() {
                                             <ArrowLeftRight className="size-4 text-blue-600" />
                                         )}
                                         <p className="font-medium text-sm truncate">
-                                            {recurring.description || recurring.category?.name || 'Recurring'}
+                                            {recurring.description || recurring.category?.name || t('dashboard.recurring')}
                                         </p>
                                     </div>
                                     <p className={`font-mono text-sm ${
@@ -915,7 +922,7 @@ export default function DashboardPage() {
                                         {formatCurrency(recurring.amount, recurring.account.currency)}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                        {new Date(recurring.nextRunDate).toLocaleDateString('en-US', {
+                                        {new Date(recurring.nextRunDate).toLocaleDateString(intlLocale(), {
                                             month: 'short',
                                             day: 'numeric'
                                         })}
@@ -926,11 +933,11 @@ export default function DashboardPage() {
                     ) : (
                         <div className="text-center py-8">
                             <Repeat className="size-12 mx-auto text-muted-foreground/50 mb-3" />
-                            <p className="text-muted-foreground mb-3">No recurring transactions</p>
+                            <p className="text-muted-foreground mb-3">{t('dashboard.noRecurring')}</p>
                             <Button asChild size="sm">
                                 <Link to="/recurring/create">
                                     <Plus className="size-4 mr-1" />
-                                    Create Recurring
+                                    {t('dashboard.createRecurring')}
                                 </Link>
                             </Button>
                         </div>

@@ -1,9 +1,11 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn, formatCurrency } from '@/lib/utils'
 import { useActivityHeatmap } from '@/hooks'
+import { intlLocale } from '@/lib/i18n'
 import type { ReportFilters } from '../types'
 
 interface ActivityHeatmapProps {
@@ -41,6 +43,7 @@ function colorForValue(value: number, max: number): string | null {
 }
 
 export function ActivityHeatmap({ filters }: ActivityHeatmapProps) {
+    const { t } = useTranslation('pages')
     const { data, isLoading, error } = useActivityHeatmap(filters)
     const areaRef = useRef<HTMLDivElement>(null)
     const [cols, setCols] = useState(7)
@@ -98,7 +101,7 @@ export function ActivityHeatmap({ filters }: ActivityHeatmapProps) {
         return (
             <Card>
                 <CardContent className="py-8 text-center text-red-500">
-                    Failed to load activity heatmap
+                    {t('reports.errors.heatmap')}
                 </CardContent>
             </Card>
         )
@@ -109,16 +112,16 @@ export function ActivityHeatmap({ filters }: ActivityHeatmapProps) {
             <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="text-lg">Spending Activity</CardTitle>
+                        <CardTitle className="text-lg">{t('reports.heatmap.title')}</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            Daily expense intensity
+                            {t('reports.heatmap.subtitle')}
                         </p>
                     </div>
                     {heatmapData && (
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <span>Less</span>
+                            <span>{t('reports.heatmap.less')}</span>
                             <div className="h-2.5 w-20 rounded-sm" style={{ background: GRADIENT_CSS }} />
-                            <span>More</span>
+                            <span>{t('reports.heatmap.more')}</span>
                         </div>
                     )}
                 </div>
@@ -128,7 +131,7 @@ export function ActivityHeatmap({ filters }: ActivityHeatmapProps) {
                     <Skeleton className="flex-1 min-h-[220px]" />
                 ) : !heatmapData ? (
                     <div className="flex-1 min-h-[220px] flex items-center justify-center text-muted-foreground">
-                        No data for selected period
+                        {t('reports.noData')}
                     </div>
                 ) : (
                     <div ref={areaRef} className="flex-1 min-h-[220px] overflow-hidden">
@@ -156,7 +159,7 @@ export function ActivityHeatmap({ filters }: ActivityHeatmapProps) {
                                     </TooltipTrigger>
                                     <TooltipContent side="top" className="text-center">
                                         <p className="font-medium">
-                                            {parseLocalDate(cell.date).toLocaleDateString('en-US', {
+                                            {parseLocalDate(cell.date).toLocaleDateString(intlLocale(), {
                                                 weekday: 'short',
                                                 month: 'short',
                                                 day: 'numeric',
@@ -166,10 +169,10 @@ export function ActivityHeatmap({ filters }: ActivityHeatmapProps) {
                                         {cell.value > 0 ? (
                                             <>
                                                 <p className="text-amber-300">{formatCurrency(cell.value, heatmapData.currency)}</p>
-                                                <p className="opacity-70">{cell.count} transaction{cell.count !== 1 ? 's' : ''}</p>
+                                                <p className="opacity-70">{t('reports.heatmap.transactions', { count: cell.count })}</p>
                                             </>
                                         ) : (
-                                            <p className="opacity-70">No expenses</p>
+                                            <p className="opacity-70">{t('reports.heatmap.noExpenses')}</p>
                                         )}
                                     </TooltipContent>
                                 </Tooltip>

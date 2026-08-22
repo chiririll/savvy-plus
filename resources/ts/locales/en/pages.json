@@ -1,0 +1,396 @@
+{
+    "accounts": {
+        "title": "Accounts",
+        "description": "Manage your bank accounts, cash and crypto wallets",
+        "create": "New Account",
+        "createTitle": "Create Account",
+        "editTitle": "Edit Account",
+        "columns": {
+            "account": "Account",
+            "type": "Type",
+            "balance": "Balance",
+            "status": "Status"
+        },
+        "types": {
+            "bank": "Bank",
+            "cash": "Cash",
+            "crypto": "Crypto",
+            "debt": "Debt"
+        },
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive"
+        },
+        "initial": "Initial: {{amount}}",
+        "deleteTitle": "Delete account?",
+        "deleteDescription": "This action cannot be undone. The account \"{{name}}\" will be permanently deleted."
+    },
+    "categories": {
+        "title": "Categories",
+        "description": "Manage income and expense categories",
+        "create": "New Category",
+        "createTitle": "Create Category",
+        "editTitle": "Edit Category",
+        "columns": {
+            "category": "Category",
+            "type": "Type"
+        },
+        "types": {
+            "income": "Income",
+            "expense": "Expense"
+        },
+        "deleteTitle": "Delete category?",
+        "deleteDescription": "This action cannot be undone. The category \"{{name}}\" will be permanently deleted."
+    },
+    "tags": {
+        "title": "Tags",
+        "description": "Organize transactions with tags",
+        "create": "New Tag",
+        "createTitle": "Create Tag",
+        "editTitle": "Edit Tag",
+        "emptyTitle": "No tags found",
+        "emptyDescription": "Create your first tag to organize transactions",
+        "columns": {
+            "name": "Name",
+            "transactions": "Transactions"
+        },
+        "deleteTitle": "Delete tag?",
+        "deleteDescription": "This action cannot be undone. The tag \"{{name}}\" will be permanently deleted."
+    },
+    "users": {
+        "title": "Users",
+        "description": "Manage user accounts",
+        "create": "New User",
+        "createTitle": "Create User",
+        "editTitle": "Edit User",
+        "columns": {
+            "user": "User",
+            "email": "Email",
+            "role": "Role"
+        },
+        "deleteTitle": "Delete user?",
+        "deleteDescription": "This action cannot be undone. The user \"{{name}}\" will be permanently deleted."
+    },
+    "currencies": {
+        "title": "Currencies",
+        "description": "Manage currencies and exchange rates",
+        "create": "New Currency",
+        "createTitle": "Create Currency",
+        "editTitle": "Edit Currency",
+        "columns": {
+            "code": "Code",
+            "name": "Name",
+            "rate": "Rate",
+            "decimals": "Decimals",
+            "base": "Base"
+        },
+        "deleteTitle": "Delete currency?",
+        "deleteDescription": "This action cannot be undone. The currency \"{{name}}\" will be permanently deleted."
+    },
+    "transactions": {
+        "title": "Transactions",
+        "createTitle": "New Transaction",
+        "editTitle": "Edit Transaction",
+        "columns": {
+            "date": "Date",
+            "type": "Type",
+            "description": "Description",
+            "amount": "Amount"
+        },
+        "types": {
+            "income": "Income",
+            "expense": "Expense",
+            "transfer": "Transfer",
+            "debt_payment": "Debt Payment"
+        },
+        "deleteTitle": "Delete transaction?",
+        "deleteDescription": "This action cannot be undone."
+    },
+    "recurring": {
+        "title": "Recurring Transactions",
+        "description": "Manage automatically repeating transactions",
+        "create": "New Recurring",
+        "createTitle": "New Recurring Transaction",
+        "editTitle": "Edit Recurring Transaction",
+        "columns": {
+            "transaction": "Transaction",
+            "amount": "Amount",
+            "category": "Category",
+            "frequency": "Frequency",
+            "nextRun": "Next Run",
+            "status": "Status"
+        },
+        "status": {
+            "active": "Active",
+            "paused": "Paused"
+        },
+        "deleteTitle": "Delete recurring transaction?",
+        "deleteDescription": "This action cannot be undone."
+    },
+    "budgets": {
+        "title": "Budgets",
+        "description": "Set spending limits for categories",
+        "create": "New Budget",
+        "createTitle": "Create Budget",
+        "editTitle": "Edit Budget",
+        "columns": {
+            "budget": "Budget",
+            "limit": "Limit",
+            "period": "Period",
+            "progress": "Progress",
+            "status": "Status"
+        },
+        "deleteTitle": "Delete budget?",
+        "deleteDescription": "This action cannot be undone."
+    },
+    "debts": {
+        "title": "Debts",
+        "description": "Track money you owe and money owed to you",
+        "create": "New Debt",
+        "createTitle": "Create Debt",
+        "editTitle": "Edit Debt",
+        "netPosition": "Net Position",
+        "inYourFavor": "in your favor",
+        "youOwe": "you owe",
+        "showCompleted": "Show completed debts",
+        "columns": {
+            "debt": "Debt",
+            "type": "Type",
+            "progress": "Progress",
+            "total": "Total",
+            "remaining": "Remaining",
+            "dueDate": "Due Date",
+            "status": "Status"
+        },
+        "types": {
+            "i_owe": "I Owe",
+            "owed_to_me": "Owed To Me"
+        },
+        "deleteTitle": "Delete debt?",
+        "deleteDescription": "This action cannot be undone."
+    },
+    "automation": {
+        "title": "Automation Rules",
+        "description": "Create rules to automatically process transactions",
+        "create": "New Rule",
+        "createTitle": "New Automation Rule",
+        "editTitle": "Edit Automation Rule",
+        "columns": {
+            "order": "#",
+            "name": "Name",
+            "trigger": "Trigger",
+            "conditions": "Conditions",
+            "actions": "Actions",
+            "runs": "Runs",
+            "active": "Active"
+        },
+        "deleteTitle": "Delete rule?",
+        "deleteDescription": "This action cannot be undone."
+    },
+    "reports": {
+        "title": "Reports",
+        "description": "Analyze your finances across different dimensions",
+        "tabs": {
+            "overview": "Overview",
+            "cashflow": "Cash Flow",
+            "expenses": "Expenses",
+            "income": "Income",
+            "networth": "Net Worth"
+        },
+        "noData": "No data for selected period",
+        "vsPreviousPeriod": "vs previous period",
+        "vsAmount": "vs {{amount}}",
+        "vsPreviousAmount": "{{amount}} vs previous period",
+        "filters": {
+            "month": "Month",
+            "quarter": "Quarter",
+            "year": "Year",
+            "ytd": "YTD",
+            "custom": "Custom",
+            "comparePlaceholder": "Compare with...",
+            "noComparison": "No comparison",
+            "previousPeriod": "Previous period",
+            "samePeriodLastYear": "Same period last year",
+            "accounts": "Accounts",
+            "categories": "Categories",
+            "tags": "Tags",
+            "title": "Filters",
+            "period": "Period",
+            "compareWith": "Compare with",
+            "filterBy": "Filter by",
+            "reset": "Reset",
+            "resetFilters": "Reset filters",
+            "quarterLabel": "Q{{q}} {{year}}"
+        },
+        "groupBy": {
+            "day": "Day",
+            "week": "Week",
+            "month": "Month"
+        },
+        "views": {
+            "donut": "Donut",
+            "bar": "Bar",
+            "treemap": "Treemap",
+            "line": "Line"
+        },
+        "metrics": {
+            "income": "Income",
+            "expenses": "Expenses",
+            "netCashFlow": "Net Cash Flow",
+            "savingsRate": "Savings Rate",
+            "inflow": "Inflow",
+            "outflow": "Outflow",
+            "totalExpenses": "Total Expenses",
+            "totalIncome": "Total Income",
+            "avgPerDay": "Avg. per day",
+            "avgPerWeek": "Avg. per week",
+            "currentNetWorth": "Current Net Worth",
+            "percentagePoints": "{{value}}pp"
+        },
+        "series": {
+            "income": "Income",
+            "expenses": "Expenses",
+            "balance": "Balance",
+            "flow": "Flow",
+            "prevIncome": "Prev Income",
+            "prevExpenses": "Prev Expenses",
+            "prevBalance": "Prev Balance",
+            "previousPeriod": "Previous Period",
+            "netWorth": "Net Worth",
+            "budgetPace": "Budget Pace",
+            "actual": "Actual",
+            "current": "Current",
+            "budget": "Budget",
+            "today": "Today",
+            "total": "Total",
+            "sources": "Sources",
+            "day": "Day {{day}}",
+            "budgetLabel": "Budget: {{amount}}"
+        },
+        "errors": {
+            "overview": "Failed to load overview metrics",
+            "cashflow": "Failed to load cash flow metrics",
+            "cashflowChart": "Failed to load cash flow data",
+            "moneyFlow": "Failed to load money flow data",
+            "expensePace": "Failed to load expense pace data",
+            "heatmap": "Failed to load activity heatmap",
+            "expensesByCategory": "Failed to load expenses by category"
+        },
+        "moneyFlow": {
+            "title": "Money Flow",
+            "subtitle": "Where your money comes from and where it goes"
+        },
+        "expensePace": {
+            "title": "Expense Pace",
+            "subtitleBudget": "Track your spending against the monthly budget",
+            "subtitleDaily": "Track your daily spending progress",
+            "budgetRemaining": "Budget Remaining",
+            "spentSoFar": "Spent So Far",
+            "noBudgetHint": "No budget set. Create a budget to track your spending goals.",
+            "projectedEnd": "Projected by end of month",
+            "totalSpent": "Total spent",
+            "overBudget": "{{amount}} over budget",
+            "underBudget": "{{amount}} under budget",
+            "spentInDays": "{{spent}} spent in {{days}} days = {{avg}}/day avg × {{monthDays}} days",
+            "spentOverDays": "{{spent}} spent over {{days}} days = {{avg}}/day avg",
+            "noData": "No expense data for selected period"
+        },
+        "heatmap": {
+            "title": "Spending Activity",
+            "subtitle": "Daily expense intensity",
+            "less": "Less",
+            "more": "More",
+            "noExpenses": "No expenses",
+            "transactions_one": "{{count}} transaction",
+            "transactions_other": "{{count}} transactions"
+        },
+        "expensesByCategory": {
+            "title": "Expenses by Category",
+            "subtitle": "Compare spending across categories",
+            "noData": "No expense data for selected period"
+        },
+        "expensesStructure": {
+            "title": "Expenses Structure",
+            "subtitle": "Breakdown by category",
+            "noData": "No expenses for selected period"
+        },
+        "incomeStructure": {
+            "title": "Income Structure",
+            "subtitle": "Breakdown by source",
+            "noData": "No income for selected period"
+        },
+        "expensesDynamics": {
+            "title": "Expenses Dynamics",
+            "subtitle": "How your spending changes over time"
+        },
+        "incomeDynamics": {
+            "title": "Income Dynamics",
+            "subtitle": "How your income changes over time"
+        },
+        "topExpenses": {
+            "title": "Top Expenses",
+            "subtitle": "Largest transactions this period",
+            "topTotal": "Top {{count}} total",
+            "noData": "No expenses for selected period"
+        },
+        "topIncome": {
+            "title": "Top Income",
+            "subtitle": "Largest income transactions this period",
+            "topTotal": "Top {{count}} total",
+            "noData": "No income for selected period"
+        },
+        "cashFlowChart": {
+            "title": "Cash Flow Over Time",
+            "subtitle": "Income, expenses, and running balance",
+            "noIncomeOrExpenses": "No income or expenses for selected period",
+            "noIncome": "No income data for selected period",
+            "noExpenses": "No expenses data for selected period"
+        },
+        "netWorth": {
+            "accountsBreakdown": "Accounts Breakdown",
+            "distribution": "Distribution by account",
+            "noAccounts": "No accounts found",
+            "chartTitle": "Net Worth Over Time",
+            "chartSubtitle": "Track your wealth growth"
+        }
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "welcome": "Welcome to your finance dashboard",
+        "totalBalance": "Total Balance",
+        "incomeThisMonth": "Income this month",
+        "expensesThisMonth": "Expenses this month",
+        "balanceDynamics": "Balance Dynamics",
+        "accountBalances": "Account Balances",
+        "expensesByCategory": "Expenses by Category",
+        "recentTransactions": "Recent Transactions",
+        "budgets": "Budgets",
+        "noBudgets": "No budgets yet",
+        "allExpenses": "All expenses",
+        "noCategories": "No categories",
+        "noDebts": "No active debts",
+        "noRecurring": "No recurring transactions",
+        "transaction": "Transaction",
+        "debts": "Debts",
+        "upcoming": "Upcoming Recurring",
+        "recurring": "Recurring",
+        "noDataPeriod": "No data for this period",
+        "noAccounts": "No active accounts",
+        "noExpensesMonth": "No expenses this month",
+        "noTransactions": "No transactions yet",
+        "createBudget": "Create Budget",
+        "addDebt": "Add Debt",
+        "createRecurring": "Create Recurring",
+        "percentPaid": "{{percent}}% paid",
+        "toCounterparty": "To: {{name}}",
+        "fromCounterparty": "From: {{name}}",
+        "periods": {
+            "this_month": "This month",
+            "last_month": "Last month",
+            "last_3_months": "Last 3 months",
+            "last_6_months": "Last 6 months",
+            "this_year": "This year",
+            "custom": "Custom"
+        }
+    }
+}

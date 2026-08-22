@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { MetricCard } from '../components/MetricCard'
 import { SankeyDiagram } from '../components/SankeyDiagram'
 import { ExpensePaceChart } from '../components/ExpensePaceChart'
@@ -12,12 +13,13 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ filters }: OverviewTabProps) {
+    const { t } = useTranslation('pages')
     const { data, isLoading, error } = useOverviewMetrics(filters)
 
     if (error) {
         return (
             <div className="text-center py-8 text-red-500">
-                Failed to load overview metrics
+                {t('reports.errors.overview')}
             </div>
         )
     }
@@ -36,7 +38,7 @@ export function OverviewTab({ filters }: OverviewTabProps) {
                 ) : data ? (
                     <>
                         <MetricCard
-                            title="Income"
+                            title={t('reports.metrics.income')}
                             value={data.income.value}
                             previousValue={data.income.previous}
                             sparklineData={data.income.sparkline}
@@ -45,7 +47,7 @@ export function OverviewTab({ filters }: OverviewTabProps) {
                             currency={data.currency}
                         />
                         <MetricCard
-                            title="Expenses"
+                            title={t('reports.metrics.expenses')}
                             value={data.expenses.value}
                             previousValue={data.expenses.previous}
                             sparklineData={data.expenses.sparkline}
@@ -54,7 +56,7 @@ export function OverviewTab({ filters }: OverviewTabProps) {
                             currency={data.currency}
                         />
                         <MetricCard
-                            title="Net Cash Flow"
+                            title={t('reports.metrics.netCashFlow')}
                             value={data.netCashFlow.value}
                             previousValue={data.netCashFlow.previous}
                             sparklineData={data.netCashFlow.sparkline}
@@ -63,7 +65,7 @@ export function OverviewTab({ filters }: OverviewTabProps) {
                             currency={data.currency}
                         />
                         <MetricCard
-                            title="Savings Rate"
+                            title={t('reports.metrics.savingsRate')}
                             value={data.savingsRate.value}
                             previousValue={data.savingsRate.previous}
                             sparklineData={data.savingsRate.sparkline}

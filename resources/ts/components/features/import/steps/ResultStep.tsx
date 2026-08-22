@@ -1,4 +1,5 @@
-import { CheckCircle2, XCircle, Copy, Tag, FolderOpen } from 'lucide-react'
+import { CheckCircle2, XCircle, Tag, FolderOpen } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
@@ -9,6 +10,7 @@ interface ResultStepProps {
 }
 
 export function ResultStep({ result }: ResultStepProps) {
+    const { t } = useTranslation('settings')
     const navigate = useNavigate()
 
     const hasCreated = result.created > 0
@@ -16,7 +18,6 @@ export function ResultStep({ result }: ResultStepProps) {
 
     return (
         <div className="space-y-6">
-            {/* Main Result */}
             <div className={`p-6 border rounded-lg text-center ${hasCreated ? 'bg-green-500/10' : 'bg-yellow-500/10'}`}>
                 {hasCreated ? (
                     <CheckCircle2 className="size-16 text-green-500 mx-auto mb-4" />
@@ -24,43 +25,41 @@ export function ResultStep({ result }: ResultStepProps) {
                     <XCircle className="size-16 text-yellow-500 mx-auto mb-4" />
                 )}
                 <h2 className="text-2xl font-bold mb-2">
-                    {hasCreated ? 'Import Complete!' : 'No Transactions Imported'}
+                    {hasCreated ? t('import.complete') : t('import.noneImported')}
                 </h2>
                 <p className="text-muted-foreground">
                     {hasCreated
-                        ? `Successfully imported ${result.created} transaction${result.created !== 1 ? 's' : ''}`
-                        : 'All transactions were either duplicates or had errors'}
+                        ? t('import.successCount', { count: result.created })
+                        : t('import.allSkipped')}
                 </p>
             </div>
 
-            {/* Statistics */}
             <div className="grid gap-4 sm:grid-cols-3">
                 <div className="p-4 border rounded-lg text-center">
                     <div className="text-3xl font-bold text-green-600">{result.created}</div>
-                    <div className="text-sm text-muted-foreground">Created</div>
+                    <div className="text-sm text-muted-foreground">{t('import.created')}</div>
                 </div>
                 <div className="p-4 border rounded-lg text-center">
                     <div className="text-3xl font-bold text-yellow-600">{result.skippedDuplicates}</div>
-                    <div className="text-sm text-muted-foreground">Skipped (duplicates)</div>
+                    <div className="text-sm text-muted-foreground">{t('import.skippedDuplicates')}</div>
                 </div>
                 <div className="p-4 border rounded-lg text-center">
                     <div className="text-3xl font-bold text-red-600">{result.errors.length}</div>
-                    <div className="text-sm text-muted-foreground">Errors</div>
+                    <div className="text-sm text-muted-foreground">{t('import.errors')}</div>
                 </div>
             </div>
 
-            {/* Created Entities */}
             {(result.createdCategories.length > 0 ||
                 result.createdTags.length > 0 ||
                 result.createdCurrencies.length > 0) && (
                 <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium mb-3">New Entities Created</h3>
+                    <h3 className="font-medium mb-3">{t('import.newEntitiesCreated')}</h3>
                     <div className="space-y-3">
                         {result.createdCategories.length > 0 && (
                             <div className="flex items-start gap-2">
                                 <FolderOpen className="size-4 text-muted-foreground mt-0.5" />
                                 <div>
-                                    <div className="text-sm font-medium">Categories</div>
+                                    <div className="text-sm font-medium">{t('import.categoriesLabel')}</div>
                                     <div className="flex flex-wrap gap-1 mt-1">
                                         {result.createdCategories.map((cat) => (
                                             <Badge key={cat} variant="outline">{cat}</Badge>
@@ -73,7 +72,7 @@ export function ResultStep({ result }: ResultStepProps) {
                             <div className="flex items-start gap-2">
                                 <Tag className="size-4 text-muted-foreground mt-0.5" />
                                 <div>
-                                    <div className="text-sm font-medium">Tags</div>
+                                    <div className="text-sm font-medium">{t('import.tagsLabel')}</div>
                                     <div className="flex flex-wrap gap-1 mt-1">
                                         {result.createdTags.map((tag) => (
                                             <Badge key={tag} variant="outline">{tag}</Badge>
@@ -86,19 +85,17 @@ export function ResultStep({ result }: ResultStepProps) {
                 </div>
             )}
 
-            {/* Errors */}
             {hasErrors && (
                 <div className="p-4 border rounded-lg bg-red-500/10">
                     <div className="flex items-center gap-2 mb-2">
                         <XCircle className="size-4 text-red-500" />
-                        <span className="font-medium">Errors ({result.errors.length})</span>
+                        <span className="font-medium">{t('import.errorsCount', { count: result.errors.length })}</span>
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
                         <ul className="text-sm space-y-1">
                             {result.errors.map((err, i) => (
                                 <li key={i}>
-                                    <span className="font-mono text-muted-foreground">Row {err.row}:</span>{' '}
-                                    {err.message}
+                                    {t('import.rowDetail', { row: err.row, detail: err.message })}
                                 </li>
                             ))}
                         </ul>
@@ -106,10 +103,9 @@ export function ResultStep({ result }: ResultStepProps) {
                 </div>
             )}
 
-            {/* Actions */}
             <div className="flex justify-center gap-4">
                 <Button variant="outline" onClick={() => navigate('/transactions')}>
-                    View Transactions
+                    {t('import.viewTransactions')}
                 </Button>
             </div>
         </div>

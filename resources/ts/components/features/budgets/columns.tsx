@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Budget } from '@/types'
 import { formatCurrency } from '@/lib/utils'
+import i18n from '@/lib/i18n'
 
 const periodLabels: Record<string, string> = {
     weekly: 'Weekly',
@@ -38,7 +39,7 @@ export const createBudgetColumns = (
 ): ColumnDef<Budget>[] => [
     {
         accessorKey: 'name',
-        header: 'Budget',
+        header: () => i18n.t('pages:budgets.columns.budget'),
         cell: ({ row }) => (
             <div>
                 <p className="font-medium">{row.original.name}</p>
@@ -52,7 +53,7 @@ export const createBudgetColumns = (
     },
     {
         accessorKey: 'amount',
-        header: 'Limit',
+        header: () => i18n.t('pages:budgets.columns.limit'),
         cell: ({ row }) => (
             <span className="font-mono font-medium">
                 {formatCurrency(row.original.amount, row.original.currency)}
@@ -61,7 +62,7 @@ export const createBudgetColumns = (
     },
     {
         accessorKey: 'period',
-        header: 'Period',
+        header: () => i18n.t('pages:budgets.columns.period'),
         cell: ({ row }) => (
             <Badge variant="outline">
                 {periodLabels[row.original.period] || row.original.period}
@@ -70,7 +71,7 @@ export const createBudgetColumns = (
     },
     {
         accessorKey: 'progress',
-        header: 'Progress',
+        header: () => i18n.t('pages:budgets.columns.progress'),
         cell: ({ row }) => {
             const progress = row.original.progress
             if (!progress) return null
@@ -100,7 +101,7 @@ export const createBudgetColumns = (
     },
     {
         accessorKey: 'isActive',
-        header: 'Status',
+        header: () => i18n.t('pages:budgets.columns.status'),
         cell: ({ row }) => (
             <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
                 {row.original.isActive ? 'Active' : 'Inactive'}
@@ -121,7 +122,7 @@ export const createBudgetColumns = (
                     <DropdownMenuItem asChild>
                         <Link to={`/budgets/${row.original.id}/edit`}>
                             <Pencil className="mr-2 h-4 w-4" />
-                            Edit
+                            {i18n.t('actions.edit')}
                         </Link>
                     </DropdownMenuItem>
                     {!isReadOnly && (
@@ -134,24 +135,23 @@ export const createBudgetColumns = (
                                 className="text-destructive focus:text-destructive"
                             >
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
+                                {i18n.t('actions.delete')}
                             </DropdownMenuItem>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Delete budget?</AlertDialogTitle>
+                                <AlertDialogTitle>{i18n.t('pages:budgets.deleteTitle')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone. The budget "{row.original.name}"
-                                    will be permanently deleted.
+                                    {i18n.t('pages:budgets.deleteDescription')}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={() => onDelete(row.original.id)}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
-                                    Delete
+                                    {i18n.t('actions.delete')}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

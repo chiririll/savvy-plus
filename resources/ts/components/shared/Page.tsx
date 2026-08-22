@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
-
-const APP_NAME = 'Savvy'
+import { useTranslation } from 'react-i18next'
 
 interface PageProps {
     title: string
@@ -8,12 +7,15 @@ interface PageProps {
 }
 
 export function Page({ title, children }: PageProps) {
+    const { t } = useTranslation()
+
     useEffect(() => {
-        document.title = title ? `${title} | ${APP_NAME}` : APP_NAME
+        const appName = t('appName')
+        document.title = title ? `${title} | ${appName}` : appName
         return () => {
-            document.title = APP_NAME
+            document.title = appName
         }
-    }, [title])
+    }, [title, t])
 
     return <>{children}</>
 }

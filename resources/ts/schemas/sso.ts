@@ -1,20 +1,21 @@
 import { z } from 'zod'
+import i18n from '@/lib/i18n'
 
 export const roleMappingRuleSchema = z.object({
-    claim: z.string().min(1, 'Claim is required'),
+    claim: z.string().min(1, i18n.t('validation.claimRequired')),
     operator: z.enum(['equals', 'contains', 'one_of']),
-    value: z.string().min(1, 'Value is required'),
+    value: z.string().min(1, i18n.t('validation.valueRequired')),
     role: z.enum(['admin', 'read-write', 'read-only']),
 })
 
 export const identityProviderSchema = z.object({
-    name: z.string().min(1, 'Name is required').max(255),
+    name: z.string().min(1, i18n.t('validation.nameRequired')).max(255),
     slug: z
         .string()
-        .min(1, 'Slug is required')
+        .min(1, i18n.t('validation.slugRequired'))
         .max(255)
-        .regex(/^[a-z0-9-]+$/, 'Use lowercase letters, digits and hyphens'),
-    preset: z.string().min(1, 'Pick a provider type'),
+        .regex(/^[a-z0-9-]+$/, i18n.t('validation.slugFormat')),
+    preset: z.string().min(1, i18n.t('validation.pickProvider')),
     enabled: z.boolean().default(false),
     fields: z.record(z.string(), z.string()).default({}),
     role_mapping: z.array(roleMappingRuleSchema).default([]),

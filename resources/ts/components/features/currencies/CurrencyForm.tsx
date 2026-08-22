@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -79,11 +80,12 @@ export function CurrencyForm({
     defaultValues,
     onSubmit,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
     isEditing = false,
     autoUpdateEnabled = false,
     isBase = false,
 }: CurrencyFormProps) {
+    const { t } = useTranslation(['common', 'forms'])
     const [suggestField, setSuggestField] = useState<'code' | 'name' | null>(null)
     const { data: catalog = [] } = useCurrencyCatalog(!isEditing)
 
@@ -130,7 +132,7 @@ export function CurrencyForm({
                     name="code"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Code</FormLabel>
+                            <FormLabel>{t('forms:currencies.code')}</FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Input
@@ -150,7 +152,7 @@ export function CurrencyForm({
                                 </div>
                             </FormControl>
                             <FormDescription>
-                                ISO 4217 currency code (e.g., USD, EUR, RUB)
+                                {t('forms:currencies.codeHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -162,11 +164,11 @@ export function CurrencyForm({
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>{t('fields.name')}</FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Input
-                                        placeholder="US Dollar"
+                                        placeholder={t('forms:currencies.namePlaceholder')}
                                         autoComplete="off"
                                         {...field}
                                         onChange={(e) => {
@@ -191,12 +193,12 @@ export function CurrencyForm({
                     name="symbol"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Symbol</FormLabel>
+                            <FormLabel>{t('forms:currencies.symbol')}</FormLabel>
                             <FormControl>
                                 <Input placeholder="$" {...field} />
                             </FormControl>
                             <FormDescription>
-                                Currency symbol for display (e.g., $, €, ₽)
+                                {t('forms:currencies.symbolHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -208,12 +210,12 @@ export function CurrencyForm({
                     name="decimals"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Decimal places</FormLabel>
+                            <FormLabel>{t('forms:currencies.decimals')}</FormLabel>
                             <FormControl>
                                 <Input type="number" min={0} max={8} {...field} />
                             </FormControl>
                             <FormDescription>
-                                Number of decimal places (usually 2)
+                                {t('forms:currencies.decimalsHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -225,7 +227,7 @@ export function CurrencyForm({
                     name="rate"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Exchange rate</FormLabel>
+                            <FormLabel>{t('forms:currencies.rate')}</FormLabel>
                             <FormControl>
                                 <Input
                                     type="number"
@@ -237,10 +239,10 @@ export function CurrencyForm({
                             </FormControl>
                             <FormDescription>
                                 {isBase
-                                    ? 'Base currency rate is always 1'
+                                    ? t('forms:currencies.rateBaseHelp')
                                     : autoUpdateEnabled
-                                        ? 'Filled from the catalog. Rates stay in sync automatically.'
-                                        : 'Rate relative to base currency'}
+                                        ? t('forms:currencies.rateAutoHelp')
+                                        : t('forms:currencies.rateHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -248,7 +250,7 @@ export function CurrencyForm({
                 />
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? 'Saving...' : submitLabel}
+                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                 </Button>
             </form>
         </Form>

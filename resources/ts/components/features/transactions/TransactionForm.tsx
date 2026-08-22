@@ -1,6 +1,7 @@
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useEffect, useMemo, useRef, type KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -22,9 +23,9 @@ import { CategorySelect } from '@/components/shared/CategorySelect'
 import { FormWrapper } from '@/components/shared/FormWrapper'
 
 const TRANSACTION_TYPES = [
-    { value: 'income', label: 'Income', icon: ArrowDownLeft, color: 'text-green-600' },
-    { value: 'expense', label: 'Expense', icon: ArrowUpRight, color: 'text-red-600' },
-    { value: 'transfer', label: 'Transfer', icon: ArrowLeftRight, color: 'text-blue-600' },
+    { value: 'income', icon: ArrowDownLeft, color: 'text-green-600' },
+    { value: 'expense', icon: ArrowUpRight, color: 'text-red-600' },
+    { value: 'transfer', icon: ArrowLeftRight, color: 'text-blue-600' },
 ] as const
 
 interface TransactionFormProps {
@@ -40,8 +41,9 @@ export function TransactionForm({
     onSubmit,
     onTypeChange,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
 }: TransactionFormProps) {
+    const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
     const { data: categories } = useCategories()
     const { data: tags } = useTags()
@@ -234,7 +236,7 @@ export function TransactionForm({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* Transaction Type Tabs */}
                 <div className="flex gap-2 p-1 bg-muted rounded-lg">
-                    {TRANSACTION_TYPES.map(({ value, label, icon: Icon, color }) => (
+                    {TRANSACTION_TYPES.map(({ value, icon: Icon, color }) => (
                         <button
                             key={value}
                             type="button"
@@ -250,7 +252,7 @@ export function TransactionForm({
                             )}
                         >
                             <Icon className={cn('size-4', transactionType === value && color)} />
-                            {label}
+                            {t(`pages:transactions.types.${value}`)}
                         </button>
                     ))}
                 </div>
@@ -263,7 +265,7 @@ export function TransactionForm({
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    {transactionType === 'transfer' ? 'From Account' : 'Account'}
+                                    {transactionType === 'transfer' ? t('forms:fromAccount') : t('fields.account')}
                                 </FormLabel>
                                 <AccountSelect
                                     value={field.value}
@@ -281,7 +283,7 @@ export function TransactionForm({
                             name="to_account_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>To Account</FormLabel>
+                                    <FormLabel>{t('forms:transactions.toAccount')}</FormLabel>
                                     <AccountSelect
                                         value={field.value}
                                         onChange={field.onChange}
@@ -298,7 +300,7 @@ export function TransactionForm({
                             name="category_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Category</FormLabel>
+                                    <FormLabel>{t('fields.category')}</FormLabel>
                                     <CategorySelect
                                         value={field.value}
                                         onChange={field.onChange}
@@ -318,14 +320,14 @@ export function TransactionForm({
                         balancePreview.insufficientFunds ? 'bg-destructive/10 border-destructive/50' : 'bg-muted/50'
                     )}>
                         <div className="flex-1">
-                            <span className="text-muted-foreground">Balance: </span>
+                            <span className="text-muted-foreground">{t('forms:transactions.balance')}: </span>
                             <span className="font-mono font-medium">
                                 {formatCurrency(balancePreview.currentBalance, balancePreview.currency)}
                             </span>
                         </div>
                         <span className="text-muted-foreground">→</span>
                         <div className="flex-1 text-right">
-                            <span className="text-muted-foreground">After: </span>
+                            <span className="text-muted-foreground">{t('forms:transactions.after')}: </span>
                             <span className={cn(
                                 'font-mono font-medium',
                                 balancePreview.insufficientFunds ? 'text-destructive' :
@@ -335,7 +337,7 @@ export function TransactionForm({
                             </span>
                         </div>
                         {balancePreview.insufficientFunds && (
-                            <span className="text-destructive text-xs font-medium">Insufficient funds</span>
+                            <span className="text-destructive text-xs font-medium">{t('forms:transactions.insufficientFunds')}</span>
                         )}
                     </div>
                 )}
@@ -344,14 +346,14 @@ export function TransactionForm({
                 {toBalancePreview && (
                     <div className="flex items-center gap-4 p-3 rounded-lg border bg-muted/50 text-sm">
                         <div className="flex-1">
-                            <span className="text-muted-foreground">To Balance: </span>
+                            <span className="text-muted-foreground">{t('forms:transactions.toBalance')}: </span>
                             <span className="font-mono font-medium">
                                 {formatCurrency(toBalancePreview.currentBalance, toBalancePreview.currency)}
                             </span>
                         </div>
                         <span className="text-muted-foreground">→</span>
                         <div className="flex-1 text-right">
-                            <span className="text-muted-foreground">After: </span>
+                            <span className="text-muted-foreground">{t('forms:transactions.after')}: </span>
                             <span className="font-mono font-medium text-green-600">
                                 {formatCurrency(toBalancePreview.newBalance, toBalancePreview.currency)}
                             </span>
@@ -367,7 +369,7 @@ export function TransactionForm({
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    {transactionType === 'transfer' ? 'Send Amount' : 'Amount'}
+                                    {transactionType === 'transfer' ? t('forms:transactions.sendAmount') : t('fields.amount')}
                                     {selectedAccount?.currency?.symbol && (
                                         <span className="text-muted-foreground ml-1">
                                             ({selectedAccount.currency.symbol})
@@ -396,13 +398,13 @@ export function TransactionForm({
                             name="to_amount"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Receive Amount</FormLabel>
+                                    <FormLabel>{t('forms:transactions.receiveAmount')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
                                             step="0.01"
                                             min={0}
-                                            placeholder="0.00 (auto if same currency)"
+                                            placeholder={t('forms:transactions.receiveAmountPlaceholder')}
                                             {...field}
                                             value={field.value ?? ''}
                                             onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
@@ -418,7 +420,7 @@ export function TransactionForm({
                             name="date"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Date</FormLabel>
+                                    <FormLabel>{t('fields.date')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="date"
@@ -440,7 +442,7 @@ export function TransactionForm({
                         name="date"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Date</FormLabel>
+                                <FormLabel>{t('fields.date')}</FormLabel>
                                 <FormControl>
                                     <Input
                                         type="date"
@@ -460,10 +462,10 @@ export function TransactionForm({
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Description</FormLabel>
+                            <FormLabel>{t('fields.description')}</FormLabel>
                             <FormControl>
                                 <Textarea
-                                    placeholder="Optional notes..."
+                                    placeholder={t('forms:transactions.notesPlaceholder')}
                                     className="resize-none h-20"
                                     {...field}
                                 />
@@ -480,7 +482,7 @@ export function TransactionForm({
                         name="tag_ids"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Tags</FormLabel>
+                                <FormLabel>{t('forms:tags.label')}</FormLabel>
                                 <div className="flex flex-wrap gap-2">
                                     {tags.map((tag) => {
                                         const isSelected = selectedTagIds.includes(tag.id)
@@ -516,7 +518,7 @@ export function TransactionForm({
                 {transactionType !== 'transfer' && (
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <FormLabel>Items</FormLabel>
+                            <FormLabel>{t('forms:transactions.items')}</FormLabel>
                             <Button
                                 type="button"
                                 variant="outline"
@@ -524,7 +526,7 @@ export function TransactionForm({
                                 onClick={addItem}
                             >
                                 <Plus className="size-4 mr-1" />
-                                Add Item
+                                {t('forms:transactions.addItem')}
                             </Button>
                         </div>
 
@@ -533,10 +535,10 @@ export function TransactionForm({
                                 <table className="w-full text-sm">
                                     <thead className="bg-muted/50">
                                         <tr>
-                                            <th className="text-left p-2 font-medium">Name</th>
-                                            <th className="text-left p-2 font-medium w-20">Qty</th>
-                                            <th className="text-left p-2 font-medium w-28">Price</th>
-                                            <th className="text-right p-2 font-medium w-28">Total</th>
+                                            <th className="text-left p-2 font-medium">{t('fields.name')}</th>
+                                            <th className="text-left p-2 font-medium w-20">{t('forms:transactions.qty')}</th>
+                                            <th className="text-left p-2 font-medium w-28">{t('forms:transactions.price')}</th>
+                                            <th className="text-right p-2 font-medium w-28">{t('forms:transactions.total')}</th>
                                             <th className="w-10"></th>
                                         </tr>
                                     </thead>
@@ -551,7 +553,7 @@ export function TransactionForm({
                                                     <td className="p-1">
                                                         <Input
                                                             {...form.register(`items.${index}.name`)}
-                                                            placeholder="Item name"
+                                                            placeholder={t('forms:transactions.itemName')}
                                                             className="h-8 border-0 shadow-none focus-visible:ring-1"
                                                             data-item-name
                                                             data-index={index}
@@ -605,7 +607,7 @@ export function TransactionForm({
                                     <tfoot className="border-t bg-muted/30">
                                         <tr>
                                             <td colSpan={4} className="p-2 text-right font-medium">
-                                                Total:
+                                                {t('forms:transactions.total')}:
                                             </td>
                                             <td className="p-2 text-right font-mono font-semibold">
                                                 {formatCurrency(itemsTotal, selectedAccount?.currency, { showSymbol: false })}
@@ -619,7 +621,7 @@ export function TransactionForm({
 
                         {fields.length === 0 && (
                             <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg border-dashed">
-                                No items. Click "Add Item" or enter amount manually.
+                                {t('forms:transactions.noItems')}
                             </p>
                         )}
 
@@ -632,7 +634,7 @@ export function TransactionForm({
                 )}
 
                 <Button type="submit" disabled={isSubmitting || balancePreview?.insufficientFunds} className="w-full">
-                    {isSubmitting ? 'Saving...' : submitLabel}
+                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                 </Button>
             </form>
         </Form>

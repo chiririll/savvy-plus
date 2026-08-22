@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import ReactECharts from 'echarts-for-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +13,7 @@ interface SankeyDiagramProps {
 }
 
 export function SankeyDiagram({ filters }: SankeyDiagramProps) {
+    const { t } = useTranslation('pages')
     const navigate = useNavigate()
     const { data, isLoading, error } = useMoneyFlow(filters)
 
@@ -66,7 +68,7 @@ export function SankeyDiagram({ filters }: SankeyDiagramProps) {
         return (
             <Card>
                 <CardContent className="py-8 text-center text-red-500">
-                    Failed to load money flow data
+                    {t('reports.errors.moneyFlow')}
                 </CardContent>
             </Card>
         )
@@ -75,9 +77,9 @@ export function SankeyDiagram({ filters }: SankeyDiagramProps) {
     return (
         <Card>
             <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Money Flow</CardTitle>
+                <CardTitle className="text-lg">{t('reports.moneyFlow.title')}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                    Where your money comes from and where it goes
+                    {t('reports.moneyFlow.subtitle')}
                 </p>
             </CardHeader>
             <CardContent>
@@ -85,7 +87,7 @@ export function SankeyDiagram({ filters }: SankeyDiagramProps) {
                     <Skeleton className="h-[400px]" />
                 ) : !sankeyOption ? (
                     <div className="h-[400px] flex items-center justify-center text-muted-foreground">
-                        No data for selected period
+                        {t('reports.noData')}
                     </div>
                 ) : (
                     <ReactECharts

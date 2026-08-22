@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 import { ApiError } from '@/types'
 
 interface WrappedResponse<T> {
@@ -32,10 +33,15 @@ const createApiClient = (baseURL: string): AxiosInstance => {
         },
     })
 
+    client.interceptors.request.use((config) => {
+        config.headers['X-Locale'] = i18n.resolvedLanguage ?? i18n.language
+        return config
+    })
+
     client.interceptors.response.use(
         (response) => response,
         (error) => {
-            const message = error.response?.data?.message || 'An error occurred'
+            const message = error.response?.data?.message || i18n.t('errors.generic')
 
             if (error.response?.status === 401) {
                 onUnauthorized?.()

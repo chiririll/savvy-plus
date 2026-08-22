@@ -24,6 +24,7 @@ import {
 import { Account } from '@/types'
 import { ACCOUNT_TYPE_CONFIG } from '@/constants'
 import { formatCurrency } from '@/lib/utils'
+import i18n from '@/lib/i18n'
 
 export const createAccountColumns = (
     onDelete: (id: number) => void,
@@ -31,7 +32,7 @@ export const createAccountColumns = (
 ): ColumnDef<Account>[] => [
     {
         accessorKey: 'name',
-        header: 'Account',
+        header: () => i18n.t('pages:accounts.columns.account'),
         cell: ({ row }) => {
             const config = ACCOUNT_TYPE_CONFIG[row.original.type]
             const Icon = config.icon
@@ -44,7 +45,7 @@ export const createAccountColumns = (
                     <div>
                         <p className="font-medium">{row.original.name}</p>
                         <p className="text-xs text-muted-foreground">
-                            {row.original.currency?.code ?? 'N/A'}
+                            {row.original.currency?.code ?? i18n.t('na')}
                         </p>
                     </div>
                 </div>
@@ -53,19 +54,19 @@ export const createAccountColumns = (
     },
     {
         accessorKey: 'type',
-        header: 'Type',
+        header: () => i18n.t('pages:accounts.columns.type'),
         cell: ({ row }) => {
             const config = ACCOUNT_TYPE_CONFIG[row.original.type]
             return (
                 <Badge variant="secondary" className={config.color}>
-                    {config.label}
+                    {i18n.t(`pages:accounts.types.${row.original.type}`)}
                 </Badge>
             )
         },
     },
     {
         accessorKey: 'currentBalance',
-        header: 'Balance',
+        header: () => i18n.t('pages:accounts.columns.balance'),
         cell: ({ row }) => (
             <div className="font-mono text-right">
                 <p className={row.original.currentBalance >= 0 ? 'text-green-600' : 'text-red-600'}>
@@ -73,7 +74,9 @@ export const createAccountColumns = (
                 </p>
                 {row.original.initialBalance !== row.original.currentBalance && (
                     <p className="text-xs text-muted-foreground">
-                        Initial: {formatCurrency(row.original.initialBalance, row.original.currency)}
+                        {i18n.t('pages:accounts.initial', {
+                            amount: formatCurrency(row.original.initialBalance, row.original.currency),
+                        })}
                     </p>
                 )}
             </div>
@@ -81,10 +84,12 @@ export const createAccountColumns = (
     },
     {
         accessorKey: 'isActive',
-        header: 'Status',
+        header: () => i18n.t('pages:accounts.columns.status'),
         cell: ({ row }) => (
             <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
-                {row.original.isActive ? 'Active' : 'Inactive'}
+                {row.original.isActive
+                    ? i18n.t('pages:accounts.status.active')
+                    : i18n.t('pages:accounts.status.inactive')}
             </Badge>
         ),
     },
@@ -102,7 +107,7 @@ export const createAccountColumns = (
                     <DropdownMenuItem asChild>
                         <Link to={`/accounts/${row.original.id}/edit`}>
                             <Pencil className="mr-2 size-4" />
-                            Edit
+                            {i18n.t('actions.edit')}
                         </Link>
                     </DropdownMenuItem>
                     {!isReadOnly && (
@@ -115,24 +120,23 @@ export const createAccountColumns = (
                                 className="text-destructive focus:text-destructive"
                             >
                                 <Trash2 className="mr-2 size-4" />
-                                Delete
+                                {i18n.t('actions.delete')}
                             </DropdownMenuItem>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Delete account?</AlertDialogTitle>
+                                <AlertDialogTitle>{i18n.t('pages:accounts.deleteTitle')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone. The account "{row.original.name}"
-                                    will be permanently deleted.
+                                    {i18n.t('pages:accounts.deleteDescription', { name: row.original.name })}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={() => onDelete(row.original.id)}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
-                                    Delete
+                                    {i18n.t('actions.delete')}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

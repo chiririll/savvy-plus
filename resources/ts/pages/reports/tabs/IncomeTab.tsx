@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn, formatCurrency } from '@/lib/utils'
@@ -13,6 +14,7 @@ interface IncomeTabProps {
 }
 
 export function IncomeTab({ filters }: IncomeTabProps) {
+    const { t } = useTranslation('pages')
     const { data, isLoading } = useTransactionReportSummary(filters, 'income')
 
     const percentChange = data?.previous
@@ -43,7 +45,7 @@ export function IncomeTab({ filters }: IncomeTabProps) {
                             {/* Main metric */}
                             <div className="space-y-2">
                                 <p className="text-sm text-muted-foreground font-medium">
-                                    Total Income
+                                    {t('reports.metrics.totalIncome')}
                                 </p>
                                 <p className="text-5xl font-bold text-green-600 tracking-tight">
                                     {formatCurrency(data.total, data.currency)}
@@ -64,7 +66,9 @@ export function IncomeTab({ filters }: IncomeTabProps) {
                                             {Math.abs(percentChange).toFixed(1)}%
                                         </span>
                                         <span className="text-sm text-muted-foreground">
-                                            {isIncrease ? '+' : ''}{formatCurrency(absoluteChange, data.currency)} vs previous period
+                                            {t('reports.vsPreviousAmount', {
+                                                amount: `${isIncrease ? '+' : ''}${formatCurrency(absoluteChange, data.currency)}`,
+                                            })}
                                         </span>
                                     </div>
                                 )}
@@ -78,11 +82,11 @@ export function IncomeTab({ filters }: IncomeTabProps) {
                                         <Calendar className="size-5" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">Avg. per day</p>
+                                        <p className="text-xs text-muted-foreground">{t('reports.metrics.avgPerDay')}</p>
                                         <p className="text-xl font-semibold">{formatCurrency(data.avgPerDay, data.currency)}</p>
                                         {filters.compareWith !== 'none' && data.prevAvgPerDay !== null && (
                                             <p className="text-xs text-muted-foreground">
-                                                vs {formatCurrency(data.prevAvgPerDay, data.currency)}
+                                                {t('reports.vsAmount', { amount: formatCurrency(data.prevAvgPerDay, data.currency) })}
                                             </p>
                                         )}
                                     </div>
@@ -94,11 +98,11 @@ export function IncomeTab({ filters }: IncomeTabProps) {
                                         <CalendarDays className="size-5" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">Avg. per week</p>
+                                        <p className="text-xs text-muted-foreground">{t('reports.metrics.avgPerWeek')}</p>
                                         <p className="text-xl font-semibold">{formatCurrency(data.avgPerWeek, data.currency)}</p>
                                         {filters.compareWith !== 'none' && data.prevAvgPerWeek !== null && (
                                             <p className="text-xs text-muted-foreground">
-                                                vs {formatCurrency(data.prevAvgPerWeek, data.currency)}
+                                                {t('reports.vsAmount', { amount: formatCurrency(data.prevAvgPerWeek, data.currency) })}
                                             </p>
                                         )}
                                     </div>

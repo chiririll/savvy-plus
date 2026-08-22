@@ -1,27 +1,28 @@
 import { z } from 'zod'
+import i18n from '@/lib/i18n'
 
 export const transactionItemSchema = z.object({
-    name: z.string().min(1, 'Name is required').max(255),
-    quantity: z.coerce.number().int('Must be an integer').min(1, 'Must be at least 1'),
-    price_per_unit: z.coerce.number().min(0, 'Cannot be negative'),
+    name: z.string().min(1, i18n.t('validation.nameRequired')).max(255),
+    quantity: z.coerce.number().int(i18n.t('validation.integer')).min(1, i18n.t('validation.atLeastOne')),
+    price_per_unit: z.coerce.number().min(0, i18n.t('validation.cannotBeNegative')),
 })
 
 export const transactionSchema = z.object({
     type: z.enum(['income', 'expense', 'transfer'], {
-        required_error: 'Please select transaction type',
+        required_error: i18n.t('validation.selectTransactionType'),
     }),
 
     account_id: z.coerce.number({
-        required_error: 'Please select account',
-    }).positive('Please select account'),
+        required_error: i18n.t('validation.selectAccount'),
+    }).positive(i18n.t('validation.selectAccount')),
 
     to_account_id: z.coerce.number().positive().optional().nullable(),
 
     category_id: z.coerce.number().positive().optional().nullable(),
 
     amount: z.coerce.number({
-        required_error: 'Amount is required',
-    }).positive('Amount must be positive'),
+        required_error: i18n.t('validation.amountRequired'),
+    }).positive(i18n.t('validation.amountPositive')),
 
     to_amount: z.coerce.number().positive().optional().nullable(),
 
@@ -31,7 +32,7 @@ export const transactionSchema = z.object({
 
     date: z.preprocess(
         (val) => val ?? new Date().toISOString().split('T')[0],
-        z.string().min(1, 'Date is required')
+        z.string().min(1, i18n.t('validation.dateRequired'))
     ),
 
     items: z.array(transactionItemSchema).optional(),
@@ -42,7 +43,7 @@ export const transactionSchema = z.object({
     if (data.type === 'transfer' && !data.to_account_id) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Destination account is required for transfers',
+            message: i18n.t('validation.transferDestination'),
             path: ['to_account_id'],
         })
     }
@@ -51,7 +52,7 @@ export const transactionSchema = z.object({
     if (data.type === 'transfer' && data.category_id) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Category should not be set for transfers',
+            message: i18n.t('validation.transferNoCategory'),
             path: ['category_id'],
         })
     }
@@ -60,7 +61,7 @@ export const transactionSchema = z.object({
     if (data.type !== 'transfer' && !data.category_id) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Please select a category',
+            message: i18n.t('validation.selectCategory'),
             path: ['category_id'],
         })
     }
@@ -72,7 +73,10 @@ export const transactionSchema = z.object({
         if (itemsTotal > 0 && Math.abs(itemsTotal - data.amount) > 0.01) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: `Items total (${itemsTotal.toFixed(2)}) must equal amount (${data.amount.toFixed(2)})`,
+                message: i18n.t('validation.itemsTotalMismatch', {
+                    itemsTotal: itemsTotal.toFixed(2),
+                    amount: data.amount.toFixed(2),
+                }),
                 path: ['items'],
             })
         }

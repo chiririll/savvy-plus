@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { settingsApi } from '@/api'
 import { Settings } from '@/types'
 import { toast } from 'sonner'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['settings']
 
@@ -19,10 +20,10 @@ export function useUpdateSettings() {
         mutationFn: (data: Partial<Settings>) => settingsApi.update(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success('Settings updated')
+            toast.success(i18n.t('toasts.settings.updated'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update settings')
+            toast.error(error.message || i18n.t('toasts.settings.updateFailed'))
         },
     })
 }

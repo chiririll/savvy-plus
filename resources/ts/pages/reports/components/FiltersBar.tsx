@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -38,14 +39,15 @@ interface FiltersBarProps {
 }
 
 export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onReset }: FiltersBarProps) {
+    const { t, i18n } = useTranslation('pages')
     const { data: categories } = useCategories()
     const { data: accounts } = useAccounts()
     const { data: tags } = useTags()
     const isMobile = useIsMobile()
     const [sheetOpen, setSheetOpen] = useState(false)
 
-    const monthOptions = useMemo(() => getMonthOptions(), [])
-    const quarterOptions = useMemo(() => getQuarterOptions(), [])
+    const monthOptions = useMemo(() => getMonthOptions(), [i18n.language])
+    const quarterOptions = useMemo(() => getQuarterOptions(), [i18n.language])
     const yearOptions = useMemo(() => getYearOptions(), [])
 
     const hasActiveFilters =
@@ -68,10 +70,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
                     className="cursor-pointer"
                     onClick={() => onFilterChange('periodType', type)}
                 >
-                    {type === 'month' && 'Month'}
-                    {type === 'quarter' && 'Quarter'}
-                    {type === 'year' && 'Year'}
-                    {type === 'ytd' && 'YTD'}
+                    {t(`reports.filters.${type}`)}
                 </Badge>
             ))}
             <Badge
@@ -79,7 +78,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
                 className="cursor-pointer"
                 onClick={() => onFilterChange('periodType', 'custom')}
             >
-                Custom
+                {t('reports.filters.custom')}
             </Badge>
         </div>
     )
@@ -168,12 +167,12 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
             onValueChange={(val) => onFilterChange('compareWith', val as CompareType)}
         >
             <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Compare with..." />
+                <SelectValue placeholder={t('reports.filters.comparePlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-                <SelectItem value="none">No comparison</SelectItem>
-                <SelectItem value="previous_period">Previous period</SelectItem>
-                <SelectItem value="same_period_last_year">Same period last year</SelectItem>
+                <SelectItem value="none">{t('reports.filters.noComparison')}</SelectItem>
+                <SelectItem value="previous_period">{t('reports.filters.previousPeriod')}</SelectItem>
+                <SelectItem value="same_period_last_year">{t('reports.filters.samePeriodLastYear')}</SelectItem>
             </SelectContent>
         </Select>
     )
@@ -183,7 +182,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
         if (inSheet) {
             return (
                 <div className="space-y-2">
-                    <Label className="text-sm font-medium">Accounts</Label>
+                    <Label className="text-sm font-medium">{t('reports.filters.accounts')}</Label>
                     <div className="space-y-1 max-h-40 overflow-y-auto border rounded-md p-2">
                         {accounts?.map(account => (
                             <div
@@ -207,7 +206,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
             <Popover>
                 <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8">
-                        Accounts
+                        {t('reports.filters.accounts')}
                         {filters.accountIds.length > 0 && (
                             <Badge variant="secondary" className="ml-1 px-1.5">
                                 {filters.accountIds.length}
@@ -242,7 +241,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
         if (inSheet) {
             return (
                 <div className="space-y-2">
-                    <Label className="text-sm font-medium">Categories</Label>
+                    <Label className="text-sm font-medium">{t('reports.filters.categories')}</Label>
                     <div className="space-y-1 max-h-40 overflow-y-auto border rounded-md p-2">
                         {categories?.map(category => (
                             <div
@@ -266,7 +265,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
             <Popover>
                 <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8">
-                        Categories
+                        {t('reports.filters.categories')}
                         {filters.categoryIds.length > 0 && (
                             <Badge variant="secondary" className="ml-1 px-1.5">
                                 {filters.categoryIds.length}
@@ -303,7 +302,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
         if (inSheet) {
             return (
                 <div className="space-y-2">
-                    <Label className="text-sm font-medium">Tags</Label>
+                    <Label className="text-sm font-medium">{t('reports.filters.tags')}</Label>
                     <div className="space-y-1 max-h-40 overflow-y-auto border rounded-md p-2">
                         {tags.map(tag => (
                             <div
@@ -327,7 +326,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
             <Popover>
                 <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8">
-                        Tags
+                        {t('reports.filters.tags')}
                         {filters.tagIds.length > 0 && (
                             <Badge variant="secondary" className="ml-1 px-1.5">
                                 {filters.tagIds.length}
@@ -382,14 +381,14 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
                             </SheetTrigger>
                             <SheetContent side="bottom" className="h-[85vh] rounded-t-xl">
                                 <SheetHeader>
-                                    <SheetTitle>Filters</SheetTitle>
+                                    <SheetTitle>{t('reports.filters.title')}</SheetTitle>
                                 </SheetHeader>
                                 <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-6">
                                     {/* Period */}
                                     <div className="space-y-3">
                                         <Label className="text-sm font-medium flex items-center gap-2">
                                             <Calendar className="size-4" />
-                                            Period
+                                            {t('reports.filters.period')}
                                         </Label>
                                         <PeriodTypeBadges />
                                         <PeriodSelector />
@@ -397,7 +396,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
 
                                     {/* Comparison */}
                                     <div className="space-y-2">
-                                        <Label className="text-sm font-medium">Compare with</Label>
+                                        <Label className="text-sm font-medium">{t('reports.filters.compareWith')}</Label>
                                         <ComparisonSelector />
                                     </div>
 
@@ -405,7 +404,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
                                     <div className="space-y-4">
                                         <Label className="text-sm font-medium flex items-center gap-2">
                                             <Filter className="size-4" />
-                                            Filter by
+                                            {t('reports.filters.filterBy')}
                                         </Label>
                                         <AccountsFilter inSheet />
                                         <CategoriesFilter inSheet />
@@ -423,7 +422,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
                                             className="w-full"
                                         >
                                             <RotateCcw className="size-4 mr-2" />
-                                            Reset filters
+                                            {t('reports.filters.resetFilters')}
                                         </Button>
                                     )}
                                 </div>
@@ -473,7 +472,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
                                 className="h-8 text-muted-foreground"
                             >
                                 <RotateCcw className="size-3 mr-1" />
-                                Reset
+                                {t('reports.filters.reset')}
                             </Button>
                         </>
                     )}

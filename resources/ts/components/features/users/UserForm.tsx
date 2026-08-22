@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -39,9 +40,10 @@ export function UserForm({
     defaultValues,
     onSubmit,
     isSubmitting,
-    submitLabel = 'Save',
+    submitLabel,
     isEdit = false,
 }: UserFormProps) {
+    const { t } = useTranslation(['common', 'forms'])
     const currentUser = useUser()
     const isEditingSelf = isEdit && defaultValues?.id === currentUser?.id
 
@@ -65,9 +67,9 @@ export function UserForm({
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Name</FormLabel>
+                                <FormLabel>{t('fields.name')}</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="John Doe" {...field} />
+                                    <Input placeholder={t('forms:users.namePlaceholder')} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -79,9 +81,9 @@ export function UserForm({
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>{t('fields.email')}</FormLabel>
                                 <FormControl>
-                                    <Input type="email" placeholder="john@example.com" {...field} />
+                                    <Input type="email" placeholder={t('forms:users.emailPlaceholder')} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -93,17 +95,17 @@ export function UserForm({
                         name="password"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>{isEdit ? 'New Password' : 'Password'}</FormLabel>
+                                <FormLabel>{isEdit ? t('forms:users.newPassword') : t('fields.password')}</FormLabel>
                                 <FormControl>
                                     <Input
                                         type="password"
-                                        placeholder={isEdit ? 'Leave empty to keep current' : 'Enter password'}
+                                        placeholder={isEdit ? t('forms:users.passwordKeepPlaceholder') : t('forms:users.passwordPlaceholder')}
                                         {...field}
                                     />
                                 </FormControl>
                                 {isEdit && (
                                     <FormDescription>
-                                        Leave empty to keep the current password
+                                        {t('forms:users.passwordKeepHelp')}
                                     </FormDescription>
                                 )}
                                 <FormMessage />
@@ -116,7 +118,7 @@ export function UserForm({
                         name="role"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Role</FormLabel>
+                                <FormLabel>{t('fields.role')}</FormLabel>
                                 <Select
                                     value={field.value}
                                     onValueChange={field.onChange}
@@ -124,18 +126,18 @@ export function UserForm({
                                 >
                                     <FormControl>
                                         <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select role" />
+                                            <SelectValue placeholder={t('forms:selectRole')} />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="admin">Admin</SelectItem>
-                                        <SelectItem value="read-write">Read-Write</SelectItem>
-                                        <SelectItem value="read-only">Read-Only</SelectItem>
+                                        <SelectItem value="admin">{t('roles.admin')}</SelectItem>
+                                        <SelectItem value="read-write">{t('roles.read-write')}</SelectItem>
+                                        <SelectItem value="read-only">{t('roles.read-only')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 {isEditingSelf && (
                                     <FormDescription>
-                                        You cannot change your own role
+                                        {t('forms:users.cannotChangeOwnRole')}
                                     </FormDescription>
                                 )}
                                 <FormMessage />
@@ -144,7 +146,7 @@ export function UserForm({
                     />
 
                     <Button type="submit" disabled={isSubmitting} className="w-full">
-                        {isSubmitting ? 'Saving...' : submitLabel}
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                     </Button>
                 </form>
             </Form>
