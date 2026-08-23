@@ -30,23 +30,23 @@ RUN apk upgrade --no-cache \
 
 WORKDIR /var/www/html
 
-COPY --from=backend /app/vendor ./vendor
-COPY --from=backend /app/public ./public
-COPY --from=backend /app/bootstrap ./bootstrap
-COPY --from=backend /app/config ./config
-COPY --from=backend /app/routes ./routes
-COPY --from=backend /app/storage ./storage
-COPY --from=backend /app/resources ./resources
-COPY --from=backend /app/app ./app
-COPY --from=backend /app/artisan ./artisan
-COPY --from=backend /app/database ./database
-COPY --from=backend /app/composer.json ./composer.json
-
-COPY --from=frontend /app/public/build ./public/build
-
-RUN chown -R www-data:www-data /var/www/html \
+RUN chown www-data:www-data /var/www/html \
     && chown -R www-data:www-data /var/lib/nginx /var/log/nginx \
-    && mkdir -p /data && chown -R www-data:www-data /data
+    && mkdir -p /data && chown www-data:www-data /data
+
+COPY --chown=www-data:www-data --from=backend /app/vendor ./vendor
+COPY --chown=www-data:www-data --from=backend /app/public ./public
+COPY --chown=www-data:www-data --from=backend /app/bootstrap ./bootstrap
+COPY --chown=www-data:www-data --from=backend /app/config ./config
+COPY --chown=www-data:www-data --from=backend /app/routes ./routes
+COPY --chown=www-data:www-data --from=backend /app/storage ./storage
+COPY --chown=www-data:www-data --from=backend /app/resources ./resources
+COPY --chown=www-data:www-data --from=backend /app/app ./app
+COPY --chown=www-data:www-data --from=backend /app/artisan ./artisan
+COPY --chown=www-data:www-data --from=backend /app/database ./database
+COPY --chown=www-data:www-data --from=backend /app/composer.json ./composer.json
+
+COPY --chown=www-data:www-data --from=frontend /app/public/build ./public/build
 
 COPY docker/nginx-main.conf /etc/nginx/nginx.conf
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
