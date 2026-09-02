@@ -15,10 +15,11 @@ class AuthSessionService
      *
      * @return array{token: string, csrf: string, session: AuthSession}
      */
-    public function issue(User $user, Request $request): array
+    public function issue(User $user, Request $request, bool $rememberMe = false): array
     {
         $token = Str::random(48);
         $csrf = Str::random(40);
+        $ttl = $this->ttlMinutes($rememberMe);
 
         $session = AuthSession::create([
             'user_id' => $user->id,
@@ -26,9 +27,11 @@ class AuthSessionService
             'csrf' => $csrf,
             'ip' => $request->ip(),
             'user_agent' => Str::limit((string) $request->userAgent(), 500, ''),
+            'remember_me' => $rememberMe,
             'last_used_at' => now(),
-            'idle_expires_at' => now()->addMinutes((int) config('auth_session.idle_ttl')),
-            'absolute_expires_at' => now()->addMinutes((int) config('auth_session.absolute_ttl')),
+            'refreshed_at' => now(),
+            'idle_expires_at' => now()->addMinutes($ttl),
+            'absolute_expires_at' => now()->addMinutes($ttl),
         ]);
 
         return ['token' => $token, 'csrf' => $csrf, 'session' => $session];
@@ -42,11 +45,11 @@ class AuthSessionService
     }
 
     /**
-     * Slide the idle window forward (capped by the absolute lifetime).
+     * Slide idle forward (capped by the absolute lifetime). Does not rotate.
      */
     public function touch(AuthSession $session): void
     {
-        $idle = now()->addMinutes((int) config('auth_session.idle_ttl'));
+        $idle = now()->addMinutes($this->ttlMinutes((bool) $session->remember_me));
 
         $session->forceFill([
             'last_used_at' => now(),
@@ -54,30 +57,65 @@ class AuthSessionService
         ])->save();
     }
 
-    public function shouldRotate(AuthSession $session): bool
+    /**
+     * Remember-me only: once a day, issue a new token and slide the 7-day window.
+     *
+     * @return array{token: string, csrf: string}|null
+     */
+    public function maybeRefresh(AuthSession $session): ?array
     {
-        return $session->created_at->addMinutes((int) config('auth_session.rotate_after'))->isPast();
+        if (! $session->remember_me) {
+            $this->touch($session);
+
+            return null;
+        }
+
+        $refreshedAt = $session->refreshed_at ?? $session->created_at;
+        if ($refreshedAt->gt(now()->subDay())) {
+            $this->touch($session);
+
+            return null;
+        }
+
+        return $this->refresh($session);
     }
 
     /**
-     * Issue a fresh token + csrf on the same session row, preserving the
-     * absolute lifetime. Returns the new raw token + csrf.
-     *
      * @return array{token: string, csrf: string}
      */
-    public function rotate(AuthSession $session): array
+    public function refresh(AuthSession $session): array
     {
         $token = Str::random(48);
         $csrf = Str::random(40);
+        $ttl = $this->ttlMinutes(true);
 
         $session->forceFill([
             'token_hash' => $this->hash($token),
             'csrf' => $csrf,
             'last_used_at' => now(),
-            'idle_expires_at' => now()->addMinutes((int) config('auth_session.idle_ttl'))->min($session->absolute_expires_at),
+            'refreshed_at' => now(),
+            'idle_expires_at' => now()->addMinutes($ttl),
+            'absolute_expires_at' => now()->addMinutes($ttl),
         ])->save();
 
         return ['token' => $token, 'csrf' => $csrf];
+    }
+
+    /**
+     * @return array{expires_at: string, refresh_at: string|null}
+     */
+    public function clientTimes(AuthSession $session): array
+    {
+        $refreshAt = null;
+        if ($session->remember_me) {
+            $from = $session->refreshed_at ?? $session->created_at;
+            $refreshAt = $from->copy()->addDay()->min($session->absolute_expires_at)->toIso8601String();
+        }
+
+        return [
+            'expires_at' => $session->absolute_expires_at->toIso8601String(),
+            'refresh_at' => $refreshAt,
+        ];
     }
 
     public function revoke(AuthSession $session): void
@@ -97,6 +135,11 @@ class AuthSessionService
         return AuthSession::where('absolute_expires_at', '<', now())
             ->orWhere(fn ($q) => $q->whereNotNull('revoked_at')->where('revoked_at', '<', now()->subDay()))
             ->delete();
+    }
+
+    public function ttlMinutes(bool $rememberMe): int
+    {
+        return (int) config($rememberMe ? 'auth_session.remember_ttl' : 'auth_session.session_ttl');
     }
 
     private function hash(string $token): string

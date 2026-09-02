@@ -19,9 +19,9 @@ function makeAuthUser(array $overrides = []): User
     ], $overrides));
 }
 
-function openSession(User $user): array
+function openSession(User $user, bool $remember = false): array
 {
-    return app(AuthSessionService::class)->issue($user, request());
+    return app(AuthSessionService::class)->issue($user, request(), $remember);
 }
 
 it('rejects a request once the idle window has passed', function () {
@@ -54,20 +54,83 @@ it('slides the idle window forward on use', function () {
     expect($issued['session']->fresh()->idle_expires_at->gt(now()->addMinutes(60)))->toBeTrue();
 });
 
-it('rotates the session token after the rotation threshold', function () {
-    $issued = openSession(makeAuthUser());
-    $issued['session']->forceFill(['created_at' => now()->subHours(2)])->save();
-    $oldHash = $issued['session']->token_hash;
+it('does not rotate the token on ordinary API use', function () {
+    $issued = openSession(makeAuthUser(), remember: true);
+    $hash = $issued['session']->token_hash;
+
+    $issued['session']->forceFill(['refreshed_at' => now()->subHours(2)])->save();
 
     $response = $this->call('GET', '/api/auth/2fa/status', [], ['svy_session' => $issued['token']]);
     $response->assertOk();
+    expect(collect($response->headers->getCookies())->first(fn ($c) => $c->getName() === 'svy_session'))->toBeNull();
+    expect($issued['session']->fresh()->token_hash)->toBe($hash);
+});
+
+it('refreshes a remember-me session from /auth/me after a day', function () {
+    $issued = openSession(makeAuthUser(), remember: true);
+    $oldHash = $issued['session']->token_hash;
+    $issued['session']->forceFill(['refreshed_at' => now()->subDay()->subMinute()])->save();
+
+    $response = $this->call('GET', '/api/auth/me', [], ['svy_session' => $issued['token']]);
+    $response->assertOk()->assertJsonPath('user.email', 'u@test.com');
 
     $rotated = collect($response->headers->getCookies())->first(fn ($c) => $c->getName() === 'svy_session');
     expect($rotated)->not->toBeNull();
     expect($issued['session']->fresh()->token_hash)->not->toBe($oldHash);
+    expect($response->json('refresh_at'))->not->toBeNull();
+});
 
-    // The old token no longer resolves.
-    $this->call('GET', '/api/auth/2fa/status', [], ['svy_session' => $issued['token']])->assertStatus(401);
+it('does not refresh a remember-me session before a day has passed', function () {
+    $issued = openSession(makeAuthUser(), remember: true);
+    $hash = $issued['session']->token_hash;
+
+    $response = $this->call('GET', '/api/auth/me', [], ['svy_session' => $issued['token']]);
+    $response->assertOk();
+    expect(collect($response->headers->getCookies())->first(fn ($c) => $c->getName() === 'svy_session'))->toBeNull();
+    expect($issued['session']->fresh()->token_hash)->toBe($hash);
+});
+
+it('does not refresh a browser-session login from /auth/me', function () {
+    $issued = openSession(makeAuthUser());
+    $issued['session']->forceFill(['refreshed_at' => now()->subDays(2)])->save();
+
+    $response = $this->call('GET', '/api/auth/me', [], ['svy_session' => $issued['token']]);
+    $response->assertOk();
+    expect(collect($response->headers->getCookies())->first(fn ($c) => $c->getName() === 'svy_session'))->toBeNull();
+    expect($response->json('refresh_at'))->toBeNull();
+});
+
+it('issues a session cookie without remember me and a persistent cookie with it', function () {
+    makeAuthUser();
+
+    $sessionLogin = $this->postJson('/api/auth/login', [
+        'email' => 'u@test.com',
+        'password' => 'secret1',
+        'remember_me' => false,
+    ])->assertOk();
+    $sessionCookie = collect($sessionLogin->headers->getCookies())->first(fn ($c) => $c->getName() === 'svy_session');
+    expect($sessionCookie)->not->toBeNull();
+    expect($sessionCookie->getExpiresTime())->toBe(0);
+
+    $rememberLogin = $this->postJson('/api/auth/login', [
+        'email' => 'u@test.com',
+        'password' => 'secret1',
+        'remember_me' => true,
+    ])->assertOk();
+    $rememberCookie = collect($rememberLogin->headers->getCookies())->first(fn ($c) => $c->getName() === 'svy_session');
+    expect($rememberCookie)->not->toBeNull();
+    expect($rememberCookie->getExpiresTime())->toBeGreaterThan(time() + 60 * 60 * 24 * 6);
+});
+
+it('slides the idle window on /auth/me', function () {
+    $issued = openSession(makeAuthUser());
+    $issued['session']->forceFill(['idle_expires_at' => now()->addMinutes(5)])->save();
+
+    $this->call('GET', '/api/auth/me', [], ['svy_session' => $issued['token']])
+        ->assertOk()
+        ->assertJsonPath('user.email', 'u@test.com');
+
+    expect($issued['session']->fresh()->idle_expires_at->gt(now()->addMinutes(60)))->toBeTrue();
 });
 
 it('enforces CSRF on mutating authenticated requests', function () {

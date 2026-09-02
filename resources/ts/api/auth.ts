@@ -6,6 +6,7 @@ import {
     LoginCredentials,
     RegisterData,
     User,
+    MeResponse,
     TwoFactorAuthResponse,
     TwoFactorStatus,
     TwoFactorEnableResponse,
@@ -47,7 +48,7 @@ export const authApi = {
         return response.data
     },
 
-    me: async (): Promise<{ user: User | null }> => {
+    me: async (): Promise<MeResponse> => {
         const response = await apiClient.get('/auth/me')
         return response.data
     },
@@ -77,10 +78,11 @@ export const authApi = {
         return response.data
     },
 
-    twoFactorVerify: async (twoFactorToken: string, code: string): Promise<AuthResponse> => {
+    twoFactorVerify: async (twoFactorToken: string, code: string, rememberMe = false): Promise<AuthResponse> => {
         const response = await apiClient.post('/auth/2fa/verify', {
             two_factor_token: twoFactorToken,
             code,
+            remember_me: rememberMe,
         })
         return response.data
     },

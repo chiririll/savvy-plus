@@ -21,6 +21,8 @@ import {
     InputOTPSlot,
     InputOTPSeparator,
 } from '@/components/ui/input-otp'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Loader2, ArrowLeft, Key, Fingerprint } from 'lucide-react'
 import {
     browserSupportsWebAuthn,
@@ -38,6 +40,25 @@ import { toast } from 'sonner'
 type LoginFormValues = {
     email: string
     password: string
+    remember_me: boolean
+}
+
+type LoginLocationState = {
+    twoFactorToken?: string
+    rememberMe?: boolean
+    sessionExpired?: boolean
+    from?: string | { pathname?: string; search?: string }
+}
+
+function safeReturnPath(from: LoginLocationState['from']): string {
+    if (typeof from === 'string') {
+        return from.startsWith('/') && !from.startsWith('//') ? from : '/'
+    }
+    const pathname = from?.pathname
+    if (typeof pathname === 'string' && pathname.startsWith('/') && !pathname.startsWith('//')) {
+        return `${pathname}${from?.search ?? ''}`
+    }
+    return '/'
 }
 
 export default function LoginPage() {
@@ -56,8 +77,12 @@ export default function LoginPage() {
     const [useRecoveryCode, setUseRecoveryCode] = useState(false)
     const [recoveryCode, setRecoveryCode] = useState('')
     const [passkeyLoading, setPasskeyLoading] = useState(false)
+    const [rememberMe, setRememberMe] = useState(false)
     const [passkeySupported] = useState(() => browserSupportsWebAuthn() && isPasskeyDomainSupported())
     const autofillStarted = useRef(false)
+    const loginState = (location.state as LoginLocationState | null) ?? null
+    const sessionExpiredNotice = Boolean(loginState?.sessionExpired)
+    const afterLoginPath = safeReturnPath(loginState?.from)
 
     useEffect(() => {
         authApi.status().then((status) => {
@@ -70,9 +95,12 @@ export default function LoginPage() {
 
     // Resume the 2FA step when arriving from the SSO callback.
     useEffect(() => {
-        const incoming = (location.state as { twoFactorToken?: string } | null)?.twoFactorToken
-        if (incoming) {
-            setTwoFactorToken(incoming)
+        const incoming = location.state as LoginLocationState | null
+        if (incoming?.twoFactorToken) {
+            setTwoFactorToken(incoming.twoFactorToken)
+            if (incoming.rememberMe) {
+                setRememberMe(true)
+            }
             navigate(location.pathname, { replace: true, state: null })
         }
     }, [location.state, location.pathname, navigate])
@@ -93,7 +121,7 @@ export default function LoginPage() {
             if (!supported || cancelled) return
             loginWithPasskey({ useAutofill: true })
                 .then(() => {
-                    if (!cancelled) navigate('/')
+                    if (!cancelled) navigate(afterLoginPath)
                 })
                 .catch(() => {})
         })
@@ -101,14 +129,14 @@ export default function LoginPage() {
         return () => {
             cancelled = true
         }
-    }, [checkingStatus, twoFactorToken, loginWithPasskey, navigate])
+    }, [checkingStatus, twoFactorToken, loginWithPasskey, navigate, afterLoginPath])
 
     const handlePasskeyLogin = async (stepUpToken?: string) => {
         setPasskeyLoading(true)
         try {
             await loginWithPasskey({ twoFactorToken: stepUpToken })
             toast.success(t('welcomeToast'))
-            navigate('/')
+            navigate(afterLoginPath)
         } catch (error: unknown) {
             toast.error(passkeyErrorMessage(error, t('passkeyFailed')))
         } finally {
@@ -119,6 +147,7 @@ export default function LoginPage() {
     const loginSchema = useMemo(() => z.object({
         email: z.string().email(t('validation.email')),
         password: z.string().min(1, t('validation.passwordRequired')),
+        remember_me: z.boolean(),
     }), [t])
 
     const form = useForm<LoginFormValues>({
@@ -126,6 +155,7 @@ export default function LoginPage() {
         defaultValues: {
             email: '',
             password: '',
+            remember_me: false,
         },
     })
 
@@ -135,8 +165,9 @@ export default function LoginPage() {
             const result = await login(data)
             if (result.success) {
                 toast.success(t('welcomeToast'))
-                navigate('/')
+                navigate(afterLoginPath)
             } else if (result.requires_2fa) {
+                setRememberMe(data.remember_me)
                 setTwoFactorToken(result.two_factor_token)
             }
         } catch (error: unknown) {
@@ -152,9 +183,9 @@ export default function LoginPage() {
 
         setIsLoading(true)
         try {
-            await loginWith2FA(twoFactorToken, code)
+            await loginWith2FA(twoFactorToken, code, rememberMe)
             toast.success(t('welcomeToast'))
-            navigate('/')
+            navigate(afterLoginPath)
         } catch (error: unknown) {
             toast.error(getApiErrorMessage(error, t('twoFactor.invalidCode')))
             if (useRecoveryCode) {
@@ -298,6 +329,11 @@ export default function LoginPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    {sessionExpiredNotice && (
+                        <Alert>
+                            <AlertDescription>{t('sessionExpired.banner')}</AlertDescription>
+                        </Alert>
+                    )}
                     {passkeySupported && (
                         <Button
                             variant="outline"
@@ -349,6 +385,22 @@ export default function LoginPage() {
                                             />
                                         </FormControl>
                                         <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="remember_me"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                                        <FormControl>
+                                            <Checkbox
+                                                checked={field.value}
+                                                onCheckedChange={(checked) => field.onChange(checked === true)}
+                                            />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">{t('rememberMe')}</FormLabel>
                                     </FormItem>
                                 )}
                             />

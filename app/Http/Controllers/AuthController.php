@@ -52,7 +52,7 @@ class AuthController extends Controller
             'role' => UserRole::Admin,
         ]);
 
-        return $this->issueSession($user, $request, 201);
+        return $this->issueSession($user, $request, 201, true);
     }
 
     public function login(Request $request): JsonResponse
@@ -60,6 +60,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
+            'remember_me' => 'sometimes|boolean',
         ]);
 
         if ($this->passwordLoginDisabled()) {
@@ -106,9 +107,26 @@ class AuthController extends Controller
         $token = $this->cookies->readToken($request);
         $session = $token ? $this->sessions->resolve($token) : null;
 
-        return response()->json([
-            'user' => $session?->user ? $this->sessionUser($session->user) : null,
-        ]);
+        if (! $session?->user) {
+            return response()->json([
+                'user' => null,
+                'expires_at' => null,
+                'refresh_at' => null,
+            ])->header('Cache-Control', 'no-store');
+        }
+
+        $refreshed = $this->sessions->maybeRefresh($session);
+
+        $response = response()->json($this->sessionPayload($session->user, $session->fresh()))
+            ->header('Cache-Control', 'no-store');
+
+        if ($refreshed) {
+            foreach ($this->cookies->make($request, $refreshed['token'], $refreshed['csrf'], true) as $cookie) {
+                $response->withCookie($cookie);
+            }
+        }
+
+        return $response;
     }
 
     public function logout(Request $request): JsonResponse

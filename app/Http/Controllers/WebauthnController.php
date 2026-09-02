@@ -162,6 +162,6 @@ class WebauthnController extends Controller
             $this->twoFactorChallenges->consume($data['two_factor_token']);
         }
 
-        return $this->issueSession($user, $request);
+        return $this->issueSession($user, $request, rememberMe: true);
     }
 }
