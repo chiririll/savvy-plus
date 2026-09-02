@@ -57,6 +57,20 @@ export const authApi = {
         await apiClient.post('/auth/logout')
     },
 
+    changePassword: async (data: {
+        current_password: string
+        password: string
+        password_confirmation: string
+    }): Promise<{ message: string }> => {
+        const response = await apiClient.put('/auth/password', data)
+        return response.data
+    },
+
+    logoutOthers: async (): Promise<{ message: string; revoked: number }> => {
+        const response = await apiClient.post('/auth/logout-others')
+        return response.data
+    },
+
     // 2FA Methods
     twoFactorStatus: async (): Promise<TwoFactorStatus> => {
         const response = await apiClient.get('/auth/2fa/status')

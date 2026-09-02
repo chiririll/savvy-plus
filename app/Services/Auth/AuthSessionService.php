@@ -130,6 +130,14 @@ class AuthSessionService
             ->update(['revoked_at' => now()]);
     }
 
+    public function revokeOthers(User $user, AuthSession $keep): int
+    {
+        return AuthSession::where('user_id', $user->id)
+            ->where('id', '!=', $keep->id)
+            ->whereNull('revoked_at')
+            ->update(['revoked_at' => now()]);
+    }
+
     public function purgeExpired(): int
     {
         return AuthSession::where('absolute_expires_at', '<', now())

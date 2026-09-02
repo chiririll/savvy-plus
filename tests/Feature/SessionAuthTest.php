@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\Auth\AuthSessionService;
 use App\Services\Auth\TwoFactorChallengeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
@@ -183,4 +184,84 @@ it('does not resolve an expired 2FA challenge', function () {
     TwoFactorChallenge::query()->update(['expires_at' => now()->subMinute()]);
 
     expect($svc->resolve($token))->toBeNull();
+});
+
+it('revokes other sessions when the password is changed', function () {
+    $user = makeAuthUser();
+    $current = openSession($user);
+    $other = openSession($user);
+
+    $this->call(
+        'PUT',
+        '/api/auth/password',
+        [
+            'current_password' => 'secret1',
+            'password' => 'newsecret1',
+            'password_confirmation' => 'newsecret1',
+        ],
+        ['svy_session' => $current['token']],
+        [],
+        ['HTTP_X_CSRF_TOKEN' => $current['csrf']],
+    )->assertOk();
+
+    $this->call('GET', '/api/auth/2fa/status', [], ['svy_session' => $current['token']])->assertOk();
+    $this->call('GET', '/api/auth/2fa/status', [], ['svy_session' => $other['token']])->assertStatus(401);
+    expect(Hash::check('newsecret1', $user->fresh()->password))->toBeTrue();
+});
+
+it('does not revoke sessions when the current password is wrong', function () {
+    $user = makeAuthUser();
+    $current = openSession($user);
+    $other = openSession($user);
+
+    $this->call(
+        'PUT',
+        '/api/auth/password',
+        [
+            'current_password' => 'wrong-password',
+            'password' => 'newsecret1',
+            'password_confirmation' => 'newsecret1',
+        ],
+        ['svy_session' => $current['token']],
+        [],
+        ['HTTP_X_CSRF_TOKEN' => $current['csrf']],
+    )->assertStatus(422);
+
+    $this->call('GET', '/api/auth/2fa/status', [], ['svy_session' => $other['token']])->assertOk();
+    expect(Hash::check('secret1', $user->fresh()->password))->toBeTrue();
+});
+
+it('rejects a password change for SSO-only accounts', function () {
+    $issued = openSession(makeAuthUser(['email' => 'sso@test.com', 'is_sso_only' => true]));
+
+    $this->call(
+        'PUT',
+        '/api/auth/password',
+        [
+            'current_password' => 'secret1',
+            'password' => 'newsecret1',
+            'password_confirmation' => 'newsecret1',
+        ],
+        ['svy_session' => $issued['token']],
+        [],
+        ['HTTP_X_CSRF_TOKEN' => $issued['csrf']],
+    )->assertStatus(422);
+});
+
+it('revokes other sessions from logout-others and keeps the current one', function () {
+    $user = makeAuthUser();
+    $current = openSession($user);
+    $other = openSession($user);
+
+    $this->call(
+        'POST',
+        '/api/auth/logout-others',
+        [],
+        ['svy_session' => $current['token']],
+        [],
+        ['HTTP_X_CSRF_TOKEN' => $current['csrf']],
+    )->assertOk()->assertJsonPath('revoked', 1);
+
+    $this->call('GET', '/api/auth/2fa/status', [], ['svy_session' => $current['token']])->assertOk();
+    $this->call('GET', '/api/auth/2fa/status', [], ['svy_session' => $other['token']])->assertStatus(401);
 });

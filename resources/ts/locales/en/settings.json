@@ -32,6 +32,29 @@
         "title": "Security Settings",
         "heading": "Security",
         "description": "Manage your account security settings",
+        "password": {
+            "title": "Password",
+            "description": "Change your password. Other devices will be signed out.",
+            "current": "Current password",
+            "new": "New password",
+            "confirm": "Confirm new password",
+            "submit": "Update password",
+            "ssoOnly": "This account signs in with SSO and does not use a password.",
+            "validation": {
+                "currentRequired": "Enter your current password",
+                "passwordMin": "Password must be at least 8 characters",
+                "passwordMatch": "Passwords don't match"
+            }
+        },
+        "sessions": {
+            "title": "Sessions",
+            "description": "Sign out anywhere you are not right now",
+            "logoutOthers": "Sign out of all devices",
+            "logoutOthersDescription": "Other browsers and devices will need to sign in again. This one stays signed in.",
+            "confirmTitle": "Sign out of other devices?",
+            "confirmDescription": "Every other session will be revoked. You will stay signed in here.",
+            "confirm": "Sign out everywhere else"
+        },
         "twoFactor": {
             "title": "Two-Factor Authentication",
             "description": "Require a verification code in addition to your password",

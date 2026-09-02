@@ -2,6 +2,8 @@ export interface User {
     id: number
     name: string
     email: string
+    role?: string
+    isSsoOnly?: boolean
 }
 
 export interface LoginCredentials {

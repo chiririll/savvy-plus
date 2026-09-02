@@ -43,6 +43,7 @@ trait IssuesAuthSession
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->role,
+            'isSsoOnly' => (bool) $user->is_sso_only,
         ];
     }
 }

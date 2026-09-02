@@ -1,11 +1,22 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { Page, PageHeader, FormWrapper } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form'
 import {
     Dialog,
     DialogContent,
@@ -21,6 +32,8 @@ import {
     InputOTPSeparator,
 } from '@/components/ui/input-otp'
 import {
+    useChangePassword,
+    useLogoutOthers,
     useTwoFactorStatus,
     useEnableTwoFactor,
     useConfirmTwoFactor,
@@ -32,7 +45,8 @@ import {
     isPasskeyDomainSupported,
 } from '@/hooks'
 import { browserSupportsWebAuthn } from '@simplewebauthn/browser'
-import { ShieldCheck, Key, Copy, RefreshCw, Fingerprint, Trash2, Plus } from 'lucide-react'
+import { ShieldCheck, Key, Copy, RefreshCw, Fingerprint, Trash2, Plus, Lock, LogOut } from 'lucide-react'
+import { useUser } from '@/stores/auth'
 import { toast } from 'sonner'
 import { QRCode } from 'react-qrcode-logo'
 import { useTheme } from '@/hooks'
@@ -93,6 +107,130 @@ function ActionRow({
     )
 }
 
+type PasswordFormValues = {
+    current_password: string
+    password: string
+    password_confirmation: string
+}
+
+function ChangePasswordSection() {
+    const { t } = useTranslation('settings')
+    const user = useUser()
+    const changePassword = useChangePassword()
+
+    const schema = useMemo(() => z.object({
+        current_password: z.string().min(1, t('security.password.validation.currentRequired')),
+        password: z.string().min(8, t('security.password.validation.passwordMin')),
+        password_confirmation: z.string(),
+    }).refine((data) => data.password === data.password_confirmation, {
+        message: t('security.password.validation.passwordMatch'),
+        path: ['password_confirmation'],
+    }), [t])
+
+    const form = useForm<PasswordFormValues>({
+        resolver: zodResolver(schema),
+        defaultValues: {
+            current_password: '',
+            password: '',
+            password_confirmation: '',
+        },
+    })
+
+    const onSubmit = async (data: PasswordFormValues) => {
+        try {
+            await changePassword.mutateAsync(data)
+            form.reset()
+        } catch {
+            // toasted by the mutation
+        }
+    }
+
+    return (
+        <Section
+            icon={Lock}
+            title={t('security.password.title')}
+            description={t('security.password.description')}
+        >
+            {user?.isSsoOnly ? (
+                <p className="text-sm text-muted-foreground">{t('security.password.ssoOnly')}</p>
+            ) : (
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="current_password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('security.password.current')}</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" autoComplete="current-password" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('security.password.new')}</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" autoComplete="new-password" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="password_confirmation"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('security.password.confirm')}</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" autoComplete="new-password" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" disabled={changePassword.isPending}>
+                            {t('security.password.submit')}
+                        </Button>
+                    </form>
+                </Form>
+            )}
+        </Section>
+    )
+}
+
+function SessionsSection({
+    onConfirm,
+}: {
+    onConfirm: () => void
+}) {
+    const { t } = useTranslation('settings')
+
+    return (
+        <Section
+            icon={LogOut}
+            title={t('security.sessions.title')}
+            description={t('security.sessions.description')}
+        >
+            <div className="space-y-4">
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                    {t('security.sessions.logoutOthersDescription')}
+                </p>
+                <Button variant="outline" onClick={onConfirm}>
+                    <LogOut className="mr-2 size-4" />
+                    {t('security.sessions.logoutOthers')}
+                </Button>
+            </div>
+        </Section>
+    )
+}
+
 function RowSkeleton() {
     return (
         <div className="flex items-center justify-between gap-4 px-4 py-3.5">
@@ -131,6 +269,8 @@ export default function SecuritySettingsPage() {
     const [otpValue, setOtpValue] = useState('')
     const [showAddPasskeyDialog, setShowAddPasskeyDialog] = useState(false)
     const [passkeyName, setPasskeyName] = useState('')
+    const [showLogoutOthersDialog, setShowLogoutOthersDialog] = useState(false)
+    const logoutOthers = useLogoutOthers()
 
     const formatDate = (value: string) => new Date(value).toLocaleDateString(intlLocale())
 
@@ -195,6 +335,9 @@ export default function SecuritySettingsPage() {
 
             <FormWrapper>
                 <div className="grid items-start gap-6 lg:grid-cols-2">
+                    <ChangePasswordSection />
+                    <SessionsSection onConfirm={() => setShowLogoutOthersDialog(true)} />
+
                     <Section
                         icon={ShieldCheck}
                         title={t('security.twoFactor.title')}
@@ -510,6 +653,36 @@ export default function SecuritySettingsPage() {
                             disabled={otpValue.length !== 6 || regenerateMutation.isPending}
                         >
                             {regenerateMutation.isPending ? t('security.recovery.regenerating') : t('security.recovery.regenerate')}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={showLogoutOthersDialog} onOpenChange={setShowLogoutOthersDialog}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>{t('security.sessions.confirmTitle')}</DialogTitle>
+                        <DialogDescription>
+                            {t('security.sessions.confirmDescription')}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setShowLogoutOthersDialog(false)}>
+                            {tCommon('actions.cancel')}
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            disabled={logoutOthers.isPending}
+                            onClick={async () => {
+                                try {
+                                    await logoutOthers.mutateAsync()
+                                    setShowLogoutOthersDialog(false)
+                                } catch {
+                                    // toasted by the mutation
+                                }
+                            }}
+                        >
+                            {t('security.sessions.confirm')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

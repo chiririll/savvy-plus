@@ -129,6 +129,51 @@ class AuthController extends Controller
         return $response;
     }
 
+    public function changePassword(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->is_sso_only || $user->password === null) {
+            return response()->json(['message' => __('messages.password_sso_only')], 422);
+        }
+
+        $data = $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if (! Hash::check($data['current_password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => [__('messages.current_password_incorrect')],
+            ]);
+        }
+
+        $user->password = $data['password'];
+        $user->save();
+
+        $session = $request->attributes->get('auth_session');
+        if ($session instanceof AuthSession) {
+            $this->sessions->revokeOthers($user, $session);
+        }
+
+        return response()->json(['message' => __('messages.password_changed')]);
+    }
+
+    public function logoutOthers(Request $request): JsonResponse
+    {
+        $session = $request->attributes->get('auth_session');
+        $revoked = 0;
+
+        if ($session instanceof AuthSession) {
+            $revoked = $this->sessions->revokeOthers($request->user(), $session);
+        }
+
+        return response()->json([
+            'message' => __('messages.logged_out_others'),
+            'revoked' => $revoked,
+        ]);
+    }
+
     public function logout(Request $request): JsonResponse
     {
         $session = $request->attributes->get('auth_session');
