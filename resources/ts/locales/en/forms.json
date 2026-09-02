@@ -41,7 +41,8 @@
         "price": "Price",
         "total": "Total",
         "itemName": "Item name",
-        "noItems": "No items. Click \"Add item\" or enter amount manually."
+        "noItems": "No items. Click \"Add item\" or enter amount manually.",
+        "pendingHint": "This date is in the future. The transaction will stay pending and will not change the balance until you confirm it."
     },
     "currencies": {
         "code": "Code",

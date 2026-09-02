@@ -2,6 +2,7 @@
 
 namespace App\DTOs;
 
+use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 
 readonly class TransactionData
@@ -18,6 +19,8 @@ readonly class TransactionData
         public ?string $description = null,
         public ?array $items = null,
         public ?array $tagIds = null,
+        public ?TransactionStatus $status = null,
+        public ?int $recurringTransactionId = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -34,6 +37,10 @@ readonly class TransactionData
             description: $data['description'] ?? null,
             items: $data['items'] ?? null,
             tagIds: $data['tag_ids'] ?? null,
+            status: isset($data['status'])
+                ? ($data['status'] instanceof TransactionStatus ? $data['status'] : TransactionStatus::from($data['status']))
+                : null,
+            recurringTransactionId: $data['recurring_transaction_id'] ?? null,
         );
     }
 

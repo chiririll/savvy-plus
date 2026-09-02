@@ -2,6 +2,7 @@
 
 namespace App\DTOs;
 
+use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 
 readonly class TransactionFilterData
@@ -20,6 +21,7 @@ readonly class TransactionFilterData
         public string $sortBy = 'date',
         public string $sortDirection = 'desc',
         public int $perPage = 20,
+        public ?TransactionStatus $status = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -38,6 +40,7 @@ readonly class TransactionFilterData
             sortBy: $data['sort_by'] ?? 'date',
             sortDirection: $data['sort_direction'] ?? 'desc',
             perPage: $data['per_page'] ?? 20,
+            status: isset($data['status']) ? TransactionStatus::from($data['status']) : null,
         );
     }
 }

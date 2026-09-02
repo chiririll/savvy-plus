@@ -12,22 +12,26 @@ class AccountBalanceRepository
     {
         $initial = (float) $account->initial_balance;
 
-        $income = Transaction::where('account_id', $account->id)
+        $income = Transaction::confirmed()
+            ->where('account_id', $account->id)
             ->whereIn('type', ['income', 'debt_collection', 'debt_borrow'])
             ->where('date', '<=', $date)
             ->sum('amount');
 
-        $expense = Transaction::where('account_id', $account->id)
+        $expense = Transaction::confirmed()
+            ->where('account_id', $account->id)
             ->whereIn('type', ['expense', 'debt_payment', 'debt_lend'])
             ->where('date', '<=', $date)
             ->sum('amount');
 
-        $transferOut = Transaction::where('account_id', $account->id)
+        $transferOut = Transaction::confirmed()
+            ->where('account_id', $account->id)
             ->where('type', 'transfer')
             ->where('date', '<=', $date)
             ->sum('amount');
 
-        $transferIn = Transaction::where('to_account_id', $account->id)
+        $transferIn = Transaction::confirmed()
+            ->where('to_account_id', $account->id)
             ->where('date', '<=', $date)
             ->sum('to_amount');
 

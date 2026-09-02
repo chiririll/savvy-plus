@@ -81,7 +81,8 @@ class AccountService
         $start = \Carbon\Carbon::parse($startDate)->startOfDay();
         $end = \Carbon\Carbon::parse($endDate)->endOfDay();
 
-        $transactions = \App\Models\Transaction::whereBetween('date', [$start, $end])
+        $transactions = \App\Models\Transaction::confirmed()
+            ->whereBetween('date', [$start, $end])
             ->where(function ($query) use ($accountIds) {
                 $query->whereIn('account_id', $accountIds)
                     ->orWhereIn('to_account_id', $accountIds);
@@ -185,22 +186,26 @@ class AccountService
     {
         // Income + debt collections (money coming in)
         $income = $account->transactions()
+            ->confirmed()
             ->whereIn('type', ['income', 'debt_collection', 'debt_borrow'])
             ->where('date', '<', $date)
             ->sum('amount');
 
         // Expenses + debt payments (money going out)
         $expense = $account->transactions()
+            ->confirmed()
             ->whereIn('type', ['expense', 'debt_payment', 'debt_lend'])
             ->where('date', '<', $date)
             ->sum('amount');
 
         $transferOut = $account->transactions()
+            ->confirmed()
             ->where('type', 'transfer')
             ->where('date', '<', $date)
             ->sum('amount');
 
-        $transferIn = \App\Models\Transaction::where('to_account_id', $account->id)
+        $transferIn = \App\Models\Transaction::confirmed()
+            ->where('to_account_id', $account->id)
             ->where('date', '<', $date)
             ->sum('to_amount');
 

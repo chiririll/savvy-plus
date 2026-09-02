@@ -19,7 +19,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins, Check, SkipForward } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn, formatCurrency } from '@/lib/utils'
 import i18n, { intlLocale } from '@/lib/i18n'
@@ -34,11 +34,21 @@ const TYPE_CONFIG = {
     debt_borrow: { icon: Banknote, color: 'text-green-600', bg: 'bg-green-100', label: 'Loan Received' },
 }
 
-export function createTransactionColumns(
-    onDelete: (id: number) => void,
-    onDuplicate: (id: number) => void,
+interface ColumnsOptions {
+    onDelete: (id: number) => void
+    onDuplicate: (id: number) => void
+    onConfirm?: (id: number) => void
+    onSkip?: (id: number) => void
     isReadOnly?: boolean
-): ColumnDef<Transaction>[] {
+}
+
+export function createTransactionColumns({
+    onDelete,
+    onDuplicate,
+    onConfirm,
+    onSkip,
+    isReadOnly,
+}: ColumnsOptions): ColumnDef<Transaction>[] {
     return [
         {
             id: 'expand',
@@ -68,9 +78,21 @@ export function createTransactionColumns(
             accessorKey: 'date',
             header: () => i18n.t('pages:transactions.columns.date'),
             cell: ({ row }) => (
-                <span className="font-mono text-sm">
-                    {new Date(row.original.date).toLocaleDateString(intlLocale())}
-                </span>
+                <div className="flex flex-col gap-1">
+                    <span className="font-mono text-sm">
+                        {new Date(row.original.date).toLocaleDateString(intlLocale())}
+                    </span>
+                    {row.original.status === 'skipped' && (
+                        <Badge variant="secondary" className="w-fit text-xs">
+                            {i18n.t('pages:transactions.status.skipped')}
+                        </Badge>
+                    )}
+                    {row.original.status === 'pending' && (
+                        <Badge variant="outline" className="w-fit text-xs">
+                            {i18n.t('pages:transactions.status.pending')}
+                        </Badge>
+                    )}
+                </div>
             ),
         },
         {
@@ -183,18 +205,33 @@ export function createTransactionColumns(
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            {transaction.status !== 'skipped' && (
                             <DropdownMenuItem asChild>
                                 <Link to={`/transactions/${transaction.id}/edit`}>
                                     <Pencil className="mr-2 size-4" />
                                     {i18n.t('actions.edit')}
                                 </Link>
                             </DropdownMenuItem>
-                            {!isReadOnly && (
+                            )}
+                            {!isReadOnly && transaction.status === 'pending' && onConfirm && (
+                            <DropdownMenuItem onClick={() => onConfirm(transaction.id)}>
+                                <Check className="mr-2 size-4" />
+                                {i18n.t('actions.confirm')}
+                            </DropdownMenuItem>
+                            )}
+                            {!isReadOnly && transaction.status === 'pending' && transaction.recurringTransactionId && onSkip && (
+                            <DropdownMenuItem onClick={() => onSkip(transaction.id)}>
+                                <SkipForward className="mr-2 size-4" />
+                                {i18n.t('actions.skip')}
+                            </DropdownMenuItem>
+                            )}
+                            {!isReadOnly && transaction.status !== 'skipped' && (
                             <>
                             <DropdownMenuItem onClick={() => onDuplicate(transaction.id)}>
                                 <Copy className="mr-2 size-4" />
                                 {i18n.t('actions.duplicate')}
                             </DropdownMenuItem>
+                            {!(transaction.status === 'pending' && transaction.recurringTransactionId) && (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <DropdownMenuItem
@@ -223,6 +260,7 @@ export function createTransactionColumns(
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
+                            )}
                             </>
                             )}
                         </DropdownMenuContent>

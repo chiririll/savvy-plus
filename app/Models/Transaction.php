@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -20,10 +22,13 @@ class Transaction extends Model
         'exchange_rate',
         'description',
         'date',
+        'status',
+        'recurring_transaction_id',
     ];
 
     protected $casts = [
         'type' => TransactionType::class,
+        'status' => TransactionStatus::class,
         'amount' => 'decimal:2',
         'to_amount' => 'decimal:2',
         'exchange_rate' => 'decimal:6',
@@ -53,6 +58,41 @@ class Transaction extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'transaction_tag');
+    }
+
+    public function recurringTransaction(): BelongsTo
+    {
+        return $this->belongsTo(RecurringTransaction::class);
+    }
+
+    public function scopeConfirmed(Builder $query): Builder
+    {
+        return $query->where('status', TransactionStatus::Confirmed);
+    }
+
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', TransactionStatus::Pending);
+    }
+
+    public function scopeSkipped(Builder $query): Builder
+    {
+        return $query->where('status', TransactionStatus::Skipped);
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === TransactionStatus::Pending;
+    }
+
+    public function isSkipped(): bool
+    {
+        return $this->status === TransactionStatus::Skipped;
+    }
+
+    public function isRecurringLinked(): bool
+    {
+        return $this->recurring_transaction_id !== null;
     }
 
     public function isTransfer(): bool

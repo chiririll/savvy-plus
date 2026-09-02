@@ -15,6 +15,13 @@ return [
         'delete_has_transactions' => 'Cannot delete account that has transactions.',
     ],
 
+    'transactions' => [
+        'not_pending' => 'Only pending transactions can be confirmed.',
+        'cannot_skip' => 'Only a pending scheduled transaction can be skipped.',
+        'cannot_delete_recurring' => 'Scheduled occurrences cannot be deleted. Skip or confirm them instead.',
+        'cannot_edit_skipped' => 'Skipped transactions cannot be edited.',
+    ],
+
     'categories' => [
         'delete_has_transactions' => 'Cannot delete category that has transactions.',
         'delete_last' => 'Cannot delete the last category of this type.',

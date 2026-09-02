@@ -116,6 +116,10 @@ class UpdateTransactionRequest extends FormRequest
         $newAmount = (float) ($this->input('amount') ?? $originalAmount);
         $newAccountId = $this->input('account_id') ?? $originalAccountId;
 
+        if ($transaction->isPending() || $transaction->isSkipped()) {
+            return;
+        }
+
         // Only check for expense and transfer
         if (! in_array($newType, [TransactionType::Expense->value, TransactionType::Transfer->value])) {
             return;

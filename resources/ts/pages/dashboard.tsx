@@ -31,10 +31,10 @@ import {
     Repeat
 } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
-import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison, useUpcomingRecurring } from '@/hooks'
+import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
 import { useOverviewMetrics } from '@/hooks/use-reports'
 import type { ReportFilters } from '@/pages/reports/types'
-import { cn, formatCurrency, formatCurrencyCompact } from '@/lib/utils'
+import { addDaysLocal, cn, formatCurrency, formatCurrencyCompact, formatDateLocal } from '@/lib/utils'
 import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -46,12 +46,6 @@ import { ACCOUNT_TYPE_CONFIG, CHART_COLORS, CATEGORY_COLORS } from '@/constants'
 
 type PeriodPreset = 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'custom'
 
-function formatDateLocal(date: Date): string {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-}
 
 function getPresetDates(preset: PeriodPreset): { start_date: string; end_date: string } {
     const now = new Date()
@@ -176,7 +170,7 @@ export default function DashboardPage() {
     }, [chartPeriod, customStartDate, customEndDate])
 
     const { data: monthData } = useTransactions({ ...currentMonthFilters, with_summary: true })
-    const { data: recentTransactions } = useTransactions({ per_page: 5 })
+    const { data: recentTransactions } = useTransactions({ per_page: 5, status: 'confirmed' })
     const { data: historyData } = useBalanceHistory(chartFilters)
     const { data: expensesByCategory } = useCategorySummary({
         type: 'expense',
@@ -186,7 +180,13 @@ export default function DashboardPage() {
     const { data: debtsData } = useDebtsWithSummary()
     const { data: overviewData } = useOverviewMetrics(reportFilters)
     const { data: balanceComparison } = useBalanceComparison()
-    const { data: upcomingRecurring } = useUpcomingRecurring()
+    const { data: upcomingPending } = useTransactions({
+        status: 'pending',
+        end_date: addDaysLocal(new Date(), 7),
+        sort_by: 'date',
+        sort_direction: 'asc',
+        per_page: 5,
+    })
 
     const activeBudgets = useMemo(() => {
         return budgets?.filter(b => b.isActive).slice(0, 4) ?? []
@@ -887,42 +887,42 @@ export default function DashboardPage() {
                         {t('dashboard.upcoming')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
-                        <Link to="/recurring">
+                        <Link to="/transactions?status=pending">
                             {tCommon('actions.viewAll')}
                             <ArrowRight className="ml-1 size-4" />
                         </Link>
                     </Button>
                 </CardHeader>
                 <CardContent>
-                    {upcomingRecurring && upcomingRecurring.length > 0 ? (
+                    {upcomingPending?.data && upcomingPending.data.length > 0 ? (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                            {upcomingRecurring.slice(0, 5).map((recurring) => (
+                            {upcomingPending.data.map((transaction) => (
                                 <Link
-                                    key={recurring.id}
-                                    to={`/recurring/${recurring.id}/edit`}
+                                    key={transaction.id}
+                                    to="/transactions?status=pending"
                                     className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                                 >
                                     <div className="flex items-center gap-2 mb-2">
-                                        {recurring.type === 'income' ? (
+                                        {transaction.type === 'income' ? (
                                             <ArrowDownLeft className="size-4 text-green-600" />
-                                        ) : recurring.type === 'expense' ? (
+                                        ) : transaction.type === 'expense' ? (
                                             <ArrowUpRight className="size-4 text-red-600" />
                                         ) : (
                                             <ArrowLeftRight className="size-4 text-blue-600" />
                                         )}
                                         <p className="font-medium text-sm truncate">
-                                            {recurring.description || recurring.category?.name || t('dashboard.recurring')}
+                                            {transaction.description || transaction.category?.name || t('dashboard.transaction')}
                                         </p>
                                     </div>
                                     <p className={`font-mono text-sm ${
-                                        recurring.type === 'income' ? 'text-green-600' :
-                                        recurring.type === 'expense' ? 'text-red-600' : ''
+                                        transaction.type === 'income' ? 'text-green-600' :
+                                        transaction.type === 'expense' ? 'text-red-600' : ''
                                     }`}>
-                                        {recurring.type === 'income' ? '+' : recurring.type === 'expense' ? '-' : ''}
-                                        {formatCurrency(recurring.amount, recurring.account.currency)}
+                                        {transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : ''}
+                                        {formatCurrency(transaction.amount, transaction.account.currency)}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                        {new Date(recurring.nextRunDate).toLocaleDateString(intlLocale(), {
+                                        {new Date(transaction.date).toLocaleDateString(intlLocale(), {
                                             month: 'short',
                                             day: 'numeric'
                                         })}
@@ -933,7 +933,7 @@ export default function DashboardPage() {
                     ) : (
                         <div className="text-center py-8">
                             <Repeat className="size-12 mx-auto text-muted-foreground/50 mb-3" />
-                            <p className="text-muted-foreground mb-3">{t('dashboard.noRecurring')}</p>
+                            <p className="text-muted-foreground mb-3">{t('dashboard.noPending')}</p>
                             <Button asChild size="sm">
                                 <Link to="/recurring/create">
                                     <Plus className="size-4 mr-1" />

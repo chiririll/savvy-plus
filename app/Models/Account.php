@@ -95,18 +95,20 @@ class Account extends Model
 
     private function calculateRegularBalance(): float
     {
-        $income = $this->transactions()->where('type', 'income')->sum('amount');
-        $expense = $this->transactions()->where('type', 'expense')->sum('amount');
-        $transferOut = $this->transactions()->where('type', 'transfer')->sum('amount');
-        $transferIn = Transaction::where('to_account_id', $this->id)->sum('to_amount');
+        $income = $this->transactions()->confirmed()->where('type', 'income')->sum('amount');
+        $expense = $this->transactions()->confirmed()->where('type', 'expense')->sum('amount');
+        $transferOut = $this->transactions()->confirmed()->where('type', 'transfer')->sum('amount');
+        $transferIn = Transaction::confirmed()->where('to_account_id', $this->id)->sum('to_amount');
 
         // Money in: collected repayment or received loan
         $debtCollectionIn = $this->transactions()
+            ->confirmed()
             ->whereIn('type', ['debt_collection', 'debt_borrow'])
             ->sum('amount');
 
         // Money out: paid own debt or lent money
         $debtPaymentOut = $this->transactions()
+            ->confirmed()
             ->whereIn('type', ['debt_payment', 'debt_lend'])
             ->sum('amount');
 
@@ -123,7 +125,8 @@ class Account extends Model
     {
         $targetAmount = (float) $this->target_amount;
 
-        $payments = Transaction::where('to_account_id', $this->id)
+        $payments = Transaction::confirmed()
+            ->where('to_account_id', $this->id)
             ->whereIn('type', ['debt_payment', 'debt_collection'])
             ->sum('to_amount');
 

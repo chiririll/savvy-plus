@@ -107,6 +107,11 @@ class StoreTransactionRequest extends FormRequest
 
         $accountId = $this->input('account_id');
         $amount = (float) $this->input('amount');
+        $date = $this->input('date');
+
+        if ($date && $date > now()->toDateString()) {
+            return;
+        }
 
         $account = \App\Models\Account::find($accountId);
         if (! $account) {

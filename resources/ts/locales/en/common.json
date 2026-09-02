@@ -180,7 +180,12 @@
             "createFailed": "Failed to create transaction",
             "updateFailed": "Failed to update transaction",
             "deleteFailed": "Failed to delete transaction",
-            "duplicateFailed": "Failed to duplicate transaction"
+            "duplicateFailed": "Failed to duplicate transaction",
+            "pendingCreated": "Pending transaction created",
+            "confirmed": "Transaction confirmed",
+            "skipped": "Occurrence skipped",
+            "confirmFailed": "Failed to confirm transaction",
+            "skipFailed": "Failed to skip transaction"
         },
         "recurring": {
             "created": "Recurring transaction created",

@@ -101,6 +101,17 @@
         "editTitle": "Edit Transaction",
         "emptyTitle": "No transactions found",
         "emptyDescription": "Create your first transaction to start tracking",
+        "emptyPendingTitle": "No pending transactions",
+        "emptyPendingDescription": "Future and scheduled transactions will appear here until you confirm them",
+        "tabs": {
+            "pending": "Pending"
+        },
+        "status": {
+            "pending": "Pending",
+            "skipped": "Skipped"
+        },
+        "upcomingTitle": "Due soon",
+        "viewAllPending": "All pending",
         "itemLabel": "transactions",
         "filters": "Filters",
         "clear": "Clear",
@@ -148,7 +159,7 @@
     },
     "recurring": {
         "title": "Recurring Transactions",
-        "description": "Manage automatically repeating transactions",
+        "description": "Manage repeating transaction templates",
         "create": "New Recurring",
         "createTitle": "New Recurring Transaction",
         "editTitle": "Edit Recurring Transaction",
@@ -459,8 +470,9 @@
         "noRecurring": "No recurring transactions",
         "transaction": "Transaction",
         "debts": "Debts",
-        "upcoming": "Upcoming Recurring",
+        "upcoming": "Upcoming payments",
         "recurring": "Recurring",
+        "noPending": "No upcoming payments",
         "noDataPeriod": "No data for this period",
         "noAccounts": "No active accounts",
         "noExpensesMonth": "No expenses this month",

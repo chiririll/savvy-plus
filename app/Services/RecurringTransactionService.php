@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\TransactionData;
 use App\Enums\RecurringFrequency;
+use App\Enums\TransactionStatus;
 use App\Models\Account;
 use App\Models\RecurringTransaction;
 use App\Models\Transaction;
@@ -50,16 +51,27 @@ class RecurringTransactionService
                 $recurring->tags()->sync($data['tag_ids']);
             }
 
-            return $recurring->load(['account.currency', 'toAccount.currency', 'category', 'tags']);
+            $recurring = $recurring->load(['account.currency', 'toAccount.currency', 'category', 'tags']);
+
+            if ($this->isWithinSchedule($recurring)) {
+                $this->createPendingOccurrence($recurring);
+            }
+
+            return $recurring->fresh(['account.currency', 'toAccount.currency', 'category', 'tags']);
         });
     }
 
     public function update(RecurringTransaction $recurring, array $data): RecurringTransaction
     {
         return DB::transaction(function () use ($recurring, $data) {
-            // Recalculate next_run_date if schedule changed
             if ($this->scheduleChanged($recurring, $data)) {
-                $data['next_run_date'] = $this->calculateInitialNextRunDate($data);
+                $data['next_run_date'] = $this->calculateInitialNextRunDate(array_merge([
+                    'start_date' => $recurring->start_date->toDateString(),
+                    'frequency' => $recurring->frequency->value,
+                    'interval' => $recurring->interval,
+                    'day_of_week' => $recurring->day_of_week,
+                    'day_of_month' => $recurring->day_of_month,
+                ], $data));
             }
 
             $recurring->update($data);
@@ -68,48 +80,45 @@ class RecurringTransactionService
                 $recurring->tags()->sync($data['tag_ids'] ?? []);
             }
 
-            return $recurring->load(['account.currency', 'toAccount.currency', 'category', 'tags']);
+            $recurring = $recurring->fresh(['account.currency', 'toAccount.currency', 'category', 'tags']);
+            $this->syncOpenPending($recurring);
+
+            return $recurring;
         });
     }
 
     public function delete(RecurringTransaction $recurring): void
     {
-        $recurring->delete();
+        DB::transaction(function () use ($recurring) {
+            $recurring->transactions()->pending()->delete();
+            $recurring->delete();
+        });
     }
 
-    public function skip(RecurringTransaction $recurring): RecurringTransaction
+    public function advanceAfterOccurrence(RecurringTransaction $recurring): void
     {
+        $next = $this->calculateNextRunDate($recurring);
+
         $recurring->update([
-            'next_run_date' => $this->calculateNextRunDate($recurring),
+            'last_run_date' => now()->toDateString(),
+            'next_run_date' => $next->toDateString(),
         ]);
 
-        return $recurring->fresh(['account.currency', 'toAccount.currency', 'category', 'tags']);
-    }
+        $recurring->refresh();
 
-    public function processDue(): array
-    {
-        $due = RecurringTransaction::due()->get();
-        $generated = [];
-
-        foreach ($due as $recurring) {
-            $transaction = $this->generateTransaction($recurring);
-            $generated[] = $transaction;
-
-            $recurring->update([
-                'last_run_date' => now()->toDateString(),
-                'next_run_date' => $this->calculateNextRunDate($recurring),
-            ]);
+        if (! $this->isWithinSchedule($recurring) || $recurring->transactions()->pending()->exists()) {
+            return;
         }
 
-        return $generated;
+        $this->createPendingOccurrence($recurring);
     }
 
-    public function generateTransaction(RecurringTransaction $recurring): Transaction
+    public function createPendingOccurrence(RecurringTransaction $recurring): Transaction
     {
         $toAmount = null;
 
         if ($recurring->isTransfer() && $recurring->to_amount) {
-            $toAmount = $recurring->to_amount;
+            $toAmount = (float) $recurring->to_amount;
         } elseif ($recurring->isTransfer()) {
             $toAmount = $this->calculateToAmount($recurring);
         }
@@ -118,12 +127,14 @@ class RecurringTransactionService
             type: $recurring->type,
             accountId: $recurring->account_id,
             amount: (float) $recurring->amount,
+            date: $recurring->next_run_date->toDateString(),
             categoryId: $recurring->category_id,
             toAccountId: $recurring->to_account_id,
             toAmount: $toAmount,
             description: $recurring->description,
-            date: now()->toDateString(),
-            tagIds: $recurring->tags->pluck('id')->toArray(),
+            tagIds: $recurring->tags()->pluck('tags.id')->toArray(),
+            status: TransactionStatus::Pending,
+            recurringTransactionId: $recurring->id,
         );
 
         return $this->transactionService->create($data);
@@ -142,18 +153,60 @@ class RecurringTransactionService
         };
     }
 
+    protected function syncOpenPending(RecurringTransaction $recurring): void
+    {
+        $pending = $recurring->transactions()->pending()->first();
+
+        if (! $pending) {
+            if ($this->isWithinSchedule($recurring)) {
+                $this->createPendingOccurrence($recurring);
+            }
+
+            return;
+        }
+
+        $toAmount = $pending->to_amount;
+        if ($recurring->isTransfer()) {
+            $toAmount = $recurring->to_amount
+                ? (float) $recurring->to_amount
+                : $this->calculateToAmount($recurring);
+        }
+
+        $pending->update([
+            'type' => $recurring->type,
+            'account_id' => $recurring->account_id,
+            'to_account_id' => $recurring->to_account_id,
+            'category_id' => $recurring->category_id,
+            'amount' => $recurring->amount,
+            'to_amount' => $toAmount,
+            'description' => $recurring->description,
+            'date' => $recurring->next_run_date->toDateString(),
+        ]);
+
+        $pending->tags()->sync($recurring->tags()->pluck('tags.id')->toArray());
+    }
+
+    protected function isWithinSchedule(RecurringTransaction $recurring): bool
+    {
+        if (! $recurring->is_active) {
+            return false;
+        }
+
+        return ! $recurring->end_date || $recurring->next_run_date->lte($recurring->end_date);
+    }
+
     protected function calculateInitialNextRunDate(array $data): string
     {
         $startDate = Carbon::parse($data['start_date']);
-        $frequency = RecurringFrequency::from($data['frequency']);
+        $frequency = $data['frequency'] instanceof RecurringFrequency
+            ? $data['frequency']
+            : RecurringFrequency::from($data['frequency']);
         $interval = $data['interval'] ?? 1;
 
-        // If start date is in the future, use it
         if ($startDate->isFuture() || $startDate->isToday()) {
             return $this->adjustToSchedule($startDate, $frequency, $data)->toDateString();
         }
 
-        // Calculate from start date until we reach future
         $nextDate = $startDate->copy();
 
         while ($nextDate->isPast()) {

@@ -4,6 +4,7 @@ import { Category } from './categories'
 import { Tag } from './tags'
 
 export type TransactionType = 'income' | 'expense' | 'transfer' | 'debt_payment' | 'debt_collection' | 'debt_lend' | 'debt_borrow'
+export type TransactionStatus = 'pending' | 'confirmed' | 'skipped'
 
 export interface TransactionItem {
     id?: number
@@ -20,6 +21,8 @@ export interface Transaction extends BaseEntity {
     exchangeRate?: number
     description?: string
     date: string
+    status: TransactionStatus
+    recurringTransactionId?: number | null
     account: Account
     toAccount?: Account
     category?: Category
@@ -60,6 +63,7 @@ export interface TransactionFilters {
     sort_direction?: 'asc' | 'desc'
     per_page?: number
     page?: number
+    status?: TransactionStatus
 }
 
 export interface TransactionSummary {

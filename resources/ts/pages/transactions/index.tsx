@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf, parseAsStringLiteral } from 'nuqs'
-import { Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Filter, ArrowUpDown, X } from 'lucide-react'
+import { Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Filter, ArrowUpDown, X, Check, SkipForward } from 'lucide-react'
 import { Row } from '@tanstack/react-table'
 import { Page, PageHeader, DataTable, ServerPagination } from '@/components/shared'
 import { Button } from '@/components/ui/button'
@@ -22,10 +22,11 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
 import { createTransactionColumns } from '@/components/features/transactions'
-import { useTransactions, useDeleteTransaction, useDuplicateTransaction, useCategories, useTags } from '@/hooks'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useTransactions, useDeleteTransaction, useDuplicateTransaction, useConfirmTransaction, useSkipTransaction, useCategories, useTags } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { TransactionType, Transaction } from '@/types'
-import { cn, formatCurrency } from '@/lib/utils'
+import { addDaysLocal, cn, formatCurrency } from '@/lib/utils'
 
 const TYPE_FILTERS: { value: TransactionType | null; labelKey: string; icon?: typeof ArrowDownLeft }[] = [
     { value: null, labelKey: 'all' },
@@ -82,6 +83,7 @@ const transactionSearchParams = {
     tagIds: parseAsArrayOf(parseAsInteger).withDefault([]),
     startDate: parseAsString,
     endDate: parseAsString,
+    status: parseAsStringLiteral(['pending'] as const),
 }
 
 export default function TransactionsPage() {
@@ -99,20 +101,34 @@ export default function TransactionsPage() {
         tag_ids: params.tagIds.length > 0 ? params.tagIds : undefined,
         start_date: params.startDate ?? undefined,
         end_date: params.endDate ?? undefined,
+        status: params.status ?? undefined,
     }
 
     const { data, isLoading } = useTransactions(filters)
+    const { data: upcomingPending } = useTransactions({
+        status: 'pending',
+        end_date: addDaysLocal(new Date(), 7),
+        sort_by: 'date',
+        sort_direction: 'asc',
+        per_page: 5,
+    })
     const deleteTransaction = useDeleteTransaction()
     const duplicateTransaction = useDuplicateTransaction()
+    const confirmTransaction = useConfirmTransaction()
+    const skipTransaction = useSkipTransaction()
     const { data: categories } = useCategories()
     const { data: tags } = useTags()
     const isReadOnly = useReadOnly()
 
-    const columns = createTransactionColumns(
-        (id) => deleteTransaction.mutate(id),
-        (id) => duplicateTransaction.mutate(id),
-        isReadOnly
-    )
+    const columns = createTransactionColumns({
+        onDelete: (id) => deleteTransaction.mutate(id),
+        onDuplicate: (id) => duplicateTransaction.mutate(id),
+        onConfirm: (id) => confirmTransaction.mutate(id),
+        onSkip: (id) => skipTransaction.mutate(id),
+        isReadOnly,
+    })
+    const highlight = upcomingPending?.data ?? []
+    const showHighlight = !params.status && highlight.length > 0
 
     const transactions = data?.data ?? []
     const meta = data?.meta
@@ -163,6 +179,60 @@ export default function TransactionsPage() {
                 createLink={params.type ? `/transactions/create?type=${params.type}` : '/transactions/create'}
                 createLabel={t('transactions.create')}
             />
+
+            <Tabs
+                value={params.status ?? 'all'}
+                onValueChange={(value) => setParams({ status: value === 'pending' ? 'pending' : null, page: 1 })}
+                className="mb-4"
+            >
+                <TabsList>
+                    <TabsTrigger value="all">{t('common:actions.all')}</TabsTrigger>
+                    <TabsTrigger value="pending">{t('transactions.tabs.pending')}</TabsTrigger>
+                </TabsList>
+            </Tabs>
+
+            {showHighlight && (
+                <Card className="mb-4">
+                    <CardContent className="pt-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">{t('transactions.upcomingTitle')}</p>
+                            <Button variant="ghost" size="sm" onClick={() => setParams({ status: 'pending', page: 1 })}>
+                                {t('transactions.viewAllPending')}
+                            </Button>
+                        </div>
+                        <div className="space-y-2">
+                            {highlight.map((transaction) => (
+                                <div key={transaction.id} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2">
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium truncate">
+                                            {transaction.description || t(`transactions.types.${transaction.type}`)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {new Date(transaction.date).toLocaleDateString()}
+                                            {' · '}
+                                            {formatCurrency(transaction.amount, transaction.account.currency)}
+                                        </p>
+                                    </div>
+                                    {!isReadOnly && (
+                                        <div className="flex gap-1 shrink-0">
+                                            <Button size="sm" variant="outline" onClick={() => confirmTransaction.mutate(transaction.id)}>
+                                                <Check className="size-4 mr-1" />
+                                                {t('common:actions.confirm')}
+                                            </Button>
+                                            {transaction.recurringTransactionId && (
+                                                <Button size="sm" variant="ghost" onClick={() => skipTransaction.mutate(transaction.id)}>
+                                                    <SkipForward className="size-4 mr-1" />
+                                                    {t('common:actions.skip')}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Type Filter & Sort */}
             <div className="flex items-center justify-between gap-4 mb-4">
@@ -310,8 +380,8 @@ export default function TransactionsPage() {
                 data={transactions}
                 columns={columns}
                 isLoading={isLoading}
-                emptyTitle={t('transactions.emptyTitle')}
-                emptyDescription={t('transactions.emptyDescription')}
+                emptyTitle={params.status === 'pending' ? t('transactions.emptyPendingTitle') : t('transactions.emptyTitle')}
+                emptyDescription={params.status === 'pending' ? t('transactions.emptyPendingDescription') : t('transactions.emptyDescription')}
                 emptyAction={
                     <Button asChild>
                         <Link to={params.type ? `/transactions/create?type=${params.type}` : '/transactions/create'}>

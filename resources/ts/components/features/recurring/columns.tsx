@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
-import { Pencil, Trash2, MoreHorizontal, SkipForward, ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react'
+import { Pencil, Trash2, MoreHorizontal, ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -34,13 +34,11 @@ const typeConfig = {
 
 interface ColumnsOptions {
     onDelete: (id: number) => void
-    onSkip: (id: number) => void
     isReadOnly?: boolean
 }
 
 export const createRecurringColumns = ({
     onDelete,
-    onSkip,
     isReadOnly,
 }: ColumnsOptions): ColumnDef<RecurringTransaction>[] => [
     {
@@ -163,12 +161,6 @@ export const createRecurringColumns = ({
                             {i18n.t('actions.edit')}
                         </Link>
                     </DropdownMenuItem>
-                    {!isReadOnly && row.original.isActive && (
-                        <DropdownMenuItem onClick={() => onSkip(row.original.id)}>
-                            <SkipForward className="mr-2 h-4 w-4" />
-                            {i18n.t('actions.skipNext')}
-                        </DropdownMenuItem>
-                    )}
                     {!isReadOnly && (
                     <>
                     <DropdownMenuSeparator />

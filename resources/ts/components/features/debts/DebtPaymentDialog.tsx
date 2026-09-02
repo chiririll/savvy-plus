@@ -31,7 +31,7 @@ import {
 import { debtPaymentSchema, DebtPaymentFormData } from '@/schemas'
 import { useAccounts } from '@/hooks'
 import { Debt } from '@/types'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, formatDateLocal } from '@/lib/utils'
 
 interface DebtPaymentDialogProps {
     debt: Debt | null
@@ -58,7 +58,7 @@ export function DebtPaymentDialog({
         defaultValues: {
             account_id: 0,
             amount: 0,
-            date: new Date().toISOString().split('T')[0],
+            date: formatDateLocal(),
             description: '',
         },
     })

@@ -3,6 +3,7 @@
 namespace App\Builders;
 
 use App\DTOs\TransactionFilterData;
+use App\Enums\TransactionStatus;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -79,6 +80,19 @@ class TransactionQueryBuilder
 
         if ($filters->search) {
             $this->query->where('description', 'like', "%{$filters->search}%");
+        }
+
+        if ($filters->status === TransactionStatus::Pending) {
+            $this->query->pending();
+        } elseif ($filters->status === TransactionStatus::Confirmed) {
+            $this->query->confirmed();
+        } elseif ($filters->status === TransactionStatus::Skipped) {
+            $this->query->skipped();
+        } else {
+            $this->query->whereIn('status', [
+                TransactionStatus::Confirmed,
+                TransactionStatus::Skipped,
+            ]);
         }
 
         return $this;

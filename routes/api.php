@@ -126,6 +126,8 @@ Route::middleware(['session', 'csrf'])->group(function () {
 
         Route::apiResource('transactions', TransactionController::class);
         Route::post('transactions/{transaction}/duplicate', [TransactionController::class, 'duplicate']);
+        Route::post('transactions/{transaction}/confirm', [TransactionController::class, 'confirm']);
+        Route::post('transactions/{transaction}/skip', [TransactionController::class, 'skip']);
         Route::get('transactions-summary', [TransactionController::class, 'summary']);
 
         // Universal S3-compatible multipart uploads (Uppy AwsS3 companion protocol)
@@ -150,7 +152,6 @@ Route::middleware(['session', 'csrf'])->group(function () {
         // Recurring Transactions
         Route::get('recurring-upcoming', [RecurringTransactionController::class, 'upcoming']);
         Route::apiResource('recurring', RecurringTransactionController::class);
-        Route::post('recurring/{recurring}/skip', [RecurringTransactionController::class, 'skip']);
 
         Route::apiResource('tags', TagController::class);
 

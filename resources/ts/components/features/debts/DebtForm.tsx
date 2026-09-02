@@ -27,7 +27,7 @@ import { useCurrencies, useAccounts } from '@/hooks'
 import { AccountSelect } from '@/components/shared/AccountSelect'
 import { Banknote, HandCoins } from 'lucide-react'
 import { FormWrapper } from '@/components/shared/FormWrapper'
-import { cn, formatCurrency } from '@/lib/utils'
+import { cn, formatCurrency, formatDateLocal } from '@/lib/utils'
 
 interface DebtFormProps {
     defaultValues?: Partial<DebtFormData>
@@ -54,7 +54,7 @@ const DEBT_TYPES = [
 ] as const
 
 function today(): string {
-    return new Date().toISOString().split('T')[0]
+    return formatDateLocal()
 }
 
 export function DebtForm({

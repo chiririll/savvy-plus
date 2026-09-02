@@ -17,6 +17,8 @@ class TransactionResource extends JsonResource
             'exchangeRate' => $this->when($this->exchange_rate !== null, (float) $this->exchange_rate),
             'description' => $this->description,
             'date' => $this->date->format('Y-m-d'),
+            'status' => $this->status->value,
+            'recurringTransactionId' => $this->recurring_transaction_id,
             'account' => new AccountResource($this->whenLoaded('account')),
             'toAccount' => new AccountResource($this->whenLoaded('toAccount')),
             'category' => new CategoryResource($this->whenLoaded('category')),

@@ -172,6 +172,7 @@ class TransactionRepository
     private function baseQuery()
     {
         return Transaction::query()
+            ->confirmed()
             ->join('accounts', 'transactions.account_id', '=', 'accounts.id')
             ->join('currencies', 'accounts.currency_id', '=', 'currencies.id');
     }

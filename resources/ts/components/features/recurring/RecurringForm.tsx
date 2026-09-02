@@ -26,7 +26,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { recurringSchema, RecurringFormData } from '@/schemas'
 import { useAccounts, useCategories, useTags } from '@/hooks'
 import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+import { cn, formatDateLocal } from '@/lib/utils'
 import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react'
 import { AccountSelect } from '@/components/shared/AccountSelect'
 import { CategorySelect } from '@/components/shared/CategorySelect'
@@ -73,7 +73,7 @@ export function RecurringForm({
             interval: 1,
             day_of_week: null,
             day_of_month: 1,
-            start_date: new Date().toISOString().split('T')[0],
+            start_date: formatDateLocal(),
             end_date: null,
             is_active: true,
             tag_ids: [],

@@ -28,13 +28,17 @@ export function useCreateTransaction(redirectTo?: string) {
 
     return useMutation({
         mutationFn: (data: TransactionFormData) => transactionsApi.create(data),
-        onSuccess: () => {
+        onSuccess: (transaction) => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
             queryClient.invalidateQueries({ queryKey: ['accounts'] })
             queryClient.invalidateQueries({ queryKey: ['budgets'] })
             queryClient.invalidateQueries({ queryKey: ['categories'] })
             queryClient.invalidateQueries({ queryKey: ['reports'] })
-            toast.success(i18n.t('toasts.transaction.created'))
+            toast.success(
+                transaction.status === 'pending'
+                    ? i18n.t('toasts.transaction.pendingCreated')
+                    : i18n.t('toasts.transaction.created')
+            )
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
@@ -99,6 +103,45 @@ export function useDuplicateTransaction() {
         },
         onError: (error: Error) => {
             toast.error(error.message || i18n.t('toasts.transaction.duplicateFailed'))
+        },
+    })
+}
+
+function invalidateTransactionQueries(queryClient: ReturnType<typeof useQueryClient>) {
+    queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    queryClient.invalidateQueries({ queryKey: ['accounts'] })
+    queryClient.invalidateQueries({ queryKey: ['budgets'] })
+    queryClient.invalidateQueries({ queryKey: ['categories'] })
+    queryClient.invalidateQueries({ queryKey: ['reports'] })
+    queryClient.invalidateQueries({ queryKey: ['recurring'] })
+}
+
+export function useConfirmTransaction() {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (id: string | number) => transactionsApi.confirm(id),
+        onSuccess: () => {
+            invalidateTransactionQueries(queryClient)
+            toast.success(i18n.t('toasts.transaction.confirmed'))
+        },
+        onError: (error: Error) => {
+            toast.error(error.message || i18n.t('toasts.transaction.confirmFailed'))
+        },
+    })
+}
+
+export function useSkipTransaction() {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (id: string | number) => transactionsApi.skip(id),
+        onSuccess: () => {
+            invalidateTransactionQueries(queryClient)
+            toast.success(i18n.t('toasts.transaction.skipped'))
+        },
+        onError: (error: Error) => {
+            toast.error(error.message || i18n.t('toasts.transaction.skipFailed'))
         },
     })
 }
