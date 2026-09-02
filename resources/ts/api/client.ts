@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
 import i18n from '@/lib/i18n'
+import { getApiErrorMessage } from '@/lib/api-error'
 import { ApiError } from '@/types'
 
 interface WrappedResponse<T> {
@@ -41,23 +42,23 @@ const createApiClient = (baseURL: string): AxiosInstance => {
     client.interceptors.response.use(
         (response) => response,
         (error) => {
-            const message = error.response?.data?.message || i18n.t('errors.generic')
-
             if (error.response?.status === 401) {
                 onUnauthorized?.()
                 return Promise.reject(error)
             }
 
+            const apiError: ApiError = {
+                message: error.response?.data?.message || i18n.t('errors.generic'),
+                code: error.response?.status?.toString() || 'UNKNOWN',
+                details: error.response?.data?.errors ?? error.response?.data?.details,
+            }
+            apiError.message = getApiErrorMessage(apiError, i18n.t('errors.generic'))
+
             // Show toast for non-validation errors
             if (error.response?.status !== 422) {
-                toast.error(message)
+                toast.error(apiError.message)
             }
 
-            const apiError: ApiError = {
-                message,
-                code: error.response?.status?.toString() || 'UNKNOWN',
-                details: error.response?.data?.details,
-            }
             return Promise.reject(apiError)
         }
     )

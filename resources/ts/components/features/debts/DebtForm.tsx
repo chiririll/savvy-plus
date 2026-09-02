@@ -23,11 +23,11 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getDebtSchema, DebtFormData } from '@/schemas'
-import { useCurrencies } from '@/hooks'
+import { useCurrencies, useAccounts } from '@/hooks'
 import { AccountSelect } from '@/components/shared/AccountSelect'
 import { Banknote, HandCoins } from 'lucide-react'
 import { FormWrapper } from '@/components/shared/FormWrapper'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 
 interface DebtFormProps {
     defaultValues?: Partial<DebtFormData>
@@ -69,6 +69,7 @@ export function DebtForm({
 }: DebtFormProps) {
     const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: currencies, isLoading: currenciesLoading } = useCurrencies()
+    const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
 
     const form = useForm<DebtFormData>({
         resolver: zodResolver(getDebtSchema(mode)),
@@ -89,6 +90,14 @@ export function DebtForm({
 
     const origin = form.watch('origin') ?? 'new'
     const debtType = form.watch('debt_type')
+    const accountId = form.watch('account_id')
+    const amount = Number(form.watch('amount')) || 0
+    const selectedAccount = accounts?.find((account) => account.id === Number(accountId))
+    const insufficientFunds = mode === 'create'
+        && origin === 'new'
+        && debtType === 'owed_to_me'
+        && !!selectedAccount
+        && amount > selectedAccount.currentBalance
 
     useEffect(() => {
         if (!onValuesChange) {
@@ -257,8 +266,12 @@ export function DebtForm({
                                     {...field}
                                 />
                             </FormControl>
-                            <FormDescription>
-                                {t('forms:debts.amountHelp')}
+                            <FormDescription className={insufficientFunds ? 'text-destructive' : undefined}>
+                                {insufficientFunds && selectedAccount
+                                    ? t('forms:debts.insufficientFunds', {
+                                        available: formatCurrency(selectedAccount.currentBalance, selectedAccount.currency),
+                                    })
+                                    : t('forms:debts.amountHelp')}
                             </FormDescription>
                             <FormMessage />
                         </FormItem>

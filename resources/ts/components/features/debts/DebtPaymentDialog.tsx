@@ -50,7 +50,7 @@ export function DebtPaymentDialog({
     isSubmitting,
     mode,
 }: DebtPaymentDialogProps) {
-    const { t } = useTranslation('forms')
+    const { t } = useTranslation(['forms', 'pages', 'common'])
     const { data: accounts, isLoading: accountsLoading } = useAccounts({ active: true, exclude_debts: true })
 
     const form = useForm<DebtPaymentFormData>({

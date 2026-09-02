@@ -4,6 +4,7 @@ import { debtsApi } from '@/api'
 import { DebtFormData, DebtPaymentFormData } from '@/types'
 import { toast } from 'sonner'
 import i18n from '@/lib/i18n'
+import { getApiErrorMessage } from '@/lib/api-error'
 
 const QUERY_KEY = ['debts']
 
@@ -50,7 +51,7 @@ export function useCreateDebt(redirectTo?: string) {
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.debt.createFailed'))
+            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.createFailed')))
         },
     })
 }
@@ -69,7 +70,7 @@ export function useUpdateDebt(redirectTo?: string) {
             if (redirectTo) navigate(redirectTo)
         },
         onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.debt.updateFailed'))
+            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.updateFailed')))
         },
     })
 }
@@ -85,7 +86,7 @@ export function useDeleteDebt() {
             toast.success(i18n.t('toasts.debt.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.debt.deleteFailed'))
+            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.deleteFailed')))
         },
     })
 }
@@ -103,7 +104,7 @@ export function useDebtPayment() {
             toast.success(i18n.t('toasts.debt.payment'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.debt.paymentFailed'))
+            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.paymentFailed')))
         },
     })
 }
@@ -121,7 +122,7 @@ export function useDebtCollection() {
             toast.success(i18n.t('toasts.debt.collection'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.debt.collectionFailed'))
+            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.collectionFailed')))
         },
     })
 }
@@ -136,7 +137,7 @@ export function useReopenDebt() {
             toast.success(i18n.t('toasts.debt.reopened'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.debt.reopenFailed'))
+            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.reopenFailed')))
         },
     })
 }

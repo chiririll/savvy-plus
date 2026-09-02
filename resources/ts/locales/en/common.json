@@ -73,6 +73,7 @@
         "amountRequired": "Amount is required",
         "amountPositive": "Amount must be positive",
         "amountGreaterThanZero": "Amount must be greater than 0",
+        "insufficientFunds": "Insufficient funds",
         "balanceNegative": "Balance cannot be negative",
         "integer": "Must be an integer",
         "atLeastOne": "Must be at least 1",

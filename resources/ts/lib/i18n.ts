@@ -29,9 +29,30 @@ export function isAppLocale(value: string): value is AppLocale {
     return (SUPPORTED_LOCALES as readonly string[]).includes(value)
 }
 
+const I18N_NAMESPACES = ['common', 'nav', 'auth', 'settings', 'pages', 'forms'] as const
+
 /** BCP 47 tag for Intl formatters. */
 export function intlLocale(locale: string = i18n.resolvedLanguage ?? i18n.language): string {
     return locale.startsWith('ru') ? 'ru-RU' : 'en-US'
+}
+
+function resolveDottedNamespaceKey(key: string): string {
+    const parts = key.split('.')
+    if (parts.length < 2) {
+        return key
+    }
+
+    const ns = parts[0]
+    const rest = parts.slice(1).join('.')
+    if (!(I18N_NAMESPACES as readonly string[]).includes(ns)) {
+        return key
+    }
+
+    if (i18n.exists(rest, { ns })) {
+        return i18n.t(rest, { ns })
+    }
+
+    return key
 }
 
 void i18n
@@ -46,8 +67,9 @@ void i18n
         supportedLngs: [...SUPPORTED_LOCALES],
         nonExplicitSupportedLngs: true,
         defaultNS: 'common',
-        ns: ['common', 'nav', 'auth', 'settings', 'pages', 'forms'],
+        ns: [...I18N_NAMESPACES],
         interpolation: { escapeValue: false },
+        parseMissingKeyHandler: resolveDottedNamespaceKey,
         detection: {
             order: ['localStorage', 'navigator'],
             caches: ['localStorage'],

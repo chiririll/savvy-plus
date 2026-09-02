@@ -20,6 +20,7 @@ import { useAuthStore } from '@/stores/auth'
 import { LanguageSwitcher } from '@/components/shared'
 import { Logo } from '@/components/shared/Logo'
 import { authApi } from '@/api'
+import { getApiErrorMessage } from '@/lib/api-error'
 import { toast } from 'sonner'
 
 type SetupFormValues = {
@@ -75,10 +76,7 @@ export default function SetupPage() {
             toast.success(t('setup.created'))
             navigate('/setup-2fa')
         } catch (error: unknown) {
-            const message = error && typeof error === 'object' && 'message' in error
-                ? (error as { message: string }).message
-                : t('setup.failed')
-            toast.error(message)
+            toast.error(getApiErrorMessage(error, t('setup.failed')))
         } finally {
             setIsLoading(false)
         }

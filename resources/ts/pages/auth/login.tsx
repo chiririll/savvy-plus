@@ -32,6 +32,7 @@ import { Logo } from '@/components/shared/Logo'
 import { SsoButtons } from '@/components/features/sso'
 import { authApi } from '@/api'
 import { passkeyErrorMessage, isPasskeyDomainSupported } from '@/hooks'
+import { getApiErrorMessage } from '@/lib/api-error'
 import { toast } from 'sonner'
 
 type LoginFormValues = {
@@ -139,10 +140,7 @@ export default function LoginPage() {
                 setTwoFactorToken(result.two_factor_token)
             }
         } catch (error: unknown) {
-            const message = error && typeof error === 'object' && 'message' in error
-                ? (error as { message: string }).message
-                : t('invalidCredentials')
-            toast.error(message)
+            toast.error(getApiErrorMessage(error, t('invalidCredentials')))
         } finally {
             setIsLoading(false)
         }
@@ -158,10 +156,7 @@ export default function LoginPage() {
             toast.success(t('welcomeToast'))
             navigate('/')
         } catch (error: unknown) {
-            const message = error && typeof error === 'object' && 'message' in error
-                ? (error as { message: string }).message
-                : t('twoFactor.invalidCode')
-            toast.error(message)
+            toast.error(getApiErrorMessage(error, t('twoFactor.invalidCode')))
             if (useRecoveryCode) {
                 setRecoveryCode('')
             } else {

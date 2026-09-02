@@ -71,6 +71,7 @@
         "iOweHelp": "Money you need to pay back",
         "owedToMeHelp": "Money you expect to receive",
         "amountHelp": "Total debt amount",
+        "insufficientFunds": "Insufficient funds. Available: {{available}}",
         "counterparty": "Counterparty",
         "counterpartyPlaceholder": "Jane Doe / Bank name",
         "counterpartyHelp": "Who you owe to or who owes you",

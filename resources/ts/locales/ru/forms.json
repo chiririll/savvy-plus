@@ -71,6 +71,7 @@
         "iOweHelp": "Деньги, которые нужно вернуть",
         "owedToMeHelp": "Деньги, которые вам должны вернуть",
         "amountHelp": "Общая сумма долга",
+        "insufficientFunds": "Недостаточно средств. Доступно: {{available}}",
         "counterparty": "Контрагент",
         "counterpartyPlaceholder": "Иван Иванов / название банка",
         "counterpartyHelp": "Кому вы должны или кто должен вам",
