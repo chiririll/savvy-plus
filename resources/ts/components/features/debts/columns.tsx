@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
 import { Pencil, Trash2, MoreHorizontal, HandCoins, Banknote, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -46,6 +45,7 @@ interface ColumnActions {
     onPayment: (debt: Debt) => void
     onCollect: (debt: Debt) => void
     onReopen: (id: number) => void
+    onEdit: (debt: Debt) => void
     isReadOnly?: boolean
 }
 
@@ -195,11 +195,9 @@ export const createDebtColumns = (
                                 <DropdownMenuSeparator />
                             </>
                         )}
-                        <DropdownMenuItem asChild>
-                            <Link to={`/debts/${debt.id}/edit`}>
-                                <Pencil className="mr-2 size-4" />
-                                {i18n.t('actions.edit')}
-                            </Link>
+                        <DropdownMenuItem onClick={() => actions.onEdit(debt)}>
+                            <Pencil className="mr-2 size-4" />
+                            {i18n.t('actions.edit')}
                         </DropdownMenuItem>
                         {!actions.isReadOnly && (
                         <>

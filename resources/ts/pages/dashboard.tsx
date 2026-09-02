@@ -830,7 +830,7 @@ export default function DashboardPage() {
                                     {activeDebts.map((debt) => (
                                         <Link
                                             key={debt.id}
-                                            to={`/debts/${debt.id}/edit`}
+                                            to={`/debts?edit=${debt.id}`}
                                             className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                                         >
                                             <div className="flex items-center gap-2 mb-2">
@@ -870,7 +870,7 @@ export default function DashboardPage() {
                             <HandCoins className="size-12 mx-auto text-muted-foreground/50 mb-3" />
                             <p className="text-muted-foreground mb-3">{t('dashboard.noDebts')}</p>
                             <Button asChild size="sm">
-                                <Link to="/debts/create">
+                                <Link to="/debts?create=1">
                                     <Plus className="size-4 mr-1" />
                                     {t('dashboard.addDebt')}
                                 </Link>

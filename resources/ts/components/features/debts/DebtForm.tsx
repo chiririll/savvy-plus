@@ -30,6 +30,8 @@ interface DebtFormProps {
     onSubmit: (data: DebtFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
+    formId?: string
+    hideSubmit?: boolean
 }
 
 const DEBT_TYPES = [
@@ -50,6 +52,8 @@ export function DebtForm({
     onSubmit,
     isSubmitting,
     submitLabel,
+    formId,
+    hideSubmit,
 }: DebtFormProps) {
     const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: currencies, isLoading: currenciesLoading } = useCurrencies()
@@ -71,7 +75,7 @@ export function DebtForm({
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-md space-y-4">
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                     control={form.control}
                     name="name"
@@ -232,9 +236,11 @@ export function DebtForm({
                     )}
                 />
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>

@@ -31,8 +31,6 @@ const TagsPage = lazy(() => import('@/pages/tags'))
 const TagCreatePage = lazy(() => import('@/pages/tags/create'))
 const TagEditPage = lazy(() => import('@/pages/tags/[id]/edit'))
 const DebtsPage = lazy(() => import('@/pages/debts'))
-const DebtCreatePage = lazy(() => import('@/pages/debts/create'))
-const DebtEditPage = lazy(() => import('@/pages/debts/[id]/edit'))
 const RecurringPage = lazy(() => import('@/pages/recurring'))
 const RecurringCreatePage = lazy(() => import('@/pages/recurring/create'))
 const RecurringEditPage = lazy(() => import('@/pages/recurring/[id]/edit'))
@@ -113,8 +111,6 @@ export const router = createBrowserRouter([
                     { path: 'tags/create', element: withSuspense(TagCreatePage) },
                     { path: 'tags/:id/edit', element: withSuspense(TagEditPage) },
                     { path: 'debts', element: withSuspense(DebtsPage) },
-                    { path: 'debts/create', element: withSuspense(DebtCreatePage) },
-                    { path: 'debts/:id/edit', element: withSuspense(DebtEditPage) },
                     { path: 'recurring', element: withSuspense(RecurringPage) },
                     { path: 'recurring/create', element: withSuspense(RecurringCreatePage) },
                     { path: 'recurring/:id/edit', element: withSuspense(RecurringEditPage) },
