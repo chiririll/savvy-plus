@@ -48,6 +48,8 @@ return [
         'cannot_use_debt_target' => 'Cannot use debt account as target.',
         'delete_with_history' => 'Cannot delete debt with payment history.',
         'not_paid_off' => 'Debt is not paid off.',
+        'issued' => 'Issued debt: :name',
+        'borrowed' => 'Received loan: :name',
     ],
 
     'sso' => [
@@ -176,6 +178,8 @@ return [
             'transfer' => 'Transfer',
             'debt_payment' => 'Debt Payment',
             'debt_collection' => 'Debt Collection',
+            'debt_lend' => 'Debt Issued',
+            'debt_borrow' => 'Loan Received',
         ],
         'debt' => [
             'i_owe' => 'I Owe',
@@ -228,5 +232,8 @@ return [
         'custom_range_exceeded' => 'Custom range cannot exceed :days days.',
         'invalid_period_value' => 'Invalid period_value format for period_type ":type".',
         'debt_amount_gt' => 'Debt amount must be greater than zero.',
+        'account_required' => 'Please select an account.',
+        'date_required' => 'Please select a date.',
+        'currency_required' => 'Please select a currency.',
     ],
 ];

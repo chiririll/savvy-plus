@@ -13,12 +13,12 @@ class AccountBalanceRepository
         $initial = (float) $account->initial_balance;
 
         $income = Transaction::where('account_id', $account->id)
-            ->whereIn('type', ['income', 'debt_collection'])
+            ->whereIn('type', ['income', 'debt_collection', 'debt_borrow'])
             ->where('date', '<=', $date)
             ->sum('amount');
 
         $expense = Transaction::where('account_id', $account->id)
-            ->whereIn('type', ['expense', 'debt_payment'])
+            ->whereIn('type', ['expense', 'debt_payment', 'debt_lend'])
             ->where('date', '<=', $date)
             ->sum('amount');
 

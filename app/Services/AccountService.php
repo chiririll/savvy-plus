@@ -121,13 +121,15 @@ class AccountService
 
                     switch ($transaction->type->value) {
                         case 'income':
-                        case 'debt_collection': // Money comes to regular account
+                        case 'debt_collection':
+                        case 'debt_borrow':
                             if (isset($runningBalances[$accountId])) {
                                 $runningBalances[$accountId] += (float) $transaction->amount;
                             }
                             break;
                         case 'expense':
-                        case 'debt_payment': // Money goes from regular account
+                        case 'debt_payment':
+                        case 'debt_lend':
                             if (isset($runningBalances[$accountId])) {
                                 $runningBalances[$accountId] -= (float) $transaction->amount;
                             }
@@ -183,13 +185,13 @@ class AccountService
     {
         // Income + debt collections (money coming in)
         $income = $account->transactions()
-            ->whereIn('type', ['income', 'debt_collection'])
+            ->whereIn('type', ['income', 'debt_collection', 'debt_borrow'])
             ->where('date', '<', $date)
             ->sum('amount');
 
         // Expenses + debt payments (money going out)
         $expense = $account->transactions()
-            ->whereIn('type', ['expense', 'debt_payment'])
+            ->whereIn('type', ['expense', 'debt_payment', 'debt_lend'])
             ->where('date', '<', $date)
             ->sum('amount');
 

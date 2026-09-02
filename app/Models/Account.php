@@ -100,14 +100,14 @@ class Account extends Model
         $transferOut = $this->transactions()->where('type', 'transfer')->sum('amount');
         $transferIn = Transaction::where('to_account_id', $this->id)->sum('to_amount');
 
-        // Debt collection: money received from someone who owed you
+        // Money in: collected repayment or received loan
         $debtCollectionIn = $this->transactions()
-            ->where('type', 'debt_collection')
+            ->whereIn('type', ['debt_collection', 'debt_borrow'])
             ->sum('amount');
 
-        // Debt payment: money paid to reduce your debt
+        // Money out: paid own debt or lent money
         $debtPaymentOut = $this->transactions()
-            ->where('type', 'debt_payment')
+            ->whereIn('type', ['debt_payment', 'debt_lend'])
             ->sum('amount');
 
         return $this->initial_balance
@@ -123,8 +123,9 @@ class Account extends Model
     {
         $targetAmount = (float) $this->target_amount;
 
-        // Sum of all payments to this debt account
-        $payments = Transaction::where('to_account_id', $this->id)->sum('to_amount');
+        $payments = Transaction::where('to_account_id', $this->id)
+            ->whereIn('type', ['debt_payment', 'debt_collection'])
+            ->sum('to_amount');
 
         return $targetAmount - $payments;
     }

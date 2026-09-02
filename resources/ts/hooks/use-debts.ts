@@ -45,6 +45,7 @@ export function useCreateDebt(redirectTo?: string) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
             queryClient.invalidateQueries({ queryKey: ['accounts'] })
+            queryClient.invalidateQueries({ queryKey: ['transactions'] })
             toast.success(i18n.t('toasts.debt.created'))
             if (redirectTo) navigate(redirectTo)
         },

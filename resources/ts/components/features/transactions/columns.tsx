@@ -30,6 +30,8 @@ const TYPE_CONFIG = {
     transfer: { icon: ArrowLeftRight, color: 'text-blue-600', bg: 'bg-blue-100', label: 'Transfer' },
     debt_payment: { icon: Banknote, color: 'text-orange-600', bg: 'bg-orange-100', label: 'Debt Payment' },
     debt_collection: { icon: HandCoins, color: 'text-purple-600', bg: 'bg-purple-100', label: 'Debt Collection' },
+    debt_lend: { icon: HandCoins, color: 'text-red-600', bg: 'bg-red-100', label: 'Debt Issued' },
+    debt_borrow: { icon: Banknote, color: 'text-green-600', bg: 'bg-green-100', label: 'Loan Received' },
 }
 
 export function createTransactionColumns(
@@ -96,6 +98,8 @@ export function createTransactionColumns(
                     if (type === 'transfer') return `${account.name} → ${toAccount?.name}`
                     if (type === 'debt_payment') return i18n.t('pages:transactions.fallback.payment', { name: toAccount?.name })
                     if (type === 'debt_collection') return i18n.t('pages:transactions.fallback.collection', { name: toAccount?.name })
+                    if (type === 'debt_lend') return i18n.t('pages:transactions.fallback.lend', { name: toAccount?.name })
+                    if (type === 'debt_borrow') return i18n.t('pages:transactions.fallback.borrow', { name: toAccount?.name })
                     return category?.name
                 }
 
@@ -103,10 +107,10 @@ export function createTransactionColumns(
                     if (type === 'transfer') {
                         return <span>{account.name} → {toAccount?.name}</span>
                     }
-                    if (type === 'debt_payment') {
+                    if (type === 'debt_payment' || type === 'debt_lend') {
                         return <span>{account.name} → {toAccount?.name}</span>
                     }
-                    if (type === 'debt_collection') {
+                    if (type === 'debt_collection' || type === 'debt_borrow') {
                         return <span>{toAccount?.name} → {account.name}</span>
                     }
                     return (
@@ -146,9 +150,9 @@ export function createTransactionColumns(
             header: () => <div className="text-right">{i18n.t('pages:transactions.columns.amount')}</div>,
             cell: ({ row }) => {
                 const { type, amount, toAmount, account, toAccount } = row.original
-                const isIncoming = type === 'income' || type === 'debt_collection'
+                const isIncoming = type === 'income' || type === 'debt_collection' || type === 'debt_borrow'
                 const isTransfer = type === 'transfer'
-                const isDebtPayment = type === 'debt_payment'
+                const isDebtPayment = type === 'debt_payment' || type === 'debt_lend'
 
                 return (
                     <div className="text-right space-y-1">

@@ -48,6 +48,8 @@ return [
         'cannot_use_debt_target' => 'Нельзя использовать долговой счёт как назначение.',
         'delete_with_history' => 'Нельзя удалить долг с историей платежей.',
         'not_paid_off' => 'Долг ещё не погашен.',
+        'issued' => 'Выдан долг: :name',
+        'borrowed' => 'Получен займ: :name',
     ],
 
     'sso' => [
@@ -176,6 +178,8 @@ return [
             'transfer' => 'Перевод',
             'debt_payment' => 'Платёж по долгу',
             'debt_collection' => 'Возврат долга',
+            'debt_lend' => 'Выдача долга',
+            'debt_borrow' => 'Получение займа',
         ],
         'debt' => [
             'i_owe' => 'Я должен',
@@ -228,5 +232,8 @@ return [
         'custom_range_exceeded' => 'Свой период не может быть длиннее :days дн.',
         'invalid_period_value' => 'Неверный формат period_value для period_type «:type».',
         'debt_amount_gt' => 'Сумма долга должна быть больше нуля.',
+        'account_required' => 'Выберите счёт.',
+        'date_required' => 'Укажите дату.',
+        'currency_required' => 'Выберите валюту.',
     ],
 ];

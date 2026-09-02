@@ -121,7 +121,9 @@
         },
         "fallback": {
             "payment": "Платёж: {{name}}",
-            "collection": "Возврат: {{name}}"
+            "collection": "Возврат: {{name}}",
+            "lend": "Выдача: {{name}}",
+            "borrow": "Займ: {{name}}"
         },
         "columns": {
             "date": "Дата",
@@ -134,7 +136,9 @@
             "expense": "Расход",
             "transfer": "Перевод",
             "debt_payment": "Платёж по долгу",
-            "debt_collection": "Возврат долга"
+            "debt_collection": "Возврат долга",
+            "debt_lend": "Выдача долга",
+            "debt_borrow": "Получение займа"
         },
         "deleteTitle": "Удалить транзакцию?",
         "deleteDescription": "Это действие нельзя отменить."

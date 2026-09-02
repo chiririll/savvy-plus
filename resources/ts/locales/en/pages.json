@@ -119,7 +119,9 @@
         },
         "fallback": {
             "payment": "Payment: {{name}}",
-            "collection": "Collection: {{name}}"
+            "collection": "Collection: {{name}}",
+            "lend": "Issued: {{name}}",
+            "borrow": "Received: {{name}}"
         },
         "columns": {
             "date": "Date",
@@ -132,7 +134,9 @@
             "expense": "Expense",
             "transfer": "Transfer",
             "debt_payment": "Debt Payment",
-            "debt_collection": "Debt Collection"
+            "debt_collection": "Debt Collection",
+            "debt_lend": "Debt Issued",
+            "debt_borrow": "Loan Received"
         },
         "deleteTitle": "Delete transaction?",
         "deleteDescription": "This action cannot be undone."

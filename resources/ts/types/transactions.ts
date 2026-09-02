@@ -3,7 +3,7 @@ import { Account } from './accounts'
 import { Category } from './categories'
 import { Tag } from './tags'
 
-export type TransactionType = 'income' | 'expense' | 'transfer' | 'debt_payment' | 'debt_collection'
+export type TransactionType = 'income' | 'expense' | 'transfer' | 'debt_payment' | 'debt_collection' | 'debt_lend' | 'debt_borrow'
 
 export interface TransactionItem {
     id?: number

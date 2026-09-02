@@ -59,6 +59,7 @@ export function DebtFormDialog({
 
                 <DebtForm
                     key={debt?.id ?? 'create'}
+                    mode={isEdit ? 'edit' : 'create'}
                     defaultValues={debt ? toFormValues(debt) : undefined}
                     onSubmit={onSubmit}
                     isSubmitting={isSubmitting}
