@@ -14,11 +14,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
+        $seeders = [
             CurrencySeeder::class,
             CategorySeeder::class,
             TagSeeder::class,
-            DemoSeeder::class,
-        ]);
+        ];
+
+        if (filter_var(env('SEED_DEMO', false), FILTER_VALIDATE_BOOLEAN)) {
+            $seeders[] = DemoSeeder::class;
+        }
+
+        $this->call($seeders);
     }
 }
