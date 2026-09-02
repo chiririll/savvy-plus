@@ -153,7 +153,33 @@ it('creates a pending occurrence when a recurring template is created', function
 
     $pending = Transaction::pending()->where('recurring_transaction_id', $response->json('data.id'))->first();
     expect($pending)->not->toBeNull()
-        ->and((float) $pending->amount)->toBe(120.0);
+        ->and((float) $pending->amount)->toBe(120.0)
+        ->and($pending->date->toDateString())->toBe($today);
+});
+
+it('creates the first pending on the start date even when it is in the past', function () {
+    $this->travelTo('2026-09-02');
+
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    $response = callAs('POST', '/api/recurring', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 50,
+        'frequency' => 'monthly',
+        'interval' => 1,
+        'day_of_month' => 15,
+        'start_date' => '2026-08-19',
+        'is_active' => true,
+    ], $user);
+
+    $response->assertCreated();
+    expect(
+        Transaction::pending()->where('recurring_transaction_id', $response->json('data.id'))->first()->date->toDateString()
+    )->toBe('2026-08-19');
 });
 
 it('spawns the next pending after confirming a recurring occurrence', function () {

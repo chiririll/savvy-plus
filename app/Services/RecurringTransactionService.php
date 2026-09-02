@@ -43,7 +43,7 @@ class RecurringTransactionService
     public function create(array $data): RecurringTransaction
     {
         return DB::transaction(function () use ($data) {
-            $data['next_run_date'] = $this->calculateInitialNextRunDate($data);
+            $data['next_run_date'] = Carbon::parse($data['start_date'])->toDateString();
 
             $recurring = RecurringTransaction::create($data);
 
@@ -64,14 +64,10 @@ class RecurringTransactionService
     public function update(RecurringTransaction $recurring, array $data): RecurringTransaction
     {
         return DB::transaction(function () use ($recurring, $data) {
-            if ($this->scheduleChanged($recurring, $data)) {
-                $data['next_run_date'] = $this->calculateInitialNextRunDate(array_merge([
-                    'start_date' => $recurring->start_date->toDateString(),
-                    'frequency' => $recurring->frequency->value,
-                    'interval' => $recurring->interval,
-                    'day_of_week' => $recurring->day_of_week,
-                    'day_of_month' => $recurring->day_of_month,
-                ], $data));
+            if (array_key_exists('start_date', $data)
+                && Carbon::parse($data['start_date'])->toDateString() !== $recurring->start_date->toDateString()
+            ) {
+                $data['next_run_date'] = Carbon::parse($data['start_date'])->toDateString();
             }
 
             $recurring->update($data);
@@ -195,52 +191,6 @@ class RecurringTransactionService
         return ! $recurring->end_date || $recurring->next_run_date->lte($recurring->end_date);
     }
 
-    protected function calculateInitialNextRunDate(array $data): string
-    {
-        $startDate = Carbon::parse($data['start_date']);
-        $frequency = $data['frequency'] instanceof RecurringFrequency
-            ? $data['frequency']
-            : RecurringFrequency::from($data['frequency']);
-        $interval = $data['interval'] ?? 1;
-
-        if ($startDate->isFuture() || $startDate->isToday()) {
-            return $this->adjustToSchedule($startDate, $frequency, $data)->toDateString();
-        }
-
-        $nextDate = $startDate->copy();
-
-        while ($nextDate->isPast()) {
-            $nextDate = match ($frequency) {
-                RecurringFrequency::Daily => $nextDate->addDays($interval),
-                RecurringFrequency::Weekly => $nextDate->addWeeks($interval),
-                RecurringFrequency::Monthly => $nextDate->addMonths($interval),
-                RecurringFrequency::Yearly => $nextDate->addYears($interval),
-            };
-        }
-
-        return $this->adjustToSchedule($nextDate, $frequency, $data)->toDateString();
-    }
-
-    protected function adjustToSchedule(Carbon $date, RecurringFrequency $frequency, array $data): Carbon
-    {
-        if ($frequency === RecurringFrequency::Weekly && isset($data['day_of_week'])) {
-            $dayOfWeek = (int) $data['day_of_week'];
-            if ($date->dayOfWeek !== $dayOfWeek) {
-                $date = $date->next($dayOfWeek);
-            }
-        }
-
-        if ($frequency === RecurringFrequency::Monthly && isset($data['day_of_month'])) {
-            $dayOfMonth = min((int) $data['day_of_month'], $date->daysInMonth);
-            $date = $date->day($dayOfMonth);
-            if ($date->isPast() && ! $date->isToday()) {
-                $date = $date->addMonth()->day(min((int) $data['day_of_month'], $date->daysInMonth));
-            }
-        }
-
-        return $date;
-    }
-
     protected function calculateNextWeekly(Carbon $current, int $interval, ?int $dayOfWeek): Carbon
     {
         $next = $current->addWeeks($interval);
@@ -274,18 +224,5 @@ class RecurringTransactionService
         }
 
         return $fromAccount->currency->convertTo((float) $recurring->amount, $toAccount->currency);
-    }
-
-    protected function scheduleChanged(RecurringTransaction $recurring, array $data): bool
-    {
-        $fields = ['frequency', 'interval', 'day_of_week', 'day_of_month', 'start_date'];
-
-        foreach ($fields as $field) {
-            if (array_key_exists($field, $data) && $data[$field] != $recurring->$field) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
