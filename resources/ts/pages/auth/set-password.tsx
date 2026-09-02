@@ -32,7 +32,7 @@ export default function SetPasswordPage() {
     const { t } = useTranslation('auth')
     const navigate = useNavigate()
     const { token } = useParams<{ token: string }>()
-    const setUser = useAuthStore((state) => state.setUser)
+    const applySession = useAuthStore((state) => state.applySession)
     const [preview, setPreview] = useState<PasswordTokenPreview | null>(null)
     const [loading, setLoading] = useState(true)
     const [invalid, setInvalid] = useState(false)
@@ -74,11 +74,11 @@ export default function SetPasswordPage() {
             const response = await authApi.acceptPasswordToken(token, data.password, data.password_confirmation)
             if ('requires_2fa' in response && response.requires_2fa) {
                 toast.success(t('setPassword.updated'))
-                navigate('/login', { replace: true, state: { twoFactorToken: response.two_factor_token } })
+                navigate('/login', { replace: true, state: { twoFactorToken: response.two_factor_token, rememberMe: true } })
                 return
             }
             if ('user' in response) {
-                setUser(response.user)
+                applySession(response)
             }
             toast.success(t('setPassword.updated'))
             navigate('/', { replace: true })

@@ -28,9 +28,9 @@ class AuthCookies
     /**
      * @return array<int, Cookie>
      */
-    public function make(Request $request, string $token, string $csrf): array
+    public function make(Request $request, string $token, string $csrf, bool $rememberMe = false): array
     {
-        $minutes = (int) config('auth_session.absolute_ttl');
+        $minutes = $rememberMe ? (int) config('auth_session.remember_ttl') : 0;
         $secure = $request->isSecure();
 
         return [

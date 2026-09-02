@@ -28,16 +28,7 @@ class AuthenticateSession
         $request->attributes->set('auth_session', $session);
 
         $this->sessions->touch($session);
-        $rotated = $this->sessions->shouldRotate($session) ? $this->sessions->rotate($session) : null;
 
-        $response = $next($request);
-
-        if ($rotated) {
-            foreach ($this->cookies->make($request, $rotated['token'], $rotated['csrf']) as $cookie) {
-                $response->headers->setCookie($cookie);
-            }
-        }
-
-        return $response;
+        return $next($request);
     }
 }

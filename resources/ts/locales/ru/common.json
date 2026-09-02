@@ -299,6 +299,12 @@
             "codesRegenerated": "Коды восстановления обновлены",
             "enableFailed": "Не удалось включить 2FA",
             "invalidCode": "Неверный код подтверждения"
+        },
+        "accountSecurity": {
+            "passwordChanged": "Пароль обновлён. На других устройствах выполнен выход.",
+            "passwordFailed": "Не удалось обновить пароль",
+            "loggedOutOthers": "Вы вышли на других устройствах",
+            "logoutOthersFailed": "Не удалось выйти на других устройствах"
         }
     }
 }

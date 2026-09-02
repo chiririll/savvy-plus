@@ -75,5 +75,5 @@ export interface IdentityProviderFormData {
 }
 
 export type SsoExchangeResponse =
-    | { user: User }
+    | { user: User; expires_at: string; refresh_at: string | null }
     | { requires_2fa: true; two_factor_token: string }

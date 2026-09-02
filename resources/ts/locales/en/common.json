@@ -299,6 +299,12 @@
             "codesRegenerated": "Recovery codes regenerated",
             "enableFailed": "Failed to enable 2FA",
             "invalidCode": "Invalid verification code"
+        },
+        "accountSecurity": {
+            "passwordChanged": "Password updated. Other devices have been signed out.",
+            "passwordFailed": "Could not update the password",
+            "loggedOutOthers": "Signed out of other devices",
+            "logoutOthersFailed": "Could not sign out other devices"
         }
     }
 }

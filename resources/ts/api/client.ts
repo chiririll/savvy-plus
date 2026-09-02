@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
 import i18n from '@/lib/i18n'
 import { getApiErrorMessage } from '@/lib/api-error'
@@ -14,12 +14,33 @@ interface WrappedResponse<T> {
     }
 }
 
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+    _csrfRetry?: boolean
+}
+
 // Soft, router-driven sign-out: the auth store registers this so a 401 never
 // hard-reloads the page. The frontend holds no token and never refreshes.
 let onUnauthorized: (() => void) | null = null
 
 export const setOnUnauthorized = (handler: () => void) => {
     onUnauthorized = handler
+}
+
+const AUTH_EXEMPT_401 = [
+    '/auth/login',
+    '/auth/register',
+    '/auth/2fa/verify',
+    '/auth/webauthn/login',
+    '/auth/sso/',
+    '/auth/logout',
+]
+
+function requestUrl(config?: { url?: string; baseURL?: string }): string {
+    return `${config?.url ?? ''}`
+}
+
+function isAuthExempt(url: string): boolean {
+    return AUTH_EXEMPT_401.some((path) => url.includes(path))
 }
 
 const createApiClient = (baseURL: string): AxiosInstance => {
@@ -42,20 +63,33 @@ const createApiClient = (baseURL: string): AxiosInstance => {
     client.interceptors.response.use(
         (response) => response,
         (error) => {
-            if (error.response?.status === 401) {
-                onUnauthorized?.()
+            const url = requestUrl(error.config)
+            const status = error.response?.status
+
+            if (status === 401) {
+                if (!isAuthExempt(url)) {
+                    onUnauthorized?.()
+                }
                 return Promise.reject(error)
+            }
+
+            if (status === 419) {
+                const config = error.config as RetryableRequestConfig | undefined
+                if (config && !config._csrfRetry && !isAuthExempt(url)) {
+                    config._csrfRetry = true
+                    return client.request(config)
+                }
             }
 
             const apiError: ApiError = {
                 message: error.response?.data?.message || i18n.t('errors.generic'),
-                code: error.response?.status?.toString() || 'UNKNOWN',
+                code: status?.toString() || 'UNKNOWN',
                 details: error.response?.data?.errors ?? error.response?.data?.details,
             }
             apiError.message = getApiErrorMessage(apiError, i18n.t('errors.generic'))
 
             // Show toast for non-validation errors
-            if (error.response?.status !== 422) {
+            if (status !== 422) {
                 toast.error(apiError.message)
             }
 

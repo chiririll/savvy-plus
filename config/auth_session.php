@@ -12,15 +12,13 @@ return [
     // Header the SPA echoes the CSRF token back in.
     'csrf_header' => 'X-CSRF-Token',
 
-    // Idle timeout (minutes): a session dies this long after its last use.
-    'idle_ttl' => (int) env('AUTH_SESSION_IDLE_TTL', 60 * 24),
+    // Browser-session login (no "remember me"): server-side lifetime in minutes.
+    // The cookie itself is a session cookie and dies when the browser closes.
+    'session_ttl' => (int) env('AUTH_SESSION_TTL', 60 * 24),
 
-    // Absolute lifetime (minutes): hard cap regardless of activity.
-    'absolute_ttl' => (int) env('AUTH_SESSION_ABSOLUTE_TTL', 60 * 24 * 30),
+    // "Remember me" lifetime in minutes. Slides by one window on a daily /auth/me refresh.
+    'remember_ttl' => (int) env('AUTH_SESSION_REMEMBER_TTL', 60 * 24 * 7),
 
     // Pre-auth 2FA challenge lifetime (minutes).
     'challenge_ttl' => (int) env('AUTH_SESSION_CHALLENGE_TTL', 5),
-
-    // Rotate the session token after this many minutes of life (mitigates fixation/theft).
-    'rotate_after' => (int) env('AUTH_SESSION_ROTATE_AFTER', 60),
 ];

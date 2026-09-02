@@ -92,7 +92,7 @@ class SsoController extends Controller
             ]);
         }
 
-        return $this->issueSession($ticket->user, $request);
+        return $this->issueSession($ticket->user, $request, rememberMe: true);
     }
 
     private function complete(string $slug, Request $request): RedirectResponse

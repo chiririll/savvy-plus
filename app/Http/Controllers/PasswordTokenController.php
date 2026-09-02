@@ -62,6 +62,6 @@ class PasswordTokenController extends Controller
             ]);
         }
 
-        return $this->issueSession($user, $request);
+        return $this->issueSession($user, $request, rememberMe: true);
     }
 }

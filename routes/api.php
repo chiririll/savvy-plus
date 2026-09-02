@@ -64,6 +64,8 @@ Route::put('uploads/{upload}/parts/{partNumber}', [UploadController::class, 'upl
 Route::middleware(['session', 'csrf'])->group(function () {
     // Auth routes (available to all authenticated users)
     Route::post('auth/logout', [AuthController::class, 'logout']);
+    Route::post('auth/logout-others', [AuthController::class, 'logoutOthers']);
+    Route::put('auth/password', [AuthController::class, 'changePassword']);
 
     // 2FA status (available to all authenticated users)
     Route::get('auth/2fa/status', [TwoFactorController::class, 'status']);

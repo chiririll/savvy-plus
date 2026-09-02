@@ -33,7 +33,7 @@ function ssoErrorMessage(code: string): string {
 export default function SsoCallbackPage() {
     const [params] = useSearchParams()
     const navigate = useNavigate()
-    const setUser = useAuthStore((state) => state.setUser)
+    const applySession = useAuthStore((state) => state.applySession)
     const ran = useRef(false)
 
     useEffect(() => {
@@ -53,11 +53,11 @@ export default function SsoCallbackPage() {
             .exchange(ticket)
             .then((res) => {
                 if ('requires_2fa' in res) {
-                    navigate('/login', { replace: true, state: { twoFactorToken: res.two_factor_token } })
+                    navigate('/login', { replace: true, state: { twoFactorToken: res.two_factor_token, rememberMe: true } })
                     return
                 }
 
-                setUser(res.user)
+                applySession(res)
                 toast.success(i18n.t('auth:welcomeToast'))
                 navigate('/', { replace: true })
             })
@@ -65,7 +65,7 @@ export default function SsoCallbackPage() {
                 toast.error(i18n.t('auth:ssoFailed'))
                 navigate('/login', { replace: true })
             })
-    }, [params, navigate, setUser])
+    }, [params, navigate, applySession])
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-background">
