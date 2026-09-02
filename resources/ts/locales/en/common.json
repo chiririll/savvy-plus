@@ -229,7 +229,9 @@
             "deleted": "User deleted",
             "createFailed": "Failed to create user",
             "updateFailed": "Failed to update user",
-            "deleteFailed": "Failed to delete user"
+            "deleteFailed": "Failed to delete user",
+            "passwordLink": "Set-password link created",
+            "passwordLinkFailed": "Failed to create set-password link"
         },
         "automation": {
             "created": "Automation rule created",

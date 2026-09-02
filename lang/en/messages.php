@@ -24,6 +24,9 @@ return [
         'demote_last_admin' => 'Cannot demote the last admin.',
         'delete_self' => 'Cannot delete yourself.',
         'delete_last_admin' => 'Cannot delete the last admin.',
+        'reset_self' => 'You cannot reset your own password this way.',
+        'reset_sso_only' => 'This user signs in with SSO and has no password.',
+        'password_token_invalid' => 'This link is invalid or has expired.',
     ],
 
     'currencies' => [

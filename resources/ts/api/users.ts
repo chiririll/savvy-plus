@@ -14,4 +14,7 @@ export const usersApi = {
         api.patch<User, Partial<UserFormData>>(`${ENDPOINT}/${id}`, data),
 
     delete: (id: number | string) => api.delete<void>(`${ENDPOINT}/${id}`),
+
+    issuePasswordToken: (id: number | string) =>
+        api.post<User>(`${ENDPOINT}/${id}/password-token`),
 }

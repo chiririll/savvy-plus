@@ -55,6 +55,16 @@ class User extends Authenticatable
         return $this->hasMany(WebauthnCredential::class);
     }
 
+    public function passwordTokens(): HasMany
+    {
+        return $this->hasMany(PasswordToken::class);
+    }
+
+    public function isInactive(): bool
+    {
+        return $this->password === null;
+    }
+
     public function hasPasskeys(): bool
     {
         return $this->webauthnCredentials()->exists();

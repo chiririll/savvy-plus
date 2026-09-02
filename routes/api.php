@@ -20,6 +20,7 @@ use App\Http\Controllers\TransactionImportController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\WebauthnController;
+use App\Http\Controllers\PasswordTokenController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,11 @@ Route::get('auth/status', [AuthController::class, 'status']);
 Route::get('auth/me', [AuthController::class, 'me']);
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
+
+Route::prefix('auth/password')->middleware('throttle:30,1')->group(function () {
+    Route::get('{token}', [PasswordTokenController::class, 'preview']);
+    Route::post('{token}', [PasswordTokenController::class, 'accept']);
+});
 
 // 2FA verification (public - used during login flow)
 Route::post('auth/2fa/verify', [TwoFactorController::class, 'verify']);
@@ -85,6 +91,7 @@ Route::middleware(['session', 'csrf'])->group(function () {
     Route::get('users/{user}', [UserController::class, 'show']);
     Route::middleware('role:admin')->group(function () {
         Route::post('users', [UserController::class, 'store']);
+        Route::post('users/{user}/password-token', [UserController::class, 'issuePasswordToken']);
         Route::put('users/{user}', [UserController::class, 'update']);
         Route::patch('users/{user}', [UserController::class, 'update']);
         Route::delete('users/{user}', [UserController::class, 'destroy']);

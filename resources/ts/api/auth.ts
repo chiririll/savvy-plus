@@ -1,4 +1,5 @@
 import { apiClient } from './client'
+import type { PasswordTokenPreview } from '@/types/users'
 import {
     AuthResponse,
     AuthStatus,
@@ -26,6 +27,23 @@ export const authApi = {
 
     register: async (data: RegisterData): Promise<AuthResponse> => {
         const response = await apiClient.post('/auth/register', data)
+        return response.data
+    },
+
+    previewPasswordToken: async (token: string): Promise<PasswordTokenPreview> => {
+        const response = await apiClient.get(`/auth/password/${token}`)
+        return response.data
+    },
+
+    acceptPasswordToken: async (
+        token: string,
+        password: string,
+        passwordConfirmation: string,
+    ): Promise<AuthResponse | TwoFactorAuthResponse> => {
+        const response = await apiClient.post(`/auth/password/${token}`, {
+            password,
+            password_confirmation: passwordConfirmation,
+        })
         return response.data
     },
 

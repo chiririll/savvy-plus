@@ -63,7 +63,9 @@
         "newPassword": "Новый пароль",
         "passwordKeepPlaceholder": "Оставьте пустым, чтобы не менять",
         "passwordKeepHelp": "Оставьте пустым, чтобы сохранить текущий пароль",
-        "cannotChangeOwnRole": "Нельзя изменить собственную роль"
+        "cannotChangeOwnRole": "Нельзя изменить собственную роль",
+        "setPassword": "Задать пароль",
+        "setPasswordHelp": "Если не отмечено, пользователь получит ссылку и сам придумает пароль"
     },
     "debts": {
         "targetAmount": "Целевая сумма",

@@ -9,6 +9,7 @@ const LoginPage = lazy(() => import('@/pages/auth/login'))
 const SetupPage = lazy(() => import('@/pages/auth/setup'))
 const Setup2FAPage = lazy(() => import('@/pages/auth/setup-2fa'))
 const SsoCallbackPage = lazy(() => import('@/pages/auth/sso-callback'))
+const SetPasswordPage = lazy(() => import('@/pages/auth/set-password'))
 
 // Protected pages
 const DashboardPage = lazy(() => import('@/pages/dashboard'))
@@ -39,8 +40,6 @@ const AutomationCreatePage = lazy(() => import('@/pages/automation/create'))
 const AutomationEditPage = lazy(() => import('@/pages/automation/[id]/edit'))
 const AutomationLogsPage = lazy(() => import('@/pages/automation/[id]/logs'))
 const UsersPage = lazy(() => import('@/pages/users'))
-const UserCreatePage = lazy(() => import('@/pages/users/create'))
-const UserEditPage = lazy(() => import('@/pages/users/[id]/edit'))
 const ReportsPage = lazy(() => import('@/pages/reports'))
 const MonitoringPage = lazy(() => import('@/pages/settings/monitoring'))
 const SystemSettingsPage = lazy(() => import('@/pages/settings/system'))
@@ -82,6 +81,10 @@ export const router = createBrowserRouter([
         path: '/auth/sso/callback',
         element: withSuspense(SsoCallbackPage),
     },
+    {
+        path: '/set-password/:token',
+        element: withSuspense(SetPasswordPage),
+    },
 
     // Protected routes
     {
@@ -119,8 +122,6 @@ export const router = createBrowserRouter([
                     { path: 'automation/:id/edit', element: withSuspense(AutomationEditPage) },
                     { path: 'automation/:id/logs', element: withSuspense(AutomationLogsPage) },
                     { path: 'users', element: withSuspense(UsersPage) },
-                    { path: 'users/create', element: withSuspense(UserCreatePage) },
-                    { path: 'users/:id/edit', element: withSuspense(UserEditPage) },
                     { path: 'reports', element: withSuspense(ReportsPage) },
                     { path: 'settings/system', element: withSuspense(SystemSettingsPage) },
                     { path: 'settings/monitoring', element: withSuspense(MonitoringPage) },

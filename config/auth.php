@@ -112,4 +112,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Set-password / invite tokens
+    |--------------------------------------------------------------------------
+    |
+    | TTL in seconds for one-time links used to invite a user or reset a
+    | password. The built-in password broker above is unused.
+    |
+    */
+
+    'password_token_ttl' => (int) env('PASSWORD_TOKEN_TTL', 604800),
+
 ];

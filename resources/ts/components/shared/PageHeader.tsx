@@ -9,6 +9,7 @@ interface Props {
     description?: string
     createLink?: string
     createLabel?: string
+    onCreateClick?: () => void
     backLink?: string
     actions?: React.ReactNode
 }
@@ -18,11 +19,25 @@ export function PageHeader({
                                description,
                                createLink,
                                createLabel,
+                               onCreateClick,
                                backLink,
                                actions
                            }: Props) {
     const { t } = useTranslation()
     const label = createLabel ?? t('actions.create')
+    const createButton = onCreateClick ? (
+        <Button onClick={onCreateClick}>
+            <Plus className="mr-2 h-4 w-4" />
+            {label}
+        </Button>
+    ) : createLink ? (
+        <Button asChild>
+            <Link to={createLink}>
+                <Plus className="mr-2 h-4 w-4" />
+                {label}
+            </Link>
+        </Button>
+    ) : null
     return (
         <div className="mb-8">
             <div className="flex items-center justify-between">
@@ -43,14 +58,7 @@ export function PageHeader({
                 </div>
                 <div className="flex items-center gap-2">
                     {actions}
-                    {createLink && (
-                        <Button asChild>
-                            <Link to={createLink}>
-                                <Plus className="mr-2 h-4 w-4" />
-                                {label}
-                            </Link>
-                        </Button>
-                    )}
+                    {createButton}
                 </div>
             </div>
             <Separator className="mt-6" />

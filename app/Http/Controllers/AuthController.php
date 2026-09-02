@@ -70,7 +70,12 @@ class AuthController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if (! $user || $user->is_sso_only || ! Hash::check($data['password'], $user->password)) {
+        if (
+            ! $user
+            || $user->is_sso_only
+            || $user->isInactive()
+            || ! Hash::check($data['password'], $user->password)
+        ) {
             throw ValidationException::withMessages([
                 'email' => [__('messages.invalid_credentials')],
             ]);
