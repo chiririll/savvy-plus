@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -26,10 +27,12 @@ import { useCurrencies } from '@/hooks'
 import { AccountSelect } from '@/components/shared/AccountSelect'
 import { Banknote, HandCoins } from 'lucide-react'
 import { FormWrapper } from '@/components/shared/FormWrapper'
+import { cn } from '@/lib/utils'
 
 interface DebtFormProps {
     defaultValues?: Partial<DebtFormData>
     onSubmit: (data: DebtFormData) => void
+    onValuesChange?: (data: DebtFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
     formId?: string
@@ -57,6 +60,7 @@ function today(): string {
 export function DebtForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
     formId,
@@ -85,6 +89,18 @@ export function DebtForm({
 
     const origin = form.watch('origin') ?? 'new'
     const debtType = form.watch('debt_type')
+
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as DebtFormData)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
 
     return (
         <FormWrapper>
@@ -135,45 +151,39 @@ export function DebtForm({
                     )}
                 />
 
-                <FormField
-                    control={form.control}
-                    name="debt_type"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>{t('fields.type')}</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder={t('forms:selectDebtType')} />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {DEBT_TYPES.map((type) => {
-                                        const Icon = type.icon
-                                        return (
-                                            <SelectItem key={type.value} value={type.value}>
-                                                <div className="flex items-center gap-2">
-                                                    <Icon className={`size-4 ${type.color}`} />
-                                                    <span>{t(`pages:debts.types.${type.value}`)}</span>
-                                                </div>
-                                            </SelectItem>
-                                        )
-                                    })}
-                                </SelectContent>
-                            </Select>
-                            <FormDescription>
-                                {debtType === 'i_owe'
-                                    ? t('forms:debts.iOweHelp')
-                                    : t('forms:debts.owedToMeHelp')
-                                }
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField
+                        control={form.control}
+                        name="debt_type"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('fields.type')}</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder={t('forms:selectDebtType')} />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {DEBT_TYPES.map((type) => {
+                                            const Icon = type.icon
+                                            return (
+                                                <SelectItem key={type.value} value={type.value}>
+                                                    <div className="flex items-center gap-2">
+                                                        <Icon className={`size-4 ${type.color}`} />
+                                                        <span>{t(`pages:debts.types.${type.value}`)}</span>
+                                                    </div>
+                                                </SelectItem>
+                                            )
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                {mode === 'create' && origin === 'new' && (
-                    <>
+                    {mode === 'create' && origin === 'new' && (
                         <FormField
                             control={form.control}
                             name="account_id"
@@ -192,62 +202,45 @@ export function DebtForm({
                                 </FormItem>
                             )}
                         />
+                    )}
 
+                    {(mode === 'edit' || origin === 'existing') && (
                         <FormField
                             control={form.control}
-                            name="date"
+                            name="currency_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>{t('forms:debts.issuedDate')}</FormLabel>
-                                    <FormControl>
-                                        <Input type="date" {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        {t('forms:debts.issuedDateHelp')}
-                                    </FormDescription>
+                                    <FormLabel>{t('fields.currency')}</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value?.toString()}
+                                        disabled={currenciesLoading}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder={t('forms:selectCurrency')} />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {currencies?.map((currency) => (
+                                                <SelectItem
+                                                    key={currency.id}
+                                                    value={currency.id.toString()}
+                                                >
+                                                    <span className="font-mono">{currency.code}</span>
+                                                    <span className="text-muted-foreground ml-2">
+                                                        {currency.symbol} · {currency.name}
+                                                    </span>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                    </>
-                )}
-
-                {(mode === 'edit' || origin === 'existing') && (
-                    <FormField
-                        control={form.control}
-                        name="currency_id"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('fields.currency')}</FormLabel>
-                                <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value?.toString()}
-                                    disabled={currenciesLoading}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder={t('forms:selectCurrency')} />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {currencies?.map((currency) => (
-                                            <SelectItem
-                                                key={currency.id}
-                                                value={currency.id.toString()}
-                                            >
-                                                <span className="font-mono">{currency.code}</span>
-                                                <span className="text-muted-foreground ml-2">
-                                                    {currency.symbol} · {currency.name}
-                                                </span>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
+                    )}
+                </div>
 
                 <FormField
                     control={form.control}
@@ -289,22 +282,37 @@ export function DebtForm({
                     )}
                 />
 
-                <FormField
-                    control={form.control}
-                    name="due_date"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>{t('forms:debts.dueDate')}</FormLabel>
-                            <FormControl>
-                                <Input type="date" {...field} />
-                            </FormControl>
-                            <FormDescription>
-                                {t('forms:debts.dueDateHelp')}
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
+                <div className={cn('grid gap-4', mode === 'create' && origin === 'new' && 'sm:grid-cols-2')}>
+                    {mode === 'create' && origin === 'new' && (
+                        <FormField
+                            control={form.control}
+                            name="date"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('forms:debts.issuedDate')}</FormLabel>
+                                    <FormControl>
+                                        <Input type="date" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     )}
-                />
+
+                    <FormField
+                        control={form.control}
+                        name="due_date"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('forms:debts.dueDate')}</FormLabel>
+                                <FormControl>
+                                    <Input type="date" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
 
                 <FormField
                     control={form.control}
