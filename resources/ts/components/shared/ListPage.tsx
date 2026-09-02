@@ -12,6 +12,7 @@ interface ListPageProps<T> {
     description?: string
     createLink?: string
     createLabel?: string
+    onCreateClick?: () => void
     data: T[]
     columns: ColumnDef<T>[]
     isLoading?: boolean
@@ -25,6 +26,7 @@ export function ListPage<T>({
     description,
     createLink,
     createLabel,
+    onCreateClick,
     data,
     columns,
     isLoading,
@@ -34,6 +36,19 @@ export function ListPage<T>({
 }: ListPageProps<T>) {
     const { t } = useTranslation()
     const newLabel = createLabel ?? t('actions.create')
+    const emptyAction = onCreateClick ? (
+        <Button onClick={onCreateClick}>
+            <Plus className="size-4" />
+            {newLabel}
+        </Button>
+    ) : createLink ? (
+        <Button asChild>
+            <Link to={createLink}>
+                <Plus className="size-4" />
+                {newLabel}
+            </Link>
+        </Button>
+    ) : undefined
 
     return (
         <Page title={title}>
@@ -42,6 +57,7 @@ export function ListPage<T>({
                 description={description}
                 createLink={createLink}
                 createLabel={newLabel}
+                onCreateClick={onCreateClick}
             />
             <DataTable
                 data={data}
@@ -50,16 +66,7 @@ export function ListPage<T>({
                 emptyTitle={emptyTitle ?? t('table.emptyTitle')}
                 emptyDescription={emptyDescription ?? t('table.emptyDescription')}
                 getRowClassName={getRowClassName}
-                emptyAction={
-                    createLink ? (
-                        <Button asChild>
-                            <Link to={createLink}>
-                                <Plus className="size-4" />
-                                {newLabel}
-                            </Link>
-                        </Button>
-                    ) : undefined
-                }
+                emptyAction={emptyAction}
             />
         </Page>
     )

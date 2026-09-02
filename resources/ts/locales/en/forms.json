@@ -63,7 +63,9 @@
         "newPassword": "New password",
         "passwordKeepPlaceholder": "Leave empty to keep current",
         "passwordKeepHelp": "Leave empty to keep the current password",
-        "cannotChangeOwnRole": "You cannot change your own role"
+        "cannotChangeOwnRole": "You cannot change your own role",
+        "setPassword": "Set password",
+        "setPasswordHelp": "If unchecked, the user will get a link to choose their own password"
     },
     "debts": {
         "targetAmount": "Target amount",

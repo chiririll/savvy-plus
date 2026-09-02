@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
-import { Pencil, Trash2, MoreHorizontal } from 'lucide-react'
+import { KeyRound, Pencil, Trash2, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
     DropdownMenu,
@@ -27,6 +27,8 @@ import i18n from '@/lib/i18n'
 
 export const createUserColumns = (
     onDelete: (id: number) => void,
+    onEdit: (user: User) => void,
+    onResetPassword: (user: User) => void,
     currentUserId?: number,
     isReadOnly?: boolean
 ): ColumnDef<User>[] => [
@@ -40,7 +42,12 @@ export const createUserColumns = (
                     <AvatarFallback>{getUserInitials(row.original)}</AvatarFallback>
                 </Avatar>
                 <div>
-                    <p className="font-medium">{row.original.name}</p>
+                    <div className="flex items-center gap-2">
+                        <p className="font-medium">{row.original.name}</p>
+                        {row.original.isInactive && (
+                            <Badge variant="secondary">{i18n.t('status.inactive')}</Badge>
+                        )}
+                    </div>
                     <p className="text-xs text-muted-foreground">{row.original.email}</p>
                 </div>
             </div>
@@ -65,6 +72,7 @@ export const createUserColumns = (
         header: '',
         cell: ({ row }) => {
             const isCurrentUser = currentUserId === row.original.id
+            const canReset = !isCurrentUser && !row.original.isSsoOnly && !isReadOnly
 
             return (
                 <DropdownMenu>
@@ -74,12 +82,16 @@ export const createUserColumns = (
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                            <Link to={`/users/${row.original.id}/edit`}>
-                                <Pencil className="mr-2 size-4" />
-                                {i18n.t('actions.edit')}
-                            </Link>
+                        <DropdownMenuItem onClick={() => onEdit(row.original)}>
+                            <Pencil className="mr-2 size-4" />
+                            {i18n.t('actions.edit')}
                         </DropdownMenuItem>
+                        {canReset && (
+                            <DropdownMenuItem onClick={() => onResetPassword(row.original)}>
+                                <KeyRound className="mr-2 size-4" />
+                                {i18n.t('pages:users.resetPassword')}
+                            </DropdownMenuItem>
+                        )}
                         {!isReadOnly && (
                         <>
                         <DropdownMenuSeparator />
