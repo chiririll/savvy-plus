@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { createElement, Fragment } from 'react'
 import { cn } from '@/lib/utils'
 import {
     ColumnDef,
@@ -251,7 +251,7 @@ export function DataTable<T>({
                             {row.getIsExpanded() && renderSubComponent && (
                                 <TableRow className="bg-muted/30 hover:bg-muted/30">
                                     <TableCell colSpan={row.getVisibleCells().length} className="p-0">
-                                        {renderSubComponent({ row })}
+                                        {createElement(renderSubComponent, { row })}
                                     </TableCell>
                                 </TableRow>
                             )}
