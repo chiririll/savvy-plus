@@ -1,9 +1,10 @@
+# Image publish is paused
 name: Build and Push to Docker Hub
 
 on:
-  push:
-    branches: [main]
-    tags: ['v*']
+  # push:
+  #   branches: [main]
+  #   tags: ['v*']
   workflow_dispatch:
 
 jobs:

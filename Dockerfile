@@ -45,14 +45,15 @@ COPY --chown=www-data:www-data --from=backend /app/app ./app
 COPY --chown=www-data:www-data --from=backend /app/artisan ./artisan
 COPY --chown=www-data:www-data --from=backend /app/database ./database
 COPY --chown=www-data:www-data --from=backend /app/composer.json ./composer.json
+COPY --chown=www-data:www-data --from=backend /app/deploy/common/bootstrap.sh ./scripts/bootstrap.sh
 
 COPY --chown=www-data:www-data --from=frontend /app/public/build ./public/build
 
-COPY docker/nginx-main.conf /etc/nginx/nginx.conf
-COPY docker/nginx.conf /etc/nginx/http.d/default.conf
-COPY docker/supervisord.conf /etc/supervisord.conf
-COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY deploy/docker/nginx-main.conf /etc/nginx/nginx.conf
+COPY deploy/docker/nginx.conf /etc/nginx/http.d/default.conf
+COPY deploy/docker/supervisord.conf /etc/supervisord.conf
+COPY deploy/docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh /var/www/html/scripts/bootstrap.sh
 
 VOLUME /data
 EXPOSE 80

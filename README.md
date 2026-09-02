@@ -205,6 +205,17 @@ helm install savvy savvy/savvy -n savvy --create-namespace
 See [`deploy/helm/savvy/README.md`](deploy/helm/savvy/README.md) for values and
 design notes.
 
+### Debian package
+
+On Debian 13 (Trixie) or another release with PHP 8.4, install the `.deb` from the GitHub release:
+
+```bash
+curl -fsSLO https://github.com/truenormis/savvy/releases/latest/download/savvy.deb
+sudo apt install ./savvy.deb
+```
+
+Data lives in `/var/lib/savvy`. Optional settings (`APP_URL`, `TZ`) go in `/etc/savvy/install.env`. `apt purge savvy` removes the data directory.
+
 ## 🔄 Updating
 ```bash
 docker compose pull
@@ -212,6 +223,8 @@ docker compose up -d
 ```
 
 Your data is safe in the `/data` volume.
+
+Debian: install the newer `.deb`. Data stays in `/var/lib/savvy`.
 
 ## 💾 Backups
 
@@ -225,6 +238,11 @@ Manual backup:
 # Fold the WAL into the main file, then copy
 docker exec savvy php artisan tinker --execute="DB::statement('PRAGMA wal_checkpoint(TRUNCATE);');"
 docker cp savvy:/data/database.sqlite ./backup-$(date +%Y%m%d).sqlite
+```
+
+Debian package:
+```bash
+sqlite3 /var/lib/savvy/database.sqlite ".backup savvy-$(date +%Y%m%d).sqlite"
 ```
 
 Restore (stop writers first so the WAL doesn't fight the swap):
@@ -241,6 +259,8 @@ Your data stays with you. SQLite database stored in `/data` volume — no extern
 ## ⚙️ How It Works
 
 One container runs everything under Supervisor — Nginx, PHP-FPM, the scheduler (recurring transactions, automatic exchange-rate updates) and a queue worker for background jobs. SQLite lives in `/data`; no external database, cache, or queue service is required. Migrations run automatically on startup.
+
+The Debian package runs the same app without Docker: nginx and php-fpm from the distro, queue and scheduler as systemd units, SQLite in `/var/lib/savvy`.
 
 ## 🛠 Stack
 

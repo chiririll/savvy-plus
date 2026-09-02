@@ -1,0 +1,86 @@
+name: Build dist tarball and deb
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dist-release
+  cancel-in-progress: false
+
+jobs:
+  dist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Push a v* tag to build a release (git tag v1.2.3 && git push origin v1.2.3)"
+            exit 1
+          fi
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo, sqlite, pdo_sqlite, bcmath
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-progress
+
+      - name: Build frontend
+        run: npm ci && npm run build
+
+      - name: Package tarball
+        env:
+          APP_VERSION: ${{ steps.ver.outputs.tag }}
+        run: bash deploy/common/package-dist.sh
+
+      - name: Install nfpm
+        env:
+          NFPM_VERSION: "2.47.0"
+        run: |
+          curl -fsSL "https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}/nfpm_${NFPM_VERSION}_Linux_x86_64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin nfpm
+          nfpm --version
+
+      - name: Package deb
+        env:
+          APP_VERSION: ${{ steps.ver.outputs.tag }}
+        run: bash deploy/deb/package-deb.sh
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: ${{ steps.ver.outputs.tag }}
+          files: |
+            dist/savvy.tar.gz
+            dist/*.deb
+          body: |
+            Savvy ${{ steps.ver.outputs.tag }}
+
+            Tarball: `https://github.com/${{ github.repository }}/releases/latest/download/savvy.tar.gz`
+
+            Debian 13+ / PHP 8.4:
+            ```bash
+            curl -fsSLO https://github.com/${{ github.repository }}/releases/latest/download/savvy.deb
+            sudo apt install ./savvy.deb
+            ```

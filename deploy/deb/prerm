@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+
+checkpoint_wal() {
+    if [ -f /var/lib/savvy/database.sqlite ] && command -v sqlite3 >/dev/null 2>&1; then
+        runuser -u www-data -- sqlite3 /var/lib/savvy/database.sqlite \
+            "PRAGMA wal_checkpoint(TRUNCATE);" || true
+    fi
+}
+
+case "$1" in
+    upgrade)
+        checkpoint_wal
+        if [ -d /run/systemd/system ]; then
+            systemctl stop savvy-queue.service savvy-scheduler.service || true
+        fi
+        ;;
+    remove|deconfigure)
+        checkpoint_wal
+        rm -f /etc/nginx/sites-enabled/savvy
+        if [ -d /run/systemd/system ]; then
+            systemctl disable --now savvy-queue.service savvy-scheduler.service || true
+        fi
+        ;;
+esac
+
+exit 0
