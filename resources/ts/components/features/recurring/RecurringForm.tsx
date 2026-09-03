@@ -163,8 +163,7 @@ export function RecurringForm({
                     )}
                 />
 
-                {/* Account Selection */}
-                <div className={cn('grid gap-4', isTransfer ? 'grid-cols-2' : 'grid-cols-1')}>
+                <div className="grid grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
                         name="account_id"
@@ -180,7 +179,7 @@ export function RecurringForm({
                         )}
                     />
 
-                    {isTransfer && (
+                    {isTransfer ? (
                         <FormField
                             control={form.control}
                             name="to_account_id"
@@ -196,27 +195,24 @@ export function RecurringForm({
                                 </FormItem>
                             )}
                         />
+                    ) : (
+                        <FormField
+                            control={form.control}
+                            name="category_id"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('fields.category')}</FormLabel>
+                                    <CategorySelect
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        type={type as 'income' | 'expense'}
+                                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     )}
                 </div>
-
-                {/* Category (for income/expense) */}
-                {!isTransfer && (
-                    <FormField
-                        control={form.control}
-                        name="category_id"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('fields.category')}</FormLabel>
-                                <CategorySelect
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    type={type as 'income' | 'expense'}
-                                />
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
 
                 {/* Amount */}
                 <div className={cn('grid gap-4', isTransfer ? 'grid-cols-2' : 'grid-cols-1')}>
