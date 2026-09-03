@@ -33,8 +33,7 @@ import {
 import { Progress } from '@/components/ui/progress'
 import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
 import { useOverviewMetrics } from '@/hooks/use-reports'
-import type { ReportFilters } from '@/pages/reports/types'
-import { cn, formatCurrency, formatCurrencyCompact, formatDateLocal } from '@/lib/utils'
+import { cn, formatCurrency, formatCurrencyCompact, formatDateLocal, addDaysLocal } from '@/lib/utils'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
@@ -44,8 +43,9 @@ import { useTheme } from '@/hooks/use-theme'
 import { Link, useNavigate } from 'react-router-dom'
 import { Transaction, AccountType } from '@/types'
 import { ACCOUNT_TYPE_CONFIG, CHART_COLORS, CATEGORY_COLORS } from '@/constants'
+import { DEFAULT_FILTERS, type ReportFilters } from '@/pages/reports/types'
 
-type PeriodPreset = 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'custom'
+type PeriodPreset = 'last_30_days' | 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'custom'
 
 
 function getPresetDates(preset: PeriodPreset): { start_date: string; end_date: string } {
@@ -54,6 +54,12 @@ function getPresetDates(preset: PeriodPreset): { start_date: string; end_date: s
     const month = now.getMonth()
 
     switch (preset) {
+        case 'last_30_days': {
+            return {
+                start_date: addDaysLocal(now, -29),
+                end_date: formatDateLocal(now),
+            }
+        }
         case 'this_month': {
             const firstDay = new Date(year, month, 1)
             const lastDay = new Date(year, month + 1, 0)
@@ -95,7 +101,49 @@ function getPresetDates(preset: PeriodPreset): { start_date: string; end_date: s
             }
         }
         default:
-            return getPresetDates('this_month')
+            return getPresetDates('last_30_days')
+    }
+}
+
+function formatYearMonth(date: Date): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    return `${year}-${month}`
+}
+
+function toReportFilters(
+    preset: PeriodPreset,
+    customStartDate: string,
+    customEndDate: string,
+): ReportFilters {
+    const now = new Date()
+    const useCustomDates = preset === 'custom' && Boolean(customStartDate && customEndDate)
+    const dates = useCustomDates
+        ? { start_date: customStartDate, end_date: customEndDate }
+        : getPresetDates(preset === 'custom' ? 'last_30_days' : preset)
+
+    const filters: ReportFilters = {
+        ...DEFAULT_FILTERS,
+        customStartDate: dates.start_date,
+        customEndDate: dates.end_date,
+        compareWith: 'previous_period',
+    }
+
+    switch (preset) {
+        case 'last_30_days':
+            return { ...filters, periodType: 'last_30_days' }
+        case 'this_month':
+            return { ...filters, periodType: 'month', selectedMonth: formatYearMonth(now) }
+        case 'last_month':
+            return {
+                ...filters,
+                periodType: 'month',
+                selectedMonth: formatYearMonth(new Date(now.getFullYear(), now.getMonth() - 1, 1)),
+            }
+        case 'this_year':
+            return { ...filters, periodType: 'year', selectedYear: String(now.getFullYear()) }
+        default:
+            return { ...filters, periodType: 'custom' }
     }
 }
 
@@ -121,47 +169,27 @@ export default function DashboardPage() {
     const { data: balance } = useTotalBalance()
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
 
-    // Period state for chart
-    const [chartPeriod, setChartPeriod] = useState<PeriodPreset>('this_month')
+    const [period, setPeriod] = useState<PeriodPreset>('last_30_days')
     const [customStartDate, setCustomStartDate] = useState('')
     const [customEndDate, setCustomEndDate] = useState('')
 
-    // Current month filters (for summary cards)
-    const currentMonthFilters = useMemo(() => getPresetDates('this_month'), [])
-
-    // Report filters for income/expense comparison
-    const reportFilters: ReportFilters = useMemo(() => {
-        const now = new Date()
-        const year = now.getFullYear()
-        const month = String(now.getMonth() + 1).padStart(2, '0')
-        return {
-            periodType: 'month',
-            selectedMonth: `${year}-${month}`,
-            selectedQuarter: `${year}-Q${Math.ceil((now.getMonth() + 1) / 3)}`,
-            selectedYear: year.toString(),
-            customStartDate: '',
-            customEndDate: '',
-            compareWith: 'previous_period',
-            accountIds: [],
-            categoryIds: [],
-            tagIds: [],
-        }
-    }, [])
-
-    // Chart period filters
-    const chartFilters = useMemo(() => {
-        if (chartPeriod === 'custom' && customStartDate && customEndDate) {
+    const periodDates = useMemo(() => {
+        if (period === 'custom' && customStartDate && customEndDate) {
             return { start_date: customStartDate, end_date: customEndDate }
         }
-        return getPresetDates(chartPeriod)
-    }, [chartPeriod, customStartDate, customEndDate])
+        return getPresetDates(period)
+    }, [period, customStartDate, customEndDate])
 
-    const { data: monthData } = useTransactions({ ...currentMonthFilters, with_summary: true })
+    const reportFilters = useMemo(
+        () => toReportFilters(period, customStartDate, customEndDate),
+        [period, customStartDate, customEndDate],
+    )
+
     const { data: recentTransactions } = useTransactions({ per_page: 5, status: 'confirmed' })
-    const { data: historyData } = useBalanceHistory(chartFilters)
+    const { data: historyData } = useBalanceHistory(periodDates)
     const { data: expensesByCategory } = useCategorySummary({
         type: 'expense',
-        ...currentMonthFilters,
+        ...periodDates,
     })
     const { data: budgets } = useBudgets()
     const { data: debtsData } = useDebtsWithSummary()
@@ -181,12 +209,10 @@ export default function DashboardPage() {
     const activeDebts = debtsData?.data?.filter(d => !d.isPaidOff).slice(0, 4) ?? []
     const debtSummary = debtsData?.summary
 
-    const summary = monthData?.summary
-
     const totalBalance = balance?.total_balance ?? 0
     const currency = balance?.currency
-    const monthIncome = Number(summary?.income) || 0
-    const monthExpense = Number(summary?.expense) || 0
+    const periodIncome = overviewData?.income.value ?? 0
+    const periodExpense = overviewData?.expenses.value ?? 0
 
     // Calculate percentage changes
     const balanceChange = useMemo(() => {
@@ -372,7 +398,7 @@ export default function DashboardPage() {
     }, [expensesByCategory, theme, currency])
 
     const handlePeriodChange = (value: PeriodPreset) => {
-        setChartPeriod(value)
+        setPeriod(value)
         if (value !== 'custom') {
             setCustomStartDate('')
             setCustomEndDate('')
@@ -381,9 +407,47 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
-                <p className="text-muted-foreground">{t('dashboard.welcome')}</p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
+                    <p className="text-muted-foreground">{t('dashboard.welcome')}</p>
+                </div>
+                <div className="flex flex-col gap-2 sm:items-end">
+                    <div className="flex items-center gap-2">
+                        <Calendar className="size-4 text-muted-foreground hidden sm:block" />
+                        <Select value={period} onValueChange={handlePeriodChange}>
+                            <SelectTrigger className="w-full sm:w-[200px] h-8">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="last_30_days">{t('dashboard.periods.last_30_days')}</SelectItem>
+                                <SelectItem value="this_month">{t('dashboard.periods.this_month')}</SelectItem>
+                                <SelectItem value="last_month">{t('dashboard.periods.last_month')}</SelectItem>
+                                <SelectItem value="last_3_months">{t('dashboard.periods.last_3_months')}</SelectItem>
+                                <SelectItem value="last_6_months">{t('dashboard.periods.last_6_months')}</SelectItem>
+                                <SelectItem value="this_year">{t('dashboard.periods.this_year')}</SelectItem>
+                                <SelectItem value="custom">{t('dashboard.periods.custom')}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {period === 'custom' && (
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                            <Input
+                                type="date"
+                                value={customStartDate}
+                                onChange={(e) => setCustomStartDate(e.target.value)}
+                                className="h-8 w-full sm:w-[140px]"
+                            />
+                            <span className="text-muted-foreground text-center hidden sm:block">—</span>
+                            <Input
+                                type="date"
+                                value={customEndDate}
+                                onChange={(e) => setCustomEndDate(e.target.value)}
+                                className="h-8 w-full sm:w-[140px]"
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
@@ -417,13 +481,13 @@ export default function DashboardPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            {t('dashboard.incomeThisMonth')}
+                            {t('dashboard.income')}
                         </CardTitle>
                         <ArrowDownLeft className="size-4 text-green-600" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold font-mono text-green-600">
-                            +{formatCurrency(monthIncome, currency)}
+                            +{formatCurrency(periodIncome, currency)}
                         </div>
                         {incomeChange !== null && (
                             <div className={cn(
@@ -444,13 +508,13 @@ export default function DashboardPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            {t('dashboard.expensesThisMonth')}
+                            {t('dashboard.expenses')}
                         </CardTitle>
                         <ArrowUpRight className="size-4 text-red-600" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold font-mono text-red-600">
-                            -{formatCurrency(monthExpense, currency)}
+                            -{formatCurrency(periodExpense, currency)}
                         </div>
                         {expenseChange !== null && (
                             <div className={cn(
@@ -471,42 +535,9 @@ export default function DashboardPage() {
 
             <div className="grid gap-4 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
-                    <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <CardHeader>
                         <CardTitle>{t('dashboard.balanceDynamics')}</CardTitle>
-                        <div className="flex items-center gap-2">
-                            <Calendar className="size-4 text-muted-foreground hidden sm:block" />
-                            <Select value={chartPeriod} onValueChange={handlePeriodChange}>
-                                <SelectTrigger className="w-full sm:w-[160px] h-8">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="this_month">{t('dashboard.periods.this_month')}</SelectItem>
-                                    <SelectItem value="last_month">{t('dashboard.periods.last_month')}</SelectItem>
-                                    <SelectItem value="last_3_months">{t('dashboard.periods.last_3_months')}</SelectItem>
-                                    <SelectItem value="last_6_months">{t('dashboard.periods.last_6_months')}</SelectItem>
-                                    <SelectItem value="this_year">{t('dashboard.periods.this_year')}</SelectItem>
-                                    <SelectItem value="custom">{t('dashboard.periods.custom')}</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
                     </CardHeader>
-                    {chartPeriod === 'custom' && (
-                        <div className="px-6 pb-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                            <Input
-                                type="date"
-                                value={customStartDate}
-                                onChange={(e) => setCustomStartDate(e.target.value)}
-                                className="h-8 w-full sm:w-[140px]"
-                            />
-                            <span className="text-muted-foreground text-center hidden sm:block">—</span>
-                            <Input
-                                type="date"
-                                value={customEndDate}
-                                onChange={(e) => setCustomEndDate(e.target.value)}
-                                className="h-8 w-full sm:w-[140px]"
-                            />
-                        </div>
-                    )}
                     <CardContent>
                         {historyData && historyData.series.length > 0 ? (
                             <ReactECharts
@@ -615,7 +646,7 @@ export default function DashboardPage() {
                             />
                         ) : (
                             <div className="flex items-center justify-center h-[280px] text-muted-foreground">
-                                {t('dashboard.noExpensesMonth')}
+                                {t('dashboard.noDataPeriod')}
                             </div>
                         )}
                     </CardContent>
