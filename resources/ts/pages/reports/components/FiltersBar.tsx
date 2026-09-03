@@ -63,7 +63,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
     // Period type badges component
     const PeriodTypeBadges = () => (
         <div className="flex flex-wrap gap-1">
-            {(['month', 'quarter', 'year', 'ytd'] as PeriodType[]).map(type => (
+            {(['last_30_days', 'month', 'quarter', 'year', 'ytd'] as PeriodType[]).map(type => (
                 <Badge
                     key={type}
                     variant={filters.periodType === type ? 'default' : 'outline'}

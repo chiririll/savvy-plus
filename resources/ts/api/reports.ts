@@ -69,6 +69,7 @@ export interface ExpensesByCategoryData {
 
 export interface CashFlowDataPoint {
     label: string
+    date?: string
     income: number
     expenses: number
     balance: number
@@ -134,6 +135,7 @@ export interface TransactionDynamicsDataset {
 
 export interface TransactionDynamicsData {
     labels: string[]
+    dates?: string[]
     datasets: TransactionDynamicsDataset[]
     currency: string | null
 }
@@ -180,6 +182,7 @@ export interface NetWorthData {
 
 export interface NetWorthHistoryData {
     labels: string[]
+    dates?: string[]
     values: number[]
     currency: string | null
 }

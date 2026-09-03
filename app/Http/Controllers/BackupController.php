@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\BackupResource;
 use App\Models\Backup;
 use App\Services\BackupService;
+use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -32,17 +33,21 @@ class BackupController extends Controller
         return new BackupResource($backup);
     }
 
-    public function upload(Request $request): BackupResource
+    public function upload(Request $request): BackupResource|JsonResponse
     {
         $request->validate([
             'file' => 'required|file|max:102400', // 100MB max
             'note' => 'nullable|string|max:255',
         ]);
 
-        $backup = $this->backupService->upload(
-            $request->file('file'),
-            $request->input('note')
-        );
+        try {
+            $backup = $this->backupService->upload(
+                $request->file('file'),
+                $request->input('note')
+            );
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return new BackupResource($backup);
     }
@@ -52,9 +57,22 @@ class BackupController extends Controller
         return $this->backupService->download($backup);
     }
 
+    public function inspect(Backup $backup): JsonResponse
+    {
+        try {
+            return response()->json($this->backupService->inspect($backup)->toArray());
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
     public function restore(Backup $backup): JsonResponse
     {
-        $this->backupService->restore($backup);
+        try {
+            $this->backupService->restore($backup);
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return response()->json(['message' => __('messages.backup.restored')]);
     }

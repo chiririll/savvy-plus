@@ -31,12 +31,16 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Download, RotateCcw, Trash2, Plus, Upload, Loader2 } from 'lucide-react'
 import { useBackups, useCreateBackup, useUploadBackup, useRestoreBackup, useDeleteBackup } from '@/hooks/use-backups'
 import { backupsApi } from '@/api/backups'
-import { Backup } from '@/types/backup'
+import { Backup, BackupInspection, BackupSchemaStatus } from '@/types/backup'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { intlLocale } from '@/lib/i18n'
+import { getApiErrorMessage } from '@/lib/api-error'
+import { toast } from 'sonner'
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B'
@@ -48,6 +52,12 @@ function formatBytes(bytes: number): string {
 
 function formatDate(dateString: string): string {
     return new Date(dateString).toLocaleString(intlLocale())
+}
+
+function schemaBadgeVariant(status: BackupSchemaStatus): 'secondary' | 'outline' | 'destructive' {
+    if (status === 'current') return 'secondary'
+    if (status === 'newer') return 'destructive'
+    return 'outline'
 }
 
 export default function BackupsPage() {
@@ -65,6 +75,8 @@ export default function BackupsPage() {
     const [restoreDialogOpen, setRestoreDialogOpen] = useState(false)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [selectedBackup, setSelectedBackup] = useState<Backup | null>(null)
+    const [restorePreview, setRestorePreview] = useState<BackupInspection | null>(null)
+    const [inspectingId, setInspectingId] = useState<number | null>(null)
     const [note, setNote] = useState('')
     const [uploadFile, setUploadFile] = useState<File | null>(null)
 
@@ -88,13 +100,32 @@ export default function BackupsPage() {
         })
     }
 
+    const openRestore = async (backup: Backup) => {
+        setSelectedBackup(backup)
+        setInspectingId(backup.id)
+        try {
+            const preview = await backupsApi.inspect(backup.id)
+            setRestorePreview(preview)
+            setRestoreDialogOpen(true)
+        } catch (error) {
+            toast.error(getApiErrorMessage(error, tCommon('toasts.backup.inspectFailed')))
+            setSelectedBackup(null)
+            setRestorePreview(null)
+        } finally {
+            setInspectingId(null)
+        }
+    }
+
+    const closeRestore = () => {
+        setRestoreDialogOpen(false)
+        setSelectedBackup(null)
+        setRestorePreview(null)
+    }
+
     const handleRestore = () => {
-        if (!selectedBackup) return
+        if (!selectedBackup || restorePreview?.compatible === false) return
         restoreBackup.mutate(selectedBackup.id, {
-            onSuccess: () => {
-                setRestoreDialogOpen(false)
-                setSelectedBackup(null)
-            },
+            onSuccess: closeRestore,
         })
     }
 
@@ -149,6 +180,7 @@ export default function BackupsPage() {
                         <TableRow>
                             <TableHead>{t('backups.date')}</TableHead>
                             <TableHead>{t('backups.size')}</TableHead>
+                            <TableHead>{t('backups.version')}</TableHead>
                             <TableHead>{t('backups.note')}</TableHead>
                             <TableHead className="text-right">{t('backups.actions')}</TableHead>
                         </TableRow>
@@ -159,13 +191,14 @@ export default function BackupsPage() {
                                 <TableRow key={i}>
                                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-24 ml-auto" /></TableCell>
                                 </TableRow>
                             ))
                         ) : backups?.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                                     {t('backups.empty')}
                                 </TableCell>
                             </TableRow>
@@ -174,6 +207,23 @@ export default function BackupsPage() {
                                 <TableRow key={backup.id}>
                                     <TableCell>{formatDate(backup.createdAt)}</TableCell>
                                     <TableCell>{formatBytes(backup.size)}</TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col items-start gap-1">
+                                            <span className="font-mono text-sm">
+                                                {backup.schemaVersion || t('backups.versionUnknown')}
+                                            </span>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Badge variant={schemaBadgeVariant(backup.schemaStatus)}>
+                                                        {t(`backups.schemaStatus.${backup.schemaStatus}`)}
+                                                    </Badge>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    {t(`backups.schemaStatusHelp.${backup.schemaStatus}`)}
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </div>
+                                    </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {backup.note || '-'}
                                     </TableCell>
@@ -190,14 +240,15 @@ export default function BackupsPage() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                onClick={() => {
-                                                    setSelectedBackup(backup)
-                                                    setRestoreDialogOpen(true)
-                                                }}
-                                                title={t('backups.restore')}
-                                                disabled={isReadOnly}
+                                                onClick={() => openRestore(backup)}
+                                                title={backup.schemaStatus === 'newer'
+                                                    ? t('backups.schemaStatusHelp.newer')
+                                                    : t('backups.restore')}
+                                                disabled={isReadOnly || backup.schemaStatus === 'newer' || inspectingId === backup.id}
                                             >
-                                                <RotateCcw className="size-4" />
+                                                {inspectingId === backup.id
+                                                    ? <Loader2 className="size-4 animate-spin" />
+                                                    : <RotateCcw className="size-4" />}
                                             </Button>
                                             <Button
                                                 variant="ghost"
@@ -291,26 +342,63 @@ export default function BackupsPage() {
                 </DialogContent>
             </Dialog>
 
-            <AlertDialog open={restoreDialogOpen} onOpenChange={setRestoreDialogOpen}>
+            <AlertDialog
+                open={restoreDialogOpen}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        closeRestore()
+                        return
+                    }
+                    setRestoreDialogOpen(true)
+                }}
+            >
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>{t('backups.restoreTitle')}</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('backups.restoreDescription', {
-                                date: selectedBackup ? formatDate(selectedBackup.createdAt) : '',
-                            })}
+                        <AlertDialogTitle>
+                            {restorePreview?.compatible === false
+                                ? t('backups.restoreNewerTitle')
+                                : t('backups.restoreTitle')}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription asChild>
+                            <div className="space-y-2">
+                                {restorePreview?.compatible === false ? (
+                                    <p>{t('backups.restoreNewerDescription')}</p>
+                                ) : (
+                                    <>
+                                        <p>
+                                            {t('backups.restoreDescription', {
+                                                date: selectedBackup ? formatDate(selectedBackup.createdAt) : '',
+                                            })}
+                                        </p>
+                                        {restorePreview && restorePreview.pendingCount > 0 && (
+                                            <p>
+                                                {t('backups.restoreMigrationsDescription', {
+                                                    count: restorePreview.pendingCount,
+                                                })}
+                                            </p>
+                                        )}
+                                    </>
+                                )}
+                            </div>
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleRestore}
-                            disabled={restoreBackup.isPending}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                            {restoreBackup.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
-                            {t('backups.restore')}
-                        </AlertDialogAction>
+                        <AlertDialogCancel disabled={restoreBackup.isPending}>
+                            {restorePreview?.compatible === false
+                                ? tCommon('actions.done')
+                                : tCommon('actions.cancel')}
+                        </AlertDialogCancel>
+                        {restorePreview?.compatible !== false && (
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                disabled={restoreBackup.isPending}
+                                onClick={handleRestore}
+                            >
+                                {restoreBackup.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+                                {t('backups.restore')}
+                            </Button>
+                        )}
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

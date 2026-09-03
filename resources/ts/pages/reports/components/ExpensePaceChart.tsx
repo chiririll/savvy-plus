@@ -9,6 +9,7 @@ import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
 import { useExpensePace } from '@/hooks'
 import i18n from '@/lib/i18n'
 import type { ReportFilters } from '../types'
+import { formatExpensePaceMonthLabel } from '../utils'
 import type { ExpensePaceMonth } from '@/api/reports'
 
 interface ExpensePaceChartProps {
@@ -34,7 +35,8 @@ interface MonthChartData {
 }
 
 function processMonthData(month: ExpensePaceMonth): MonthChartData {
-    const { budget, dailyExpenses, currentDay, daysInMonth, totalSpent, label } = month
+    const { budget, dailyExpenses, currentDay, daysInMonth, totalSpent, monthStart } = month
+    const label = formatExpensePaceMonthLabel(monthStart)
 
     const hasBudget = budget !== null && budget > 0
     const isCurrentMonth = currentDay !== null && currentDay > 0
@@ -245,7 +247,7 @@ export function ExpensePaceChart({ filters }: ExpensePaceChartProps) {
     const monthsData = useMemo(() => {
         if (!data?.months?.length) return null
         return data.months.map(processMonthData)
-    }, [data])
+    }, [data, i18n.language])
 
     useEffect(() => {
         if (monthsData?.length) {

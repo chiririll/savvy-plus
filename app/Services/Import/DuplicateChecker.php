@@ -15,7 +15,7 @@ class DuplicateChecker
      */
     public function loadExistingTransactions(int $accountId, ?string $startDate = null, ?string $endDate = null): void
     {
-        $query = Transaction::where('account_id', $accountId);
+        $query = Transaction::confirmed()->where('account_id', $accountId);
 
         if ($startDate) {
             $query->where('date', '>=', $startDate);

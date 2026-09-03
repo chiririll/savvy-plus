@@ -16,6 +16,7 @@ class Account extends Model
         'currency_id',
         'initial_balance',
         'is_active',
+        'sort_order',
         'debt_type',
         'target_amount',
         'due_date',
@@ -29,9 +30,25 @@ class Account extends Model
         'target_amount' => 'decimal:2',
         'is_active' => 'boolean',
         'is_paid_off' => 'boolean',
+        'sort_order' => 'integer',
         'debt_type' => DebtType::class,
         'due_date' => 'date',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Account $account) {
+            if (array_key_exists('sort_order', $account->getAttributes())) {
+                return;
+            }
+
+            $query = $account->isDebt()
+                ? static::query()->debts()
+                : static::query()->regularAccounts();
+
+            $account->sort_order = ($query->max('sort_order') ?? -1) + 1;
+        });
+    }
 
     public function currency(): BelongsTo
     {
@@ -44,6 +61,14 @@ class Account extends Model
     }
 
     // Scopes
+
+    public function scopeOrdered(Builder $query): Builder
+    {
+        return $query
+            ->orderByRaw("CASE WHEN type = 'debt' THEN 1 ELSE 0 END")
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
 
     public function scopeRegularAccounts(Builder $query): Builder
     {
@@ -95,19 +120,21 @@ class Account extends Model
 
     private function calculateRegularBalance(): float
     {
-        $income = $this->transactions()->where('type', 'income')->sum('amount');
-        $expense = $this->transactions()->where('type', 'expense')->sum('amount');
-        $transferOut = $this->transactions()->where('type', 'transfer')->sum('amount');
-        $transferIn = Transaction::where('to_account_id', $this->id)->sum('to_amount');
+        $income = $this->transactions()->confirmed()->where('type', 'income')->sum('amount');
+        $expense = $this->transactions()->confirmed()->where('type', 'expense')->sum('amount');
+        $transferOut = $this->transactions()->confirmed()->where('type', 'transfer')->sum('amount');
+        $transferIn = Transaction::confirmed()->where('to_account_id', $this->id)->sum('to_amount');
 
-        // Debt collection: money received from someone who owed you
+        // Money in: collected repayment or received loan
         $debtCollectionIn = $this->transactions()
-            ->where('type', 'debt_collection')
+            ->confirmed()
+            ->whereIn('type', ['debt_collection', 'debt_borrow'])
             ->sum('amount');
 
-        // Debt payment: money paid to reduce your debt
+        // Money out: paid own debt or lent money
         $debtPaymentOut = $this->transactions()
-            ->where('type', 'debt_payment')
+            ->confirmed()
+            ->whereIn('type', ['debt_payment', 'debt_lend'])
             ->sum('amount');
 
         return $this->initial_balance
@@ -123,8 +150,10 @@ class Account extends Model
     {
         $targetAmount = (float) $this->target_amount;
 
-        // Sum of all payments to this debt account
-        $payments = Transaction::where('to_account_id', $this->id)->sum('to_amount');
+        $payments = Transaction::confirmed()
+            ->where('to_account_id', $this->id)
+            ->whereIn('type', ['debt_payment', 'debt_collection'])
+            ->sum('to_amount');
 
         return $targetAmount - $payments;
     }

@@ -1,42 +1,11 @@
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Button } from '@/components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Moon, Sun, Wallet, Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, LogOut } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { useTheme } from '@/hooks/use-theme'
-import { useTotalBalance } from '@/hooks'
-import { useNavigate } from 'react-router-dom'
-import { useAuthStore } from '@/stores/auth'
-import { getUserAvatarUrl, getUserInitials } from '@/lib/avatar'
-import { formatCurrency } from '@/lib/utils'
-import { LanguageSwitcher } from '@/components/shared'
-import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher, ThemeSwitcher } from '@/components/shared'
+import { CreateTransactionMenu } from './header/CreateTransactionMenu'
+import { HeaderBalance } from './header/HeaderBalance'
+import { UserMenu } from './header/UserMenu'
+
 export function Header() {
-    const { t } = useTranslation()
-    const { t: tNav } = useTranslation('nav')
-    const { theme, toggleTheme } = useTheme()
-    const { data: balance, isLoading: balanceLoading } = useTotalBalance()
-    const navigate = useNavigate()
-    const user = useAuthStore((state) => state.user)
-    const logout = useAuthStore((state) => state.logout)
-
-    const handleCreateTransaction = (type: 'income' | 'expense' | 'transfer') => {
-        navigate(`/transactions/create?type=${type}`)
-    }
-
-    const handleLogout = async () => {
-        await logout()
-        navigate('/login')
-    }
-
     return (
         <header className="sticky top-0 z-50 h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-full items-center justify-between px-4">
@@ -46,89 +15,11 @@ export function Header() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button size="sm" className="gap-1">
-                                <Plus className="size-4" />
-                                <span className="hidden sm:inline">{tNav('newTransaction')}</span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleCreateTransaction('income')}>
-                                <ArrowDownLeft className="size-4 mr-2 text-green-600" />
-                                {tNav('income')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleCreateTransaction('expense')}>
-                                <ArrowUpRight className="size-4 mr-2 text-red-600" />
-                                {tNav('expense')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleCreateTransaction('transfer')}>
-                                <ArrowLeftRight className="size-4 mr-2 text-blue-600" />
-                                {tNav('transfer')}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    {balanceLoading ? (
-                        <div className="flex items-center gap-2 text-sm">
-                            <Wallet className="size-4 text-muted-foreground" />
-                            <Skeleton className="h-4 w-20" />
-                        </div>
-                    ) : balance ? (
-                        <div className="flex items-center gap-2 text-sm">
-                            <Wallet className="size-4 text-muted-foreground" />
-                            <span className="font-mono font-medium">
-                                {formatCurrency(balance.total_balance ?? 0, balance.currency)}
-                            </span>
-                        </div>
-                    ) : null}
-
+                    <CreateTransactionMenu />
+                    <HeaderBalance />
                     <LanguageSwitcher />
-
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={toggleTheme}
-                        aria-label={t('theme.toggle')}
-                    >
-                        {theme === 'dark' ? (
-                            <Sun className="h-5 w-5" />
-                        ) : (
-                            <Moon className="h-5 w-5" />
-                        )}
-                    </Button>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            {user && (
-                            <Button variant="ghost" size="icon" className="rounded-full">
-                                <Avatar className="size-8">
-                                    <AvatarImage src={getUserAvatarUrl(user)} />
-                                    <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
-                                </Avatar>
-                            </Button>
-                        )}
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                            {user && (
-                            <div className="flex items-center gap-2 px-2 py-1.5">
-                                <Avatar className="size-8">
-                                    <AvatarImage src={getUserAvatarUrl(user)} />
-                                    <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">{user.name}</p>
-                                    <p className="text-xs text-muted-foreground truncate">{t(`roles.${user.role}`)}</p>
-                                </div>
-                            </div>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={handleLogout}>
-                                <LogOut className="size-4 mr-2" />
-                                {t('actions.logout')}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <ThemeSwitcher />
+                    <UserMenu />
                 </div>
             </div>
         </header>

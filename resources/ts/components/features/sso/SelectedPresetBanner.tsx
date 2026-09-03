@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSsoPresets } from '@/hooks/use-sso'
 import { BrandTile } from './BrandIcon'
+import { ssoPresetLabel } from './presetMeta'
 
 interface SelectedPresetBannerProps {
     preset: string
@@ -11,6 +12,7 @@ interface SelectedPresetBannerProps {
 
 export function SelectedPresetBanner({ preset, onChange }: SelectedPresetBannerProps) {
     const { t } = useTranslation('settings')
+    const { t: tForms } = useTranslation('forms')
     const { data: presets } = useSsoPresets()
     const selected = presets?.find((p) => p.key === preset)
 
@@ -19,7 +21,7 @@ export function SelectedPresetBanner({ preset, onChange }: SelectedPresetBannerP
             <div className="flex items-center gap-3">
                 <BrandTile preset={preset} className="size-9 rounded-lg" iconClassName="size-5" />
                 <div>
-                    <p className="text-sm font-medium">{selected?.label}</p>
+                    <p className="text-sm font-medium">{selected ? ssoPresetLabel(selected, tForms) : preset}</p>
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">{selected?.protocol}</p>
                 </div>
             </div>

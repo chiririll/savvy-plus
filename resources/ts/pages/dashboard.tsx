@@ -31,10 +31,10 @@ import {
     Repeat
 } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
-import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison, useUpcomingRecurring } from '@/hooks'
+import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
 import { useOverviewMetrics } from '@/hooks/use-reports'
-import type { ReportFilters } from '@/pages/reports/types'
-import { cn, formatCurrency, formatCurrencyCompact } from '@/lib/utils'
+import { cn, formatCurrency, formatCurrencyCompact, formatDateLocal, addDaysLocal } from '@/lib/utils'
+import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -43,15 +43,10 @@ import { useTheme } from '@/hooks/use-theme'
 import { Link, useNavigate } from 'react-router-dom'
 import { Transaction, AccountType } from '@/types'
 import { ACCOUNT_TYPE_CONFIG, CHART_COLORS, CATEGORY_COLORS } from '@/constants'
+import { DEFAULT_FILTERS, type ReportFilters } from '@/pages/reports/types'
 
-type PeriodPreset = 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'custom'
+type PeriodPreset = 'last_30_days' | 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'custom'
 
-function formatDateLocal(date: Date): string {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-}
 
 function getPresetDates(preset: PeriodPreset): { start_date: string; end_date: string } {
     const now = new Date()
@@ -59,6 +54,12 @@ function getPresetDates(preset: PeriodPreset): { start_date: string; end_date: s
     const month = now.getMonth()
 
     switch (preset) {
+        case 'last_30_days': {
+            return {
+                start_date: addDaysLocal(now, -29),
+                end_date: formatDateLocal(now),
+            }
+        }
         case 'this_month': {
             const firstDay = new Date(year, month, 1)
             const lastDay = new Date(year, month + 1, 0)
@@ -100,7 +101,49 @@ function getPresetDates(preset: PeriodPreset): { start_date: string; end_date: s
             }
         }
         default:
-            return getPresetDates('this_month')
+            return getPresetDates('last_30_days')
+    }
+}
+
+function formatYearMonth(date: Date): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    return `${year}-${month}`
+}
+
+function toReportFilters(
+    preset: PeriodPreset,
+    customStartDate: string,
+    customEndDate: string,
+): ReportFilters {
+    const now = new Date()
+    const useCustomDates = preset === 'custom' && Boolean(customStartDate && customEndDate)
+    const dates = useCustomDates
+        ? { start_date: customStartDate, end_date: customEndDate }
+        : getPresetDates(preset === 'custom' ? 'last_30_days' : preset)
+
+    const filters: ReportFilters = {
+        ...DEFAULT_FILTERS,
+        customStartDate: dates.start_date,
+        customEndDate: dates.end_date,
+        compareWith: 'previous_period',
+    }
+
+    switch (preset) {
+        case 'last_30_days':
+            return { ...filters, periodType: 'last_30_days' }
+        case 'this_month':
+            return { ...filters, periodType: 'month', selectedMonth: formatYearMonth(now) }
+        case 'last_month':
+            return {
+                ...filters,
+                periodType: 'month',
+                selectedMonth: formatYearMonth(new Date(now.getFullYear(), now.getMonth() - 1, 1)),
+            }
+        case 'this_year':
+            return { ...filters, periodType: 'year', selectedYear: String(now.getFullYear()) }
+        default:
+            return { ...filters, periodType: 'custom' }
     }
 }
 
@@ -110,25 +153,11 @@ function formatDate(dateString: string): string {
 }
 
 function getTransactionSign(type: Transaction['type']): string {
-    switch (type) {
-        case 'income':
-            return '+'
-        case 'expense':
-            return '-'
-        default:
-            return ''
-    }
+    return transactionAmountAppearance(type).sign
 }
 
 function getTransactionColor(type: Transaction['type']): string {
-    switch (type) {
-        case 'income':
-            return 'text-green-600'
-        case 'expense':
-            return 'text-red-600'
-        default:
-            return 'text-muted-foreground'
-    }
+    return transactionAmountAppearance(type).className
 }
 
 export default function DashboardPage() {
@@ -140,53 +169,38 @@ export default function DashboardPage() {
     const { data: balance } = useTotalBalance()
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
 
-    // Period state for chart
-    const [chartPeriod, setChartPeriod] = useState<PeriodPreset>('this_month')
+    const [period, setPeriod] = useState<PeriodPreset>('last_30_days')
     const [customStartDate, setCustomStartDate] = useState('')
     const [customEndDate, setCustomEndDate] = useState('')
 
-    // Current month filters (for summary cards)
-    const currentMonthFilters = useMemo(() => getPresetDates('this_month'), [])
-
-    // Report filters for income/expense comparison
-    const reportFilters: ReportFilters = useMemo(() => {
-        const now = new Date()
-        const year = now.getFullYear()
-        const month = String(now.getMonth() + 1).padStart(2, '0')
-        return {
-            periodType: 'month',
-            selectedMonth: `${year}-${month}`,
-            selectedQuarter: `${year}-Q${Math.ceil((now.getMonth() + 1) / 3)}`,
-            selectedYear: year.toString(),
-            customStartDate: '',
-            customEndDate: '',
-            compareWith: 'previous_period',
-            accountIds: [],
-            categoryIds: [],
-            tagIds: [],
-        }
-    }, [])
-
-    // Chart period filters
-    const chartFilters = useMemo(() => {
-        if (chartPeriod === 'custom' && customStartDate && customEndDate) {
+    const periodDates = useMemo(() => {
+        if (period === 'custom' && customStartDate && customEndDate) {
             return { start_date: customStartDate, end_date: customEndDate }
         }
-        return getPresetDates(chartPeriod)
-    }, [chartPeriod, customStartDate, customEndDate])
+        return getPresetDates(period)
+    }, [period, customStartDate, customEndDate])
 
-    const { data: monthData } = useTransactions({ ...currentMonthFilters, with_summary: true })
-    const { data: recentTransactions } = useTransactions({ per_page: 5 })
-    const { data: historyData } = useBalanceHistory(chartFilters)
+    const reportFilters = useMemo(
+        () => toReportFilters(period, customStartDate, customEndDate),
+        [period, customStartDate, customEndDate],
+    )
+
+    const { data: recentTransactions } = useTransactions({ per_page: 5, status: 'confirmed' })
+    const { data: historyData } = useBalanceHistory(periodDates)
     const { data: expensesByCategory } = useCategorySummary({
         type: 'expense',
-        ...currentMonthFilters,
+        ...periodDates,
     })
     const { data: budgets } = useBudgets()
     const { data: debtsData } = useDebtsWithSummary()
     const { data: overviewData } = useOverviewMetrics(reportFilters)
     const { data: balanceComparison } = useBalanceComparison()
-    const { data: upcomingRecurring } = useUpcomingRecurring()
+    const { data: upcomingPending } = useTransactions({
+        status: 'pending',
+        sort_by: 'date',
+        sort_direction: 'asc',
+        per_page: 5,
+    })
 
     const activeBudgets = useMemo(() => {
         return budgets?.filter(b => b.isActive).slice(0, 4) ?? []
@@ -195,12 +209,10 @@ export default function DashboardPage() {
     const activeDebts = debtsData?.data?.filter(d => !d.isPaidOff).slice(0, 4) ?? []
     const debtSummary = debtsData?.summary
 
-    const summary = monthData?.summary
-
     const totalBalance = balance?.total_balance ?? 0
     const currency = balance?.currency
-    const monthIncome = Number(summary?.income) || 0
-    const monthExpense = Number(summary?.expense) || 0
+    const periodIncome = overviewData?.income.value ?? 0
+    const periodExpense = overviewData?.expenses.value ?? 0
 
     // Calculate percentage changes
     const balanceChange = useMemo(() => {
@@ -235,12 +247,15 @@ export default function DashboardPage() {
 
         const isDark = theme === 'dark'
 
+        const seriesName = (s: (typeof historyData.series)[number]) =>
+            s.type === 'total' ? t('reports.series.total') : s.name
+
         const series = historyData.series.map((s, index) => {
             const isTotal = s.type === 'total'
             const color = isTotal ? '#6366f1' : CHART_COLORS[index % CHART_COLORS.length]
 
             return {
-                name: s.name,
+                name: seriesName(s),
                 type: 'line',
                 smooth: true,
                 data: s.data,
@@ -286,7 +301,7 @@ export default function DashboardPage() {
                 textStyle: { color: isDark ? '#f3f4f6' : '#1f2937' },
             },
             legend: {
-                data: historyData.series.map((s) => s.name),
+                data: historyData.series.map(seriesName),
                 bottom: 0,
                 textStyle: { color: isDark ? '#9ca3af' : '#6b7280' },
                 icon: 'roundRect',
@@ -321,7 +336,7 @@ export default function DashboardPage() {
             },
             series,
         }
-    }, [historyData, theme, currency])
+    }, [historyData, theme, currency, t])
 
     const pieChartOption = useMemo(() => {
         if (!expensesByCategory?.data.length) return {}
@@ -383,7 +398,7 @@ export default function DashboardPage() {
     }, [expensesByCategory, theme, currency])
 
     const handlePeriodChange = (value: PeriodPreset) => {
-        setChartPeriod(value)
+        setPeriod(value)
         if (value !== 'custom') {
             setCustomStartDate('')
             setCustomEndDate('')
@@ -392,9 +407,47 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
-                <p className="text-muted-foreground">{t('dashboard.welcome')}</p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
+                    <p className="text-muted-foreground">{t('dashboard.welcome')}</p>
+                </div>
+                <div className="flex flex-col gap-2 sm:items-end">
+                    <div className="flex items-center gap-2">
+                        <Calendar className="size-4 text-muted-foreground hidden sm:block" />
+                        <Select value={period} onValueChange={handlePeriodChange}>
+                            <SelectTrigger className="w-full sm:w-[200px] h-8">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="last_30_days">{t('dashboard.periods.last_30_days')}</SelectItem>
+                                <SelectItem value="this_month">{t('dashboard.periods.this_month')}</SelectItem>
+                                <SelectItem value="last_month">{t('dashboard.periods.last_month')}</SelectItem>
+                                <SelectItem value="last_3_months">{t('dashboard.periods.last_3_months')}</SelectItem>
+                                <SelectItem value="last_6_months">{t('dashboard.periods.last_6_months')}</SelectItem>
+                                <SelectItem value="this_year">{t('dashboard.periods.this_year')}</SelectItem>
+                                <SelectItem value="custom">{t('dashboard.periods.custom')}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {period === 'custom' && (
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                            <Input
+                                type="date"
+                                value={customStartDate}
+                                onChange={(e) => setCustomStartDate(e.target.value)}
+                                className="h-8 w-full sm:w-[140px]"
+                            />
+                            <span className="text-muted-foreground text-center hidden sm:block">—</span>
+                            <Input
+                                type="date"
+                                value={customEndDate}
+                                onChange={(e) => setCustomEndDate(e.target.value)}
+                                className="h-8 w-full sm:w-[140px]"
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
@@ -428,13 +481,13 @@ export default function DashboardPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            {t('dashboard.incomeThisMonth')}
+                            {t('dashboard.income')}
                         </CardTitle>
                         <ArrowDownLeft className="size-4 text-green-600" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold font-mono text-green-600">
-                            +{formatCurrency(monthIncome, currency)}
+                            +{formatCurrency(periodIncome, currency)}
                         </div>
                         {incomeChange !== null && (
                             <div className={cn(
@@ -455,13 +508,13 @@ export default function DashboardPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            {t('dashboard.expensesThisMonth')}
+                            {t('dashboard.expenses')}
                         </CardTitle>
                         <ArrowUpRight className="size-4 text-red-600" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold font-mono text-red-600">
-                            -{formatCurrency(monthExpense, currency)}
+                            -{formatCurrency(periodExpense, currency)}
                         </div>
                         {expenseChange !== null && (
                             <div className={cn(
@@ -482,42 +535,9 @@ export default function DashboardPage() {
 
             <div className="grid gap-4 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
-                    <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <CardHeader>
                         <CardTitle>{t('dashboard.balanceDynamics')}</CardTitle>
-                        <div className="flex items-center gap-2">
-                            <Calendar className="size-4 text-muted-foreground hidden sm:block" />
-                            <Select value={chartPeriod} onValueChange={handlePeriodChange}>
-                                <SelectTrigger className="w-full sm:w-[160px] h-8">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="this_month">{t('dashboard.periods.this_month')}</SelectItem>
-                                    <SelectItem value="last_month">{t('dashboard.periods.last_month')}</SelectItem>
-                                    <SelectItem value="last_3_months">{t('dashboard.periods.last_3_months')}</SelectItem>
-                                    <SelectItem value="last_6_months">{t('dashboard.periods.last_6_months')}</SelectItem>
-                                    <SelectItem value="this_year">{t('dashboard.periods.this_year')}</SelectItem>
-                                    <SelectItem value="custom">{t('dashboard.periods.custom')}</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
                     </CardHeader>
-                    {chartPeriod === 'custom' && (
-                        <div className="px-6 pb-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                            <Input
-                                type="date"
-                                value={customStartDate}
-                                onChange={(e) => setCustomStartDate(e.target.value)}
-                                className="h-8 w-full sm:w-[140px]"
-                            />
-                            <span className="text-muted-foreground text-center hidden sm:block">—</span>
-                            <Input
-                                type="date"
-                                value={customEndDate}
-                                onChange={(e) => setCustomEndDate(e.target.value)}
-                                className="h-8 w-full sm:w-[140px]"
-                            />
-                        </div>
-                    )}
                     <CardContent>
                         {historyData && historyData.series.length > 0 ? (
                             <ReactECharts
@@ -626,7 +646,7 @@ export default function DashboardPage() {
                             />
                         ) : (
                             <div className="flex items-center justify-center h-[280px] text-muted-foreground">
-                                {t('dashboard.noExpensesMonth')}
+                                {t('dashboard.noDataPeriod')}
                             </div>
                         )}
                     </CardContent>
@@ -670,11 +690,7 @@ export default function DashboardPage() {
                                             </div>
                                             <div className="min-w-0">
                                                 <p className="text-sm font-medium truncate">
-                                                    {transaction.category?.name ||
-                                                        transaction.description ||
-                                                        (transaction.type === 'transfer'
-                                                            ? t('transactions.types.transfer')
-                                                            : t('dashboard.transaction'))}
+                                                    {displayTransactionDescription(transaction)}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground truncate">
                                                     {formatDate(transaction.date)} · {transaction.account.name}
@@ -830,7 +846,7 @@ export default function DashboardPage() {
                                     {activeDebts.map((debt) => (
                                         <Link
                                             key={debt.id}
-                                            to={`/debts/${debt.id}/edit`}
+                                            to={`/debts?edit=${debt.id}`}
                                             className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                                         >
                                             <div className="flex items-center gap-2 mb-2">
@@ -870,7 +886,7 @@ export default function DashboardPage() {
                             <HandCoins className="size-12 mx-auto text-muted-foreground/50 mb-3" />
                             <p className="text-muted-foreground mb-3">{t('dashboard.noDebts')}</p>
                             <Button asChild size="sm">
-                                <Link to="/debts/create">
+                                <Link to="/debts?create=1">
                                     <Plus className="size-4 mr-1" />
                                     {t('dashboard.addDebt')}
                                 </Link>
@@ -887,42 +903,42 @@ export default function DashboardPage() {
                         {t('dashboard.upcoming')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
-                        <Link to="/recurring">
+                        <Link to="/transactions?status=pending">
                             {tCommon('actions.viewAll')}
                             <ArrowRight className="ml-1 size-4" />
                         </Link>
                     </Button>
                 </CardHeader>
                 <CardContent>
-                    {upcomingRecurring && upcomingRecurring.length > 0 ? (
+                    {upcomingPending?.data && upcomingPending.data.length > 0 ? (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                            {upcomingRecurring.slice(0, 5).map((recurring) => (
+                            {upcomingPending.data.map((transaction) => (
                                 <Link
-                                    key={recurring.id}
-                                    to={`/recurring/${recurring.id}/edit`}
+                                    key={transaction.id}
+                                    to="/transactions?status=pending"
                                     className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                                 >
                                     <div className="flex items-center gap-2 mb-2">
-                                        {recurring.type === 'income' ? (
+                                        {transaction.type === 'income' ? (
                                             <ArrowDownLeft className="size-4 text-green-600" />
-                                        ) : recurring.type === 'expense' ? (
+                                        ) : transaction.type === 'expense' ? (
                                             <ArrowUpRight className="size-4 text-red-600" />
                                         ) : (
                                             <ArrowLeftRight className="size-4 text-blue-600" />
                                         )}
                                         <p className="font-medium text-sm truncate">
-                                            {recurring.description || recurring.category?.name || t('dashboard.recurring')}
+                                            {transaction.description || transaction.category?.name || t('dashboard.transaction')}
                                         </p>
                                     </div>
                                     <p className={`font-mono text-sm ${
-                                        recurring.type === 'income' ? 'text-green-600' :
-                                        recurring.type === 'expense' ? 'text-red-600' : ''
+                                        transaction.type === 'income' ? 'text-green-600' :
+                                        transaction.type === 'expense' ? 'text-red-600' : ''
                                     }`}>
-                                        {recurring.type === 'income' ? '+' : recurring.type === 'expense' ? '-' : ''}
-                                        {formatCurrency(recurring.amount, recurring.account.currency)}
+                                        {transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : ''}
+                                        {formatCurrency(transaction.amount, transaction.account.currency)}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                        {new Date(recurring.nextRunDate).toLocaleDateString(intlLocale(), {
+                                        {new Date(transaction.date).toLocaleDateString(intlLocale(), {
                                             month: 'short',
                                             day: 'numeric'
                                         })}
@@ -933,9 +949,9 @@ export default function DashboardPage() {
                     ) : (
                         <div className="text-center py-8">
                             <Repeat className="size-12 mx-auto text-muted-foreground/50 mb-3" />
-                            <p className="text-muted-foreground mb-3">{t('dashboard.noRecurring')}</p>
+                            <p className="text-muted-foreground mb-3">{t('dashboard.noPending')}</p>
                             <Button asChild size="sm">
-                                <Link to="/recurring/create">
+                                <Link to="/recurring?create=1">
                                     <Plus className="size-4 mr-1" />
                                     {t('dashboard.createRecurring')}
                                 </Link>

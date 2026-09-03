@@ -57,6 +57,7 @@ class CashFlowReportService
 
             $entry = [
                 'label' => $item['label'],
+                'date' => $item['date'],
                 'income' => $item['income'],
                 'expenses' => $item['expenses'],
                 'balance' => round($balance, 2),
@@ -95,6 +96,7 @@ class CashFlowReportService
             $periodKey = $period['key'];
             $result[] = [
                 'label' => $period['label'],
+                'date' => $periodKey,
                 'income' => round((float) ($incomeData[$periodKey] ?? 0), 2),
                 'expenses' => round((float) ($expensesData[$periodKey] ?? 0), 2),
             ];
@@ -126,7 +128,7 @@ class CashFlowReportService
         }
         unset($income);
 
-        return [$incomeByCategory, $expensesByCategory, $resolve('Savings')];
+        return [$incomeByCategory, $expensesByCategory, $resolve('__savings__')];
     }
 
     private function buildNodes(array $incomeByCategory, array $expensesByCategory, float $savings, string $savingsNode): array

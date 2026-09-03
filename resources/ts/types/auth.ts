@@ -2,11 +2,14 @@ export interface User {
     id: number
     name: string
     email: string
+    role?: string
+    isSsoOnly?: boolean
 }
 
 export interface LoginCredentials {
     email: string
     password: string
+    remember_me?: boolean
 }
 
 export interface RegisterData {
@@ -17,6 +20,14 @@ export interface RegisterData {
 
 export interface AuthResponse {
     user: User
+    expires_at: string
+    refresh_at: string | null
+}
+
+export interface MeResponse {
+    user: User | null
+    expires_at: string | null
+    refresh_at: string | null
 }
 
 export interface TwoFactorAuthResponse {

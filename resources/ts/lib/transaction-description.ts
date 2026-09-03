@@ -1,0 +1,51 @@
+import i18n from '@/lib/i18n'
+import type { Transaction, TransactionType } from '@/types'
+
+const INCOMING_TYPES: TransactionType[] = ['income', 'debt_collection', 'debt_borrow']
+const OUTGOING_TYPES: TransactionType[] = ['expense', 'debt_payment', 'debt_lend']
+
+const STORED_MESSAGE_KEY = /^messages\.[a-z0-9_.]+$/i
+
+export function displayTransactionDescription(
+    transaction: Pick<Transaction, 'description' | 'type' | 'category' | 'account' | 'toAccount'>
+): string {
+    const stored = transaction.description?.trim()
+    if (stored && !STORED_MESSAGE_KEY.test(stored)) {
+        return stored
+    }
+
+    const name = transaction.toAccount?.name ?? transaction.account.name
+
+    switch (transaction.type) {
+        case 'transfer':
+            return transaction.toAccount
+                ? `${transaction.account.name} → ${transaction.toAccount.name}`
+                : transaction.account.name
+        case 'debt_payment':
+            return i18n.t('pages:transactions.fallback.payment', { name })
+        case 'debt_collection':
+            return i18n.t('pages:transactions.fallback.collection', { name })
+        case 'debt_lend':
+            return i18n.t('pages:transactions.fallback.lend', { name })
+        case 'debt_borrow':
+            return i18n.t('pages:transactions.fallback.borrow', { name })
+        default:
+            return transaction.category?.name || i18n.t(`pages:transactions.types.${transaction.type}`)
+    }
+}
+
+export function transactionAmountAppearance(type: TransactionType): {
+    sign: '+' | '-' | ''
+    className: string
+} {
+    if (INCOMING_TYPES.includes(type)) {
+        return { sign: '+', className: 'text-green-600' }
+    }
+    if (type === 'transfer') {
+        return { sign: '', className: 'text-blue-600' }
+    }
+    if (OUTGOING_TYPES.includes(type)) {
+        return { sign: '-', className: 'text-red-600' }
+    }
+    return { sign: '', className: 'text-foreground' }
+}

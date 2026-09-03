@@ -125,6 +125,7 @@ class BudgetService
         $targetRate = $targetCurrency ? (float) $targetCurrency->rate : 1;
 
         $query = Transaction::query()
+            ->confirmed()
             ->join('accounts', 'transactions.account_id', '=', 'accounts.id')
             ->join('currencies', 'accounts.currency_id', '=', 'currencies.id')
             ->where('transactions.type', 'expense')

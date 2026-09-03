@@ -16,6 +16,7 @@ use App\Models\Currency;
 use App\Models\RecurringTransaction;
 use App\Models\Tag;
 use App\Models\Transaction;
+use App\Models\TransactionItem;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -41,6 +42,23 @@ class DemoSeeder extends Seeder
         'Other Expenses' => ['PayPal', 'Venmo', 'Cash Withdrawal', 'Square'],
     ];
 
+    private array $catalogs = [
+        'Food & Groceries' => ['Organic Bananas', 'Whole Milk', 'Sourdough Bread', 'Free-range Eggs', 'Chicken Breast', 'Avocados', 'Greek Yogurt', 'Baby Spinach', 'Ground Coffee', 'Cheddar Cheese', 'Pasta', 'Olive Oil', 'Roma Tomatoes', 'Atlantic Salmon', 'Brown Rice', 'Butter', 'Orange Juice', 'Granola'],
+        'Restaurants & Cafes' => ['Latte', 'Avocado Toast', 'Caesar Salad', 'Burger Combo', 'Iced Americano', 'Chicken Bowl', 'Fries', 'Cheesecake', 'Iced Tea', 'Soup of the Day', 'Fish Tacos', 'Espresso'],
+        'Transport' => ['Regular Gasoline', 'Premium Gasoline', 'Airport Parking', 'Car Wash', 'Metro Day Pass', 'Oil Change', 'Tire Rotation', 'Tolls'],
+        'Shopping' => ['Cotton T-Shirt', 'Wireless Earbuds', 'Desk Lamp', 'Running Shorts', 'Phone Case', 'Notebook Set', 'Kitchen Towels', 'HDMI Cable', 'Sneakers', 'Backpack'],
+        'Entertainment' => ['Movie Ticket', 'Popcorn Combo', 'Game Download', 'Arcade Tokens', 'Concert Ticket', 'Streaming Rental', 'Bowling Lane'],
+        'Healthcare' => ['Prescription Refill', 'Vitamin D', 'Ibuprofen', 'Allergy Test', 'Contact Lenses', 'First Aid Kit', 'Protein Powder'],
+        'Personal Care' => ['Haircut', 'Shampoo', 'Face Moisturizer', 'Toothpaste', 'Sunscreen', 'Nail Polish', 'Beard Oil'],
+        'Travel' => ['Hotel Night', 'Airport Transfer', 'City Museum Pass', 'Travel Adapter', 'Bottled Water', 'Snack Box', 'Souvenir'],
+        'Education' => ['Online Course', 'Paperback Textbook', 'Notebook', 'Highlighter Set', 'USB Flash Drive', 'Practice Exam'],
+        'Gifts' => ['Greeting Card', 'Gift Wrap', 'Scented Candle', 'Chocolate Box', 'Bouquet', 'Mug'],
+        'Utilities' => ['Electricity Usage', 'Delivery Charge', 'Service Fee'],
+        'Subscriptions' => ['Base Plan', 'Add-on Storage', 'Family Seat'],
+        'Housing' => ['Base Rent', 'Parking Spot', 'Pet Fee'],
+        'Other Expenses' => ['Service Fee', 'Convenience Charge', 'Misc. Purchase', 'Packaging'],
+    ];
+
     public function run(): void
     {
         mt_srand(20260605);
@@ -64,13 +82,14 @@ class DemoSeeder extends Seeder
         $tags = Tag::all();
 
         $this->createTransactions($accounts, $expenseCategories, $incomeCategories, $tags);
+        $this->seedTransactionItems($expenseCategories);
         $this->createBudgets($usd, $expenseCategories, $tags);
         $this->createRecurringTransactions($accounts, $expenseCategories, $incomeCategories);
         $this->createAutomationRules($tags);
 
         mt_srand();
 
-        $this->command->info('Demo data seeded: '.Transaction::count().' transactions across '.count($accounts).' accounts.');
+        $this->command->info('Demo data seeded: '.Transaction::count().' transactions ('.TransactionItem::count().' line items) across '.count($accounts).' accounts.');
     }
 
     private function createUsers(): void
@@ -426,6 +445,85 @@ class DemoSeeder extends Seeder
         $list = $this->merchants[$category] ?? ['General Store'];
 
         return $list[array_rand($list)];
+    }
+
+    private function seedTransactionItems($expenseCategories): void
+    {
+        $target = max(1, (int) round(Transaction::count() * 0.10));
+
+        $candidates = Transaction::query()
+            ->where('type', TransactionType::Expense)
+            ->where('amount', '>=', 2)
+            ->get();
+
+        if ($candidates->isEmpty()) {
+            return;
+        }
+
+        $sample = $candidates->shuffle()->take(min($target, $candidates->count()));
+        $categoriesById = $expenseCategories->keyBy('id');
+
+        foreach ($sample as $tx) {
+            $catName = $categoriesById->get($tx->category_id)?->name ?? 'Other Expenses';
+            $this->attachRandomItems($tx, $catName);
+        }
+    }
+
+    private function attachRandomItems(Transaction $tx, string $category): void
+    {
+        $catalog = $this->catalogs[$category] ?? $this->catalogs['Other Expenses'];
+        $remainingCents = (int) round((float) $tx->amount * 100);
+
+        if ($remainingCents < 1) {
+            return;
+        }
+
+        $maxItems = min(6, count($catalog), $remainingCents);
+        $count = $maxItems === 1 ? 1 : mt_rand(2, $maxItems);
+
+        $names = $catalog;
+        shuffle($names);
+        $names = array_slice($names, 0, $count);
+
+        $items = [];
+        $left = count($names);
+
+        foreach ($names as $name) {
+            $left--;
+            $canSplit = $left > 0 && $remainingCents > $left;
+
+            if (! $canSplit) {
+                if ($remainingCents < 1) {
+                    break;
+                }
+
+                $items[] = [
+                    'name' => $name,
+                    'quantity' => 1,
+                    'price_per_unit' => round($remainingCents / 100, 2),
+                    'total_price' => round($remainingCents / 100, 2),
+                ];
+                break;
+            }
+
+            $maxShare = $remainingCents - $left;
+            $qty = mt_rand(1, min(3, $maxShare));
+            $share = max($qty, intdiv($maxShare * mt_rand(25, 55), 100));
+            $lineCents = intdiv($share, $qty) * $qty;
+            $lineCents = max($qty, min($lineCents, intdiv($maxShare, $qty) * $qty));
+            $remainingCents -= $lineCents;
+
+            $items[] = [
+                'name' => $name,
+                'quantity' => $qty,
+                'price_per_unit' => round($lineCents / $qty / 100, 2),
+                'total_price' => round($lineCents / 100, 2),
+            ];
+        }
+
+        if ($items !== []) {
+            $tx->items()->createMany($items);
+        }
     }
 
     private function createBudgets(Currency $usd, $expenseCategories, $tags): void

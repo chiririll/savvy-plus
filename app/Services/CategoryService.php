@@ -56,7 +56,7 @@ class CategoryService
     {
         $category = Category::findOrFail($categoryId);
 
-        $query = $category->transactions();
+        $query = $category->transactions()->confirmed();
 
         if ($startDate) {
             $query->where('date', '>=', $startDate);
@@ -81,6 +81,7 @@ class CategoryService
 
         // Get totals converted to base currency using SQL
         $query = Transaction::query()
+            ->confirmed()
             ->join('accounts', 'transactions.account_id', '=', 'accounts.id')
             ->join('currencies', 'accounts.currency_id', '=', 'currencies.id')
             ->whereNotNull('transactions.category_id')

@@ -1,17 +1,45 @@
 import { useSyncExternalStore } from 'react'
 
-type Theme = 'light' | 'dark'
+export type Theme = 'light' | 'dark'
+export type ThemePreference = Theme | 'auto'
+
+type ThemeState = {
+    preference: ThemePreference
+    theme: Theme
+}
 
 const STORAGE_KEY = 'theme'
 
-function readInitialTheme(): Theme {
+const SERVER_STATE: ThemeState = { preference: 'auto', theme: 'light' }
+
+function getSystemTheme(): Theme {
+    if (typeof window === 'undefined') return 'light'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+function parsePreference(value: string | null): ThemePreference {
+    if (value === 'light' || value === 'dark' || value === 'auto') return value
+    return 'auto'
+}
+
+function resolveTheme(preference: ThemePreference): Theme {
+    return preference === 'auto' ? getSystemTheme() : preference
+}
+
+function readDomTheme(): Theme {
     if (typeof document === 'undefined') return 'light'
     // The blocking inline script in the document head resolves and applies the
     // theme class before first paint; the DOM is the single source of truth.
     return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
 }
 
-let currentTheme: Theme = readInitialTheme()
+function readInitialState(): ThemeState {
+    if (typeof window === 'undefined') return SERVER_STATE
+    const preference = parsePreference(localStorage.getItem(STORAGE_KEY))
+    return { preference, theme: readDomTheme() }
+}
+
+let state: ThemeState = readInitialState()
 const listeners = new Set<() => void>()
 
 function applyTheme(theme: Theme) {
@@ -28,24 +56,32 @@ function notifyAll() {
     listeners.forEach((notify) => notify())
 }
 
-function setThemeGlobal(theme: Theme) {
-    if (theme === currentTheme) return
-    currentTheme = theme
-    localStorage.setItem(STORAGE_KEY, theme)
-    applyTheme(theme)
+function commit(next: ThemeState) {
+    if (next.preference === state.preference && next.theme === state.theme) return
+    state = next
+    applyTheme(next.theme)
     notifyAll()
+}
+
+function setPreference(preference: ThemePreference) {
+    localStorage.setItem(STORAGE_KEY, preference)
+    commit({ preference, theme: resolveTheme(preference) })
+}
+
+function syncFromSystem() {
+    if (state.preference !== 'auto') return
+    commit({ preference: 'auto', theme: getSystemTheme() })
 }
 
 if (typeof window !== 'undefined') {
     window.addEventListener('storage', (event) => {
-        if (event.key === STORAGE_KEY && (event.newValue === 'dark' || event.newValue === 'light')) {
-            if (event.newValue !== currentTheme) {
-                currentTheme = event.newValue
-                applyTheme(event.newValue)
-                notifyAll()
-            }
-        }
+        if (event.key !== STORAGE_KEY) return
+        const preference = parsePreference(event.newValue)
+        commit({ preference, theme: resolveTheme(preference) })
     })
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    media.addEventListener('change', syncFromSystem)
 }
 
 function subscribe(notify: () => void): () => void {
@@ -55,16 +91,16 @@ function subscribe(notify: () => void): () => void {
     }
 }
 
-function getSnapshot(): Theme {
-    return currentTheme
+function getSnapshot(): ThemeState {
+    return state
 }
 
 export function useTheme() {
-    const theme = useSyncExternalStore(subscribe, getSnapshot, () => 'light' as Theme)
+    const snapshot = useSyncExternalStore(subscribe, getSnapshot, () => SERVER_STATE)
 
     return {
-        theme,
-        setTheme: setThemeGlobal,
-        toggleTheme: () => setThemeGlobal(currentTheme === 'dark' ? 'light' : 'dark'),
+        theme: snapshot.theme,
+        preference: snapshot.preference,
+        setTheme: setPreference,
     }
 }

@@ -78,18 +78,3 @@ export function useDeleteRecurring() {
         },
     })
 }
-
-export function useSkipRecurring() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
-        mutationFn: (id: string | number) => recurringApi.skip(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.recurring.skipped'))
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.recurring.skipFailed'))
-        },
-    })
-}

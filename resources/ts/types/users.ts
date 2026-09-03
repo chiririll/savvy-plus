@@ -5,7 +5,11 @@ export interface User {
     name: string
     email: string
     role: UserRole
+    isInactive: boolean
+    isSsoOnly: boolean
     createdAt: string
+    token?: string
+    expiresAt?: string
 }
 
 export interface UserFormData {
@@ -13,4 +17,11 @@ export interface UserFormData {
     email: string
     password?: string
     role?: UserRole
+}
+
+export interface PasswordTokenPreview {
+    name: string
+    email: string
+    isInactive: boolean
+    expiresAt: string
 }

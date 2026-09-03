@@ -24,7 +24,8 @@
         "cannotDeleteLast": "Can't delete last",
         "cannotDeleteSelf": "Can't delete yourself",
         "clear": "Clear",
-        "processing": "Processing..."
+        "processing": "Processing...",
+        "reorder": "Reorder"
     },
     "readOnly": {
         "banner": "You are in read-only mode. You can view all data but cannot make any changes.",
@@ -73,6 +74,7 @@
         "amountRequired": "Amount is required",
         "amountPositive": "Amount must be positive",
         "amountGreaterThanZero": "Amount must be greater than 0",
+        "insufficientFunds": "Insufficient funds",
         "balanceNegative": "Balance cannot be negative",
         "integer": "Must be an integer",
         "atLeastOne": "Must be at least 1",
@@ -137,7 +139,10 @@
         "description": "Choose the interface language. Saved on this device."
     },
     "theme": {
-        "toggle": "Toggle theme"
+        "label": "Theme",
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Auto"
     },
     "sidebar": {
         "toggle": "Toggle sidebar"
@@ -153,7 +158,8 @@
             "deleted": "Account deleted",
             "createFailed": "Failed to create account",
             "updateFailed": "Failed to update account",
-            "deleteFailed": "Failed to delete account"
+            "deleteFailed": "Failed to delete account",
+            "reorderFailed": "Failed to reorder accounts"
         },
         "category": {
             "created": "Category created",
@@ -179,7 +185,12 @@
             "createFailed": "Failed to create transaction",
             "updateFailed": "Failed to update transaction",
             "deleteFailed": "Failed to delete transaction",
-            "duplicateFailed": "Failed to duplicate transaction"
+            "duplicateFailed": "Failed to duplicate transaction",
+            "pendingCreated": "Pending transaction created",
+            "confirmed": "Transaction confirmed",
+            "skipped": "Occurrence skipped",
+            "confirmFailed": "Failed to confirm transaction",
+            "skipFailed": "Failed to skip transaction"
         },
         "recurring": {
             "created": "Recurring transaction created",
@@ -229,7 +240,9 @@
             "deleted": "User deleted",
             "createFailed": "Failed to create user",
             "updateFailed": "Failed to update user",
-            "deleteFailed": "Failed to delete user"
+            "deleteFailed": "Failed to delete user",
+            "passwordLink": "Set-password link created",
+            "passwordLinkFailed": "Failed to create set-password link"
         },
         "automation": {
             "created": "Automation rule created",
@@ -267,6 +280,7 @@
             "createFailed": "Failed to create backup",
             "uploadFailed": "Failed to upload backup",
             "restoreFailed": "Failed to restore backup",
+            "inspectFailed": "Failed to check the backup file",
             "deleteFailed": "Failed to delete backup"
         },
         "import": {
@@ -291,6 +305,12 @@
             "codesRegenerated": "Recovery codes regenerated",
             "enableFailed": "Failed to enable 2FA",
             "invalidCode": "Invalid verification code"
+        },
+        "accountSecurity": {
+            "passwordChanged": "Password updated. Other devices have been signed out.",
+            "passwordFailed": "Could not update the password",
+            "loggedOutOthers": "Signed out of other devices",
+            "logoutOthersFailed": "Could not sign out other devices"
         }
     }
 }

@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Enums\RecurringFrequency;
+use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class RecurringTransaction extends Model
 {
@@ -65,19 +68,19 @@ class RecurringTransaction extends Model
         return $this->belongsToMany(Tag::class, 'recurring_transaction_tag');
     }
 
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function pendingTransaction(): HasOne
+    {
+        return $this->hasOne(Transaction::class)->where('status', TransactionStatus::Pending);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
-    }
-
-    public function scopeDue(Builder $query): Builder
-    {
-        return $query->active()
-            ->where('next_run_date', '<=', now()->toDateString())
-            ->where(function ($q) {
-                $q->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now()->toDateString());
-            });
     }
 
     public function isTransfer(): bool

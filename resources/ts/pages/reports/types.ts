@@ -1,6 +1,6 @@
 import type { CashFlowGroupBy } from '@/api/reports'
 
-export type PeriodType = 'month' | 'quarter' | 'year' | 'ytd' | 'custom'
+export type PeriodType = 'last_30_days' | 'month' | 'quarter' | 'year' | 'ytd' | 'custom'
 export type CompareType = 'none' | 'previous_period' | 'same_period_last_year'
 export type ReportTab = 'overview' | 'cashflow' | 'expenses' | 'income' | 'networth'
 
@@ -35,7 +35,7 @@ function formatYearMonth(date: Date): string {
 const now = new Date()
 
 export const DEFAULT_FILTERS: ReportFilters = {
-    periodType: 'month',
+    periodType: 'last_30_days',
     selectedMonth: formatYearMonth(now),
     selectedQuarter: `${now.getFullYear()}-Q${Math.ceil((now.getMonth() + 1) / 3)}`,
     selectedYear: now.getFullYear().toString(),
@@ -49,6 +49,7 @@ export const DEFAULT_FILTERS: ReportFilters = {
 
 export function defaultGroupBy(filters: ReportFilters): CashFlowGroupBy {
     switch (filters.periodType) {
+        case 'last_30_days':
         case 'month':
             return 'day'
         case 'quarter':

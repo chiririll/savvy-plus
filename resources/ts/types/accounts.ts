@@ -14,13 +14,15 @@ export interface Account extends BaseEntity {
     initialBalance: number
     currentBalance: number
     isActive: boolean
+    sortOrder: number
     currency?: Currency
 }
 
 export interface AccountFormData {
     name: string
     type: RegularAccountType
-    currency_id: number
+    currency_id?: number
+    currency_code?: string
     initial_balance?: number
     is_active?: boolean
 }

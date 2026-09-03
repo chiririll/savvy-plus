@@ -19,9 +19,6 @@ export const recurringApi = {
     delete: (id: number | string) =>
         api.delete<void>(`${ENDPOINT}/${id}`),
 
-    skip: (id: number | string) =>
-        api.post<RecurringTransaction>(`${ENDPOINT}/${id}/skip`),
-
     getUpcoming: () =>
         api.get<RecurringTransaction[]>('/recurring-upcoming'),
 }

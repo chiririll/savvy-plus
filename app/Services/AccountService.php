@@ -5,9 +5,14 @@ namespace App\Services;
 use App\Models\Account;
 use App\Models\Currency;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class AccountService
 {
+    public function __construct(
+        private CurrencyApiService $currencyApi,
+    ) {}
+
     public function getAll(bool $onlyActive = false, bool $excludeDebts = false): Collection
     {
         $query = Account::with('currency');
@@ -20,7 +25,16 @@ class AccountService
             $query->regularAccounts();
         }
 
-        return $query->get()->each(fn (Account $account) => $this->loadBalance($account));
+        return $query->ordered()->get()->each(fn (Account $account) => $this->loadBalance($account));
+    }
+
+    public function reorder(array $ids): void
+    {
+        DB::transaction(function () use ($ids) {
+            foreach ($ids as $index => $id) {
+                Account::where('id', $id)->update(['sort_order' => $index]);
+            }
+        });
     }
 
     public function findOrFail(int $id): Account
@@ -32,18 +46,27 @@ class AccountService
 
     public function create(array $data): Account
     {
-        $account = Account::create($data);
-        $account->load('currency');
+        return DB::transaction(function () use ($data) {
+            $data = $this->withResolvedCurrency($data);
+            $account = Account::create($data);
+            $account->load('currency');
 
-        return $this->loadBalance($account);
+            return $this->loadBalance($account);
+        });
     }
 
     public function update(Account $account, array $data): Account
     {
-        $account->update($data);
-        $account->load('currency');
+        return DB::transaction(function () use ($account, $data) {
+            if (array_key_exists('currency_id', $data) || array_key_exists('currency_code', $data)) {
+                $data = $this->withResolvedCurrency($data);
+            }
 
-        return $this->loadBalance($account);
+            $account->update($data);
+            $account->load('currency');
+
+            return $this->loadBalance($account);
+        });
     }
 
     public function delete(Account $account): void
@@ -67,6 +90,7 @@ class AccountService
         $accounts = Account::with('currency')
             ->where('is_active', true)
             ->regularAccounts()
+            ->ordered()
             ->get();
         $accountIds = $accounts->pluck('id')->toArray();
 
@@ -81,7 +105,8 @@ class AccountService
         $start = \Carbon\Carbon::parse($startDate)->startOfDay();
         $end = \Carbon\Carbon::parse($endDate)->endOfDay();
 
-        $transactions = \App\Models\Transaction::whereBetween('date', [$start, $end])
+        $transactions = \App\Models\Transaction::confirmed()
+            ->whereBetween('date', [$start, $end])
             ->where(function ($query) use ($accountIds) {
                 $query->whereIn('account_id', $accountIds)
                     ->orWhereIn('to_account_id', $accountIds);
@@ -121,13 +146,15 @@ class AccountService
 
                     switch ($transaction->type->value) {
                         case 'income':
-                        case 'debt_collection': // Money comes to regular account
+                        case 'debt_collection':
+                        case 'debt_borrow':
                             if (isset($runningBalances[$accountId])) {
                                 $runningBalances[$accountId] += (float) $transaction->amount;
                             }
                             break;
                         case 'expense':
-                        case 'debt_payment': // Money goes from regular account
+                        case 'debt_payment':
+                        case 'debt_lend':
                             if (isset($runningBalances[$accountId])) {
                                 $runningBalances[$accountId] -= (float) $transaction->amount;
                             }
@@ -183,22 +210,26 @@ class AccountService
     {
         // Income + debt collections (money coming in)
         $income = $account->transactions()
-            ->whereIn('type', ['income', 'debt_collection'])
+            ->confirmed()
+            ->whereIn('type', ['income', 'debt_collection', 'debt_borrow'])
             ->where('date', '<', $date)
             ->sum('amount');
 
         // Expenses + debt payments (money going out)
         $expense = $account->transactions()
-            ->whereIn('type', ['expense', 'debt_payment'])
+            ->confirmed()
+            ->whereIn('type', ['expense', 'debt_payment', 'debt_lend'])
             ->where('date', '<', $date)
             ->sum('amount');
 
         $transferOut = $account->transactions()
+            ->confirmed()
             ->where('type', 'transfer')
             ->where('date', '<', $date)
             ->sum('amount');
 
-        $transferIn = \App\Models\Transaction::where('to_account_id', $account->id)
+        $transferIn = \App\Models\Transaction::confirmed()
+            ->where('to_account_id', $account->id)
             ->where('date', '<', $date)
             ->sum('to_amount');
 
@@ -307,6 +338,25 @@ class AccountService
             'currency' => $baseCurrency->code,
             'decimals' => $baseCurrency->decimals,
         ];
+    }
+
+    private function withResolvedCurrency(array $data): array
+    {
+        $data['currency_id'] = $this->resolveCurrencyId($data);
+        unset($data['currency_code']);
+
+        return $data;
+    }
+
+    private function resolveCurrencyId(array $data): int
+    {
+        if (! empty($data['currency_id'])) {
+            return (int) $data['currency_id'];
+        }
+
+        $code = strtoupper(trim((string) ($data['currency_code'] ?? '')));
+
+        return $this->currencyApi->findOrCreateByCode($code)->id;
     }
 
     private function loadBalance(Account $account): Account

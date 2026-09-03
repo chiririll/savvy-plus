@@ -13,7 +13,9 @@ class AuthSession extends Model
         'csrf',
         'ip',
         'user_agent',
+        'remember_me',
         'last_used_at',
+        'refreshed_at',
         'idle_expires_at',
         'absolute_expires_at',
         'revoked_at',
@@ -27,7 +29,9 @@ class AuthSession extends Model
     protected function casts(): array
     {
         return [
+            'remember_me' => 'boolean',
             'last_used_at' => 'datetime',
+            'refreshed_at' => 'datetime',
             'idle_expires_at' => 'datetime',
             'absolute_expires_at' => 'datetime',
             'revoked_at' => 'datetime',

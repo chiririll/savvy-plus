@@ -53,13 +53,6 @@ class RecurringTransactionController extends Controller
         return response()->json(null, 204);
     }
 
-    public function skip(RecurringTransaction $recurring): RecurringTransactionResource
-    {
-        return new RecurringTransactionResource(
-            $this->service->skip($recurring)
-        );
-    }
-
     public function upcoming(): AnonymousResourceCollection
     {
         return RecurringTransactionResource::collection(

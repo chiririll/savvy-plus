@@ -4,12 +4,15 @@ namespace App\Services;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Services\Auth\PasswordTokenService;
 use DomainException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
+    public function __construct(private PasswordTokenService $passwordTokens) {}
+
     public function getAll(): Collection
     {
         return User::orderBy('name')->get();
@@ -22,7 +25,11 @@ class UserService
 
     public function create(array $data): User
     {
-        $data['password'] = Hash::make($data['password']);
+        if (filled($data['password'] ?? null)) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            $data['password'] = null;
+        }
 
         if (! isset($data['role'])) {
             $data['role'] = UserRole::ReadOnly;
@@ -35,6 +42,7 @@ class UserService
     {
         if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
+            $this->passwordTokens->revokeActive($user);
         } else {
             unset($data['password']);
         }

@@ -12,10 +12,11 @@ import {
     FormLabel,
     FormControl,
     FormMessage,
+    FormDescription,
 } from '@/components/ui/form'
 import { transactionSchema, TransactionFormValues } from '@/schemas/transactions'
 import { useAccounts, useCategories, useTags } from '@/hooks'
-import { cn, formatCurrency } from '@/lib/utils'
+import { cn, formatCurrency, formatDateLocal, isDateInFuture } from '@/lib/utils'
 import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { AccountSelect } from '@/components/shared/AccountSelect'
@@ -49,7 +50,7 @@ export function TransactionForm({
     const { data: tags } = useTags()
 
     const formDefaults = useMemo(() => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = formatDateLocal()
         return {
             type: defaultValues?.type ?? 'expense' as const,
             account_id: defaultValues?.account_id ?? 0,
@@ -85,6 +86,8 @@ export function TransactionForm({
     const categoryId = useWatch({ control: form.control, name: 'category_id' })
     const items = useWatch({ control: form.control, name: 'items' })
     const amount = useWatch({ control: form.control, name: 'amount' })
+    const date = useWatch({ control: form.control, name: 'date' })
+    const isPendingDate = isDateInFuture(date)
     const toAccountId = useWatch({ control: form.control, name: 'to_account_id' })
     const toAmount = useWatch({ control: form.control, name: 'to_amount' })
     const selectedTagIds = useWatch({ control: form.control, name: 'tag_ids' }) ?? []
@@ -314,7 +317,7 @@ export function TransactionForm({
                 </div>
 
                 {/* Balance Preview */}
-                {balancePreview && (
+                {balancePreview && !isPendingDate && (
                     <div className={cn(
                         'flex items-center gap-4 p-3 rounded-lg border text-sm',
                         balancePreview.insufficientFunds ? 'bg-destructive/10 border-destructive/50' : 'bg-muted/50'
@@ -343,7 +346,7 @@ export function TransactionForm({
                 )}
 
                 {/* To Account Balance Preview (Transfer) */}
-                {toBalancePreview && (
+                {toBalancePreview && !isPendingDate && (
                     <div className="flex items-center gap-4 p-3 rounded-lg border bg-muted/50 text-sm">
                         <div className="flex-1">
                             <span className="text-muted-foreground">{t('forms:transactions.toBalance')}: </span>
@@ -428,6 +431,9 @@ export function TransactionForm({
                                             value={field.value || ''}
                                         />
                                     </FormControl>
+                                    {isPendingDate && (
+                                        <FormDescription>{t('forms:transactions.pendingHint')}</FormDescription>
+                                    )}
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -443,18 +449,21 @@ export function TransactionForm({
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>{t('fields.date')}</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="date"
-                                        {...field}
-                                        value={field.value || ''}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
+                                    <FormControl>
+                                        <Input
+                                            type="date"
+                                            {...field}
+                                            value={field.value || ''}
+                                        />
+                                    </FormControl>
+                                    {isPendingDate && (
+                                        <FormDescription>{t('forms:transactions.pendingHint')}</FormDescription>
+                                    )}
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
 
                 {/* Description */}
                 <FormField

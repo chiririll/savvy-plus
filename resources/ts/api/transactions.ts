@@ -35,6 +35,7 @@ export const transactionsApi = {
         if (filters?.per_page) searchParams.set('per_page', String(filters.per_page))
         if (filters?.page) searchParams.set('page', String(filters.page))
         if (filters?.with_summary) searchParams.set('with_summary', 'true')
+        if (filters?.status) searchParams.set('status', filters.status)
         const query = searchParams.toString()
         // Don't unwrap - we need full response with data, summary and meta
         const response = await apiClient.get(`${ENDPOINT}${query ? `?${query}` : ''}`)
@@ -55,6 +56,12 @@ export const transactionsApi = {
 
     duplicate: (id: number | string) =>
         api.post<Transaction, void>(`${ENDPOINT}/${id}/duplicate`, undefined),
+
+    confirm: (id: number | string) =>
+        api.post<Transaction>(`${ENDPOINT}/${id}/confirm`),
+
+    skip: (id: number | string) =>
+        api.post<Transaction>(`${ENDPOINT}/${id}/skip`),
 
     getSummary: (filters?: TransactionFilters) => {
         const searchParams = new URLSearchParams()

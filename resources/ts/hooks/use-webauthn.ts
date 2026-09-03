@@ -3,6 +3,7 @@ import { startRegistration } from '@simplewebauthn/browser'
 import { webauthnApi } from '@/api'
 import { toast } from 'sonner'
 import i18n from '@/lib/i18n'
+import { resolveUserFacingText } from '@/lib/api-error'
 
 const QUERY_KEY = ['webauthn-credentials']
 
@@ -82,10 +83,10 @@ export function passkeyErrorMessage(error: unknown, fallback: string): string {
         if (error.name === 'InvalidStateError') {
             return i18n.t('toasts.passkey.alreadyRegistered')
         }
-        return error.message || fallback
+        return resolveUserFacingText(error.message || fallback)
     }
     if (error && typeof error === 'object' && 'message' in error) {
-        return (error as { message: string }).message
+        return resolveUserFacingText((error as { message: string }).message)
     }
     return fallback
 }

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTOs\DebtData;
 use App\DTOs\DebtPaymentData;
 use App\Enums\DebtType;
+use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Currency;
@@ -24,7 +25,7 @@ class DebtService
             $query->where('is_paid_off', false);
         }
 
-        return $query->get()->each(fn (Account $debt) => $this->loadDebtData($debt));
+        return $query->ordered()->get()->each(fn (Account $debt) => $this->loadDebtData($debt));
     }
 
     public function getByType(DebtType $type): Collection
@@ -33,6 +34,7 @@ class DebtService
             ->where('type', 'debt')
             ->where('debt_type', $type)
             ->where('is_paid_off', false)
+            ->ordered()
             ->get()
             ->each(fn (Account $debt) => $this->loadDebtData($debt));
     }
@@ -48,23 +50,42 @@ class DebtService
 
     public function create(DebtData $data): Account
     {
-        $debt = Account::create([
-            'name' => $data->name,
-            'type' => 'debt',
-            'debt_type' => $data->debtType,
-            'currency_id' => $data->currencyId,
-            'initial_balance' => 0,
-            'target_amount' => $data->amount,
-            'due_date' => $data->dueDate,
-            'counterparty' => $data->counterparty,
-            'debt_description' => $data->description,
-            'is_active' => true,
-            'is_paid_off' => false,
-        ]);
+        return DB::transaction(function () use ($data) {
+            $sourceAccount = null;
+            $currencyId = $data->currencyId;
 
-        $debt->load('currency');
+            if ($data->isNewOperation()) {
+                $sourceAccount = Account::with('currency')->findOrFail($data->accountId);
 
-        return $this->loadDebtData($debt);
+                if ($sourceAccount->isDebt()) {
+                    throw new DomainException(__('messages.debts.cannot_use_debt_source'));
+                }
+
+                $currencyId = $sourceAccount->currency_id;
+            }
+
+            $debt = Account::create([
+                'name' => $data->name,
+                'type' => 'debt',
+                'debt_type' => $data->debtType,
+                'currency_id' => $currencyId,
+                'initial_balance' => 0,
+                'target_amount' => $data->amount,
+                'due_date' => $data->dueDate,
+                'counterparty' => $data->counterparty,
+                'debt_description' => $data->description,
+                'is_active' => true,
+                'is_paid_off' => false,
+            ]);
+
+            if ($sourceAccount) {
+                $this->recordIssuance($debt, $sourceAccount, $data);
+            }
+
+            $debt->load('currency');
+
+            return $this->loadDebtData($debt);
+        });
     }
 
     public function update(Account $debt, DebtData $data): Account
@@ -119,9 +140,10 @@ class DebtService
                 'amount' => $data->amount,
                 'to_amount' => $toAmount,
                 'exchange_rate' => $data->amount > 0 ? round($toAmount / $data->amount, 6) : null,
-                'description' => $data->description ?? "Payment for debt: {$debt->name}",
+                'description' => $this->transactionNote($data->description),
                 'date' => $data->date,
                 'category_id' => null,
+                'status' => TransactionStatus::Confirmed,
             ]);
 
             $debt->refresh();
@@ -162,9 +184,10 @@ class DebtService
                 'amount' => $toAmount,
                 'to_amount' => $data->amount,
                 'exchange_rate' => $data->amount > 0 ? round($toAmount / $data->amount, 6) : null,
-                'description' => $data->description ?? "Collection for debt: {$debt->name}",
+                'description' => $this->transactionNote($data->description),
                 'date' => $data->date,
                 'category_id' => null,
+                'status' => TransactionStatus::Confirmed,
             ]);
 
             $debt->refresh();
@@ -221,13 +244,21 @@ class DebtService
             throw new DomainException(__('messages.debts.not_a_debt'));
         }
 
-        $hasPayments = Transaction::where('to_account_id', $debt->id)->exists();
+        $hasPayments = Transaction::where('to_account_id', $debt->id)
+            ->whereIn('type', [TransactionType::DebtPayment, TransactionType::DebtCollection])
+            ->exists();
 
         if ($hasPayments) {
             throw new DomainException(__('messages.debts.delete_with_history'));
         }
 
-        $debt->delete();
+        DB::transaction(function () use ($debt) {
+            Transaction::where('to_account_id', $debt->id)
+                ->whereIn('type', [TransactionType::DebtLend, TransactionType::DebtBorrow])
+                ->delete();
+
+            $debt->delete();
+        });
     }
 
     public function reopen(Account $debt): Account
@@ -243,6 +274,46 @@ class DebtService
         $debt->update(['is_paid_off' => false]);
 
         return $this->loadDebtData($debt);
+    }
+
+    private function recordIssuance(Account $debt, Account $account, DebtData $data): void
+    {
+        $account->loadMissing('currency');
+        $debt->loadMissing('currency');
+
+        if ($data->debtType === DebtType::OwedToMe) {
+            $toAmount = $this->calculateToAmount($account, $debt, $data->amount);
+
+            Transaction::create([
+                'type' => TransactionType::DebtLend,
+                'account_id' => $account->id,
+                'to_account_id' => $debt->id,
+                'amount' => $data->amount,
+                'to_amount' => $toAmount,
+                'exchange_rate' => $data->amount > 0 ? round($toAmount / $data->amount, 6) : null,
+                'description' => $this->transactionNote($data->description),
+                'date' => $data->date,
+                'category_id' => null,
+                'status' => TransactionStatus::Confirmed,
+            ]);
+
+            return;
+        }
+
+        $toAmount = $this->calculateToAmount($debt, $account, $data->amount);
+
+        Transaction::create([
+            'type' => TransactionType::DebtBorrow,
+            'account_id' => $account->id,
+            'to_account_id' => $debt->id,
+            'amount' => $toAmount,
+            'to_amount' => $data->amount,
+            'exchange_rate' => $data->amount > 0 ? round($toAmount / $data->amount, 6) : null,
+            'description' => $this->transactionNote($data->description),
+            'date' => $data->date,
+            'category_id' => null,
+            'status' => TransactionStatus::Confirmed,
+        ]);
     }
 
     private function loadDebtData(Account $debt): Account
@@ -261,5 +332,10 @@ class DebtService
         }
 
         return $fromAccount->currency->convertTo($amount, $toAccount->currency);
+    }
+
+    private function transactionNote(?string $description): ?string
+    {
+        return filled($description) ? $description : null;
     }
 }

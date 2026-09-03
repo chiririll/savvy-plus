@@ -8,6 +8,7 @@ import { useNetWorthHistory } from '@/hooks'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import i18n from '@/lib/i18n'
 import { defaultGroupBy } from '../types'
+import { formatReportPeriodLabel } from '../utils'
 import type { ReportFilters } from '../types'
 import type { CashFlowGroupBy } from '@/api/reports'
 
@@ -46,7 +47,11 @@ export function NetWorthChart({ filters }: NetWorthChartProps) {
             },
             xAxis: {
                 type: 'category',
-                data: data.labels,
+                data: (data.dates ?? data.labels).map((value, index) =>
+                    data.dates?.[index]
+                        ? formatReportPeriodLabel(value, groupBy, 'weekNum')
+                        : value
+                ),
                 axisLabel: {
                     fontSize: 11,
                     color: '#64748b',

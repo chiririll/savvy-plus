@@ -21,10 +21,15 @@ export interface Debt extends BaseEntity {
     currency?: Currency
 }
 
+export type DebtOrigin = 'new' | 'existing'
+
 export interface DebtFormData {
+    origin?: DebtOrigin
     name: string
     debt_type: DebtType
-    currency_id: number
+    currency_id?: number
+    account_id?: number
+    date?: string
     amount: number
     due_date?: string
     counterparty?: string

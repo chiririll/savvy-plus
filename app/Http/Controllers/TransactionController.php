@@ -11,6 +11,7 @@ use App\Http\Resources\TransactionCollection;
 use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
 use App\Services\TransactionService;
+use DomainException;
 use Illuminate\Http\JsonResponse;
 
 class TransactionController extends Controller
@@ -50,23 +51,53 @@ class TransactionController extends Controller
         return new TransactionResource($this->transactionService->findOrFail($transaction->id));
     }
 
-    public function update(UpdateTransactionRequest $request, Transaction $transaction): TransactionResource
+    public function update(UpdateTransactionRequest $request, Transaction $transaction): TransactionResource|JsonResponse
     {
         $data = TransactionData::fromArray(array_merge(
             $transaction->toArray(),
             $request->validated()
         ));
 
-        $transaction = $this->transactionService->update($transaction, $data);
+        try {
+            $transaction = $this->transactionService->update($transaction, $data);
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return new TransactionResource($transaction);
     }
 
     public function destroy(Transaction $transaction): JsonResponse
     {
-        $this->transactionService->delete($transaction);
+        try {
+            $this->transactionService->delete($transaction);
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return response()->json(null, 204);
+    }
+
+    public function confirm(Transaction $transaction): TransactionResource|JsonResponse
+    {
+        try {
+            return new TransactionResource(
+                $this->transactionService->confirm($transaction)
+            );
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function skip(Transaction $transaction): TransactionResource|JsonResponse
+    {
+        try {
+            return new TransactionResource(
+                $this->transactionService->skip($transaction)
+            );
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
     public function duplicate(Transaction $transaction): JsonResponse

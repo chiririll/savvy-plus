@@ -105,6 +105,7 @@ class TwoFactorController extends Controller
         $request->validate([
             'two_factor_token' => 'required|string',
             'code' => 'required|string',
+            'remember_me' => 'sometimes|boolean',
         ]);
 
         $user = $this->challenges->resolve($request->two_factor_token);

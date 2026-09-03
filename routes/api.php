@@ -20,6 +20,7 @@ use App\Http\Controllers\TransactionImportController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\WebauthnController;
+use App\Http\Controllers\PasswordTokenController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,11 @@ Route::get('auth/status', [AuthController::class, 'status']);
 Route::get('auth/me', [AuthController::class, 'me']);
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
+
+Route::prefix('auth/password')->middleware('throttle:30,1')->group(function () {
+    Route::get('{token}', [PasswordTokenController::class, 'preview']);
+    Route::post('{token}', [PasswordTokenController::class, 'accept']);
+});
 
 // 2FA verification (public - used during login flow)
 Route::post('auth/2fa/verify', [TwoFactorController::class, 'verify']);
@@ -58,6 +64,8 @@ Route::put('uploads/{upload}/parts/{partNumber}', [UploadController::class, 'upl
 Route::middleware(['session', 'csrf'])->group(function () {
     // Auth routes (available to all authenticated users)
     Route::post('auth/logout', [AuthController::class, 'logout']);
+    Route::post('auth/logout-others', [AuthController::class, 'logoutOthers']);
+    Route::put('auth/password', [AuthController::class, 'changePassword']);
 
     // 2FA status (available to all authenticated users)
     Route::get('auth/2fa/status', [TwoFactorController::class, 'status']);
@@ -85,6 +93,7 @@ Route::middleware(['session', 'csrf'])->group(function () {
     Route::get('users/{user}', [UserController::class, 'show']);
     Route::middleware('role:admin')->group(function () {
         Route::post('users', [UserController::class, 'store']);
+        Route::post('users/{user}/password-token', [UserController::class, 'issuePasswordToken']);
         Route::put('users/{user}', [UserController::class, 'update']);
         Route::patch('users/{user}', [UserController::class, 'update']);
         Route::delete('users/{user}', [UserController::class, 'destroy']);
@@ -102,6 +111,7 @@ Route::middleware(['session', 'csrf'])->group(function () {
         Route::post('currencies/{currency}/set-base', [CurrencyController::class, 'setBase']);
         Route::post('currencies/convert', [CurrencyController::class, 'convert']);
 
+        Route::post('accounts/reorder', [AccountController::class, 'reorder']);
         Route::apiResource('accounts', AccountController::class);
         Route::get('accounts-balance-history', [AccountController::class, 'balanceHistory']);
         Route::get('accounts-balance-comparison', [AccountController::class, 'balanceComparison']);
@@ -119,6 +129,8 @@ Route::middleware(['session', 'csrf'])->group(function () {
 
         Route::apiResource('transactions', TransactionController::class);
         Route::post('transactions/{transaction}/duplicate', [TransactionController::class, 'duplicate']);
+        Route::post('transactions/{transaction}/confirm', [TransactionController::class, 'confirm']);
+        Route::post('transactions/{transaction}/skip', [TransactionController::class, 'skip']);
         Route::get('transactions-summary', [TransactionController::class, 'summary']);
 
         // Universal S3-compatible multipart uploads (Uppy AwsS3 companion protocol)
@@ -143,7 +155,6 @@ Route::middleware(['session', 'csrf'])->group(function () {
         // Recurring Transactions
         Route::get('recurring-upcoming', [RecurringTransactionController::class, 'upcoming']);
         Route::apiResource('recurring', RecurringTransactionController::class);
-        Route::post('recurring/{recurring}/skip', [RecurringTransactionController::class, 'skip']);
 
         Route::apiResource('tags', TagController::class);
 
@@ -180,6 +191,7 @@ Route::middleware(['session', 'csrf'])->group(function () {
             Route::post('/', [BackupController::class, 'store']);
             Route::post('upload', [BackupController::class, 'upload']);
             Route::get('{backup}/download', [BackupController::class, 'download']);
+            Route::get('{backup}/inspect', [BackupController::class, 'inspect']);
             Route::post('{backup}/restore', [BackupController::class, 'restore']);
             Route::delete('{backup}', [BackupController::class, 'destroy']);
         });

@@ -2,7 +2,7 @@ import { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, ChevronRight } from 'lucide-react'
 import { useSsoPresets } from '@/hooks/use-sso'
-import { isCustomPreset } from './presetMeta'
+import { isCustomPreset, ssoPresetLabel } from './presetMeta'
 import { BrandIcon, brandAccent } from './BrandIcon'
 import type { SsoPresetCatalogEntry } from '@/types/sso'
 
@@ -11,6 +11,7 @@ interface PresetChooserProps {
 }
 
 function PresetCard({ preset, onSelect }: { preset: SsoPresetCatalogEntry; onSelect: (key: string) => void }) {
+    const { t } = useTranslation('forms')
     const brand: CSSProperties & { '--brand': string } = {
         '--brand': brandAccent(preset.key) ?? 'var(--muted-foreground)',
     }
@@ -32,7 +33,7 @@ function PresetCard({ preset, onSelect }: { preset: SsoPresetCatalogEntry; onSel
                 <BrandIcon preset={preset.key} className="size-5" />
             </div>
             <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{preset.label}</p>
+                <p className="truncate font-medium">{ssoPresetLabel(preset, t)}</p>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">{preset.protocol}</p>
             </div>
             <ChevronRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />

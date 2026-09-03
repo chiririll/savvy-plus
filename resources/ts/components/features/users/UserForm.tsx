@@ -1,8 +1,10 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
     Form,
     FormField,
@@ -29,39 +31,65 @@ import { useUser } from '@/stores/auth'
 import { FormWrapper } from '@/components/shared/FormWrapper'
 
 interface UserFormProps {
-    defaultValues?: Partial<UpdateUserFormData> & { id?: number }
+    defaultValues?: Partial<CreateUserFormData> & Partial<UpdateUserFormData> & { id?: number }
     onSubmit: (data: CreateUserFormData | UpdateUserFormData) => void
+    onValuesChange?: (data: CreateUserFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
     isEdit?: boolean
+    formId?: string
+    hideSubmit?: boolean
 }
 
 export function UserForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
     isEdit = false,
+    formId,
+    hideSubmit = false,
 }: UserFormProps) {
     const { t } = useTranslation(['common', 'forms'])
     const currentUser = useUser()
     const isEditingSelf = isEdit && defaultValues?.id === currentUser?.id
 
-    const form = useForm<CreateUserFormData | UpdateUserFormData>({
-        resolver: zodResolver(isEdit ? updateUserSchema : createUserSchema),
+    const form = useForm<CreateUserFormData>({
+        resolver: zodResolver(isEdit ? updateUserSchema : createUserSchema) as Resolver<CreateUserFormData>,
         defaultValues: {
             name: '',
             email: '',
             password: '',
             role: 'read-only',
+            setPassword: false,
             ...defaultValues,
         },
     })
 
+    const setPassword = form.watch('setPassword')
+    const showPassword = isEdit || setPassword
+
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as CreateUserFormData)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
+
     return (
         <FormWrapper>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-md space-y-4">
+                <form
+                    id={formId}
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                >
                     <FormField
                         control={form.control}
                         name="name"
@@ -90,28 +118,53 @@ export function UserForm({
                         )}
                     />
 
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{isEdit ? t('forms:users.newPassword') : t('fields.password')}</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="password"
-                                        placeholder={isEdit ? t('forms:users.passwordKeepPlaceholder') : t('forms:users.passwordPlaceholder')}
-                                        {...field}
-                                    />
-                                </FormControl>
-                                {isEdit && (
-                                    <FormDescription>
-                                        {t('forms:users.passwordKeepHelp')}
-                                    </FormDescription>
-                                )}
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {!isEdit && (
+                        <FormField
+                            control={form.control}
+                            name="setPassword"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                    <FormControl>
+                                        <Checkbox
+                                            checked={Boolean(field.value)}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                    <div className="space-y-1 leading-none">
+                                        <FormLabel>{t('forms:users.setPassword')}</FormLabel>
+                                        <FormDescription>
+                                            {t('forms:users.setPasswordHelp')}
+                                        </FormDescription>
+                                    </div>
+                                </FormItem>
+                            )}
+                        />
+                    )}
+
+                    {showPassword && (
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{isEdit ? t('forms:users.newPassword') : t('fields.password')}</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder={isEdit ? t('forms:users.passwordKeepPlaceholder') : t('forms:users.passwordPlaceholder')}
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    {isEdit && (
+                                        <FormDescription>
+                                            {t('forms:users.passwordKeepHelp')}
+                                        </FormDescription>
+                                    )}
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
 
                     <FormField
                         control={form.control}
@@ -145,9 +198,11 @@ export function UserForm({
                         )}
                     />
 
-                    <Button type="submit" disabled={isSubmitting} className="w-full">
-                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                    </Button>
+                    {!hideSubmit && (
+                        <Button type="submit" disabled={isSubmitting} className="w-full">
+                            {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                        </Button>
+                    )}
                 </form>
             </Form>
         </FormWrapper>

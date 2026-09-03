@@ -19,9 +19,10 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins, Check, SkipForward } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn, formatCurrency } from '@/lib/utils'
+import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import i18n, { intlLocale } from '@/lib/i18n'
 
 const TYPE_CONFIG = {
@@ -30,13 +31,25 @@ const TYPE_CONFIG = {
     transfer: { icon: ArrowLeftRight, color: 'text-blue-600', bg: 'bg-blue-100', label: 'Transfer' },
     debt_payment: { icon: Banknote, color: 'text-orange-600', bg: 'bg-orange-100', label: 'Debt Payment' },
     debt_collection: { icon: HandCoins, color: 'text-purple-600', bg: 'bg-purple-100', label: 'Debt Collection' },
+    debt_lend: { icon: HandCoins, color: 'text-red-600', bg: 'bg-red-100', label: 'Debt Issued' },
+    debt_borrow: { icon: Banknote, color: 'text-green-600', bg: 'bg-green-100', label: 'Loan Received' },
 }
 
-export function createTransactionColumns(
-    onDelete: (id: number) => void,
-    onDuplicate: (id: number) => void,
+interface ColumnsOptions {
+    onDelete: (id: number) => void
+    onDuplicate: (id: number) => void
+    onConfirm?: (id: number) => void
+    onSkip?: (id: number) => void
     isReadOnly?: boolean
-): ColumnDef<Transaction>[] {
+}
+
+export function createTransactionColumns({
+    onDelete,
+    onDuplicate,
+    onConfirm,
+    onSkip,
+    isReadOnly,
+}: ColumnsOptions): ColumnDef<Transaction>[] {
     return [
         {
             id: 'expand',
@@ -66,9 +79,21 @@ export function createTransactionColumns(
             accessorKey: 'date',
             header: () => i18n.t('pages:transactions.columns.date'),
             cell: ({ row }) => (
-                <span className="font-mono text-sm">
-                    {new Date(row.original.date).toLocaleDateString(intlLocale())}
-                </span>
+                <div className="flex flex-col gap-1">
+                    <span className="font-mono text-sm">
+                        {new Date(row.original.date).toLocaleDateString(intlLocale())}
+                    </span>
+                    {row.original.status === 'skipped' && (
+                        <Badge variant="secondary" className="w-fit text-xs">
+                            {i18n.t('pages:transactions.status.skipped')}
+                        </Badge>
+                    )}
+                    {row.original.status === 'pending' && (
+                        <Badge variant="outline" className="w-fit text-xs">
+                            {i18n.t('pages:transactions.status.pending')}
+                        </Badge>
+                    )}
+                </div>
             ),
         },
         {
@@ -90,23 +115,16 @@ export function createTransactionColumns(
             accessorKey: 'description',
             header: () => i18n.t('pages:transactions.columns.description'),
             cell: ({ row }) => {
-                const { description, category, account, toAccount, type, itemsCount, tags } = row.original
-
-                const getDefaultDescription = () => {
-                    if (type === 'transfer') return `${account.name} → ${toAccount?.name}`
-                    if (type === 'debt_payment') return i18n.t('pages:transactions.fallback.payment', { name: toAccount?.name })
-                    if (type === 'debt_collection') return i18n.t('pages:transactions.fallback.collection', { name: toAccount?.name })
-                    return category?.name
-                }
+                const { category, account, toAccount, type, itemsCount, tags } = row.original
 
                 const getSubDescription = () => {
                     if (type === 'transfer') {
                         return <span>{account.name} → {toAccount?.name}</span>
                     }
-                    if (type === 'debt_payment') {
+                    if (type === 'debt_payment' || type === 'debt_lend') {
                         return <span>{account.name} → {toAccount?.name}</span>
                     }
-                    if (type === 'debt_collection') {
+                    if (type === 'debt_collection' || type === 'debt_borrow') {
                         return <span>{toAccount?.name} → {account.name}</span>
                     }
                     return (
@@ -120,7 +138,7 @@ export function createTransactionColumns(
                 return (
                     <div className="space-y-1">
                         <div className="font-medium">
-                            {description || getDefaultDescription()}
+                            {displayTransactionDescription(row.original)}
                         </div>
                         <div className="text-xs text-muted-foreground">
                             {getSubDescription()}
@@ -145,18 +163,18 @@ export function createTransactionColumns(
             accessorKey: 'amount',
             header: () => <div className="text-right">{i18n.t('pages:transactions.columns.amount')}</div>,
             cell: ({ row }) => {
-                const { type, amount, toAmount, account, toAccount } = row.original
-                const isIncoming = type === 'income' || type === 'debt_collection'
+                const { type, amount, toAmount, account, toAccount, status } = row.original
+                const { sign, className } = transactionAmountAppearance(type)
                 const isTransfer = type === 'transfer'
-                const isDebtPayment = type === 'debt_payment'
 
                 return (
                     <div className="text-right space-y-1">
                         <div className={cn(
                             'font-mono font-semibold',
-                            isIncoming ? 'text-green-600' : isTransfer ? 'text-blue-600' : isDebtPayment ? 'text-orange-600' : 'text-red-600'
+                            className,
+                            status === 'pending' && 'opacity-60',
                         )}>
-                            {isIncoming ? '+' : '-'}{formatCurrency(amount, account.currency)}
+                            {sign}{formatCurrency(amount, account.currency)}
                         </div>
                         {isTransfer && toAmount && toAccount && (
                             <div className="text-xs text-muted-foreground font-mono">
@@ -179,18 +197,33 @@ export function createTransactionColumns(
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            {transaction.status !== 'skipped' && (
                             <DropdownMenuItem asChild>
                                 <Link to={`/transactions/${transaction.id}/edit`}>
                                     <Pencil className="mr-2 size-4" />
                                     {i18n.t('actions.edit')}
                                 </Link>
                             </DropdownMenuItem>
-                            {!isReadOnly && (
+                            )}
+                            {!isReadOnly && transaction.status === 'pending' && onConfirm && (
+                            <DropdownMenuItem onClick={() => onConfirm(transaction.id)}>
+                                <Check className="mr-2 size-4" />
+                                {i18n.t('actions.confirm')}
+                            </DropdownMenuItem>
+                            )}
+                            {!isReadOnly && transaction.status === 'pending' && transaction.recurringTransactionId && onSkip && (
+                            <DropdownMenuItem onClick={() => onSkip(transaction.id)}>
+                                <SkipForward className="mr-2 size-4" />
+                                {i18n.t('actions.skip')}
+                            </DropdownMenuItem>
+                            )}
+                            {!isReadOnly && transaction.status !== 'skipped' && (
                             <>
                             <DropdownMenuItem onClick={() => onDuplicate(transaction.id)}>
                                 <Copy className="mr-2 size-4" />
                                 {i18n.t('actions.duplicate')}
                             </DropdownMenuItem>
+                            {!(transaction.status === 'pending' && transaction.recurringTransactionId) && (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <DropdownMenuItem
@@ -219,6 +252,7 @@ export function createTransactionColumns(
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
+                            )}
                             </>
                             )}
                         </DropdownMenuContent>

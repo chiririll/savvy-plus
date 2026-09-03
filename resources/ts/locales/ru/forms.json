@@ -1,6 +1,10 @@
 {
     "selectAccountType": "Выберите тип счёта",
     "selectCurrency": "Выберите валюту",
+    "searchCurrency": "Поиск валюты...",
+    "currencyYour": "Ваши валюты",
+    "currencyCatalog": "Добавить валюту",
+    "currencyEmpty": "Валюты не найдены",
     "selectAccount": "Выберите счёт",
     "selectCategory": "Выберите категорию",
     "selectType": "Выберите тип",
@@ -13,7 +17,8 @@
     "accounts": {
         "initialBalance": "Начальный баланс",
         "initialBalanceHelp": "Стартовый баланс этого счёта",
-        "activeHelp": "Неактивные счета скрыты в списках"
+        "activeHelp": "Неактивные счета скрыты в списках",
+        "currencyCatalogHelp": "Если валюты ещё нет в списке, она создастся вместе со счётом."
     },
     "categories": {
         "namePlaceholder": "Продукты",
@@ -41,7 +46,8 @@
         "price": "Цена",
         "total": "Итого",
         "itemName": "Название",
-        "noItems": "Нет позиций. Нажмите «Добавить позицию» или введите сумму вручную."
+        "noItems": "Нет позиций. Нажмите «Добавить позицию» или введите сумму вручную.",
+        "pendingHint": "Дата в будущем. Транзакция останется отложенной и не изменит баланс, пока вы её не подтвердите."
     },
     "currencies": {
         "code": "Код",
@@ -63,7 +69,9 @@
         "newPassword": "Новый пароль",
         "passwordKeepPlaceholder": "Оставьте пустым, чтобы не менять",
         "passwordKeepHelp": "Оставьте пустым, чтобы сохранить текущий пароль",
-        "cannotChangeOwnRole": "Нельзя изменить собственную роль"
+        "cannotChangeOwnRole": "Нельзя изменить собственную роль",
+        "setPassword": "Задать пароль",
+        "setPasswordHelp": "Если не отмечено, пользователь получит ссылку и сам придумает пароль"
     },
     "debts": {
         "targetAmount": "Целевая сумма",
@@ -71,9 +79,16 @@
         "iOweHelp": "Деньги, которые нужно вернуть",
         "owedToMeHelp": "Деньги, которые вам должны вернуть",
         "amountHelp": "Общая сумма долга",
+        "insufficientFunds": "Недостаточно средств. Доступно: {{available}}",
         "counterparty": "Контрагент",
         "counterpartyPlaceholder": "Иван Иванов / название банка",
         "counterpartyHelp": "Кому вы должны или кто должен вам",
+        "originNew": "Новая операция",
+        "originExisting": "Уже есть",
+        "originNewHelp": "Деньги спишутся или придут на выбранный счёт",
+        "originExistingHelp": "Учесть долг, который уже висит. Балансы счетов не изменятся.",
+        "issuedDate": "Дата выдачи",
+        "issuedDateHelp": "Когда деньги ушли или пришли",
         "dueDate": "Срок",
         "dueDateHelp": "Необязательный срок погашения",
         "notesPlaceholder": "Дополнительные заметки об этом долге...",
@@ -257,7 +272,34 @@
         "continueWith": "Продолжить с {{name}}",
         "providerFallback": "провайдер",
         "visibleOnLogin": "Виден на экране входа",
-        "hiddenOnLogin": "Скрыт — включите, чтобы показать на входе"
+        "hiddenOnLogin": "Скрыт — включите, чтобы показать на входе",
+        "presets": {
+            "custom_oidc": "Свой OIDC",
+            "custom_saml": "Свой SAML"
+        },
+        "fields": {
+            "client_id": "Client ID",
+            "client_secret": "Client secret",
+            "tenant": "Tenant ID",
+            "domain": "Домен Okta",
+            "auth_server_id": "ID сервера авторизации",
+            "base_url": "Базовый URL",
+            "gitlab_base_url": "Базовый URL GitLab",
+            "keycloak_base_url": "Базовый URL Keycloak",
+            "authentik_base_url": "Базовый URL Authentik",
+            "realm": "Realm",
+            "app_slug": "Slug приложения",
+            "discovery_url": "Discovery URL",
+            "scopes": "Scopes (через пробел)",
+            "idp_entity_id": "IdP Entity ID",
+            "idp_sso_url": "IdP SSO URL",
+            "idp_x509_cert": "Сертификат IdP X.509",
+            "idp_x509_cert_standby": "Резервный сертификат (ротация)"
+        },
+        "placeholders": {
+            "auth_server_id": "default (оставьте пустым для org-сервера)",
+            "scopes": "openid profile email"
+        }
     },
     "import": {
         "dateColumn": "Колонка даты *",

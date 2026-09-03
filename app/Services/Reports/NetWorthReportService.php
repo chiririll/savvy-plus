@@ -66,12 +66,14 @@ class NetWorthReportService
         $end = $dateRange['end'];
 
         $labels = [];
+        $dates = [];
         $data = [];
 
         $current = $start->copy();
         while ($current->lte($end)) {
             $periodEnd = $this->periodGenerator->getPeriodEnd($current, $end, $groupBy);
             $labels[] = $this->periodGenerator->getPeriodLabel($current, $groupBy);
+            $dates[] = $current->toDateString();
 
             $accounts = $this->getNetWorthAtDate($periodEnd, $filters);
             $data[] = round(array_sum(array_column($accounts, 'balance')), 2);
@@ -81,6 +83,7 @@ class NetWorthReportService
 
         return [
             'labels' => $labels,
+            'dates' => $dates,
             'values' => $data,
             'currency' => Currency::baseCode(),
         ];
@@ -91,6 +94,7 @@ class NetWorthReportService
         $accountsQuery = Account::query()
             ->where('is_active', true)
             ->regularAccounts()
+            ->ordered()
             ->with('currency');
 
         if (! empty($filters->accountIds)) {

@@ -9,6 +9,8 @@ enum TransactionType: string
     case Transfer = 'transfer';
     case DebtPayment = 'debt_payment';
     case DebtCollection = 'debt_collection';
+    case DebtLend = 'debt_lend';
+    case DebtBorrow = 'debt_borrow';
 
     public function label(): string
     {
@@ -18,6 +20,8 @@ enum TransactionType: string
             self::Transfer => __('messages.enums.transaction.transfer'),
             self::DebtPayment => __('messages.enums.transaction.debt_payment'),
             self::DebtCollection => __('messages.enums.transaction.debt_collection'),
+            self::DebtLend => __('messages.enums.transaction.debt_lend'),
+            self::DebtBorrow => __('messages.enums.transaction.debt_borrow'),
         };
     }
 
@@ -28,7 +32,7 @@ enum TransactionType: string
 
     public function isDebtOperation(): bool
     {
-        return in_array($this, [self::DebtPayment, self::DebtCollection]);
+        return in_array($this, [self::DebtPayment, self::DebtCollection, self::DebtLend, self::DebtBorrow]);
     }
 
     /**
@@ -47,6 +51,8 @@ enum TransactionType: string
             self::Transfer => -1,
             self::DebtPayment => -1,
             self::DebtCollection => 1,
+            self::DebtLend => -1,
+            self::DebtBorrow => 1,
         };
     }
 }

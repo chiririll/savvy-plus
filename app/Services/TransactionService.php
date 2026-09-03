@@ -5,11 +5,13 @@ namespace App\Services;
 use App\Builders\TransactionQueryBuilder;
 use App\DTOs\TransactionData;
 use App\DTOs\TransactionFilterData;
+use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use App\Enums\TriggerType;
 use App\Models\Account;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
+use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -52,16 +54,21 @@ class TransactionService
             return $transaction->load(['account.currency', 'toAccount.currency', 'category', 'items', 'tags']);
         });
 
-        // Process automation rules after transaction is created
-        $this->automationService->process(TriggerType::OnTransactionCreate, $transaction);
+        if ($transaction->status === TransactionStatus::Confirmed) {
+            $this->automationService->process(TriggerType::OnTransactionCreate, $transaction);
+        }
 
         return $transaction->fresh(['account.currency', 'toAccount.currency', 'category', 'items', 'tags']);
     }
 
     public function update(Transaction $transaction, TransactionData $data): Transaction
     {
+        if ($transaction->isSkipped()) {
+            throw new DomainException(__('messages.transactions.cannot_edit_skipped'));
+        }
+
         $transaction = DB::transaction(function () use ($transaction, $data) {
-            $transactionData = $this->prepareTransactionData($data);
+            $transactionData = $this->prepareTransactionData($data, $transaction);
             $transaction->update($transactionData);
 
             if ($data->items !== null) {
@@ -79,17 +86,64 @@ class TransactionService
             return $transaction->load(['account.currency', 'toAccount.currency', 'category', 'items', 'tags']);
         });
 
-        // Process automation rules after transaction is updated
-        $this->automationService->process(TriggerType::OnTransactionUpdate, $transaction);
+        if ($transaction->status === TransactionStatus::Confirmed) {
+            $this->automationService->process(TriggerType::OnTransactionUpdate, $transaction);
+        }
 
         return $transaction->fresh(['account.currency', 'toAccount.currency', 'category', 'items', 'tags']);
     }
 
     public function delete(Transaction $transaction): void
     {
+        if ($transaction->isRecurringLinked() && ($transaction->isPending() || $transaction->isSkipped())) {
+            throw new DomainException(__('messages.transactions.cannot_delete_recurring'));
+        }
+
         DB::transaction(function () use ($transaction) {
             $transaction->items()->delete();
             $transaction->delete();
+        });
+    }
+
+    public function confirm(Transaction $transaction): Transaction
+    {
+        if (! $transaction->isPending()) {
+            throw new DomainException(__('messages.transactions.not_pending'));
+        }
+
+        $this->assertSufficientFunds($transaction);
+
+        $transaction = DB::transaction(function () use ($transaction) {
+            $transaction->update(['status' => TransactionStatus::Confirmed]);
+
+            if ($transaction->recurring_transaction_id) {
+                app(RecurringTransactionService::class)->advanceAfterOccurrence(
+                    $transaction->recurringTransaction
+                );
+            }
+
+            return $transaction->fresh(['account.currency', 'toAccount.currency', 'category', 'items', 'tags']);
+        });
+
+        $this->automationService->process(TriggerType::OnTransactionCreate, $transaction);
+
+        return $transaction->fresh(['account.currency', 'toAccount.currency', 'category', 'items', 'tags']);
+    }
+
+    public function skip(Transaction $transaction): Transaction
+    {
+        if (! $transaction->isPending() || ! $transaction->isRecurringLinked()) {
+            throw new DomainException(__('messages.transactions.cannot_skip'));
+        }
+
+        return DB::transaction(function () use ($transaction) {
+            $transaction->update(['status' => TransactionStatus::Skipped]);
+
+            app(RecurringTransactionService::class)->advanceAfterOccurrence(
+                $transaction->recurringTransaction
+            );
+
+            return $transaction->fresh(['account.currency', 'toAccount.currency', 'category', 'items', 'tags']);
         });
     }
 
@@ -98,6 +152,8 @@ class TransactionService
         return DB::transaction(function () use ($transaction) {
             $newTransaction = $transaction->replicate(['created_at', 'updated_at']);
             $newTransaction->date = now()->toDateString();
+            $newTransaction->status = TransactionStatus::Confirmed;
+            $newTransaction->recurring_transaction_id = null;
             $newTransaction->save();
 
             foreach ($transaction->items as $item) {
@@ -114,8 +170,25 @@ class TransactionService
 
     public function getSummary(TransactionFilterData $filters): array
     {
+        $summaryFilters = new TransactionFilterData(
+            type: $filters->type,
+            accountId: $filters->accountId,
+            categoryId: $filters->categoryId,
+            categoryIds: $filters->categoryIds,
+            tagIds: $filters->tagIds,
+            startDate: $filters->startDate,
+            endDate: $filters->endDate,
+            minAmount: $filters->minAmount,
+            maxAmount: $filters->maxAmount,
+            search: $filters->search,
+            sortBy: $filters->sortBy,
+            sortDirection: $filters->sortDirection,
+            perPage: $filters->perPage,
+            status: TransactionStatus::Confirmed,
+        );
+
         $transactions = TransactionQueryBuilder::make()
-            ->applyFilters($filters)
+            ->applyFilters($summaryFilters)
             ->getQuery()
             ->with('account.currency')
             ->get();
@@ -126,7 +199,6 @@ class TransactionService
         $expense = 0.0;
 
         foreach ($transactions as $transaction) {
-            // Skip debt operations - they don't affect income/expense
             if ($transaction->type->isDebtOperation()) {
                 continue;
             }
@@ -139,7 +211,6 @@ class TransactionService
             } elseif ($transaction->type === TransactionType::Expense) {
                 $expense += $amountInBase;
             }
-            // Transfer doesn't affect total balance - money just moves between accounts
         }
 
         return [
@@ -151,7 +222,14 @@ class TransactionService
         ];
     }
 
-    private function prepareTransactionData(TransactionData $data): array
+    public function resolveStatusForDate(string $date): TransactionStatus
+    {
+        return $date > now()->toDateString()
+            ? TransactionStatus::Pending
+            : TransactionStatus::Confirmed;
+    }
+
+    private function prepareTransactionData(TransactionData $data, ?Transaction $existing = null): array
     {
         $prepared = [
             'type' => $data->type,
@@ -161,6 +239,11 @@ class TransactionService
             'description' => $data->description,
             'date' => $data->date,
         ];
+
+        if ($existing === null) {
+            $prepared['status'] = $data->status ?? $this->resolveStatusForDate($data->date);
+            $prepared['recurring_transaction_id'] = $data->recurringTransactionId;
+        }
 
         if ($data->type->isTransfer()) {
             $prepared['to_account_id'] = $data->toAccountId;
@@ -173,6 +256,20 @@ class TransactionService
         }
 
         return $prepared;
+    }
+
+    private function assertSufficientFunds(Transaction $transaction): void
+    {
+        if (! in_array($transaction->type, [TransactionType::Expense, TransactionType::Transfer], true)) {
+            return;
+        }
+
+        $account = $transaction->account;
+        if ($account && $account->current_balance < (float) $transaction->amount) {
+            throw new DomainException(__('messages.validation.insufficient_funds', [
+                'available' => number_format($account->current_balance, 2),
+            ]));
+        }
     }
 
     private function calculateToAmount(TransactionData $data): float

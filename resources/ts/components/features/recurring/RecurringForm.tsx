@@ -26,7 +26,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { recurringSchema, RecurringFormData } from '@/schemas'
 import { useAccounts, useCategories, useTags } from '@/hooks'
 import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+import { cn, formatDateLocal } from '@/lib/utils'
 import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react'
 import { AccountSelect } from '@/components/shared/AccountSelect'
 import { CategorySelect } from '@/components/shared/CategorySelect'
@@ -35,8 +35,11 @@ import { FormWrapper } from '@/components/shared/FormWrapper'
 interface RecurringFormProps {
     defaultValues?: Partial<RecurringFormData>
     onSubmit: (data: RecurringFormData) => void
+    onValuesChange?: (data: RecurringFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
+    formId?: string
+    hideSubmit?: boolean
 }
 
 const typeOptions = [
@@ -51,8 +54,11 @@ const weekdayValues = [0, 1, 2, 3, 4, 5, 6] as const
 export function RecurringForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
+    formId,
+    hideSubmit,
 }: RecurringFormProps) {
     const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
@@ -71,9 +77,9 @@ export function RecurringForm({
             description: '',
             frequency: 'monthly',
             interval: 1,
-            day_of_week: null,
-            day_of_month: 1,
-            start_date: new Date().toISOString().split('T')[0],
+            day_of_week: new Date().getDay(),
+            day_of_month: new Date().getDate(),
+            start_date: formatDateLocal(),
             end_date: null,
             is_active: true,
             tag_ids: [],
@@ -108,10 +114,22 @@ export function RecurringForm({
         }
     }, [type, categories, form])
 
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as RecurringFormData)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
+
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-lg space-y-4">
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {/* Type Selection */}
                 <FormField
                     control={form.control}
@@ -145,8 +163,7 @@ export function RecurringForm({
                     )}
                 />
 
-                {/* Account Selection */}
-                <div className={cn('grid gap-4', isTransfer ? 'grid-cols-2' : 'grid-cols-1')}>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField
                         control={form.control}
                         name="account_id"
@@ -162,7 +179,7 @@ export function RecurringForm({
                         )}
                     />
 
-                    {isTransfer && (
+                    {isTransfer ? (
                         <FormField
                             control={form.control}
                             name="to_account_id"
@@ -178,30 +195,27 @@ export function RecurringForm({
                                 </FormItem>
                             )}
                         />
+                    ) : (
+                        <FormField
+                            control={form.control}
+                            name="category_id"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('fields.category')}</FormLabel>
+                                    <CategorySelect
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        type={type as 'income' | 'expense'}
+                                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     )}
                 </div>
 
-                {/* Category (for income/expense) */}
-                {!isTransfer && (
-                    <FormField
-                        control={form.control}
-                        name="category_id"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('fields.category')}</FormLabel>
-                                <CategorySelect
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    type={type as 'income' | 'expense'}
-                                />
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
-
                 {/* Amount */}
-                <div className={cn('grid gap-4', isTransfer ? 'grid-cols-2' : 'grid-cols-1')}>
+                <div className={cn('grid gap-4', isTransfer ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1')}>
                     <FormField
                         control={form.control}
                         name="amount"
@@ -465,9 +479,11 @@ export function RecurringForm({
                     )}
                 />
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>

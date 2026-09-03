@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Transaction;
 
+use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -31,6 +32,7 @@ class TransactionFilterRequest extends FormRequest
             'sort_by' => ['nullable', Rule::in(['date', 'amount', 'created_at'])],
             'sort_direction' => ['nullable', Rule::in(['asc', 'desc'])],
             'per_page' => 'nullable|integer|min:1|max:100',
+            'status' => ['nullable', Rule::enum(TransactionStatus::class)],
         ];
     }
 }

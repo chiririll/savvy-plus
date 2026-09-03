@@ -6,6 +6,10 @@ return [
     'read_only' => 'Read-only access',
     'csrf' => 'CSRF token mismatch.',
     'logged_out' => 'Logged out.',
+    'logged_out_others' => 'Signed out of other devices.',
+    'password_changed' => 'Password updated.',
+    'current_password_incorrect' => 'Current password is incorrect.',
+    'password_sso_only' => 'This account uses SSO and does not have a password.',
     'registration_closed' => 'Registration is closed.',
     'password_login_locked' => 'Enable at least one SSO provider before turning off password sign-in.',
     'password_signin_disabled' => 'Password sign-in is disabled. Use single sign-on instead.',
@@ -13,6 +17,13 @@ return [
 
     'accounts' => [
         'delete_has_transactions' => 'Cannot delete account that has transactions.',
+    ],
+
+    'transactions' => [
+        'not_pending' => 'Only pending transactions can be confirmed.',
+        'cannot_skip' => 'Only a pending scheduled transaction can be skipped.',
+        'cannot_delete_recurring' => 'Scheduled occurrences cannot be deleted. Skip or confirm them instead.',
+        'cannot_edit_skipped' => 'Skipped transactions cannot be edited.',
     ],
 
     'categories' => [
@@ -24,6 +35,9 @@ return [
         'demote_last_admin' => 'Cannot demote the last admin.',
         'delete_self' => 'Cannot delete yourself.',
         'delete_last_admin' => 'Cannot delete the last admin.',
+        'reset_self' => 'You cannot reset your own password this way.',
+        'reset_sso_only' => 'This user signs in with SSO and has no password.',
+        'password_token_invalid' => 'This link is invalid or has expired.',
     ],
 
     'currencies' => [
@@ -35,6 +49,7 @@ return [
         'auto_update_disabled' => 'Auto-update disabled',
         'no_base' => 'No base currency set',
         'no_api_match' => 'No matching currencies found in API',
+        'unknown_code' => 'Unknown currency code: :code',
         'updated' => 'Updated :updated currencies, skipped :skipped',
         'updated_via' => 'Updated :updated currencies via :ref, skipped :skipped',
     ],
@@ -48,6 +63,8 @@ return [
         'cannot_use_debt_target' => 'Cannot use debt account as target.',
         'delete_with_history' => 'Cannot delete debt with payment history.',
         'not_paid_off' => 'Debt is not paid off.',
+        'issued' => 'Issued debt: :name',
+        'borrowed' => 'Received loan: :name',
     ],
 
     'sso' => [
@@ -135,6 +152,9 @@ return [
 
     'backup' => [
         'restored' => 'Database restored successfully',
+        'invalid' => 'This file is not a valid SQLite backup.',
+        'missing' => 'Backup file not found.',
+        'newer' => 'This backup is from a newer version and cannot be restored.',
     ],
 
     'import' => [
@@ -176,6 +196,8 @@ return [
             'transfer' => 'Transfer',
             'debt_payment' => 'Debt Payment',
             'debt_collection' => 'Debt Collection',
+            'debt_lend' => 'Debt Issued',
+            'debt_borrow' => 'Loan Received',
         ],
         'debt' => [
             'i_owe' => 'I Owe',
@@ -228,5 +250,8 @@ return [
         'custom_range_exceeded' => 'Custom range cannot exceed :days days.',
         'invalid_period_value' => 'Invalid period_value format for period_type ":type".',
         'debt_amount_gt' => 'Debt amount must be greater than zero.',
+        'account_required' => 'Please select an account.',
+        'date_required' => 'Please select a date.',
+        'currency_required' => 'Please select a currency.',
     ],
 ];
