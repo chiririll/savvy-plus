@@ -745,7 +745,7 @@ export default function DashboardPage() {
                                 return (
                                     <Link
                                         key={budget.id}
-                                        to={`/budgets/${budget.id}/edit`}
+                                        to={`/budgets?edit=${budget.id}`}
                                         className="block p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                                     >
                                         <div className="flex items-center justify-between mb-2">
@@ -776,7 +776,7 @@ export default function DashboardPage() {
                             <PiggyBank className="size-12 mx-auto text-muted-foreground/50 mb-3" />
                             <p className="text-muted-foreground mb-3">{t('dashboard.noBudgets')}</p>
                             <Button asChild size="sm">
-                                <Link to="/budgets/create">
+                                <Link to="/budgets?create=1">
                                     <Plus className="size-4 mr-1" />
                                     {t('dashboard.createBudget')}
                                 </Link>

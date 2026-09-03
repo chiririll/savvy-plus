@@ -20,8 +20,6 @@ const CategoryCreatePage = lazy(() => import('@/pages/categories/create'))
 const CategoryEditPage = lazy(() => import('@/pages/categories/[id]/edit'))
 const CurrenciesPage = lazy(() => import('@/pages/currencies'))
 const BudgetsPage = lazy(() => import('@/pages/budgets'))
-const BudgetCreatePage = lazy(() => import('@/pages/budgets/create'))
-const BudgetEditPage = lazy(() => import('@/pages/budgets/[id]/edit'))
 const TagsPage = lazy(() => import('@/pages/tags'))
 const TagCreatePage = lazy(() => import('@/pages/tags/create'))
 const TagEditPage = lazy(() => import('@/pages/tags/[id]/edit'))
@@ -69,6 +67,11 @@ function AccountEditRedirect() {
 function CurrencyEditRedirect() {
     const { id } = useParams()
     return <Navigate to={id ? `/currencies?edit=${id}` : '/currencies'} replace />
+}
+
+function BudgetEditRedirect() {
+    const { id } = useParams()
+    return <Navigate to={id ? `/budgets?edit=${id}` : '/budgets'} replace />
 }
 
 const withSuspense = (Component: React.LazyExoticComponent<() => React.JSX.Element>) => (
@@ -128,8 +131,8 @@ export const router = createBrowserRouter([
                     { path: 'currencies/create', element: <Navigate to="/currencies?create=1" replace /> },
                     { path: 'currencies/:id/edit', element: <CurrencyEditRedirect /> },
                     { path: 'budgets', element: withSuspense(BudgetsPage) },
-                    { path: 'budgets/create', element: withSuspense(BudgetCreatePage) },
-                    { path: 'budgets/:id/edit', element: withSuspense(BudgetEditPage) },
+                    { path: 'budgets/create', element: <Navigate to="/budgets?create=1" replace /> },
+                    { path: 'budgets/:id/edit', element: <BudgetEditRedirect /> },
                     { path: 'tags', element: withSuspense(TagsPage) },
                     { path: 'tags/create', element: withSuspense(TagCreatePage) },
                     { path: 'tags/:id/edit', element: withSuspense(TagEditPage) },

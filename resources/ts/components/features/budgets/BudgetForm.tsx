@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -30,8 +31,11 @@ import { FormWrapper } from '@/components/shared/FormWrapper'
 interface BudgetFormProps {
     defaultValues?: Partial<BudgetFormData>
     onSubmit: (data: BudgetFormData) => void
+    onValuesChange?: (data: BudgetFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
+    formId?: string
+    hideSubmit?: boolean
 }
 
 const periodOptions = ['weekly', 'monthly', 'yearly', 'one_time'] as const
@@ -39,8 +43,11 @@ const periodOptions = ['weekly', 'monthly', 'yearly', 'one_time'] as const
 export function BudgetForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
+    formId,
+    hideSubmit,
 }: BudgetFormProps) {
     const { t } = useTranslation(['common', 'forms'])
     const { data: categories } = useCategories('expense')
@@ -70,10 +77,22 @@ export function BudgetForm({
     const isGlobal = form.watch('is_global')
     const period = form.watch('period')
 
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as BudgetFormData)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
+
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-lg space-y-4">
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                     control={form.control}
                     name="name"
@@ -363,9 +382,11 @@ export function BudgetForm({
                     )}
                 />
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>
