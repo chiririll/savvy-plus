@@ -16,6 +16,7 @@ class Account extends Model
         'currency_id',
         'initial_balance',
         'is_active',
+        'sort_order',
         'debt_type',
         'target_amount',
         'due_date',
@@ -29,9 +30,25 @@ class Account extends Model
         'target_amount' => 'decimal:2',
         'is_active' => 'boolean',
         'is_paid_off' => 'boolean',
+        'sort_order' => 'integer',
         'debt_type' => DebtType::class,
         'due_date' => 'date',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Account $account) {
+            if (array_key_exists('sort_order', $account->getAttributes())) {
+                return;
+            }
+
+            $query = $account->isDebt()
+                ? static::query()->debts()
+                : static::query()->regularAccounts();
+
+            $account->sort_order = ($query->max('sort_order') ?? -1) + 1;
+        });
+    }
 
     public function currency(): BelongsTo
     {
@@ -44,6 +61,14 @@ class Account extends Model
     }
 
     // Scopes
+
+    public function scopeOrdered(Builder $query): Builder
+    {
+        return $query
+            ->orderByRaw("CASE WHEN type = 'debt' THEN 1 ELSE 0 END")
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
 
     public function scopeRegularAccounts(Builder $query): Builder
     {

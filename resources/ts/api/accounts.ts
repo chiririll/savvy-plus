@@ -67,6 +67,9 @@ export const accountsApi = {
     delete: (id: number | string) =>
         api.delete<void>(`${ENDPOINT}/${id}`),
 
+    reorder: (ids: number[]) =>
+        api.post<{ success: boolean }, { ids: number[] }>(`${ENDPOINT}/reorder`, { ids }),
+
     getBalanceHistory: async (params?: { start_date?: string; end_date?: string }): Promise<BalanceHistoryResponse> => {
         const searchParams = new URLSearchParams()
         if (params?.start_date) searchParams.set('start_date', params.start_date)

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Account;
 use App\Models\Currency;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class AccountService
 {
@@ -20,7 +21,16 @@ class AccountService
             $query->regularAccounts();
         }
 
-        return $query->get()->each(fn (Account $account) => $this->loadBalance($account));
+        return $query->ordered()->get()->each(fn (Account $account) => $this->loadBalance($account));
+    }
+
+    public function reorder(array $ids): void
+    {
+        DB::transaction(function () use ($ids) {
+            foreach ($ids as $index => $id) {
+                Account::where('id', $id)->update(['sort_order' => $index]);
+            }
+        });
     }
 
     public function findOrFail(int $id): Account
@@ -67,6 +77,7 @@ class AccountService
         $accounts = Account::with('currency')
             ->where('is_active', true)
             ->regularAccounts()
+            ->ordered()
             ->get();
         $accountIds = $accounts->pluck('id')->toArray();
 

@@ -14,6 +14,7 @@ export interface Account extends BaseEntity {
     initialBalance: number
     currentBalance: number
     isActive: boolean
+    sortOrder: number
     currency?: Currency
 }
 

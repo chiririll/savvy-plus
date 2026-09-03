@@ -91,6 +91,7 @@ class NetWorthReportService
         $accountsQuery = Account::query()
             ->where('is_active', true)
             ->regularAccounts()
+            ->ordered()
             ->with('currency');
 
         if (! empty($filters->accountIds)) {

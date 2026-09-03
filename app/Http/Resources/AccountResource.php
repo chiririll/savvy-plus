@@ -17,6 +17,7 @@ class AccountResource extends JsonResource
             'initialBalance' => (float) $this->initial_balance,
             'currentBalance' => (float) $this->current_balance,
             'isActive' => $this->is_active,
+            'sortOrder' => (int) $this->sort_order,
             'currency' => new CurrencyResource($this->whenLoaded('currency')),
             'createdAt' => $this->created_at?->toISOString(),
         ];

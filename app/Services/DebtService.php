@@ -24,7 +24,7 @@ class DebtService
             $query->where('is_paid_off', false);
         }
 
-        return $query->get()->each(fn (Account $debt) => $this->loadDebtData($debt));
+        return $query->ordered()->get()->each(fn (Account $debt) => $this->loadDebtData($debt));
     }
 
     public function getByType(DebtType $type): Collection
@@ -33,6 +33,7 @@ class DebtService
             ->where('type', 'debt')
             ->where('debt_type', $type)
             ->where('is_paid_off', false)
+            ->ordered()
             ->get()
             ->each(fn (Account $debt) => $this->loadDebtData($debt));
     }

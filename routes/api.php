@@ -111,6 +111,7 @@ Route::middleware(['session', 'csrf'])->group(function () {
         Route::post('currencies/{currency}/set-base', [CurrencyController::class, 'setBase']);
         Route::post('currencies/convert', [CurrencyController::class, 'convert']);
 
+        Route::post('accounts/reorder', [AccountController::class, 'reorder']);
         Route::apiResource('accounts', AccountController::class);
         Route::get('accounts-balance-history', [AccountController::class, 'balanceHistory']);
         Route::get('accounts-balance-comparison', [AccountController::class, 'balanceComparison']);

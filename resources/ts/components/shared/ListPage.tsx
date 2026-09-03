@@ -19,6 +19,7 @@ interface ListPageProps<T> {
     emptyTitle?: string
     emptyDescription?: string
     getRowClassName?: (row: Row<T>) => string | undefined
+    onReorder?: (items: T[]) => void
 }
 
 export function ListPage<T>({
@@ -33,6 +34,7 @@ export function ListPage<T>({
     emptyTitle,
     emptyDescription,
     getRowClassName,
+    onReorder,
 }: ListPageProps<T>) {
     const { t } = useTranslation()
     const newLabel = createLabel ?? t('actions.create')
@@ -67,6 +69,7 @@ export function ListPage<T>({
                 emptyDescription={emptyDescription ?? t('table.emptyDescription')}
                 getRowClassName={getRowClassName}
                 emptyAction={emptyAction}
+                onReorder={onReorder}
             />
         </Page>
     )

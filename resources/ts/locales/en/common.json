@@ -24,7 +24,8 @@
         "cannotDeleteLast": "Can't delete last",
         "cannotDeleteSelf": "Can't delete yourself",
         "clear": "Clear",
-        "processing": "Processing..."
+        "processing": "Processing...",
+        "reorder": "Reorder"
     },
     "readOnly": {
         "banner": "You are in read-only mode. You can view all data but cannot make any changes.",
@@ -154,7 +155,8 @@
             "deleted": "Account deleted",
             "createFailed": "Failed to create account",
             "updateFailed": "Failed to update account",
-            "deleteFailed": "Failed to delete account"
+            "deleteFailed": "Failed to delete account",
+            "reorderFailed": "Failed to reorder accounts"
         },
         "category": {
             "created": "Category created",

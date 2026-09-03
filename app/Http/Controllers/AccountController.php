@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Account\ReorderAccountsRequest;
 use App\Http\Requests\Account\StoreAccountRequest;
 use App\Http\Requests\Account\UpdateAccountRequest;
 use App\Http\Resources\AccountCollection;
@@ -57,6 +58,13 @@ class AccountController extends Controller
         $account = $this->accountService->update($account, $request->validated());
 
         return new AccountResource($account);
+    }
+
+    public function reorder(ReorderAccountsRequest $request): JsonResponse
+    {
+        $this->accountService->reorder($request->validated('ids'));
+
+        return response()->json(['success' => true]);
     }
 
     public function destroy(Account $account): JsonResponse
