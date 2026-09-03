@@ -20,7 +20,7 @@ import { useCurrencies, useAccounts } from '@/hooks'
 import { AccountSelect } from '@/components/shared/AccountSelect'
 import { CurrencySelect } from '@/components/shared/CurrencySelect'
 import { Banknote, HandCoins } from 'lucide-react'
-import { FormWrapper } from '@/components/shared/FormWrapper'
+import { FieldHelp, FormWrapper } from '@/components/shared'
 import { cn, formatCurrency, formatDateLocal } from '@/lib/utils'
 
 interface DebtFormProps {
@@ -136,51 +136,47 @@ export function DebtForm({
                     ))}
                 </div>
 
-                <div className="space-y-2">
+                <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>{t('fields.name')}</FormLabel>
+                            <FormControl>
+                                <Input placeholder={t('forms:debts.namePlaceholder')} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {mode === 'create' && (
                     <FormField
                         control={form.control}
-                        name="name"
+                        name="origin"
                         render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('fields.name')}</FormLabel>
+                            <FormItem className="flex flex-row items-center gap-2 space-y-0">
                                 <FormControl>
-                                    <Input placeholder={t('forms:debts.namePlaceholder')} {...field} />
+                                    <Checkbox
+                                        checked={field.value === 'new'}
+                                        onCheckedChange={(checked) => {
+                                            field.onChange(checked === true ? 'new' : 'existing')
+                                        }}
+                                    />
                                 </FormControl>
+                                <FormLabel className="flex items-center gap-1.5 font-normal">
+                                    {t('forms:debts.createTransaction')}
+                                    <FieldHelp>
+                                        {field.value === 'existing'
+                                            ? t('forms:debts.originExistingHelp')
+                                            : t('forms:debts.originNewHelp')}
+                                    </FieldHelp>
+                                </FormLabel>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-
-                    {mode === 'create' && (
-                        <FormField
-                            control={form.control}
-                            name="origin"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                    <FormControl>
-                                        <Checkbox
-                                            checked={field.value === 'new'}
-                                            onCheckedChange={(checked) => {
-                                                field.onChange(checked === true ? 'new' : 'existing')
-                                            }}
-                                        />
-                                    </FormControl>
-                                    <div className="space-y-1 leading-none">
-                                        <FormLabel className="font-normal">
-                                            {t('forms:debts.createTransaction')}
-                                        </FormLabel>
-                                        <FormDescription>
-                                            {field.value === 'existing'
-                                                ? t('forms:debts.originExistingHelp')
-                                                : t('forms:debts.originNewHelp')}
-                                        </FormDescription>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    )}
-                </div>
+                )}
 
                 <div className="space-y-2">
                     <div className="grid grid-cols-2 gap-4">
