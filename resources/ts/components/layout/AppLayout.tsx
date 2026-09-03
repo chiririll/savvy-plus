@@ -15,11 +15,11 @@ export function AppLayout() {
     return (
         <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <AppSidebar />
-            <SidebarInset>
+            <SidebarInset className="min-w-0">
                 <ReadOnlyBanner />
                 <CreateTransactionProvider>
                     <Header />
-                    <main className="flex-1 overflow-y-auto p-6">
+                    <main className="min-w-0 flex-1 overflow-y-auto p-6">
                         <Outlet />
                     </main>
                 </CreateTransactionProvider>

@@ -111,7 +111,8 @@
             "skipped": "Skipped"
         },
         "upcomingTitle": "Due soon",
-        "viewAllPending": "All pending",
+        "skipTitle": "Skip this transaction?",
+        "skipDescription": "This occurrence will be skipped. The next one will still be created on schedule.",
         "itemLabel": "transactions",
         "filters": "Filters",
         "clear": "Clear",

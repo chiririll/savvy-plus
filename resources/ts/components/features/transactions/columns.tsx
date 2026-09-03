@@ -23,6 +23,7 @@ import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, Arro
 import { cn, formatCurrency } from '@/lib/utils'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import i18n, { intlLocale } from '@/lib/i18n'
+import { SkipTransactionAlert } from './SkipTransactionAlert'
 
 const TYPE_CONFIG = {
     income: { icon: ArrowDownLeft, color: 'text-green-600', bg: 'bg-green-100', label: 'Income' },
@@ -165,7 +166,7 @@ export function createTransactionColumns({
             header: () => <div className="text-right">{i18n.t('pages:transactions.columns.amount')}</div>,
             cell: ({ row }) => {
                 const { type, amount, toAmount, account, toAccount, status } = row.original
-                const { sign, className } = transactionAmountAppearance(type)
+                const { sign, className } = transactionAmountAppearance(type, status)
                 const isTransfer = type === 'transfer'
 
                 return (
@@ -179,7 +180,7 @@ export function createTransactionColumns({
                         </div>
                         {isTransfer && toAmount && toAccount && (
                             <div className="text-xs text-muted-foreground font-mono">
-                                → +{formatCurrency(toAmount, toAccount.currency)}
+                                → {status === 'skipped' ? '' : '+'}{formatCurrency(toAmount, toAccount.currency)}
                             </div>
                         )}
                     </div>
@@ -211,10 +212,15 @@ export function createTransactionColumns({
                             </DropdownMenuItem>
                             )}
                             {!isReadOnly && transaction.status === 'pending' && transaction.recurringTransactionId && onSkip && (
-                            <DropdownMenuItem onClick={() => onSkip(transaction.id)}>
-                                <SkipForward className="mr-2 size-4" />
-                                {i18n.t('actions.skip')}
-                            </DropdownMenuItem>
+                            <SkipTransactionAlert
+                                onConfirm={() => onSkip(transaction.id)}
+                                trigger={
+                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                        <SkipForward className="mr-2 size-4" />
+                                        {i18n.t('actions.skip')}
+                                    </DropdownMenuItem>
+                                }
+                            />
                             )}
                             {!isReadOnly && transaction.status !== 'skipped' && (
                             <>

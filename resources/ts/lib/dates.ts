@@ -20,3 +20,15 @@ export function addDaysLocal(date: Date, days: number): string {
 export function isDateInFuture(date: string): boolean {
     return date > formatDateLocal()
 }
+
+/** Overdue → red, within the next 3 days → yellow, later → muted. */
+export function pendingDateClassName(dateKey: string): string {
+    const today = formatDateLocal()
+    if (dateKey < today) {
+        return 'text-red-600'
+    }
+    if (dateKey <= addDaysLocal(new Date(), 3)) {
+        return 'text-yellow-600'
+    }
+    return 'text-muted-foreground'
+}

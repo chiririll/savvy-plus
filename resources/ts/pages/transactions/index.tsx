@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf, parseAsStringLiteral } from 'nuqs'
-import { Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Filter, ArrowUpDown, X, Check, SkipForward } from 'lucide-react'
+import { Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Filter, ArrowUpDown, X } from 'lucide-react'
 import { Row } from '@tanstack/react-table'
 import { Page, PageHeader, DataTable, ServerPagination } from '@/components/shared'
 import { Button } from '@/components/ui/button'
@@ -21,13 +21,12 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { createTransactionColumns, useTransactionFormDialog } from '@/components/features/transactions'
+import { createTransactionColumns, UpcomingPendingCard, useTransactionFormDialog } from '@/components/features/transactions'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTransactions, useTransaction, useDeleteTransaction, useDuplicateTransaction, useConfirmTransaction, useSkipTransaction, useCategories, useTags } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { TransactionType, Transaction } from '@/types'
 import { addDaysLocal, cn, formatCurrency } from '@/lib/utils'
-import { displayTransactionDescription } from '@/lib/transaction-description'
 
 const TYPE_FILTERS: { value: TransactionType | null; labelKey: string; icon?: typeof ArrowDownLeft }[] = [
     { value: null, labelKey: 'all' },
@@ -115,7 +114,7 @@ export default function TransactionsPage() {
         end_date: addDaysLocal(new Date(), 7),
         sort_by: 'date',
         sort_direction: 'asc',
-        per_page: 5,
+        per_page: 20,
     })
     const deleteTransaction = useDeleteTransaction()
     const duplicateTransaction = useDuplicateTransaction()
@@ -250,46 +249,22 @@ export default function TransactionsPage() {
             </Tabs>
 
             {showHighlight && (
-                <Card className="mb-4">
-                    <CardContent className="pt-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium">{t('transactions.upcomingTitle')}</p>
-                            <Button variant="ghost" size="sm" onClick={() => setParams({ status: 'pending', page: 1 })}>
-                                {t('transactions.viewAllPending')}
-                            </Button>
-                        </div>
-                        <div className="space-y-2">
+                <div className="mb-4 min-w-0">
+                    <p className="text-sm font-medium mb-2">{t('transactions.upcomingTitle')}</p>
+                    <div className="overflow-x-auto overscroll-x-contain pb-3">
+                        <div className="flex w-max gap-2">
                             {highlight.map((transaction) => (
-                                <div key={transaction.id} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2">
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium truncate">
-                                            {displayTransactionDescription(transaction)}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {new Date(transaction.date).toLocaleDateString()}
-                                            {' · '}
-                                            {formatCurrency(transaction.amount, transaction.account.currency)}
-                                        </p>
-                                    </div>
-                                    {!isReadOnly && (
-                                        <div className="flex gap-1 shrink-0">
-                                            <Button size="sm" variant="outline" onClick={() => confirmTransaction.mutate(transaction.id)}>
-                                                <Check className="size-4 mr-1" />
-                                                {t('common:actions.confirm')}
-                                            </Button>
-                                            {transaction.recurringTransactionId && (
-                                                <Button size="sm" variant="ghost" onClick={() => skipTransaction.mutate(transaction.id)}>
-                                                    <SkipForward className="size-4 mr-1" />
-                                                    {t('common:actions.skip')}
-                                                </Button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
+                                <UpcomingPendingCard
+                                    key={transaction.id}
+                                    transaction={transaction}
+                                    isReadOnly={isReadOnly}
+                                    onConfirm={(id) => confirmTransaction.mutate(id)}
+                                    onSkip={(id) => skipTransaction.mutate(id)}
+                                />
                             ))}
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             )}
 
             {/* Type Filter & Sort */}

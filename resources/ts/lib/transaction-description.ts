@@ -1,5 +1,5 @@
 import i18n from '@/lib/i18n'
-import type { Transaction, TransactionType } from '@/types'
+import type { Transaction, TransactionStatus, TransactionType } from '@/types/transactions'
 
 const INCOMING_TYPES: TransactionType[] = ['income', 'debt_collection', 'debt_borrow']
 const OUTGOING_TYPES: TransactionType[] = ['expense', 'debt_payment', 'debt_lend']
@@ -34,10 +34,16 @@ export function displayTransactionDescription(
     }
 }
 
-export function transactionAmountAppearance(type: TransactionType): {
+export function transactionAmountAppearance(
+    type: TransactionType,
+    status?: TransactionStatus,
+): {
     sign: '+' | '-' | ''
     className: string
 } {
+    if (status === 'skipped') {
+        return { sign: '', className: 'text-muted-foreground' }
+    }
     if (INCOMING_TYPES.includes(type)) {
         return { sign: '+', className: 'text-green-600' }
     }
