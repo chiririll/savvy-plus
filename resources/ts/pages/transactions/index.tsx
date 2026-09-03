@@ -268,41 +268,47 @@ export default function TransactionsPage() {
             )}
 
             {/* Type Filter & Sort */}
-            <div className="flex items-center justify-between gap-4 mb-4">
-                <div className="flex gap-2">
-                    {TYPE_FILTERS.map(({ value, labelKey, icon: Icon }) => (
-                        <Button
-                            key={labelKey}
-                            variant={params.type === value ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setParams({ type: value, page: 1 })}
-                        >
-                            {Icon && <Icon className="size-4 mr-1" />}
-                            {labelKey === 'all' ? t('common:actions.all') : t(`transactions.types.${labelKey}`)}
-                        </Button>
-                    ))}
+            <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="grid min-w-0 grid-cols-4 gap-1.5 sm:flex sm:gap-2">
+                    {TYPE_FILTERS.map(({ value, labelKey, icon: Icon }) => {
+                        const label = labelKey === 'all'
+                            ? t('common:actions.all')
+                            : t(`transactions.types.${labelKey}`)
+
+                        return (
+                            <Button
+                                key={labelKey}
+                                variant={params.type === value ? 'default' : 'outline'}
+                                size="sm"
+                                className="min-w-0 px-2 sm:shrink-0 sm:px-2.5"
+                                onClick={() => setParams({ type: value, page: 1 })}
+                                aria-pressed={params.type === value}
+                            >
+                                {Icon && <Icon className="hidden size-4 sm:block" />}
+                                <span className="truncate">{label}</span>
+                            </Button>
+                        )
+                    })}
                 </div>
-                <div className="flex items-center gap-2">
-                    <Select
-                        value={`${params.sortBy}:${params.sortDir}`}
-                        onValueChange={(val) => {
-                            const [sortBy, sortDir] = val.split(':') as ['date' | 'amount', 'asc' | 'desc']
-                            setParams({ sortBy, sortDir, page: 1 })
-                        }}
-                    >
-                        <SelectTrigger className="w-[180px] h-9">
-                            <ArrowUpDown className="size-4 mr-2" />
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {SORT_OPTIONS.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                    {t(`transactions.sort.${opt.labelKey}`)}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+                <Select
+                    value={`${params.sortBy}:${params.sortDir}`}
+                    onValueChange={(val) => {
+                        const [sortBy, sortDir] = val.split(':') as ['date' | 'amount', 'asc' | 'desc']
+                        setParams({ sortBy, sortDir, page: 1 })
+                    }}
+                >
+                    <SelectTrigger className="h-9 w-full min-w-0 sm:w-[180px]">
+                        <ArrowUpDown className="size-4" />
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {SORT_OPTIONS.map(opt => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                                {t(`transactions.sort.${opt.labelKey}`)}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Advanced Filters */}
