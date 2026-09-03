@@ -7,12 +7,10 @@ export const accountSchema = z.object({
         .max(255, i18n.t('validation.maxChars', { count: 255 })),
 
     type: z.enum(['bank', 'crypto', 'cash'], {
-        required_error: i18n.t('validation.selectAccountType'),
+        error: i18n.t('validation.selectAccountType'),
     }),
 
-    currency_id: z.coerce.number({
-        required_error: i18n.t('validation.selectCurrency'),
-    }).positive(i18n.t('validation.selectCurrency')),
+    currency: z.string().min(1, i18n.t('validation.selectCurrency')),
 
     initial_balance: z.coerce.number()
         .min(0, i18n.t('validation.balanceNegative'))
@@ -22,4 +20,29 @@ export const accountSchema = z.object({
     is_active: z.boolean().optional().default(true),
 })
 
-export type AccountFormData = z.infer<typeof accountSchema>
+export type AccountFormValues = z.infer<typeof accountSchema>
+
+export function encodeAccountCurrency(value: { id?: number; code?: string }): string {
+    if (value.code) {
+        return `code:${value.code}`
+    }
+
+    if (value.id) {
+        return `id:${value.id}`
+    }
+
+    return ''
+}
+
+export function decodeAccountCurrency(currency: string): { currency_id?: number; currency_code?: string } {
+    if (currency.startsWith('code:')) {
+        return { currency_code: currency.slice(5) }
+    }
+
+    if (currency.startsWith('id:')) {
+        const id = Number(currency.slice(3))
+        return Number.isFinite(id) && id > 0 ? { currency_id: id } : {}
+    }
+
+    return {}
+}

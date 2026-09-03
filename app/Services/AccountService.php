@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class AccountService
 {
+    public function __construct(
+        private CurrencyApiService $currencyApi,
+    ) {}
+
     public function getAll(bool $onlyActive = false, bool $excludeDebts = false): Collection
     {
         $query = Account::with('currency');
@@ -42,18 +46,27 @@ class AccountService
 
     public function create(array $data): Account
     {
-        $account = Account::create($data);
-        $account->load('currency');
+        return DB::transaction(function () use ($data) {
+            $data = $this->withResolvedCurrency($data);
+            $account = Account::create($data);
+            $account->load('currency');
 
-        return $this->loadBalance($account);
+            return $this->loadBalance($account);
+        });
     }
 
     public function update(Account $account, array $data): Account
     {
-        $account->update($data);
-        $account->load('currency');
+        return DB::transaction(function () use ($account, $data) {
+            if (array_key_exists('currency_id', $data) || array_key_exists('currency_code', $data)) {
+                $data = $this->withResolvedCurrency($data);
+            }
 
-        return $this->loadBalance($account);
+            $account->update($data);
+            $account->load('currency');
+
+            return $this->loadBalance($account);
+        });
     }
 
     public function delete(Account $account): void
@@ -325,6 +338,25 @@ class AccountService
             'currency' => $baseCurrency->code,
             'decimals' => $baseCurrency->decimals,
         ];
+    }
+
+    private function withResolvedCurrency(array $data): array
+    {
+        $data['currency_id'] = $this->resolveCurrencyId($data);
+        unset($data['currency_code']);
+
+        return $data;
+    }
+
+    private function resolveCurrencyId(array $data): int
+    {
+        if (! empty($data['currency_id'])) {
+            return (int) $data['currency_id'];
+        }
+
+        $code = strtoupper(trim((string) ($data['currency_code'] ?? '')));
+
+        return $this->currencyApi->findOrCreateByCode($code)->id;
     }
 
     private function loadBalance(Account $account): Account

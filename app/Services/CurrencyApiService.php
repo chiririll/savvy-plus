@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Currency;
+use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -30,28 +31,72 @@ class CurrencyApiService
         $catalog = [];
 
         foreach ($metadata as $code => $info) {
-            if (! is_array($info)) {
+            $item = is_array($info) ? $this->mapCatalogInfo((string) $code, $info, $rates) : null;
+
+            if (! $item || in_array($item['code'], $existing, true)) {
                 continue;
             }
 
-            $normalized = strtoupper((string) ($info['code'] ?? $code));
-
-            if (in_array($normalized, $existing, true)) {
-                continue;
-            }
-
-            $catalog[] = [
-                'code' => $normalized,
-                'name' => (string) ($info['name'] ?? $normalized),
-                'symbol' => $this->catalogSymbol($info),
-                'decimals' => (int) ($info['decimal_digits'] ?? 2),
-                'rate' => $rates[$normalized] ?? null,
-            ];
+            $catalog[] = $item;
         }
 
         usort($catalog, fn (array $a, array $b) => $a['code'] <=> $b['code']);
 
         return $catalog;
+    }
+
+    public function findOrCreateByCode(string $code): Currency
+    {
+        $normalized = strtoupper($code);
+
+        $existing = Currency::query()->where('code', $normalized)->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $item = $this->findCatalogItem($normalized);
+
+        if (! $item) {
+            throw new DomainException(__('messages.currencies.unknown_code', ['code' => $normalized]));
+        }
+
+        $isFirst = ! Currency::query()->exists();
+
+        return app(CurrencyService::class)->create([
+            'code' => $item['code'],
+            'name' => $item['name'],
+            'symbol' => $item['symbol'],
+            'decimals' => $item['decimals'],
+            'rate' => $isFirst ? 1 : ($item['rate'] ?? 1),
+            'is_base' => $isFirst,
+        ]);
+    }
+
+    public function findCatalogItem(string $code): ?array
+    {
+        $metadata = $this->fetchCatalogMetadata();
+
+        if (! $metadata) {
+            return null;
+        }
+
+        $rates = $this->ratesAgainstBase();
+        $normalized = strtoupper($code);
+
+        foreach ($metadata as $key => $info) {
+            if (! is_array($info)) {
+                continue;
+            }
+
+            $item = $this->mapCatalogInfo((string) $key, $info, $rates);
+
+            if ($item && $item['code'] === $normalized) {
+                return $item;
+            }
+        }
+
+        return null;
     }
 
     public function updateRates(): array
@@ -129,6 +174,23 @@ class CurrencyApiService
         }
 
         return $rates;
+    }
+
+    protected function mapCatalogInfo(string $code, array $info, array $rates): ?array
+    {
+        $normalized = strtoupper((string) ($info['code'] ?? $code));
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        return [
+            'code' => $normalized,
+            'name' => (string) ($info['name'] ?? $normalized),
+            'symbol' => $this->catalogSymbol($info),
+            'decimals' => (int) ($info['decimal_digits'] ?? 2),
+            'rate' => $rates[$normalized] ?? null,
+        ];
     }
 
     protected function catalogSymbol(array $info): string

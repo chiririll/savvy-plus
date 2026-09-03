@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
 import { Pencil, Trash2, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -26,10 +25,17 @@ import { ACCOUNT_TYPE_CONFIG } from '@/constants'
 import { formatCurrency } from '@/lib/utils'
 import i18n from '@/lib/i18n'
 
-export const createAccountColumns = (
-    onDelete: (id: number) => void,
+interface ColumnOptions {
+    onDelete: (id: number) => void
+    onEdit: (account: Account) => void
     isReadOnly?: boolean
-): ColumnDef<Account>[] => [
+}
+
+export const createAccountColumns = ({
+    onDelete,
+    onEdit,
+    isReadOnly,
+}: ColumnOptions): ColumnDef<Account>[] => [
     {
         accessorKey: 'name',
         header: () => i18n.t('pages:accounts.columns.account'),
@@ -104,11 +110,9 @@ export const createAccountColumns = (
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                        <Link to={`/accounts/${row.original.id}/edit`}>
-                            <Pencil className="mr-2 size-4" />
-                            {i18n.t('actions.edit')}
-                        </Link>
+                    <DropdownMenuItem onClick={() => onEdit(row.original)}>
+                        <Pencil className="mr-2 size-4" />
+                        {i18n.t('actions.edit')}
                     </DropdownMenuItem>
                     {!isReadOnly && (
                     <>

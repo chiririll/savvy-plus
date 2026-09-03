@@ -49,6 +49,7 @@ return [
         'auto_update_disabled' => 'Автообновление выключено',
         'no_base' => 'Базовая валюта не задана',
         'no_api_match' => 'В API нет подходящих валют',
+        'unknown_code' => 'Неизвестный код валюты: :code',
         'updated' => 'Обновлено валют: :updated, пропущено: :skipped',
         'updated_via' => 'Обновлено валют: :updated через :ref, пропущено: :skipped',
     ],

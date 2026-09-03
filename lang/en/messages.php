@@ -49,6 +49,7 @@ return [
         'auto_update_disabled' => 'Auto-update disabled',
         'no_base' => 'No base currency set',
         'no_api_match' => 'No matching currencies found in API',
+        'unknown_code' => 'Unknown currency code: :code',
         'updated' => 'Updated :updated currencies, skipped :skipped',
         'updated_via' => 'Updated :updated currencies via :ref, skipped :skipped',
     ],

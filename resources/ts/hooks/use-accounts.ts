@@ -53,6 +53,7 @@ export function useCreateAccount(redirectTo?: string) {
         mutationFn: (data: AccountFormData) => accountsApi.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+            queryClient.invalidateQueries({ queryKey: ['currencies'] })
             toast.success(i18n.t('toasts.account.created'))
             if (redirectTo) navigate(redirectTo)
         },
@@ -71,6 +72,7 @@ export function useUpdateAccount(redirectTo?: string) {
             accountsApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+            queryClient.invalidateQueries({ queryKey: ['currencies'] })
             toast.success(i18n.t('toasts.account.updated'))
             if (redirectTo) navigate(redirectTo)
         },

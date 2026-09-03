@@ -1,5 +1,6 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,44 +21,89 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { accountSchema, AccountFormData } from '@/schemas'
-import { useCurrencies } from '@/hooks'
+import {
+    accountSchema,
+    AccountFormValues,
+    decodeAccountCurrency,
+    encodeAccountCurrency,
+} from '@/schemas'
+import { AccountFormData } from '@/types'
 import { REGULAR_ACCOUNT_TYPE_CONFIG, REGULAR_ACCOUNT_TYPES } from '@/constants'
 import { cn } from '@/lib/utils'
+import { CurrencySelect, type CurrencySelectValue } from '@/components/shared/CurrencySelect'
 import { FormWrapper } from '@/components/shared/FormWrapper'
 
 interface AccountFormProps {
-    defaultValues?: Partial<AccountFormData>
+    defaultValues?: Partial<AccountFormValues>
     onSubmit: (data: AccountFormData) => void
+    onValuesChange?: (data: AccountFormValues) => void
     isSubmitting?: boolean
     submitLabel?: string
+    formId?: string
+    hideSubmit?: boolean
+}
+
+function toPayload(data: AccountFormValues): AccountFormData {
+    const { currency, ...rest } = data
+    return { ...rest, ...decodeAccountCurrency(currency) }
+}
+
+function toSelectValue(currency: string): CurrencySelectValue | null {
+    const decoded = decodeAccountCurrency(currency)
+    if (decoded.currency_code) {
+        return { source: 'catalog', code: decoded.currency_code }
+    }
+    if (decoded.currency_id) {
+        return { source: 'existing', id: decoded.currency_id }
+    }
+    return null
 }
 
 export function AccountForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
+    formId,
+    hideSubmit,
 }: AccountFormProps) {
     const { t } = useTranslation(['common', 'forms', 'pages'])
-    const { data: currencies, isLoading: currenciesLoading } = useCurrencies()
 
-    const form = useForm<AccountFormData>({
-        resolver: zodResolver(accountSchema),
+    const form = useForm<AccountFormValues>({
+        resolver: zodResolver(accountSchema) as Resolver<AccountFormValues>,
         defaultValues: {
             name: '',
             type: 'bank',
-            currency_id: 0,
+            currency: '',
             initial_balance: 0,
             is_active: true,
             ...defaultValues,
         },
     })
 
+    const currency = form.watch('currency')
+
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as AccountFormValues)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
+
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-md space-y-4">
+            <form
+                id={formId}
+                onSubmit={form.handleSubmit((data) => onSubmit(toPayload(data)))}
+                className="space-y-4"
+            >
                 <FormField
                     control={form.control}
                     name="name"
@@ -78,7 +124,7 @@ export function AccountForm({
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>{t('fields.type')}</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder={t('forms:selectAccountType')} />
@@ -106,34 +152,24 @@ export function AccountForm({
 
                 <FormField
                     control={form.control}
-                    name="currency_id"
+                    name="currency"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>{t('fields.currency')}</FormLabel>
-                            <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value?.toString()}
-                                disabled={currenciesLoading}
-                            >
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder={t('forms:selectCurrency')} />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {currencies?.map((currency) => (
-                                        <SelectItem
-                                            key={currency.id}
-                                            value={currency.id.toString()}
-                                        >
-                                            <span className="font-mono">{currency.code}</span>
-                                            <span className="text-muted-foreground ml-2">
-                                                {currency.symbol} · {currency.name}
-                                            </span>
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <CurrencySelect
+                                value={toSelectValue(field.value || currency)}
+                                onChange={(next) => {
+                                    field.onChange(encodeAccountCurrency(
+                                        next.source === 'existing'
+                                            ? { id: next.id }
+                                            : { code: next.code }
+                                    ))
+                                }}
+                                placeholder={t('forms:selectCurrency')}
+                            />
+                            <FormDescription>
+                                {t('forms:accounts.currencyCatalogHelp')}
+                            </FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
@@ -183,9 +219,11 @@ export function AccountForm({
                     )}
                 />
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>

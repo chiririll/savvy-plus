@@ -17,7 +17,8 @@ class UpdateAccountRequest extends FormRequest
         return [
             'name' => 'sometimes|string|max:255',
             'type' => ['sometimes', Rule::in(['bank', 'crypto', 'cash'])],
-            'currency_id' => 'sometimes|exists:currencies,id',
+            'currency_id' => 'sometimes|nullable|exists:currencies,id',
+            'currency_code' => 'sometimes|nullable|string|max:10',
             'initial_balance' => 'sometimes|numeric|min:0',
             'is_active' => 'sometimes|boolean',
         ];

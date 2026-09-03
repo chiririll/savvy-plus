@@ -41,11 +41,15 @@ class AccountController extends Controller
 
     public function store(StoreAccountRequest $request): JsonResponse
     {
-        $account = $this->accountService->create($request->validated());
+        try {
+            $account = $this->accountService->create($request->validated());
 
-        return (new AccountResource($account))
-            ->response()
-            ->setStatusCode(201);
+            return (new AccountResource($account))
+                ->response()
+                ->setStatusCode(201);
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
     public function show(Account $account): AccountResource
@@ -53,11 +57,15 @@ class AccountController extends Controller
         return new AccountResource($this->accountService->findOrFail($account->id));
     }
 
-    public function update(UpdateAccountRequest $request, Account $account): AccountResource
+    public function update(UpdateAccountRequest $request, Account $account): AccountResource|JsonResponse
     {
-        $account = $this->accountService->update($account, $request->validated());
+        try {
+            $account = $this->accountService->update($account, $request->validated());
 
-        return new AccountResource($account);
+            return new AccountResource($account);
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
     public function reorder(ReorderAccountsRequest $request): JsonResponse

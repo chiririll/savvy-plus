@@ -17,14 +17,10 @@ const TransactionsPage = lazy(() => import('@/pages/transactions'))
 const TransactionCreatePage = lazy(() => import('@/pages/transactions/create'))
 const TransactionEditPage = lazy(() => import('@/pages/transactions/[id]/edit'))
 const AccountsPage = lazy(() => import('@/pages/accounts'))
-const AccountCreatePage = lazy(() => import('@/pages/accounts/create'))
-const AccountEditPage = lazy(() => import('@/pages/accounts/[id]/edit'))
 const CategoriesPage = lazy(() => import('@/pages/categories'))
 const CategoryCreatePage = lazy(() => import('@/pages/categories/create'))
 const CategoryEditPage = lazy(() => import('@/pages/categories/[id]/edit'))
 const CurrenciesPage = lazy(() => import('@/pages/currencies'))
-const CurrencyCreatePage = lazy(() => import('@/pages/currencies/create'))
-const CurrencyEditPage = lazy(() => import('@/pages/currencies/[id]/edit'))
 const BudgetsPage = lazy(() => import('@/pages/budgets'))
 const BudgetCreatePage = lazy(() => import('@/pages/budgets/create'))
 const BudgetEditPage = lazy(() => import('@/pages/budgets/[id]/edit'))
@@ -52,6 +48,16 @@ const NotFoundPage = lazy(() => import('@/pages/not-found'))
 function RecurringEditRedirect() {
     const { id } = useParams()
     return <Navigate to={id ? `/recurring?edit=${id}` : '/recurring'} replace />
+}
+
+function AccountEditRedirect() {
+    const { id } = useParams()
+    return <Navigate to={id ? `/accounts?edit=${id}` : '/accounts'} replace />
+}
+
+function CurrencyEditRedirect() {
+    const { id } = useParams()
+    return <Navigate to={id ? `/currencies?edit=${id}` : '/currencies'} replace />
 }
 
 const withSuspense = (Component: React.LazyExoticComponent<() => React.JSX.Element>) => (
@@ -102,14 +108,14 @@ export const router = createBrowserRouter([
                     { path: 'transactions/create', element: withSuspense(TransactionCreatePage) },
                     { path: 'transactions/:id/edit', element: withSuspense(TransactionEditPage) },
                     { path: 'accounts', element: withSuspense(AccountsPage) },
-                    { path: 'accounts/create', element: withSuspense(AccountCreatePage) },
-                    { path: 'accounts/:id/edit', element: withSuspense(AccountEditPage) },
+                    { path: 'accounts/create', element: <Navigate to="/accounts?create=1" replace /> },
+                    { path: 'accounts/:id/edit', element: <AccountEditRedirect /> },
                     { path: 'categories', element: withSuspense(CategoriesPage) },
                     { path: 'categories/create', element: withSuspense(CategoryCreatePage) },
                     { path: 'categories/:id/edit', element: withSuspense(CategoryEditPage) },
                     { path: 'currencies', element: withSuspense(CurrenciesPage) },
-                    { path: 'currencies/create', element: withSuspense(CurrencyCreatePage) },
-                    { path: 'currencies/:id/edit', element: withSuspense(CurrencyEditPage) },
+                    { path: 'currencies/create', element: <Navigate to="/currencies?create=1" replace /> },
+                    { path: 'currencies/:id/edit', element: <CurrencyEditRedirect /> },
                     { path: 'budgets', element: withSuspense(BudgetsPage) },
                     { path: 'budgets/create', element: withSuspense(BudgetCreatePage) },
                     { path: 'budgets/:id/edit', element: withSuspense(BudgetEditPage) },

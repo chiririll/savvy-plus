@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,11 +21,14 @@ import type { CurrencyCatalogItem } from '@/types'
 interface CurrencyFormProps {
     defaultValues?: Partial<CurrencyFormData>
     onSubmit: (data: CurrencyFormData) => void
+    onValuesChange?: (data: CurrencyFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
     isEditing?: boolean
     autoUpdateEnabled?: boolean
     isBase?: boolean
+    formId?: string
+    hideSubmit?: boolean
 }
 
 function filterCatalog(catalog: CurrencyCatalogItem[], query: string, field: 'code' | 'name') {
@@ -79,18 +82,21 @@ function Suggestions({
 export function CurrencyForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
     isEditing = false,
     autoUpdateEnabled = false,
     isBase = false,
+    formId,
+    hideSubmit,
 }: CurrencyFormProps) {
     const { t } = useTranslation(['common', 'forms'])
     const [suggestField, setSuggestField] = useState<'code' | 'name' | null>(null)
     const { data: catalog = [] } = useCurrencyCatalog(!isEditing)
 
     const form = useForm<CurrencyFormData>({
-        resolver: zodResolver(currencySchema),
+        resolver: zodResolver(currencySchema) as Resolver<CurrencyFormData>,
         defaultValues: {
             code: '',
             name: '',
@@ -123,10 +129,22 @@ export function CurrencyForm({
         setSuggestField(null)
     }
 
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as CurrencyFormData)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
+
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-md space-y-4">
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                     control={form.control}
                     name="code"
@@ -249,9 +267,11 @@ export function CurrencyForm({
                     )}
                 />
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>

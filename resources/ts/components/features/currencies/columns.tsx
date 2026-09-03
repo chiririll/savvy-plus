@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
 import { Pencil, Trash2, MoreHorizontal, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -28,6 +27,7 @@ import i18n from '@/lib/i18n'
 interface ColumnOptions {
     onDelete: (id: number) => void
     onSetBase: (id: number) => void
+    onEdit: (currency: Currency) => void
     isSettingBase?: boolean
     currencyCount: number
     isReadOnly?: boolean
@@ -36,6 +36,7 @@ interface ColumnOptions {
 export const createCurrencyColumns = ({
     onDelete,
     onSetBase,
+    onEdit,
     isSettingBase,
     currencyCount,
     isReadOnly,
@@ -113,11 +114,9 @@ export const createCurrencyColumns = ({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                            <Link to={`/currencies/${row.original.id}/edit`}>
-                                <Pencil className="mr-2 size-4" />
-                                {i18n.t('actions.edit')}
-                            </Link>
+                        <DropdownMenuItem onClick={() => onEdit(row.original)}>
+                            <Pencil className="mr-2 size-4" />
+                            {i18n.t('actions.edit')}
                         </DropdownMenuItem>
                         {!isReadOnly && (
                         <>

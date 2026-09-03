@@ -17,7 +17,8 @@ class StoreAccountRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'type' => ['required', Rule::in(['bank', 'crypto', 'cash'])],
-            'currency_id' => 'required|exists:currencies,id',
+            'currency_id' => 'required_without:currency_code|nullable|exists:currencies,id',
+            'currency_code' => 'required_without:currency_id|nullable|string|max:10',
             'initial_balance' => 'sometimes|numeric|min:0',
             'is_active' => 'sometimes|boolean',
         ];

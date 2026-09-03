@@ -1,6 +1,10 @@
 {
     "selectAccountType": "Выберите тип счёта",
     "selectCurrency": "Выберите валюту",
+    "searchCurrency": "Поиск валюты...",
+    "currencyYour": "Ваши валюты",
+    "currencyCatalog": "Добавить валюту",
+    "currencyEmpty": "Валюты не найдены",
     "selectAccount": "Выберите счёт",
     "selectCategory": "Выберите категорию",
     "selectType": "Выберите тип",
@@ -13,7 +17,8 @@
     "accounts": {
         "initialBalance": "Начальный баланс",
         "initialBalanceHelp": "Стартовый баланс этого счёта",
-        "activeHelp": "Неактивные счета скрыты в списках"
+        "activeHelp": "Неактивные счета скрыты в списках",
+        "currencyCatalogHelp": "Если валюты ещё нет в списке, она создастся вместе со счётом."
     },
     "categories": {
         "namePlaceholder": "Продукты",

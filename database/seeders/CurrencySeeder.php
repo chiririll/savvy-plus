@@ -13,12 +13,7 @@ class CurrencySeeder extends Seeder
         // Fallback rates: "1 currency = X USD" (for multiplication to get base amount)
         $currencies = [
             ['code' => 'USD', 'name' => 'US Dollar', 'symbol' => '$', 'decimals' => 2, 'is_base' => true, 'rate' => 1.000000],
-            ['code' => 'EUR', 'name' => 'Euro', 'symbol' => '€', 'decimals' => 2, 'is_base' => false, 'rate' => 1.08],      // 1 EUR = 1.08 USD
-            ['code' => 'UAH', 'name' => 'Ukrainian Hryvnia', 'symbol' => '₴', 'decimals' => 2, 'is_base' => false, 'rate' => 0.024],    // 1 UAH = 0.024 USD
-            ['code' => 'GBP', 'name' => 'British Pound', 'symbol' => '£', 'decimals' => 2, 'is_base' => false, 'rate' => 1.27],      // 1 GBP = 1.27 USD
-            ['code' => 'PLN', 'name' => 'Polish Zloty', 'symbol' => 'zł', 'decimals' => 2, 'is_base' => false, 'rate' => 0.25],     // 1 PLN = 0.25 USD
-            ['code' => 'JPY', 'name' => 'Japanese Yen', 'symbol' => '¥', 'decimals' => 0, 'is_base' => false, 'rate' => 0.0064],   // 1 JPY = 0.0064 USD
-            ['code' => 'CHF', 'name' => 'Swiss Franc', 'symbol' => 'Fr', 'decimals' => 2, 'is_base' => false, 'rate' => 1.12],     // 1 CHF = 1.12 USD
+            ['code' => 'EUR', 'name' => 'Euro', 'symbol' => '€', 'decimals' => 2, 'is_base' => false, 'rate' => 1.08],
         ];
 
         // Сначала сбрасываем базовую валюту для всех
