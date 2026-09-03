@@ -21,18 +21,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { HelpCircle } from 'lucide-react'
 import { automationRuleSchema, type AutomationRuleSchema } from '@/schemas/automation'
 import { useAutomationTriggers } from '@/hooks/use-automation'
 import { ConditionBuilder } from './ConditionBuilder'
 import { ActionBuilder } from './ActionBuilder'
 import type { AutomationRuleFormData } from '@/types/automation'
-import { FormWrapper } from '@/components/shared/FormWrapper'
+import { FieldHelp, FormWrapper } from '@/components/shared'
 
 interface AutomationRuleFormProps {
     defaultValues?: Partial<AutomationRuleFormData>
@@ -113,14 +107,7 @@ export function AutomationRuleForm({
                             <FormItem className="min-w-0">
                                 <FormLabel className="flex items-center gap-1.5">
                                     {t('forms:automation.priority')}
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <HelpCircle className="size-3.5 text-muted-foreground cursor-help" />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{t('forms:automation.priorityHelp')}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
+                                    <FieldHelp>{t('forms:automation.priorityHelp')}</FieldHelp>
                                 </FormLabel>
                                 <FormControl>
                                     <Input type="number" min={1} max={100} {...field} />
@@ -140,14 +127,9 @@ export function AutomationRuleForm({
                                     <FormLabel className="flex items-center gap-1.5">
                                         {t('forms:automation.trigger')}
                                         {selectedTrigger && (
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <HelpCircle className="size-3.5 text-muted-foreground cursor-help" />
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p>{t(`forms:automation.triggerDescriptions.${selectedTrigger.value}`)}</p>
-                                                </TooltipContent>
-                                            </Tooltip>
+                                            <FieldHelp>
+                                                {t(`forms:automation.triggerDescriptions.${selectedTrigger.value}`)}
+                                            </FieldHelp>
                                         )}
                                     </FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
