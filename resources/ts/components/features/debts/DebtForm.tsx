@@ -20,7 +20,7 @@ import { useCurrencies, useAccounts } from '@/hooks'
 import { AccountSelect } from '@/components/shared/AccountSelect'
 import { CurrencySelect } from '@/components/shared/CurrencySelect'
 import { Banknote, HandCoins } from 'lucide-react'
-import { FieldHelp, FormWrapper } from '@/components/shared'
+import { FieldHelp, FormDialogFooterStart, FormWrapper } from '@/components/shared'
 import { cn, formatCurrency, formatDateLocal } from '@/lib/utils'
 
 interface DebtFormProps {
@@ -151,117 +151,108 @@ export function DebtForm({
                 />
 
                 {mode === 'create' && (
-                    <FormField
-                        control={form.control}
-                        name="origin"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                                <FormControl>
+                    <FormDialogFooterStart>
+                        <FormField
+                            control={form.control}
+                            name="origin"
+                            render={({ field }) => (
+                                <label className="flex items-center gap-2 text-sm font-normal leading-none">
                                     <Checkbox
                                         checked={field.value === 'new'}
                                         onCheckedChange={(checked) => {
                                             field.onChange(checked === true ? 'new' : 'existing')
                                         }}
                                     />
-                                </FormControl>
-                                <FormLabel className="flex items-center gap-1.5 font-normal">
-                                    {t('forms:debts.createTransaction')}
+                                    <span>{t('forms:debts.createTransaction')}</span>
                                     <FieldHelp>
                                         {field.value === 'existing'
                                             ? t('forms:debts.originExistingHelp')
                                             : t('forms:debts.originNewHelp')}
                                     </FieldHelp>
+                                </label>
+                            )}
+                        />
+                    </FormDialogFooterStart>
+                )}
+
+                <div className="grid grid-cols-2 items-start gap-4">
+                    <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                            <FormItem className="min-w-0">
+                                <FormLabel>
+                                    {t('fields.amount')}
+                                    {amountCurrencySymbol && (
+                                        <span className="text-muted-foreground ml-1">
+                                            ({amountCurrencySymbol})
+                                        </span>
+                                    )}
                                 </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        min={0}
+                                        placeholder="1000.00"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormDescription className={insufficientFunds ? 'text-destructive' : undefined}>
+                                    {insufficientFunds && selectedAccount
+                                        ? t('forms:debts.insufficientFunds', {
+                                            available: formatCurrency(selectedAccount.currentBalance, selectedAccount.currency),
+                                        })
+                                        : t('forms:debts.amountHelp')}
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                )}
 
-                <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-4">
+                    {showAccount && (
                         <FormField
                             control={form.control}
-                            name="amount"
+                            name="account_id"
                             render={({ field }) => (
                                 <FormItem className="min-w-0">
                                     <FormLabel>
-                                        {t('fields.amount')}
-                                        {amountCurrencySymbol && (
-                                            <span className="text-muted-foreground ml-1">
-                                                ({amountCurrencySymbol})
-                                            </span>
-                                        )}
+                                        {debtType === 'i_owe'
+                                            ? t('forms:debts.payment.accountReceiveInto')
+                                            : t('forms:debts.payment.accountPayFrom')}
                                     </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
-                                            min={0}
-                                            placeholder="1000.00"
-                                            {...field}
-                                        />
-                                    </FormControl>
+                                    <AccountSelect
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    />
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+                    )}
 
-                        {showAccount && (
-                            <FormField
-                                control={form.control}
-                                name="account_id"
-                                render={({ field }) => (
-                                    <FormItem className="min-w-0">
-                                        <FormLabel>
-                                            {debtType === 'i_owe'
-                                                ? t('forms:debts.payment.accountReceiveInto')
-                                                : t('forms:debts.payment.accountPayFrom')}
-                                        </FormLabel>
-                                        <AccountSelect
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                        />
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        )}
-
-                        {showCurrency && (
-                            <FormField
-                                control={form.control}
-                                name="currency_id"
-                                render={({ field }) => (
-                                    <FormItem className="min-w-0">
-                                        <FormLabel>{t('fields.currency')}</FormLabel>
-                                        <CurrencySelect
-                                            value={field.value ? { source: 'existing', id: Number(field.value) } : null}
-                                            onChange={(next) => {
-                                                if (next.source === 'existing') {
-                                                    field.onChange(next.id)
-                                                }
-                                            }}
-                                            allowCatalog={false}
-                                            placeholder={t('forms:selectCurrency')}
-                                        />
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        )}
-                    </div>
-
-                    <p className={cn(
-                        'text-sm text-muted-foreground',
-                        insufficientFunds && 'text-destructive'
-                    )}>
-                        {insufficientFunds && selectedAccount
-                            ? t('forms:debts.insufficientFunds', {
-                                available: formatCurrency(selectedAccount.currentBalance, selectedAccount.currency),
-                            })
-                            : t('forms:debts.amountHelp')}
-                    </p>
+                    {showCurrency && (
+                        <FormField
+                            control={form.control}
+                            name="currency_id"
+                            render={({ field }) => (
+                                <FormItem className="min-w-0">
+                                    <FormLabel>{t('fields.currency')}</FormLabel>
+                                    <CurrencySelect
+                                        value={field.value ? { source: 'existing', id: Number(field.value) } : null}
+                                        onChange={(next) => {
+                                            if (next.source === 'existing') {
+                                                field.onChange(next.id)
+                                            }
+                                        }}
+                                        allowCatalog={false}
+                                        placeholder={t('forms:selectCurrency')}
+                                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
                 </div>
 
                 <FormField

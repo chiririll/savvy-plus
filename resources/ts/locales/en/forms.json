@@ -125,6 +125,7 @@
         "dayOfMonthHelp": "1–31 (adjusted for shorter months)",
         "endDate": "End date",
         "endDateHelp": "Leave empty for no end",
+        "activeHelp": "Inactive recurring transactions are not generated",
         "frequencies": {
             "daily": "Daily",
             "weekly": "Weekly",
@@ -151,6 +152,7 @@
         "endDate": "End date",
         "global": "Global budget",
         "globalHelp": "Apply to all expenses, not specific categories",
+        "activeHelp": "Inactive budgets are hidden and do not track spending",
         "categories": "Categories",
         "tagsHelp": "Only transactions with selected tags will count toward this budget",
         "notifyAt": "Notify at %",
@@ -173,6 +175,7 @@
         "descriptionPlaceholder": "Describe what this rule does...",
         "selectTrigger": "Select trigger",
         "stopProcessing": "Stop processing other rules",
+        "activeHelp": "Inactive rules do not run",
         "matchAll": "Match ALL conditions",
         "matchAny": "Match ANY condition",
         "addCondition": "Add Condition",

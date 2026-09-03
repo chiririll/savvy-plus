@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
     Form,
     FormField,
@@ -30,6 +29,7 @@ import { cn, formatDateLocal } from '@/lib/utils'
 import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react'
 import { AccountSelect } from '@/components/shared/AccountSelect'
 import { CategorySelect } from '@/components/shared/CategorySelect'
+import { FormActiveField } from '@/components/shared/FormActiveField'
 import { FormWrapper } from '@/components/shared/FormWrapper'
 
 interface RecurringFormProps {
@@ -471,21 +471,9 @@ export function RecurringForm({
                     />
                 )}
 
-                {/* Active */}
-                <FormField
+                <FormActiveField
                     control={form.control}
-                    name="is_active"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                            <FormControl>
-                                <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                />
-                            </FormControl>
-                            <FormLabel>{t('fields.active')}</FormLabel>
-                        </FormItem>
-                    )}
+                    help={t('forms:recurring.activeHelp')}
                 />
 
                 {!hideSubmit && (

@@ -26,7 +26,7 @@ import { useAutomationTriggers } from '@/hooks/use-automation'
 import { ConditionBuilder } from './ConditionBuilder'
 import { ActionBuilder } from './ActionBuilder'
 import type { AutomationRuleFormData } from '@/types/automation'
-import { FieldHelp, FormWrapper } from '@/components/shared'
+import { FieldHelp, FormActiveField, FormWrapper } from '@/components/shared'
 
 interface AutomationRuleFormProps {
     defaultValues?: Partial<AutomationRuleFormData>
@@ -206,23 +206,12 @@ export function AutomationRuleForm({
                     />
                 </div>
 
-                <div className="flex items-center gap-6 pt-2">
-                    <FormField
-                        control={form.control}
-                        name="is_active"
-                        render={({ field }) => (
-                            <FormItem className="flex items-center gap-2 space-y-0">
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                    />
-                                </FormControl>
-                                <FormLabel className="cursor-pointer">{t('fields.active')}</FormLabel>
-                            </FormItem>
-                        )}
-                    />
+                <FormActiveField
+                    control={form.control}
+                    help={t('forms:automation.activeHelp')}
+                />
 
+                <div className="flex items-center gap-6 pt-2">
                     <FormField
                         control={form.control}
                         name="stop_processing"

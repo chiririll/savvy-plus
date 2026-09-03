@@ -26,7 +26,7 @@ import { useCategories, useTags } from '@/hooks'
 import { Category } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { CurrencySelect, FieldHelp, FormWrapper } from '@/components/shared'
+import { CurrencySelect, FieldHelp, FormActiveField, FormWrapper } from '@/components/shared'
 
 interface BudgetFormProps {
     defaultValues?: Partial<BudgetFormData>
@@ -359,20 +359,9 @@ export function BudgetForm({
                     />
                 )}
 
-                <FormField
+                <FormActiveField
                     control={form.control}
-                    name="is_active"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                            <FormControl>
-                                <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                />
-                            </FormControl>
-                            <FormLabel>{t('fields.active')}</FormLabel>
-                        </FormItem>
-                    )}
+                    help={t('forms:budgets.activeHelp')}
                 />
 
                 {!hideSubmit && (
