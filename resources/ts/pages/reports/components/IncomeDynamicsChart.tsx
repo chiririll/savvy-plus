@@ -16,6 +16,7 @@ import { LineChart, BarChart3, ChevronDown } from 'lucide-react'
 import { useTransactionReportDynamics } from '@/hooks'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { defaultGroupBy } from '../types'
+import { dynamicsSeriesName, formatReportPeriodLabel } from '../utils'
 import type { ReportFilters } from '../types'
 import type { CashFlowGroupBy } from '@/api/reports'
 
@@ -33,7 +34,7 @@ interface IncomeDynamicsChartProps {
 }
 
 export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
-    const { t } = useTranslation('pages')
+    const { t, i18n } = useTranslation('pages')
     const [chartType, setChartType] = useState<ChartType>('line')
     const [groupBy, setGroupBy] = useState<CashFlowGroupBy>(() => defaultGroupBy(filters))
     const [sources, setSources] = useState<SourceConfig[]>([])
@@ -49,12 +50,12 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
         if (data?.datasets) {
             setSources(data.datasets.map((d, index) => ({
                 id: d.id,
-                name: d.name,
+                name: dynamicsSeriesName(d.id, d.name, t),
                 color: d.color,
-                enabled: index === 0, // Enable only "Total" by default
+                enabled: index === 0,
             })))
         }
-    }, [data?.datasets])
+    }, [data?.datasets, t, i18n.language])
 
     const toggleSource = (id: number) => {
         setSources(srcs => srcs.map(src =>
@@ -71,17 +72,21 @@ export function IncomeDynamicsChart({ filters }: IncomeDynamicsChartProps) {
         if (!data) return { labels: [], datasets: [] }
 
         return {
-            labels: data.labels,
+            labels: (data.dates ?? data.labels).map((value, index) =>
+                data.dates?.[index]
+                    ? formatReportPeriodLabel(value, groupBy)
+                    : value
+            ),
             datasets: data.datasets
                 .filter(d => enabledSources.some(s => s.id === d.id))
                 .map(d => ({
                     id: d.id,
-                    name: d.name,
+                    name: dynamicsSeriesName(d.id, d.name, t),
                     color: d.color,
                     data: d.data,
                 })),
         }
-    }, [data, enabledSources])
+    }, [data, enabledSources, groupBy, t, i18n.language])
 
     const chartOption = useMemo(() => {
         const series = chartData.datasets.map(dataset => ({

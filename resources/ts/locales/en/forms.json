@@ -267,7 +267,34 @@
         "continueWith": "Continue with {{name}}",
         "providerFallback": "Provider",
         "visibleOnLogin": "Visible on the sign-in screen",
-        "hiddenOnLogin": "Hidden — enable to show on login"
+        "hiddenOnLogin": "Hidden — enable to show on login",
+        "presets": {
+            "custom_oidc": "Custom OIDC",
+            "custom_saml": "Custom SAML"
+        },
+        "fields": {
+            "client_id": "Client ID",
+            "client_secret": "Client secret",
+            "tenant": "Tenant ID",
+            "domain": "Okta domain",
+            "auth_server_id": "Authorization server ID",
+            "base_url": "Base URL",
+            "gitlab_base_url": "GitLab base URL",
+            "keycloak_base_url": "Keycloak base URL",
+            "authentik_base_url": "Authentik base URL",
+            "realm": "Realm",
+            "app_slug": "Application slug",
+            "discovery_url": "Discovery URL",
+            "scopes": "Scopes (space-separated)",
+            "idp_entity_id": "IdP Entity ID",
+            "idp_sso_url": "IdP SSO URL",
+            "idp_x509_cert": "IdP X.509 certificate",
+            "idp_x509_cert_standby": "Standby certificate (rotation)"
+        },
+        "placeholders": {
+            "auth_server_id": "default (leave blank for the org server)",
+            "scopes": "openid profile email"
+        }
     },
     "import": {
         "dateColumn": "Date Column *",

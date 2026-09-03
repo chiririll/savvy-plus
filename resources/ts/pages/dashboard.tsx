@@ -222,12 +222,15 @@ export default function DashboardPage() {
 
         const isDark = theme === 'dark'
 
+        const seriesName = (s: (typeof historyData.series)[number]) =>
+            s.type === 'total' ? t('reports.series.total') : s.name
+
         const series = historyData.series.map((s, index) => {
             const isTotal = s.type === 'total'
             const color = isTotal ? '#6366f1' : CHART_COLORS[index % CHART_COLORS.length]
 
             return {
-                name: s.name,
+                name: seriesName(s),
                 type: 'line',
                 smooth: true,
                 data: s.data,
@@ -273,7 +276,7 @@ export default function DashboardPage() {
                 textStyle: { color: isDark ? '#f3f4f6' : '#1f2937' },
             },
             legend: {
-                data: historyData.series.map((s) => s.name),
+                data: historyData.series.map(seriesName),
                 bottom: 0,
                 textStyle: { color: isDark ? '#9ca3af' : '#6b7280' },
                 icon: 'roundRect',
@@ -308,7 +311,7 @@ export default function DashboardPage() {
             },
             series,
         }
-    }, [historyData, theme, currency])
+    }, [historyData, theme, currency, t])
 
     const pieChartOption = useMemo(() => {
         if (!expensesByCategory?.data.length) return {}

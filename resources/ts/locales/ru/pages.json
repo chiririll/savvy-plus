@@ -369,7 +369,12 @@
             "total": "Итого",
             "sources": "Источники",
             "day": "День {{day}}",
-            "budgetLabel": "Бюджет: {{amount}}"
+            "budgetLabel": "Бюджет: {{amount}}",
+            "savings": "Сбережения"
+        },
+        "axis": {
+            "week": "Нед. {{date}}",
+            "weekNum": "{{week}} нед. {{date}}"
         },
         "errors": {
             "overview": "Не удалось загрузить метрики обзора",

@@ -7,18 +7,29 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useMoneyFlow } from '@/hooks'
 import { formatCurrency } from '@/lib/utils'
 import type { ReportFilters } from '../types'
+import { localizeSavingsNodeName } from '../utils'
 
 interface SankeyDiagramProps {
     filters: ReportFilters
 }
 
 export function SankeyDiagram({ filters }: SankeyDiagramProps) {
-    const { t } = useTranslation('pages')
+    const { t, i18n } = useTranslation('pages')
     const navigate = useNavigate()
     const { data, isLoading, error } = useMoneyFlow(filters)
 
     const sankeyOption = useMemo(() => {
         if (!data || data.nodes.length === 0 || data.links.length === 0) return null
+
+        const nodes = data.nodes.map((node) => ({
+            ...node,
+            name: localizeSavingsNodeName(node.name, t),
+        }))
+        const links = data.links.map((link) => ({
+            ...link,
+            source: localizeSavingsNodeName(link.source, t),
+            target: localizeSavingsNodeName(link.target, t),
+        }))
 
         return {
             tooltip: {
@@ -50,11 +61,11 @@ export function SankeyDiagram({ filters }: SankeyDiagramProps) {
                 label: {
                     fontSize: 12,
                 },
-                data: data.nodes,
-                links: data.links,
+                data: nodes,
+                links,
             }],
         }
-    }, [data])
+    }, [data, t, i18n.language])
 
     const handleSankeyClick = useCallback((params: { data: { source?: string; target?: string } }) => {
         if (params.data.source && params.data.target) {

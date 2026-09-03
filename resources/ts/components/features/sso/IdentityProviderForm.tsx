@@ -29,6 +29,7 @@ import { FormWrapper } from '@/components/shared/FormWrapper'
 import { identityProviderSchema, IdentityProviderFormValues } from '@/schemas/sso'
 import { useSsoPresets } from '@/hooks/use-sso'
 import { BrandIcon, brandVars } from './BrandIcon'
+import { ssoFieldLabel, ssoFieldPlaceholder, ssoPresetLabel } from './presetMeta'
 import type { LucideIcon } from 'lucide-react'
 import type { PresetField } from '@/types/sso'
 
@@ -158,11 +159,11 @@ export function IdentityProviderForm({
             name={`fields.${field.key}` as const}
             render={({ field: f }) => (
                 <FormItem>
-                    <FormLabel>{field.label}</FormLabel>
+                    <FormLabel>{ssoFieldLabel(selectedKey, field, t)}</FormLabel>
                     <FormControl>
                         {field.type === 'textarea' ? (
                             <Textarea
-                                placeholder={field.placeholder}
+                                placeholder={ssoFieldPlaceholder(field, t)}
                                 rows={4}
                                 {...f}
                                 value={f.value ?? ''}
@@ -170,7 +171,7 @@ export function IdentityProviderForm({
                         ) : (
                             <Input
                                 type={field.secret ? 'password' : field.type === 'url' ? 'url' : 'text'}
-                                placeholder={isEdit && field.secret ? t('forms:sso.secretKeepPlaceholder') : field.placeholder}
+                                placeholder={isEdit && field.secret ? t('forms:sso.secretKeepPlaceholder') : ssoFieldPlaceholder(field, t)}
                                 {...f}
                                 value={f.value ?? ''}
                             />
@@ -233,7 +234,7 @@ export function IdentityProviderForm({
                                             <SelectContent>
                                                 {presets?.map((preset) => (
                                                     <SelectItem key={preset.key} value={preset.key}>
-                                                        {preset.label} ({preset.protocol.toUpperCase()})
+                                                        {ssoPresetLabel(preset, t)} ({preset.protocol.toUpperCase()})
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>

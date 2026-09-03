@@ -267,7 +267,34 @@
         "continueWith": "Продолжить с {{name}}",
         "providerFallback": "провайдер",
         "visibleOnLogin": "Виден на экране входа",
-        "hiddenOnLogin": "Скрыт — включите, чтобы показать на входе"
+        "hiddenOnLogin": "Скрыт — включите, чтобы показать на входе",
+        "presets": {
+            "custom_oidc": "Свой OIDC",
+            "custom_saml": "Свой SAML"
+        },
+        "fields": {
+            "client_id": "Client ID",
+            "client_secret": "Client secret",
+            "tenant": "Tenant ID",
+            "domain": "Домен Okta",
+            "auth_server_id": "ID сервера авторизации",
+            "base_url": "Базовый URL",
+            "gitlab_base_url": "Базовый URL GitLab",
+            "keycloak_base_url": "Базовый URL Keycloak",
+            "authentik_base_url": "Базовый URL Authentik",
+            "realm": "Realm",
+            "app_slug": "Slug приложения",
+            "discovery_url": "Discovery URL",
+            "scopes": "Scopes (через пробел)",
+            "idp_entity_id": "IdP Entity ID",
+            "idp_sso_url": "IdP SSO URL",
+            "idp_x509_cert": "Сертификат IdP X.509",
+            "idp_x509_cert_standby": "Резервный сертификат (ротация)"
+        },
+        "placeholders": {
+            "auth_server_id": "default (оставьте пустым для org-сервера)",
+            "scopes": "openid profile email"
+        }
     },
     "import": {
         "dateColumn": "Колонка даты *",

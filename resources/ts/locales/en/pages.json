@@ -363,7 +363,12 @@
             "total": "Total",
             "sources": "Sources",
             "day": "Day {{day}}",
-            "budgetLabel": "Budget: {{amount}}"
+            "budgetLabel": "Budget: {{amount}}",
+            "savings": "Savings"
+        },
+        "axis": {
+            "week": "Week {{date}}",
+            "weekNum": "W{{week}} {{date}}"
         },
         "errors": {
             "overview": "Failed to load overview metrics",

@@ -1,4 +1,57 @@
+import type { TFunction } from 'i18next'
 import i18n, { intlLocale } from '@/lib/i18n'
+import { parseDateKey } from '@/lib/dates'
+import type { CashFlowGroupBy } from '@/api/reports'
+
+const SAVINGS_NODE_IDS = new Set(['__savings__', 'Savings', 'messages.reports.savings'])
+
+export function dynamicsSeriesName(id: number, fallbackName: string, t: TFunction): string {
+    return id === 0 ? t('reports.series.total') : fallbackName
+}
+
+export function localizeSavingsNodeName(name: string, t: TFunction): string {
+    return SAVINGS_NODE_IDS.has(name) ? t('reports.series.savings') : name
+}
+
+/** ISO-8601 week number (Carbon weekOfYear). */
+function isoWeekNumber(date: Date): number {
+    const tmp = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    tmp.setDate(tmp.getDate() + 3 - ((tmp.getDay() + 6) % 7))
+    const week1 = new Date(tmp.getFullYear(), 0, 4)
+    return 1 + Math.round(((tmp.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7)
+}
+
+export function formatReportPeriodLabel(
+    dateKey: string,
+    groupBy: CashFlowGroupBy,
+    variant: 'week' | 'weekNum' = 'week',
+): string {
+    const date = parseDateKey(dateKey)
+    const locale = intlLocale()
+
+    if (groupBy === 'week') {
+        if (variant === 'weekNum') {
+            return i18n.t('pages:reports.axis.weekNum', {
+                week: isoWeekNumber(date),
+                date: date.toLocaleDateString(locale, { month: 'short', year: '2-digit' }),
+            })
+        }
+
+        return i18n.t('pages:reports.axis.week', {
+            date: date.toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
+        })
+    }
+
+    if (groupBy === 'month') {
+        return date.toLocaleDateString(locale, { month: 'short', year: '2-digit' })
+    }
+
+    return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+}
+
+export function formatExpensePaceMonthLabel(monthStart: string): string {
+    return parseDateKey(monthStart).toLocaleDateString(intlLocale(), { month: 'short', year: 'numeric' })
+}
 
 // Format date as YYYY-MM (timezone-safe)
 function formatYearMonth(date: Date): string {

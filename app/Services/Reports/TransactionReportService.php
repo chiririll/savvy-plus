@@ -88,6 +88,7 @@ class TransactionReportService
         $categoriesData = $this->transactionRepository->sumGroupedByCategory($type, $dateRange, $filters);
         $periods = $this->periodGenerator->generate($startDate, $endDate, $groupBy);
         $labels = array_column($periods, 'label');
+        $dates = array_column($periods, 'key');
         $sqlFormat = $this->periodGenerator->getSqlFormat($groupBy);
 
         $totalByPeriod = $this->transactionRepository->getGroupedByPeriod($type, $dateRange, $sqlFormat, $filters);
@@ -130,6 +131,7 @@ class TransactionReportService
 
         return [
             'labels' => $labels,
+            'dates' => $dates,
             'datasets' => $datasets,
             'currency' => Currency::baseCode(),
         ];
