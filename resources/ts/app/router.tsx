@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, createBrowserRouter, useParams, useSearchParams } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
@@ -40,39 +40,6 @@ const ProvidersPage = lazy(() => import('@/pages/settings/providers'))
 const ProviderCreatePage = lazy(() => import('@/pages/settings/providers/create'))
 const ProviderEditPage = lazy(() => import('@/pages/settings/providers/[id]/edit'))
 const NotFoundPage = lazy(() => import('@/pages/not-found'))
-
-function TransactionCreateRedirect() {
-    const [searchParams] = useSearchParams()
-    const next = new URLSearchParams(searchParams)
-    next.set('create', '1')
-    const query = next.toString()
-    return <Navigate to={query ? `/transactions?${query}` : '/transactions?create=1'} replace />
-}
-
-function TransactionEditRedirect() {
-    const { id } = useParams()
-    return <Navigate to={id ? `/transactions?edit=${id}` : '/transactions'} replace />
-}
-
-function RecurringEditRedirect() {
-    const { id } = useParams()
-    return <Navigate to={id ? `/recurring?edit=${id}` : '/recurring'} replace />
-}
-
-function AccountEditRedirect() {
-    const { id } = useParams()
-    return <Navigate to={id ? `/accounts?edit=${id}` : '/accounts'} replace />
-}
-
-function CurrencyEditRedirect() {
-    const { id } = useParams()
-    return <Navigate to={id ? `/currencies?edit=${id}` : '/currencies'} replace />
-}
-
-function BudgetEditRedirect() {
-    const { id } = useParams()
-    return <Navigate to={id ? `/budgets?edit=${id}` : '/budgets'} replace />
-}
 
 const withSuspense = (Component: React.LazyExoticComponent<() => React.JSX.Element>) => (
     <ErrorBoundary>
@@ -119,27 +86,17 @@ export const router = createBrowserRouter([
                 children: [
                     { index: true, element: withSuspense(DashboardPage) },
                     { path: 'transactions', element: withSuspense(TransactionsPage) },
-                    { path: 'transactions/create', element: <TransactionCreateRedirect /> },
-                    { path: 'transactions/:id/edit', element: <TransactionEditRedirect /> },
                     { path: 'accounts', element: withSuspense(AccountsPage) },
-                    { path: 'accounts/create', element: <Navigate to="/accounts?create=1" replace /> },
-                    { path: 'accounts/:id/edit', element: <AccountEditRedirect /> },
                     { path: 'categories', element: withSuspense(CategoriesPage) },
                     { path: 'categories/create', element: withSuspense(CategoryCreatePage) },
                     { path: 'categories/:id/edit', element: withSuspense(CategoryEditPage) },
                     { path: 'currencies', element: withSuspense(CurrenciesPage) },
-                    { path: 'currencies/create', element: <Navigate to="/currencies?create=1" replace /> },
-                    { path: 'currencies/:id/edit', element: <CurrencyEditRedirect /> },
                     { path: 'budgets', element: withSuspense(BudgetsPage) },
-                    { path: 'budgets/create', element: <Navigate to="/budgets?create=1" replace /> },
-                    { path: 'budgets/:id/edit', element: <BudgetEditRedirect /> },
                     { path: 'tags', element: withSuspense(TagsPage) },
                     { path: 'tags/create', element: withSuspense(TagCreatePage) },
                     { path: 'tags/:id/edit', element: withSuspense(TagEditPage) },
                     { path: 'debts', element: withSuspense(DebtsPage) },
                     { path: 'recurring', element: withSuspense(RecurringPage) },
-                    { path: 'recurring/create', element: <Navigate to="/recurring?create=1" replace /> },
-                    { path: 'recurring/:id/edit', element: <RecurringEditRedirect /> },
                     { path: 'automation', element: withSuspense(AutomationPage) },
                     { path: 'automation/create', element: withSuspense(AutomationCreatePage) },
                     { path: 'automation/:id/edit', element: withSuspense(AutomationEditPage) },
