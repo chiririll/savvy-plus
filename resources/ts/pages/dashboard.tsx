@@ -34,7 +34,7 @@ import { Progress } from '@/components/ui/progress'
 import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
 import { useOverviewMetrics } from '@/hooks/use-reports'
 import type { ReportFilters } from '@/pages/reports/types'
-import { addDaysLocal, cn, formatCurrency, formatCurrencyCompact, formatDateLocal } from '@/lib/utils'
+import { cn, formatCurrency, formatCurrencyCompact, formatDateLocal } from '@/lib/utils'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
@@ -169,7 +169,6 @@ export default function DashboardPage() {
     const { data: balanceComparison } = useBalanceComparison()
     const { data: upcomingPending } = useTransactions({
         status: 'pending',
-        end_date: addDaysLocal(new Date(), 7),
         sort_by: 'date',
         sort_direction: 'asc',
         per_page: 5,
