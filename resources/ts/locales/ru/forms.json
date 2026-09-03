@@ -82,6 +82,7 @@
         "counterparty": "Контрагент",
         "counterpartyPlaceholder": "Иван Иванов / название банка",
         "counterpartyHelp": "Кому вы должны или кто должен вам",
+        "createTransaction": "Создать транзакцию",
         "originNew": "Новая операция",
         "originExisting": "Уже есть",
         "originNewHelp": "Деньги спишутся или придут на выбранный счёт",
