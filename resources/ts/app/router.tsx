@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate, useParams } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
@@ -22,9 +22,17 @@ const TagsPage = lazy(() => import('@/pages/tags'))
 const DebtsPage = lazy(() => import('@/pages/debts'))
 const RecurringPage = lazy(() => import('@/pages/recurring'))
 const AutomationPage = lazy(() => import('@/pages/automation'))
-const AutomationCreatePage = lazy(() => import('@/pages/automation/create'))
-const AutomationEditPage = lazy(() => import('@/pages/automation/[id]/edit'))
 const AutomationLogsPage = lazy(() => import('@/pages/automation/[id]/logs'))
+
+function AutomationCreateRedirect() {
+    return <Navigate to="/automation?create=1" replace />
+}
+
+function AutomationEditRedirect() {
+    const { id } = useParams<{ id: string }>()
+    return <Navigate to={id ? `/automation?edit=${id}` : '/automation'} replace />
+}
+
 const UsersPage = lazy(() => import('@/pages/users'))
 const ReportsPage = lazy(() => import('@/pages/reports'))
 const MonitoringPage = lazy(() => import('@/pages/settings/monitoring'))
@@ -90,8 +98,8 @@ export const router = createBrowserRouter([
                     { path: 'debts', element: withSuspense(DebtsPage) },
                     { path: 'recurring', element: withSuspense(RecurringPage) },
                     { path: 'automation', element: withSuspense(AutomationPage) },
-                    { path: 'automation/create', element: withSuspense(AutomationCreatePage) },
-                    { path: 'automation/:id/edit', element: withSuspense(AutomationEditPage) },
+                    { path: 'automation/create', element: <AutomationCreateRedirect /> },
+                    { path: 'automation/:id/edit', element: <AutomationEditRedirect /> },
                     { path: 'automation/:id/logs', element: withSuspense(AutomationLogsPage) },
                     { path: 'users', element: withSuspense(UsersPage) },
                     { path: 'reports', element: withSuspense(ReportsPage) },

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,7 +13,6 @@ import {
     FormLabel,
     FormControl,
     FormMessage,
-    FormDescription,
 } from '@/components/ui/form'
 import {
     Select,
@@ -37,15 +37,21 @@ import { FormWrapper } from '@/components/shared/FormWrapper'
 interface AutomationRuleFormProps {
     defaultValues?: Partial<AutomationRuleFormData>
     onSubmit: (data: AutomationRuleFormData) => void
+    onValuesChange?: (data: AutomationRuleFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
+    formId?: string
+    hideSubmit?: boolean
 }
 
 export function AutomationRuleForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
+    formId,
+    hideSubmit,
 }: AutomationRuleFormProps) {
     const { t } = useTranslation(['common', 'forms'])
     const { data: triggers } = useAutomationTriggers()
@@ -65,6 +71,18 @@ export function AutomationRuleForm({
         },
     })
 
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as AutomationRuleFormData)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
+
     const handleSubmit = (data: AutomationRuleSchema) => {
         onSubmit(data as AutomationRuleFormData)
     }
@@ -72,16 +90,40 @@ export function AutomationRuleForm({
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <form id={formId} onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>{t('fields.name')}</FormLabel>
+                            <FormControl>
+                                <Input placeholder={t('forms:automation.namePlaceholder')} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
                 <div className="grid grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
-                        name="name"
+                        name="priority"
                         render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('fields.name')}</FormLabel>
+                            <FormItem className="min-w-0">
+                                <FormLabel className="flex items-center gap-1.5">
+                                    {t('forms:automation.priority')}
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <HelpCircle className="size-3.5 text-muted-foreground cursor-help" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{t('forms:automation.priorityHelp')}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </FormLabel>
                                 <FormControl>
-                                    <Input placeholder={t('forms:automation.namePlaceholder')} {...field} />
+                                    <Input type="number" min={1} max={100} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -90,17 +132,42 @@ export function AutomationRuleForm({
 
                     <FormField
                         control={form.control}
-                        name="priority"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('forms:automation.priority')}</FormLabel>
-                                <FormControl>
-                                    <Input type="number" min={1} max={100} {...field} />
-                                </FormControl>
-                                <FormDescription>{t('forms:automation.priorityHelp')}</FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+                        name="trigger_type"
+                        render={({ field }) => {
+                            const selectedTrigger = triggers?.find(tr => tr.value === field.value)
+                            return (
+                                <FormItem className="min-w-0">
+                                    <FormLabel className="flex items-center gap-1.5">
+                                        {t('forms:automation.trigger')}
+                                        {selectedTrigger && (
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <HelpCircle className="size-3.5 text-muted-foreground cursor-help" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>{t(`forms:automation.triggerDescriptions.${selectedTrigger.value}`)}</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        )}
+                                    </FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder={t('forms:automation.selectTrigger')} />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {triggers?.map((trigger) => (
+                                                <SelectItem key={trigger.value} value={trigger.value}>
+                                                    {t(`forms:automation.triggers.${trigger.value}`)}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )
+                        }}
                     />
                 </div>
 
@@ -123,47 +190,7 @@ export function AutomationRuleForm({
                     )}
                 />
 
-                <FormField
-                    control={form.control}
-                    name="trigger_type"
-                    render={({ field }) => {
-                        const selectedTrigger = triggers?.find(tr => tr.value === field.value)
-                        return (
-                            <FormItem>
-                                <FormLabel>{t('forms:automation.trigger')}</FormLabel>
-                                <div className="flex items-center gap-2">
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder={t('forms:automation.selectTrigger')} />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {triggers?.map((trigger) => (
-                                                <SelectItem key={trigger.value} value={trigger.value}>
-                                                    {t(`forms:automation.triggers.${trigger.value}`)}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {selectedTrigger && (
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <HelpCircle className="size-4 text-muted-foreground cursor-help" />
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>{t(`forms:automation.triggerDescriptions.${selectedTrigger.value}`)}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    )}
-                                </div>
-                                <FormMessage />
-                            </FormItem>
-                        )
-                    }}
-                />
-
-                <div className="space-y-4 p-4 border rounded-lg">
+                <div className="space-y-3 pt-4 border-t">
                     <h3 className="font-medium">{t('forms:automation.conditions')}</h3>
                     <FormField
                         control={form.control}
@@ -180,7 +207,7 @@ export function AutomationRuleForm({
                     />
                 </div>
 
-                <div className="space-y-4 p-4 border rounded-lg">
+                <div className="space-y-3 pt-4 border-t">
                     <h3 className="font-medium">{t('forms:automation.actions')}</h3>
                     <FormField
                         control={form.control}
@@ -197,7 +224,7 @@ export function AutomationRuleForm({
                     />
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-6 pt-2">
                     <FormField
                         control={form.control}
                         name="is_active"
@@ -231,9 +258,11 @@ export function AutomationRuleForm({
                     />
                 </div>
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>

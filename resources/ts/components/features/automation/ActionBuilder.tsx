@@ -50,7 +50,7 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
                         value={action.category_id ? String(action.category_id) : undefined}
                         onValueChange={(val) => updateAction(index, { category_id: Number(val) })}
                     >
-                        <SelectTrigger className="w-48">
+                        <SelectTrigger className="w-full min-w-0">
                             <SelectValue placeholder={t('selectCategory')} />
                         </SelectTrigger>
                         <SelectContent>
@@ -66,7 +66,7 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
             case 'add_tags':
             case 'remove_tags':
                 return (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1.5">
                         {tags?.map(tag => (
                             <Button
                                 key={tag.id}
@@ -90,7 +90,7 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
             case 'set_description':
                 return (
                     <Input
-                        className="w-64"
+                        className="w-full min-w-0"
                         value={(action.template || action.description || '') as string}
                         onChange={(e) => updateAction(index, { template: e.target.value })}
                         placeholder={t('automation.descriptionTemplate')}
@@ -99,12 +99,12 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
 
             case 'create_transfer':
                 return (
-                    <div className="flex items-center gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                         <Select
                             value={action.to_account_id ? String(action.to_account_id) : undefined}
                             onValueChange={(val) => updateAction(index, { to_account_id: Number(val) })}
                         >
-                            <SelectTrigger className="w-40">
+                            <SelectTrigger className="w-full min-w-0">
                                 <SelectValue placeholder={t('automation.toAccount')} />
                             </SelectTrigger>
                             <SelectContent>
@@ -116,7 +116,7 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
                             </SelectContent>
                         </Select>
                         <Input
-                            className="w-40"
+                            className="min-w-0"
                             value={String(action.amount_formula ?? '')}
                             onChange={(e) => updateAction(index, { amount_formula: e.target.value })}
                             placeholder={t('automation.amountOrFormula')}
@@ -133,33 +133,36 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
         <div className="space-y-4">
             <div className="space-y-2">
                 {value.map((action, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-muted/50 rounded">
-                        <Select
-                            value={action.type}
-                            onValueChange={(type) => updateAction(index, { type: type as ActionType })}
-                        >
-                            <SelectTrigger className="w-44">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {ACTION_TYPES.map(actionType => (
-                                    <SelectItem key={actionType.value} value={actionType.value}>
-                                        {t(`automation.actionTypes.${actionType.value}`)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    <div key={index} className="space-y-2 p-2 bg-muted/50 rounded">
+                        <div className="flex items-center gap-2">
+                            <Select
+                                value={action.type}
+                                onValueChange={(type) => updateAction(index, { type: type as ActionType })}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {ACTION_TYPES.map(actionType => (
+                                        <SelectItem key={actionType.value} value={actionType.value}>
+                                            {t(`automation.actionTypes.${actionType.value}`)}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="shrink-0"
+                                onClick={() => removeAction(index)}
+                            >
+                                <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
+                            </Button>
+                        </div>
 
                         {renderActionParams(action, index)}
-
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeAction(index)}
-                        >
-                            <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
-                        </Button>
                     </div>
                 ))}
             </div>
