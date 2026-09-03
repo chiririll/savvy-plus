@@ -35,6 +35,7 @@ import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCa
 import { useOverviewMetrics } from '@/hooks/use-reports'
 import type { ReportFilters } from '@/pages/reports/types'
 import { addDaysLocal, cn, formatCurrency, formatCurrencyCompact, formatDateLocal } from '@/lib/utils'
+import { displayTransactionDescription } from '@/lib/transaction-description'
 import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -670,11 +671,7 @@ export default function DashboardPage() {
                                             </div>
                                             <div className="min-w-0">
                                                 <p className="text-sm font-medium truncate">
-                                                    {transaction.category?.name ||
-                                                        transaction.description ||
-                                                        (transaction.type === 'transfer'
-                                                            ? t('transactions.types.transfer')
-                                                            : t('dashboard.transaction'))}
+                                                    {displayTransactionDescription(transaction)}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground truncate">
                                                     {formatDate(transaction.date)} · {transaction.account.name}

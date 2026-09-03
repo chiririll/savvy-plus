@@ -22,6 +22,7 @@ import {
 import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins, Check, SkipForward } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn, formatCurrency } from '@/lib/utils'
+import { displayTransactionDescription } from '@/lib/transaction-description'
 import i18n, { intlLocale } from '@/lib/i18n'
 
 const TYPE_CONFIG = {
@@ -114,16 +115,7 @@ export function createTransactionColumns({
             accessorKey: 'description',
             header: () => i18n.t('pages:transactions.columns.description'),
             cell: ({ row }) => {
-                const { description, category, account, toAccount, type, itemsCount, tags } = row.original
-
-                const getDefaultDescription = () => {
-                    if (type === 'transfer') return `${account.name} → ${toAccount?.name}`
-                    if (type === 'debt_payment') return i18n.t('pages:transactions.fallback.payment', { name: toAccount?.name })
-                    if (type === 'debt_collection') return i18n.t('pages:transactions.fallback.collection', { name: toAccount?.name })
-                    if (type === 'debt_lend') return i18n.t('pages:transactions.fallback.lend', { name: toAccount?.name })
-                    if (type === 'debt_borrow') return i18n.t('pages:transactions.fallback.borrow', { name: toAccount?.name })
-                    return category?.name
-                }
+                const { category, account, toAccount, type, itemsCount, tags } = row.original
 
                 const getSubDescription = () => {
                     if (type === 'transfer') {
@@ -146,7 +138,7 @@ export function createTransactionColumns({
                 return (
                     <div className="space-y-1">
                         <div className="font-medium">
-                            {description || getDefaultDescription()}
+                            {displayTransactionDescription(row.original)}
                         </div>
                         <div className="text-xs text-muted-foreground">
                             {getSubDescription()}

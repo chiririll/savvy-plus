@@ -27,6 +27,7 @@ import { useTransactions, useDeleteTransaction, useDuplicateTransaction, useConf
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { TransactionType, Transaction } from '@/types'
 import { addDaysLocal, cn, formatCurrency } from '@/lib/utils'
+import { displayTransactionDescription } from '@/lib/transaction-description'
 
 const TYPE_FILTERS: { value: TransactionType | null; labelKey: string; icon?: typeof ArrowDownLeft }[] = [
     { value: null, labelKey: 'all' },
@@ -205,7 +206,7 @@ export default function TransactionsPage() {
                                 <div key={transaction.id} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2">
                                     <div className="min-w-0">
                                         <p className="text-sm font-medium truncate">
-                                            {transaction.description || t(`transactions.types.${transaction.type}`)}
+                                            {displayTransactionDescription(transaction)}
                                         </p>
                                         <p className="text-xs text-muted-foreground">
                                             {new Date(transaction.date).toLocaleDateString()}

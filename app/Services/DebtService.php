@@ -138,7 +138,7 @@ class DebtService
                 'amount' => $data->amount,
                 'to_amount' => $toAmount,
                 'exchange_rate' => $data->amount > 0 ? round($toAmount / $data->amount, 6) : null,
-                'description' => $data->description ?? "Payment for debt: {$debt->name}",
+                'description' => $this->transactionNote($data->description),
                 'date' => $data->date,
                 'category_id' => null,
             ]);
@@ -181,7 +181,7 @@ class DebtService
                 'amount' => $toAmount,
                 'to_amount' => $data->amount,
                 'exchange_rate' => $data->amount > 0 ? round($toAmount / $data->amount, 6) : null,
-                'description' => $data->description ?? "Collection for debt: {$debt->name}",
+                'description' => $this->transactionNote($data->description),
                 'date' => $data->date,
                 'category_id' => null,
             ]);
@@ -287,7 +287,7 @@ class DebtService
                 'amount' => $data->amount,
                 'to_amount' => $toAmount,
                 'exchange_rate' => $data->amount > 0 ? round($toAmount / $data->amount, 6) : null,
-                'description' => $data->description ?? __('messages.debts.issued', ['name' => $debt->name]),
+                'description' => $this->transactionNote($data->description),
                 'date' => $data->date,
                 'category_id' => null,
             ]);
@@ -304,7 +304,7 @@ class DebtService
             'amount' => $toAmount,
             'to_amount' => $data->amount,
             'exchange_rate' => $data->amount > 0 ? round($toAmount / $data->amount, 6) : null,
-            'description' => $data->description ?? __('messages.debts.borrowed', ['name' => $debt->name]),
+            'description' => $this->transactionNote($data->description),
             'date' => $data->date,
             'category_id' => null,
         ]);
@@ -326,5 +326,10 @@ class DebtService
         }
 
         return $fromAccount->currency->convertTo($amount, $toAccount->currency);
+    }
+
+    private function transactionNote(?string $description): ?string
+    {
+        return filled($description) ? $description : null;
     }
 }
