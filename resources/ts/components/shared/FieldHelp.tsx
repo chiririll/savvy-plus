@@ -1,23 +1,31 @@
 import { HelpCircle } from 'lucide-react'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { useTranslation } from 'react-i18next'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
-interface FieldHelpProps {
-    children: React.ReactNode
-}
+export function FieldHelp({ children }: { children: React.ReactNode }) {
+    const { t } = useTranslation('common')
 
-export function FieldHelp({ children }: FieldHelpProps) {
     return (
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <HelpCircle className="size-3.5 shrink-0 cursor-help text-muted-foreground" />
-            </TooltipTrigger>
-            <TooltipContent>
-                {typeof children === 'string' ? <p>{children}</p> : children}
-            </TooltipContent>
-        </Tooltip>
+        <Popover modal={false}>
+            <PopoverTrigger asChild>
+                <button
+                    type="button"
+                    aria-label={t('actions.help')}
+                    className="inline-flex size-4 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
+                >
+                    <HelpCircle className="size-3.5" />
+                </button>
+            </PopoverTrigger>
+            <PopoverContent
+                side="top"
+                align="center"
+                collisionPadding={8}
+                onOpenAutoFocus={(event) => event.preventDefault()}
+                onCloseAutoFocus={(event) => event.preventDefault()}
+                className="z-[200] w-fit max-w-[min(18rem,calc(100vw-2rem))] border-none bg-foreground px-3 py-1.5 text-xs text-balance text-background shadow-md"
+            >
+                {children}
+            </PopoverContent>
+        </Popover>
     )
 }

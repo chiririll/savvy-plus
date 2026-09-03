@@ -155,7 +155,7 @@ export function BudgetForm({
                         name="period"
                         render={({ field }) => (
                             <FormItem className="min-w-0">
-                                <FormLabel>{t('forms:budgets.period')}</FormLabel>
+                                <FormLabel className="flex min-h-4 items-center">{t('forms:budgets.period')}</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
                                         <SelectTrigger className="w-full">
@@ -180,7 +180,7 @@ export function BudgetForm({
                         name="notify_at_percent"
                         render={({ field }) => (
                             <FormItem className="min-w-0">
-                                <FormLabel className="flex items-center gap-1.5">
+                                <FormLabel className="flex min-h-4 items-center gap-1.5">
                                     {t('forms:budgets.notifyAt')}
                                     <FieldHelp>{t('forms:budgets.notifyHelp')}</FieldHelp>
                                 </FormLabel>
