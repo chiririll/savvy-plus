@@ -139,7 +139,10 @@
         "description": "Choose the interface language. Saved on this device."
     },
     "theme": {
-        "toggle": "Toggle theme"
+        "label": "Theme",
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Auto"
     },
     "sidebar": {
         "toggle": "Toggle sidebar"

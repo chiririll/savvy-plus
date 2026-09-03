@@ -1,4 +1,5 @@
 import '@/lib/i18n'
+import '@/hooks/use-theme'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from './app/App'

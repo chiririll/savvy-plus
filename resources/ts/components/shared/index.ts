@@ -1,4 +1,5 @@
 export { LanguageSwitcher } from './LanguageSwitcher'
+export { ThemeSwitcher } from './ThemeSwitcher'
 export { Page } from './Page'
 export { PageHeader } from './PageHeader'
 export { DataTable } from './DataTable'
