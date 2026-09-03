@@ -46,6 +46,8 @@ jobs:
         run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-progress
 
       - name: Build frontend
+        env:
+          APP_VERSION: ${{ steps.ver.outputs.tag }}
         run: npm ci && npm run build
 
       - name: Package tarball
