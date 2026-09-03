@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTOs\DebtData;
 use App\DTOs\DebtPaymentData;
 use App\Enums\DebtType;
+use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Currency;
@@ -142,6 +143,7 @@ class DebtService
                 'description' => $this->transactionNote($data->description),
                 'date' => $data->date,
                 'category_id' => null,
+                'status' => TransactionStatus::Confirmed,
             ]);
 
             $debt->refresh();
@@ -185,6 +187,7 @@ class DebtService
                 'description' => $this->transactionNote($data->description),
                 'date' => $data->date,
                 'category_id' => null,
+                'status' => TransactionStatus::Confirmed,
             ]);
 
             $debt->refresh();
@@ -291,6 +294,7 @@ class DebtService
                 'description' => $this->transactionNote($data->description),
                 'date' => $data->date,
                 'category_id' => null,
+                'status' => TransactionStatus::Confirmed,
             ]);
 
             return;
@@ -308,6 +312,7 @@ class DebtService
             'description' => $this->transactionNote($data->description),
             'date' => $data->date,
             'category_id' => null,
+            'status' => TransactionStatus::Confirmed,
         ]);
     }
 

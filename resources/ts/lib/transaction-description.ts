@@ -1,5 +1,8 @@
 import i18n from '@/lib/i18n'
-import type { Transaction } from '@/types'
+import type { Transaction, TransactionType } from '@/types'
+
+const INCOMING_TYPES: TransactionType[] = ['income', 'debt_collection', 'debt_borrow']
+const OUTGOING_TYPES: TransactionType[] = ['expense', 'debt_payment', 'debt_lend']
 
 const STORED_MESSAGE_KEY = /^messages\.[a-z0-9_.]+$/i
 
@@ -29,4 +32,20 @@ export function displayTransactionDescription(
         default:
             return transaction.category?.name || i18n.t(`pages:transactions.types.${transaction.type}`)
     }
+}
+
+export function transactionAmountAppearance(type: TransactionType): {
+    sign: '+' | '-' | ''
+    className: string
+} {
+    if (INCOMING_TYPES.includes(type)) {
+        return { sign: '+', className: 'text-green-600' }
+    }
+    if (type === 'transfer') {
+        return { sign: '', className: 'text-blue-600' }
+    }
+    if (OUTGOING_TYPES.includes(type)) {
+        return { sign: '-', className: 'text-red-600' }
+    }
+    return { sign: '', className: 'text-foreground' }
 }

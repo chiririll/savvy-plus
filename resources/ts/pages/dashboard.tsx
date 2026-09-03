@@ -35,7 +35,7 @@ import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCa
 import { useOverviewMetrics } from '@/hooks/use-reports'
 import type { ReportFilters } from '@/pages/reports/types'
 import { addDaysLocal, cn, formatCurrency, formatCurrencyCompact, formatDateLocal } from '@/lib/utils'
-import { displayTransactionDescription } from '@/lib/transaction-description'
+import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -105,25 +105,11 @@ function formatDate(dateString: string): string {
 }
 
 function getTransactionSign(type: Transaction['type']): string {
-    switch (type) {
-        case 'income':
-            return '+'
-        case 'expense':
-            return '-'
-        default:
-            return ''
-    }
+    return transactionAmountAppearance(type).sign
 }
 
 function getTransactionColor(type: Transaction['type']): string {
-    switch (type) {
-        case 'income':
-            return 'text-green-600'
-        case 'expense':
-            return 'text-red-600'
-        default:
-            return 'text-muted-foreground'
-    }
+    return transactionAmountAppearance(type).className
 }
 
 export default function DashboardPage() {

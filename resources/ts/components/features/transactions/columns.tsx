@@ -22,7 +22,7 @@ import {
 import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins, Check, SkipForward } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn, formatCurrency } from '@/lib/utils'
-import { displayTransactionDescription } from '@/lib/transaction-description'
+import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import i18n, { intlLocale } from '@/lib/i18n'
 
 const TYPE_CONFIG = {
@@ -163,18 +163,18 @@ export function createTransactionColumns({
             accessorKey: 'amount',
             header: () => <div className="text-right">{i18n.t('pages:transactions.columns.amount')}</div>,
             cell: ({ row }) => {
-                const { type, amount, toAmount, account, toAccount } = row.original
-                const isIncoming = type === 'income' || type === 'debt_collection' || type === 'debt_borrow'
+                const { type, amount, toAmount, account, toAccount, status } = row.original
+                const { sign, className } = transactionAmountAppearance(type)
                 const isTransfer = type === 'transfer'
-                const isDebtPayment = type === 'debt_payment' || type === 'debt_lend'
 
                 return (
                     <div className="text-right space-y-1">
                         <div className={cn(
                             'font-mono font-semibold',
-                            isIncoming ? 'text-green-600' : isTransfer ? 'text-blue-600' : isDebtPayment ? 'text-orange-600' : 'text-red-600'
+                            className,
+                            status === 'pending' && 'opacity-60',
                         )}>
-                            {isIncoming ? '+' : '-'}{formatCurrency(amount, account.currency)}
+                            {sign}{formatCurrency(amount, account.currency)}
                         </div>
                         {isTransfer && toAmount && toAccount && (
                             <div className="text-xs text-muted-foreground font-mono">
