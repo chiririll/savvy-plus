@@ -14,6 +14,14 @@ export interface TransactionItem {
     totalPrice: number
 }
 
+export interface TransactionActions {
+    edit: boolean
+    duplicate: boolean
+    delete: boolean
+    confirm: boolean
+    skip: boolean
+}
+
 export interface Transaction extends BaseEntity {
     type: TransactionType
     amount: number
@@ -23,6 +31,7 @@ export interface Transaction extends BaseEntity {
     date: string
     status: TransactionStatus
     recurringTransactionId?: number | null
+    actions: TransactionActions
     account: Account
     toAccount?: Account
     category?: Category

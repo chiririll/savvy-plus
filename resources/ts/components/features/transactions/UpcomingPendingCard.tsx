@@ -56,7 +56,7 @@ export function UpcomingPendingCard({
             </p>
             {!isReadOnly && (
                 <div className="col-start-2 row-start-3 flex items-end justify-end gap-1">
-                    {transaction.recurringTransactionId && (
+                    {transaction.actions.skip && (
                         <SkipTransactionAlert
                             onConfirm={() => onSkip(transaction.id)}
                             trigger={

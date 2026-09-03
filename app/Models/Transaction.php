@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TransactionKind;
 use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use Illuminate\Database\Eloquent\Builder;
@@ -93,6 +94,11 @@ class Transaction extends Model
     public function isRecurringLinked(): bool
     {
         return $this->recurring_transaction_id !== null;
+    }
+
+    public function kind(): TransactionKind
+    {
+        return TransactionKind::fromTransaction($this);
     }
 
     public function isTransfer(): bool

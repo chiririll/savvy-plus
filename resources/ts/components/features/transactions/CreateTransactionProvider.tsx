@@ -30,6 +30,10 @@ export function CreateTransactionProvider({ children }: { children: React.ReactN
     }, [])
 
     const openEdit = useCallback((next: Transaction) => {
+        if (!next.actions.edit) {
+            return
+        }
+
         setDefaults(undefined)
         setTransaction(next)
         setOpen(true)

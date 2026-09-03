@@ -191,6 +191,17 @@ export function createTransactionColumns({
             id: 'actions',
             cell: ({ row }) => {
                 const transaction = row.original
+                const { edit, duplicate, delete: canRemove, confirm, skip } = transaction.actions
+                const canEdit = edit && !!onEdit
+                const canConfirm = !isReadOnly && confirm && !!onConfirm
+                const canSkip = !isReadOnly && skip && !!onSkip
+                const canDuplicate = !isReadOnly && duplicate
+                const canDelete = !isReadOnly && canRemove
+
+                if (!canEdit && !canConfirm && !canSkip && !canDuplicate && !canDelete) {
+                    return null
+                }
+
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -199,19 +210,19 @@ export function createTransactionColumns({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            {transaction.status !== 'skipped' && onEdit && (
+                            {canEdit && (
                             <DropdownMenuItem onClick={() => onEdit(transaction)}>
                                 <Pencil className="mr-2 size-4" />
                                 {i18n.t('actions.edit')}
                             </DropdownMenuItem>
                             )}
-                            {!isReadOnly && transaction.status === 'pending' && onConfirm && (
+                            {canConfirm && (
                             <DropdownMenuItem onClick={() => onConfirm(transaction.id)}>
                                 <Check className="mr-2 size-4" />
                                 {i18n.t('actions.confirm')}
                             </DropdownMenuItem>
                             )}
-                            {!isReadOnly && transaction.status === 'pending' && transaction.recurringTransactionId && onSkip && (
+                            {canSkip && (
                             <SkipTransactionAlert
                                 onConfirm={() => onSkip(transaction.id)}
                                 trigger={
@@ -222,13 +233,13 @@ export function createTransactionColumns({
                                 }
                             />
                             )}
-                            {!isReadOnly && transaction.status !== 'skipped' && (
-                            <>
+                            {canDuplicate && (
                             <DropdownMenuItem onClick={() => onDuplicate(transaction.id)}>
                                 <Copy className="mr-2 size-4" />
                                 {i18n.t('actions.duplicate')}
                             </DropdownMenuItem>
-                            {!(transaction.status === 'pending' && transaction.recurringTransactionId) && (
+                            )}
+                            {canDelete && (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <DropdownMenuItem
@@ -257,8 +268,6 @@ export function createTransactionColumns({
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
-                            )}
-                            </>
                             )}
                         </DropdownMenuContent>
                     </DropdownMenu>
