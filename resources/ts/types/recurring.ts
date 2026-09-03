@@ -37,7 +37,7 @@ export interface RecurringFormData {
     category_id?: number | null
     amount: number
     to_amount?: number | null
-    description?: string
+    description?: string | null
     frequency: RecurringFrequency
     interval: number
     day_of_week?: number | null

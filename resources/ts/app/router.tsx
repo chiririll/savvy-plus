@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import { Navigate, createBrowserRouter, useParams } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
@@ -33,8 +33,6 @@ const TagCreatePage = lazy(() => import('@/pages/tags/create'))
 const TagEditPage = lazy(() => import('@/pages/tags/[id]/edit'))
 const DebtsPage = lazy(() => import('@/pages/debts'))
 const RecurringPage = lazy(() => import('@/pages/recurring'))
-const RecurringCreatePage = lazy(() => import('@/pages/recurring/create'))
-const RecurringEditPage = lazy(() => import('@/pages/recurring/[id]/edit'))
 const AutomationPage = lazy(() => import('@/pages/automation'))
 const AutomationCreatePage = lazy(() => import('@/pages/automation/create'))
 const AutomationEditPage = lazy(() => import('@/pages/automation/[id]/edit'))
@@ -50,6 +48,11 @@ const ProvidersPage = lazy(() => import('@/pages/settings/providers'))
 const ProviderCreatePage = lazy(() => import('@/pages/settings/providers/create'))
 const ProviderEditPage = lazy(() => import('@/pages/settings/providers/[id]/edit'))
 const NotFoundPage = lazy(() => import('@/pages/not-found'))
+
+function RecurringEditRedirect() {
+    const { id } = useParams()
+    return <Navigate to={id ? `/recurring?edit=${id}` : '/recurring'} replace />
+}
 
 const withSuspense = (Component: React.LazyExoticComponent<() => React.JSX.Element>) => (
     <ErrorBoundary>
@@ -115,8 +118,8 @@ export const router = createBrowserRouter([
                     { path: 'tags/:id/edit', element: withSuspense(TagEditPage) },
                     { path: 'debts', element: withSuspense(DebtsPage) },
                     { path: 'recurring', element: withSuspense(RecurringPage) },
-                    { path: 'recurring/create', element: withSuspense(RecurringCreatePage) },
-                    { path: 'recurring/:id/edit', element: withSuspense(RecurringEditPage) },
+                    { path: 'recurring/create', element: <Navigate to="/recurring?create=1" replace /> },
+                    { path: 'recurring/:id/edit', element: <RecurringEditRedirect /> },
                     { path: 'automation', element: withSuspense(AutomationPage) },
                     { path: 'automation/create', element: withSuspense(AutomationCreatePage) },
                     { path: 'automation/:id/edit', element: withSuspense(AutomationEditPage) },

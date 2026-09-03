@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
 import { Pencil, Trash2, MoreHorizontal, ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -34,11 +33,13 @@ const typeConfig = {
 
 interface ColumnsOptions {
     onDelete: (id: number) => void
+    onEdit: (recurring: RecurringTransaction) => void
     isReadOnly?: boolean
 }
 
 export const createRecurringColumns = ({
     onDelete,
+    onEdit,
     isReadOnly,
 }: ColumnsOptions): ColumnDef<RecurringTransaction>[] => [
     {
@@ -155,11 +156,9 @@ export const createRecurringColumns = ({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                        <Link to={`/recurring/${row.original.id}/edit`}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            {i18n.t('actions.edit')}
-                        </Link>
+                    <DropdownMenuItem onClick={() => onEdit(row.original)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        {i18n.t('actions.edit')}
                     </DropdownMenuItem>
                     {!isReadOnly && (
                     <>

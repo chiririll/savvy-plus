@@ -35,8 +35,11 @@ import { FormWrapper } from '@/components/shared/FormWrapper'
 interface RecurringFormProps {
     defaultValues?: Partial<RecurringFormData>
     onSubmit: (data: RecurringFormData) => void
+    onValuesChange?: (data: RecurringFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
+    formId?: string
+    hideSubmit?: boolean
 }
 
 const typeOptions = [
@@ -51,8 +54,11 @@ const weekdayValues = [0, 1, 2, 3, 4, 5, 6] as const
 export function RecurringForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
+    formId,
+    hideSubmit,
 }: RecurringFormProps) {
     const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
@@ -108,10 +114,22 @@ export function RecurringForm({
         }
     }, [type, categories, form])
 
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as RecurringFormData)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
+
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-lg space-y-4">
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {/* Type Selection */}
                 <FormField
                     control={form.control}
@@ -465,9 +483,11 @@ export function RecurringForm({
                     )}
                 />
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>

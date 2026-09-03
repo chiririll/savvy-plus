@@ -920,7 +920,7 @@ export default function DashboardPage() {
                             <Repeat className="size-12 mx-auto text-muted-foreground/50 mb-3" />
                             <p className="text-muted-foreground mb-3">{t('dashboard.noPending')}</p>
                             <Button asChild size="sm">
-                                <Link to="/recurring/create">
+                                <Link to="/recurring?create=1">
                                     <Plus className="size-4 mr-1" />
                                     {t('dashboard.createRecurring')}
                                 </Link>
