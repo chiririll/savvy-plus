@@ -34,7 +34,6 @@
         "toAccount": "Счёт назначения",
         "sendAmount": "Сумма отправки",
         "receiveAmount": "Сумма получения",
-        "receiveAmountPlaceholder": "0.00 (автоматически, если та же валюта)",
         "notesPlaceholder": "Необязательные заметки...",
         "balance": "Баланс",
         "after": "После",

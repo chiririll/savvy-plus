@@ -34,7 +34,6 @@
         "toAccount": "Destination account",
         "sendAmount": "Send amount",
         "receiveAmount": "Receive amount",
-        "receiveAmountPlaceholder": "0.00 (auto if same currency)",
         "notesPlaceholder": "Optional notes...",
         "balance": "Balance",
         "after": "After",

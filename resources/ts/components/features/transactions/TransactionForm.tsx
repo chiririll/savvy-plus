@@ -436,7 +436,7 @@ export function TransactionForm({
                                                 type="number"
                                                 step="0.01"
                                                 min={0}
-                                                placeholder={t('forms:transactions.receiveAmountPlaceholder')}
+                                                placeholder="0.00"
                                                 {...field}
                                                 value={field.value ?? ''}
                                                 onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
