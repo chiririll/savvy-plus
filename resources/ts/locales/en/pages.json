@@ -300,6 +300,7 @@
         "vsAmount": "vs {{amount}}",
         "vsPreviousAmount": "{{amount}} vs previous period",
         "filters": {
+            "last_30_days": "Last 30 days",
             "month": "Month",
             "quarter": "Quarter",
             "year": "Year",

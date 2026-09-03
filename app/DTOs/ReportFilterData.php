@@ -7,7 +7,7 @@ use Carbon\Carbon;
 readonly class ReportFilterData
 {
     public function __construct(
-        public string $periodType = 'month',       // month|quarter|year|ytd|custom
+        public string $periodType = 'last_30_days', // last_30_days|month|quarter|year|ytd|custom
         public ?string $periodValue = null,        // 2024-01 | 2024-Q1 | 2024
         public ?string $startDate = null,          // for custom period
         public ?string $endDate = null,
@@ -20,7 +20,7 @@ readonly class ReportFilterData
     public static function fromArray(array $data): self
     {
         return new self(
-            periodType: $data['period_type'] ?? 'month',
+            periodType: $data['period_type'] ?? 'last_30_days',
             periodValue: $data['period_value'] ?? null,
             startDate: $data['start_date'] ?? null,
             endDate: $data['end_date'] ?? null,
@@ -39,12 +39,13 @@ readonly class ReportFilterData
     public function getDateRange(): array
     {
         return match ($this->periodType) {
+            'last_30_days' => $this->getLast30DaysRange(),
             'month' => $this->getMonthRange(),
             'quarter' => $this->getQuarterRange(),
             'year' => $this->getYearRange(),
             'ytd' => $this->getYtdRange(),
             'custom' => $this->getCustomRange(),
-            default => $this->getMonthRange(),
+            default => $this->getLast30DaysRange(),
         };
     }
 
@@ -110,6 +111,16 @@ readonly class ReportFilterData
         return [
             'start' => $date->copy()->startOfYear(),
             'end' => $date->copy()->endOfYear(),
+        ];
+    }
+
+    private function getLast30DaysRange(): array
+    {
+        $now = Carbon::now();
+
+        return [
+            'start' => $now->copy()->subDays(29)->startOfDay(),
+            'end' => $now->copy()->endOfDay(),
         ];
     }
 
@@ -201,7 +212,7 @@ readonly class ReportFilterData
                     $currentRange['start']->copy()->subYearsNoOverflow($i),
                     fn (Carbon $d) => $d, 'startOfYear', 'endOfYear'
                 ),
-                'custom' => [
+                'last_30_days', 'custom' => [
                     'start' => $currentRange['start']->copy()->subDays($rangeDays * $i)->startOfDay(),
                     'end' => $currentRange['end']->copy()->subDays($rangeDays * $i)->endOfDay(),
                 ],

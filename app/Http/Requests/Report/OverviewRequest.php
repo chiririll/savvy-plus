@@ -25,7 +25,7 @@ class OverviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'period_type' => ['required', Rule::in(['month', 'quarter', 'year', 'ytd', 'custom'])],
+            'period_type' => ['required', Rule::in(['last_30_days', 'month', 'quarter', 'year', 'ytd', 'custom'])],
             'period_value' => 'nullable|string',
             'start_date' => 'nullable|date|required_if:period_type,custom',
             'end_date' => 'nullable|date|after_or_equal:start_date|required_if:period_type,custom',

@@ -306,6 +306,7 @@
         "vsAmount": "к {{amount}}",
         "vsPreviousAmount": "{{amount}} к прошлому периоду",
         "filters": {
+            "last_30_days": "Последние 30 дней",
             "month": "Месяц",
             "quarter": "Квартал",
             "year": "Год",
