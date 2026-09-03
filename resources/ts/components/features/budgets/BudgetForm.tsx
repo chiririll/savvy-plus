@@ -22,11 +22,11 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { budgetSchema, BudgetFormData } from '@/schemas'
-import { useCategories, useCurrencies, useTags } from '@/hooks'
+import { useCategories, useTags } from '@/hooks'
 import { Category } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { FieldHelp, FormWrapper } from '@/components/shared'
+import { CurrencySelect, FieldHelp, FormWrapper } from '@/components/shared'
 
 interface BudgetFormProps {
     defaultValues?: Partial<BudgetFormData>
@@ -51,7 +51,6 @@ export function BudgetForm({
 }: BudgetFormProps) {
     const { t } = useTranslation(['common', 'forms'])
     const { data: categories } = useCategories('expense')
-    const { data: currencies } = useCurrencies()
     const { data: tags } = useTags()
 
     const form = useForm<BudgetFormData>({
@@ -134,24 +133,16 @@ export function BudgetForm({
                         render={({ field }) => (
                             <FormItem className="min-w-0">
                                 <FormLabel>{t('fields.currency')}</FormLabel>
-                                <Select
-                                    onValueChange={(val) => field.onChange(val ? Number(val) : null)}
-                                    value={field.value?.toString() ?? ''}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder={t('forms:budgets.baseCurrency')} />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {currencies?.map((currency) => (
-                                            <SelectItem key={currency.id} value={currency.id.toString()}>
-                                                {currency.code} ({currency.symbol})
-                                                {currency.isBase && ` — ${t('forms:budgets.baseSuffix')}`}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <CurrencySelect
+                                    value={field.value ? { source: 'existing', id: Number(field.value) } : null}
+                                    onChange={(next) => {
+                                        if (next.source === 'existing') {
+                                            field.onChange(next.id)
+                                        }
+                                    }}
+                                    allowCatalog={false}
+                                    placeholder={t('forms:budgets.baseCurrency')}
+                                />
                                 <FormMessage />
                             </FormItem>
                         )}

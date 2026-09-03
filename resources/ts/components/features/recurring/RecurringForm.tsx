@@ -91,9 +91,11 @@ export function RecurringForm({
     const frequency = form.watch('frequency')
     const selectedTagIds = form.watch('tag_ids') ?? []
     const accountId = form.watch('account_id')
+    const toAccountId = form.watch('to_account_id')
 
     const isTransfer = type === 'transfer'
     const selectedAccount = accounts?.find(a => a.id === accountId)
+    const selectedToAccount = accounts?.find(a => a.id === toAccountId)
 
     // Auto-select first account
     useEffect(() => {
@@ -163,105 +165,112 @@ export function RecurringForm({
                     )}
                 />
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className={isTransfer ? 'space-y-2' : undefined}>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="amount"
+                            render={({ field }) => (
+                                <FormItem className="min-w-0">
+                                    <FormLabel>
+                                        {isTransfer ? t('forms:transactions.sendAmount') : t('fields.amount')}
+                                        {selectedAccount?.currency?.symbol && (
+                                            <span className="text-muted-foreground ml-1">
+                                                ({selectedAccount.currency.symbol})
+                                            </span>
+                                        )}
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input type="number" step="0.01" min="0" placeholder="0.00" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="account_id"
+                            render={({ field }) => (
+                                <FormItem className="min-w-0">
+                                    <FormLabel>{isTransfer ? t('forms:fromAccount') : t('fields.account')}</FormLabel>
+                                    <AccountSelect
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    {isTransfer && (
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="to_amount"
+                                render={({ field }) => (
+                                    <FormItem className="min-w-0">
+                                        <FormLabel>
+                                            {t('forms:transactions.receiveAmount')}
+                                            {selectedToAccount?.currency?.symbol && (
+                                                <span className="text-muted-foreground ml-1">
+                                                    ({selectedToAccount.currency.symbol})
+                                                </span>
+                                            )}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                placeholder={t('forms:recurring.toAmountPlaceholder')}
+                                                {...field}
+                                                value={field.value ?? ''}
+                                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="to_account_id"
+                                render={({ field }) => (
+                                    <FormItem className="min-w-0">
+                                        <FormLabel>{t('forms:transactions.toAccount')}</FormLabel>
+                                        <AccountSelect
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            excludeId={accountId}
+                                        />
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {!isTransfer && (
                     <FormField
                         control={form.control}
-                        name="account_id"
+                        name="category_id"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>{isTransfer ? t('forms:fromAccount') : t('fields.account')}</FormLabel>
-                                <AccountSelect
+                                <FormLabel>{t('fields.category')}</FormLabel>
+                                <CategorySelect
                                     value={field.value}
                                     onChange={field.onChange}
+                                    type={type as 'income' | 'expense'}
                                 />
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-
-                    {isTransfer ? (
-                        <FormField
-                            control={form.control}
-                            name="to_account_id"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('forms:recurring.toAccount')}</FormLabel>
-                                    <AccountSelect
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        excludeId={accountId}
-                                    />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    ) : (
-                        <FormField
-                            control={form.control}
-                            name="category_id"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('fields.category')}</FormLabel>
-                                    <CategorySelect
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        type={type as 'income' | 'expense'}
-                                    />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    )}
-                </div>
-
-                {/* Amount */}
-                <div className={cn('grid gap-4', isTransfer ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1')}>
-                    <FormField
-                        control={form.control}
-                        name="amount"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    {t('fields.amount')}
-                                    {selectedAccount?.currency?.symbol && (
-                                        <span className="text-muted-foreground ml-1">
-                                            ({selectedAccount.currency.symbol})
-                                        </span>
-                                    )}
-                                </FormLabel>
-                                <FormControl>
-                                    <Input type="number" step="0.01" min="0" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {isTransfer && (
-                        <FormField
-                            control={form.control}
-                            name="to_amount"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('forms:recurring.toAmount')}</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            placeholder={t('forms:recurring.toAmountPlaceholder')}
-                                            {...field}
-                                            value={field.value ?? ''}
-                                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
-                                        />
-                                    </FormControl>
-                                    <FormDescription>{t('forms:recurring.toAmountHelp')}</FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    )}
-                </div>
+                )}
 
                 {/* Description */}
                 <FormField
