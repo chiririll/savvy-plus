@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, createBrowserRouter, useParams } from 'react-router-dom'
+import { Navigate, createBrowserRouter, useParams, useSearchParams } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
@@ -14,7 +14,6 @@ const SetPasswordPage = lazy(() => import('@/pages/auth/set-password'))
 // Protected pages
 const DashboardPage = lazy(() => import('@/pages/dashboard'))
 const TransactionsPage = lazy(() => import('@/pages/transactions'))
-const TransactionCreatePage = lazy(() => import('@/pages/transactions/create'))
 const TransactionEditPage = lazy(() => import('@/pages/transactions/[id]/edit'))
 const AccountsPage = lazy(() => import('@/pages/accounts'))
 const CategoriesPage = lazy(() => import('@/pages/categories'))
@@ -44,6 +43,14 @@ const ProvidersPage = lazy(() => import('@/pages/settings/providers'))
 const ProviderCreatePage = lazy(() => import('@/pages/settings/providers/create'))
 const ProviderEditPage = lazy(() => import('@/pages/settings/providers/[id]/edit'))
 const NotFoundPage = lazy(() => import('@/pages/not-found'))
+
+function TransactionCreateRedirect() {
+    const [searchParams] = useSearchParams()
+    const next = new URLSearchParams(searchParams)
+    next.set('create', '1')
+    const query = next.toString()
+    return <Navigate to={query ? `/transactions?${query}` : '/transactions?create=1'} replace />
+}
 
 function RecurringEditRedirect() {
     const { id } = useParams()
@@ -105,7 +112,7 @@ export const router = createBrowserRouter([
                 children: [
                     { index: true, element: withSuspense(DashboardPage) },
                     { path: 'transactions', element: withSuspense(TransactionsPage) },
-                    { path: 'transactions/create', element: withSuspense(TransactionCreatePage) },
+                    { path: 'transactions/create', element: <TransactionCreateRedirect /> },
                     { path: 'transactions/:id/edit', element: withSuspense(TransactionEditPage) },
                     { path: 'accounts', element: withSuspense(AccountsPage) },
                     { path: 'accounts/create', element: <Navigate to="/accounts?create=1" replace /> },

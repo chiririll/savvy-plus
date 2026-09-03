@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf, parseAsStringLiteral } from 'nuqs'
 import { Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Filter, ArrowUpDown, X, Check, SkipForward } from 'lucide-react'
 import { Row } from '@tanstack/react-table'
@@ -21,7 +21,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { createTransactionColumns } from '@/components/features/transactions'
+import { createTransactionColumns, useCreateTransactionDialog } from '@/components/features/transactions'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTransactions, useDeleteTransaction, useDuplicateTransaction, useConfirmTransaction, useSkipTransaction, useCategories, useTags } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
@@ -90,7 +90,9 @@ const transactionSearchParams = {
 export default function TransactionsPage() {
     const { t } = useTranslation('pages')
     const [params, setParams] = useQueryStates(transactionSearchParams)
+    const [searchParams, setSearchParams] = useSearchParams()
     const [filtersOpen, setFiltersOpen] = useState(false)
+    const { openCreate } = useCreateTransactionDialog()
 
     const filters = {
         per_page: 20,
@@ -120,6 +122,37 @@ export default function TransactionsPage() {
     const { data: categories } = useCategories()
     const { data: tags } = useTags()
     const isReadOnly = useReadOnly()
+
+    useEffect(() => {
+        if (searchParams.get('create') !== '1') {
+            return
+        }
+
+        const type = searchParams.get('type')
+        const accountId = searchParams.get('account_id')
+        const amount = searchParams.get('amount')
+        const description = searchParams.get('description')
+
+        openCreate({
+            type: type === 'income' || type === 'expense' || type === 'transfer' ? type : undefined,
+            account_id: accountId ? Number(accountId) : undefined,
+            amount: amount ? Number(amount) : undefined,
+            description: description ?? undefined,
+        })
+
+        setSearchParams((prev) => {
+            prev.delete('create')
+            prev.delete('account_id')
+            prev.delete('amount')
+            prev.delete('description')
+            prev.delete('type')
+            return prev
+        }, { replace: true })
+    }, [openCreate, searchParams, setSearchParams])
+
+    const handleCreate = () => {
+        openCreate(params.type ? { type: params.type } : undefined)
+    }
 
     const columns = createTransactionColumns({
         onDelete: (id) => deleteTransaction.mutate(id),
@@ -177,7 +210,7 @@ export default function TransactionsPage() {
             <PageHeader
                 title={t('transactions.title')}
                 description={t('transactions.description')}
-                createLink={params.type ? `/transactions/create?type=${params.type}` : '/transactions/create'}
+                onCreateClick={isReadOnly ? undefined : handleCreate}
                 createLabel={t('transactions.create')}
             />
 
@@ -384,12 +417,12 @@ export default function TransactionsPage() {
                 emptyTitle={params.status === 'pending' ? t('transactions.emptyPendingTitle') : t('transactions.emptyTitle')}
                 emptyDescription={params.status === 'pending' ? t('transactions.emptyPendingDescription') : t('transactions.emptyDescription')}
                 emptyAction={
-                    <Button asChild>
-                        <Link to={params.type ? `/transactions/create?type=${params.type}` : '/transactions/create'}>
+                    !isReadOnly ? (
+                        <Button onClick={handleCreate}>
                             <Plus className="size-4" />
                             {t('transactions.create')}
-                        </Link>
-                    </Button>
+                        </Button>
+                    ) : undefined
                 }
                 renderSubComponent={TransactionItems}
                 getRowCanExpand={(row) => (row.original.itemsCount ?? row.original.items?.length ?? 0) > 1}
@@ -403,6 +436,7 @@ export default function TransactionsPage() {
                     infoLabel={t('transactions.itemLabel')}
                 />
             )}
+
         </Page>
     )
 }

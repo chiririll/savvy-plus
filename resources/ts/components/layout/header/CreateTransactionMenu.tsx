@@ -1,6 +1,5 @@
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -8,6 +7,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useCreateTransactionDialog } from '@/components/features/transactions'
 
 const TRANSACTION_TYPES = [
     { type: 'income', icon: ArrowDownLeft, className: 'text-green-600' },
@@ -17,7 +17,7 @@ const TRANSACTION_TYPES = [
 
 export function CreateTransactionMenu() {
     const { t } = useTranslation('nav')
-    const navigate = useNavigate()
+    const { openCreate } = useCreateTransactionDialog()
 
     return (
         <DropdownMenu>
@@ -31,7 +31,7 @@ export function CreateTransactionMenu() {
                 {TRANSACTION_TYPES.map(({ type, icon: Icon, className }) => (
                     <DropdownMenuItem
                         key={type}
-                        onClick={() => navigate(`/transactions/create?type=${type}`)}
+                        onClick={() => openCreate({ type })}
                     >
                         <Icon className={`size-4 mr-2 ${className}`} />
                         {t(type)}

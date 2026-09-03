@@ -33,16 +33,22 @@ interface TransactionFormProps {
     defaultValues?: Partial<TransactionFormValues>
     onSubmit: (data: TransactionFormValues) => void
     onTypeChange?: (type: TransactionFormValues['type']) => void
+    onValuesChange?: (data: TransactionFormValues) => void
     isSubmitting?: boolean
     submitLabel?: string
+    formId?: string
+    hideSubmit?: boolean
 }
 
 export function TransactionForm({
     defaultValues,
     onSubmit,
     onTypeChange,
+    onValuesChange,
     isSubmitting,
     submitLabel,
+    formId,
+    hideSubmit,
 }: TransactionFormProps) {
     const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
@@ -75,6 +81,18 @@ export function TransactionForm({
         form.reset(formDefaults)
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formDefaults])
+
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as TransactionFormValues)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,
@@ -236,7 +254,16 @@ export function TransactionForm({
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+                id={formId}
+                onSubmit={form.handleSubmit((data) => {
+                    if (balancePreview?.insufficientFunds) {
+                        return
+                    }
+                    onSubmit(data)
+                })}
+                className="space-y-6"
+            >
                 {/* Transaction Type Tabs */}
                 <div className="flex gap-2 p-1 bg-muted rounded-lg">
                     {TRANSACTION_TYPES.map(({ value, icon: Icon, color }) => (
@@ -642,9 +669,11 @@ export function TransactionForm({
                     </div>
                 )}
 
-                <Button type="submit" disabled={isSubmitting || balancePreview?.insufficientFunds} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting || balancePreview?.insufficientFunds} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>

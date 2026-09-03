@@ -40,7 +40,8 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactECharts from 'echarts-for-react'
 import { useTheme } from '@/hooks/use-theme'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { useCreateTransactionDialog } from '@/components/features/transactions'
 import { Transaction, AccountType } from '@/types'
 import { ACCOUNT_TYPE_CONFIG, CHART_COLORS, CATEGORY_COLORS } from '@/constants'
 import { DEFAULT_FILTERS, type ReportFilters } from '@/pages/reports/types'
@@ -165,7 +166,7 @@ export default function DashboardPage() {
     const { t: tCommon } = useTranslation('common')
     const { t: tNav } = useTranslation('nav')
     const { theme } = useTheme()
-    const navigate = useNavigate()
+    const { openCreate } = useCreateTransactionDialog()
     const { data: balance } = useTotalBalance()
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
 
@@ -600,19 +601,19 @@ export default function DashboardPage() {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuItem
-                                                        onClick={() => navigate(`/transactions/create?type=income&account_id=${account.id}`)}
+                                                        onClick={() => openCreate({ type: 'income', account_id: account.id })}
                                                     >
                                                         <ArrowDownLeft className="size-4 mr-2 text-green-600" />
                                                         {tNav('income')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
-                                                        onClick={() => navigate(`/transactions/create?type=expense&account_id=${account.id}`)}
+                                                        onClick={() => openCreate({ type: 'expense', account_id: account.id })}
                                                     >
                                                         <ArrowUpRight className="size-4 mr-2 text-red-600" />
                                                         {tNav('expense')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
-                                                        onClick={() => navigate(`/transactions/create?type=transfer&account_id=${account.id}`)}
+                                                        onClick={() => openCreate({ type: 'transfer', account_id: account.id })}
                                                     >
                                                         <ArrowLeftRight className="size-4 mr-2 text-blue-600" />
                                                         {tNav('transfer')}

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/sheet'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
 
 interface FormDialogProps {
     open: boolean
@@ -27,6 +28,7 @@ interface FormDialogProps {
     formId: string
     isSubmitting?: boolean
     isEdit?: boolean
+    className?: string
     children: React.ReactNode
 }
 
@@ -70,6 +72,7 @@ export function FormDialog({
     formId,
     isSubmitting,
     isEdit = false,
+    className,
     children,
 }: FormDialogProps) {
     const isMobile = useIsMobile()
@@ -114,7 +117,7 @@ export function FormDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
+            <DialogContent className={cn('flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg', className)}>
                 <DialogHeader className="shrink-0 border-b px-6 pb-4 pr-12 pt-6">
                     <DialogTitle>{title}</DialogTitle>
                     {description && (
