@@ -47,7 +47,7 @@ export function AccountSelect({
             disabled={disabled}
         >
             <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                     <SelectValue placeholder={placeholder ?? t('selectAccount')} />
                 </SelectTrigger>
             </FormControl>

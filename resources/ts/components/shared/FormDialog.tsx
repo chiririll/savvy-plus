@@ -29,6 +29,7 @@ interface FormDialogProps {
     isSubmitting?: boolean
     isEdit?: boolean
     className?: string
+    headerExtra?: React.ReactNode
     children: React.ReactNode
 }
 
@@ -73,6 +74,7 @@ export function FormDialog({
     isSubmitting,
     isEdit = false,
     className,
+    headerExtra,
     children,
 }: FormDialogProps) {
     const isMobile = useIsMobile()
@@ -105,6 +107,7 @@ export function FormDialog({
                         {description && (
                             <SheetDescription>{description}</SheetDescription>
                         )}
+                        {headerExtra}
                     </SheetHeader>
                     {body}
                     <SheetFooter className="shrink-0 border-t px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -118,11 +121,12 @@ export function FormDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className={cn('flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg', className)}>
-                <DialogHeader className="shrink-0 border-b px-6 pb-4 pr-12 pt-6">
+                <DialogHeader className="shrink-0 space-y-1.5 border-b px-6 pb-4 pr-12 pt-6">
                     <DialogTitle>{title}</DialogTitle>
                     {description && (
                         <DialogDescription>{description}</DialogDescription>
                     )}
+                    {headerExtra}
                 </DialogHeader>
                 {body}
                 <DialogFooter className="shrink-0 border-t px-6 py-4">

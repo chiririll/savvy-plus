@@ -21,9 +21,9 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { createTransactionColumns, useCreateTransactionDialog } from '@/components/features/transactions'
+import { createTransactionColumns, useTransactionFormDialog } from '@/components/features/transactions'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useTransactions, useDeleteTransaction, useDuplicateTransaction, useConfirmTransaction, useSkipTransaction, useCategories, useTags } from '@/hooks'
+import { useTransactions, useTransaction, useDeleteTransaction, useDuplicateTransaction, useConfirmTransaction, useSkipTransaction, useCategories, useTags } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { TransactionType, Transaction } from '@/types'
 import { addDaysLocal, cn, formatCurrency } from '@/lib/utils'
@@ -92,7 +92,9 @@ export default function TransactionsPage() {
     const [params, setParams] = useQueryStates(transactionSearchParams)
     const [searchParams, setSearchParams] = useSearchParams()
     const [filtersOpen, setFiltersOpen] = useState(false)
-    const { openCreate } = useCreateTransactionDialog()
+    const { openCreate, openEdit } = useTransactionFormDialog()
+    const editId = searchParams.get('edit')
+    const { data: editTransaction, isError: editNotFound } = useTransaction(editId ?? '')
 
     const filters = {
         per_page: 20,
@@ -150,6 +152,27 @@ export default function TransactionsPage() {
         }, { replace: true })
     }, [openCreate, searchParams, setSearchParams])
 
+    useEffect(() => {
+        if (!editId) {
+            return
+        }
+
+        const found = (data?.data ?? []).find((item) => String(item.id) === editId)
+        const transaction = found ?? editTransaction
+        if (!transaction && !editNotFound) {
+            return
+        }
+
+        if (transaction) {
+            openEdit(transaction)
+        }
+
+        setSearchParams((prev) => {
+            prev.delete('edit')
+            return prev
+        }, { replace: true })
+    }, [data?.data, editId, editNotFound, editTransaction, openEdit, setSearchParams])
+
     const handleCreate = () => {
         openCreate(params.type ? { type: params.type } : undefined)
     }
@@ -159,6 +182,7 @@ export default function TransactionsPage() {
         onDuplicate: (id) => duplicateTransaction.mutate(id),
         onConfirm: (id) => confirmTransaction.mutate(id),
         onSkip: (id) => skipTransaction.mutate(id),
+        onEdit: openEdit,
         isReadOnly,
     })
     const highlight = upcomingPending?.data ?? []

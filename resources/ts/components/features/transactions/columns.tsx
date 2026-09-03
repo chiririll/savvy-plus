@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { Transaction } from '@/types'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
     DropdownMenu,
@@ -20,7 +20,6 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins, Check, SkipForward } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import { cn, formatCurrency } from '@/lib/utils'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import i18n, { intlLocale } from '@/lib/i18n'
@@ -40,6 +39,7 @@ interface ColumnsOptions {
     onDuplicate: (id: number) => void
     onConfirm?: (id: number) => void
     onSkip?: (id: number) => void
+    onEdit?: (transaction: Transaction) => void
     isReadOnly?: boolean
 }
 
@@ -48,6 +48,7 @@ export function createTransactionColumns({
     onDuplicate,
     onConfirm,
     onSkip,
+    onEdit,
     isReadOnly,
 }: ColumnsOptions): ColumnDef<Transaction>[] {
     return [
@@ -197,12 +198,10 @@ export function createTransactionColumns({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            {transaction.status !== 'skipped' && (
-                            <DropdownMenuItem asChild>
-                                <Link to={`/transactions/${transaction.id}/edit`}>
-                                    <Pencil className="mr-2 size-4" />
-                                    {i18n.t('actions.edit')}
-                                </Link>
+                            {transaction.status !== 'skipped' && onEdit && (
+                            <DropdownMenuItem onClick={() => onEdit(transaction)}>
+                                <Pencil className="mr-2 size-4" />
+                                {i18n.t('actions.edit')}
                             </DropdownMenuItem>
                             )}
                             {!isReadOnly && transaction.status === 'pending' && onConfirm && (
@@ -245,7 +244,7 @@ export function createTransactionColumns({
                                         <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
                                         <AlertDialogAction
                                             onClick={() => onDelete(transaction.id)}
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                            className={buttonVariants({ variant: 'destructive' })}
                                         >
                                             {i18n.t('actions.delete')}
                                         </AlertDialogAction>

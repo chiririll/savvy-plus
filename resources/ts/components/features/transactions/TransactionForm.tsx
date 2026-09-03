@@ -1,6 +1,6 @@
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useCallback, useEffect, useMemo, useRef, type KeyboardEvent } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, type KeyboardEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,7 +12,6 @@ import {
     FormLabel,
     FormControl,
     FormMessage,
-    FormDescription,
 } from '@/components/ui/form'
 import { transactionSchema, TransactionFormValues } from '@/schemas/transactions'
 import { useAccounts, useCategories, useTags } from '@/hooks'
@@ -29,6 +28,61 @@ const TRANSACTION_TYPES = [
     { value: 'transfer', icon: ArrowLeftRight, color: 'text-blue-600' },
 ] as const
 
+type BalancePreview = {
+    currentBalance: number
+    newBalance: number
+    insufficientFunds?: boolean
+    currency: Parameters<typeof formatCurrency>[1]
+}
+
+function BalancePair({ preview, label }: { preview: BalancePreview; label: string }) {
+    return (
+        <span className="inline-flex items-center gap-1.5">
+            <span className="text-muted-foreground">{label}</span>
+            <span className="font-mono">
+                {formatCurrency(preview.currentBalance, preview.currency)}
+            </span>
+            <span className="text-muted-foreground">→</span>
+            <span className={cn(
+                'font-mono',
+                preview.insufficientFunds
+                    ? 'text-destructive'
+                    : preview.newBalance > preview.currentBalance && 'text-green-600'
+            )}>
+                {formatCurrency(preview.newBalance, preview.currency)}
+            </span>
+        </span>
+    )
+}
+
+function TransactionBalanceHint({
+    from,
+    to,
+    isPending,
+}: {
+    from: BalancePreview | null
+    to: BalancePreview | null
+    isPending: boolean
+}) {
+    const { t } = useTranslation('forms')
+
+    return (
+        <div className="flex min-h-5 flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+            {isPending ? (
+                <span className="text-muted-foreground">{t('transactions.pendingHint')}</span>
+            ) : (
+                <>
+                    {from && <BalancePair preview={from} label={t('transactions.balance')} />}
+                    {to && <BalancePair preview={to} label={t('transactions.toBalance')} />}
+                    {from?.insufficientFunds && (
+                        <span className="font-medium text-destructive">{t('transactions.insufficientFunds')}</span>
+                    )}
+                </>
+            )}
+        </div>
+    )
+}
+
 interface TransactionFormProps {
     defaultValues?: Partial<TransactionFormValues>
     onSubmit: (data: TransactionFormValues) => void
@@ -38,6 +92,7 @@ interface TransactionFormProps {
     submitLabel?: string
     formId?: string
     hideSubmit?: boolean
+    onPreviewChange?: (preview: ReactNode) => void
 }
 
 export function TransactionForm({
@@ -49,6 +104,7 @@ export function TransactionForm({
     submitLabel,
     formId,
     hideSubmit,
+    onPreviewChange,
 }: TransactionFormProps) {
     const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
@@ -211,6 +267,17 @@ export function TransactionForm({
 
     const selectedAccount = accounts?.find(a => a.id === Number(accountId))
     const selectedToAccount = accounts?.find(a => a.id === Number(toAccountId))
+    const sameTransferCurrency = Boolean(
+        selectedAccount
+        && selectedToAccount
+        && selectedAccount.currencyId === selectedToAccount.currencyId
+    )
+
+    useEffect(() => {
+        if (transactionType === 'transfer' && sameTransferCurrency) {
+            form.setValue('to_amount', amount ? Number(amount) : null, { shouldValidate: false })
+        }
+    }, [transactionType, sameTransferCurrency, amount, form])
 
     // Calculate balance preview
     const balancePreview = useMemo(() => {
@@ -251,6 +318,18 @@ export function TransactionForm({
         }
     }, [selectedToAccount, toAmount, amount, transactionType])
 
+    const balanceHint = (
+        <TransactionBalanceHint
+            from={balancePreview}
+            to={toBalancePreview}
+            isPending={isPendingDate}
+        />
+    )
+
+    useLayoutEffect(() => {
+        onPreviewChange?.(balanceHint)
+    }, [onPreviewChange, balancePreview, toBalancePreview, isPendingDate])
+
     return (
         <FormWrapper>
         <Form {...form}>
@@ -287,49 +366,115 @@ export function TransactionForm({
                     ))}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    {/* Account */}
-                    <FormField
-                        control={form.control}
-                        name="account_id"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    {transactionType === 'transfer' ? t('forms:fromAccount') : t('fields.account')}
-                                </FormLabel>
-                                <AccountSelect
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                />
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                {!onPreviewChange && balanceHint}
 
-                    {/* To Account (Transfer only) */}
-                    {transactionType === 'transfer' ? (
+                <div className={transactionType === 'transfer' ? 'space-y-2' : undefined}>
+                    <div className="grid grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
-                            name="to_account_id"
+                            name="amount"
                             render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('forms:transactions.toAccount')}</FormLabel>
+                                <FormItem className="min-w-0">
+                                    <FormLabel>
+                                        {transactionType === 'transfer' ? t('forms:transactions.sendAmount') : t('fields.amount')}
+                                        {selectedAccount?.currency?.symbol && (
+                                            <span className="text-muted-foreground ml-1">
+                                                ({selectedAccount.currency.symbol})
+                                            </span>
+                                        )}
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            min={0}
+                                            placeholder="0.00"
+                                            {...field}
+                                            disabled={items && items.length > 0}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="account_id"
+                            render={({ field }) => (
+                                <FormItem className="min-w-0">
+                                    <FormLabel>
+                                        {transactionType === 'transfer' ? t('forms:fromAccount') : t('fields.account')}
+                                    </FormLabel>
                                     <AccountSelect
                                         value={field.value}
                                         onChange={field.onChange}
-                                        excludeId={Number(accountId)}
                                     />
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                    ) : (
-                        /* Category (Income/Expense only) */
+                    </div>
+
+                    {transactionType === 'transfer' && (
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="to_amount"
+                                render={({ field }) => (
+                                    <FormItem className="min-w-0">
+                                        <FormLabel>
+                                            {t('forms:transactions.receiveAmount')}
+                                            {selectedToAccount?.currency?.symbol && (
+                                                <span className="text-muted-foreground ml-1">
+                                                    ({selectedToAccount.currency.symbol})
+                                                </span>
+                                            )}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                min={0}
+                                                placeholder={t('forms:transactions.receiveAmountPlaceholder')}
+                                                {...field}
+                                                value={field.value ?? ''}
+                                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                                                readOnly={sameTransferCurrency}
+                                                disabled={sameTransferCurrency}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="to_account_id"
+                                render={({ field }) => (
+                                    <FormItem className="min-w-0">
+                                        <FormLabel>{t('forms:transactions.toAccount')}</FormLabel>
+                                        <AccountSelect
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            excludeId={Number(accountId)}
+                                        />
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    {transactionType !== 'transfer' && (
                         <FormField
                             control={form.control}
                             name="category_id"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="min-w-0">
                                     <FormLabel>{t('fields.category')}</FormLabel>
                                     <CategorySelect
                                         value={field.value}
@@ -341,156 +486,25 @@ export function TransactionForm({
                             )}
                         />
                     )}
-                </div>
 
-                {/* Balance Preview */}
-                {balancePreview && !isPendingDate && (
-                    <div className={cn(
-                        'flex items-center gap-4 p-3 rounded-lg border text-sm',
-                        balancePreview.insufficientFunds ? 'bg-destructive/10 border-destructive/50' : 'bg-muted/50'
-                    )}>
-                        <div className="flex-1">
-                            <span className="text-muted-foreground">{t('forms:transactions.balance')}: </span>
-                            <span className="font-mono font-medium">
-                                {formatCurrency(balancePreview.currentBalance, balancePreview.currency)}
-                            </span>
-                        </div>
-                        <span className="text-muted-foreground">→</span>
-                        <div className="flex-1 text-right">
-                            <span className="text-muted-foreground">{t('forms:transactions.after')}: </span>
-                            <span className={cn(
-                                'font-mono font-medium',
-                                balancePreview.insufficientFunds ? 'text-destructive' :
-                                    balancePreview.newBalance > balancePreview.currentBalance ? 'text-green-600' : 'text-foreground'
-                            )}>
-                                {formatCurrency(balancePreview.newBalance, balancePreview.currency)}
-                            </span>
-                        </div>
-                        {balancePreview.insufficientFunds && (
-                            <span className="text-destructive text-xs font-medium">{t('forms:transactions.insufficientFunds')}</span>
-                        )}
-                    </div>
-                )}
-
-                {/* To Account Balance Preview (Transfer) */}
-                {toBalancePreview && !isPendingDate && (
-                    <div className="flex items-center gap-4 p-3 rounded-lg border bg-muted/50 text-sm">
-                        <div className="flex-1">
-                            <span className="text-muted-foreground">{t('forms:transactions.toBalance')}: </span>
-                            <span className="font-mono font-medium">
-                                {formatCurrency(toBalancePreview.currentBalance, toBalancePreview.currency)}
-                            </span>
-                        </div>
-                        <span className="text-muted-foreground">→</span>
-                        <div className="flex-1 text-right">
-                            <span className="text-muted-foreground">{t('forms:transactions.after')}: </span>
-                            <span className="font-mono font-medium text-green-600">
-                                {formatCurrency(toBalancePreview.newBalance, toBalancePreview.currency)}
-                            </span>
-                        </div>
-                    </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                    {/* Amount */}
                     <FormField
                         control={form.control}
-                        name="amount"
+                        name="date"
                         render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    {transactionType === 'transfer' ? t('forms:transactions.sendAmount') : t('fields.amount')}
-                                    {selectedAccount?.currency?.symbol && (
-                                        <span className="text-muted-foreground ml-1">
-                                            ({selectedAccount.currency.symbol})
-                                        </span>
-                                    )}
-                                </FormLabel>
+                            <FormItem className="min-w-0">
+                                <FormLabel>{t('fields.date')}</FormLabel>
                                 <FormControl>
                                     <Input
-                                        type="number"
-                                        step="0.01"
-                                        min={0}
-                                        placeholder="0.00"
+                                        type="date"
                                         {...field}
-                                        disabled={items && items.length > 0}
+                                        value={field.value || ''}
                                     />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-
-                    {/* To Amount (Transfer only) or Date */}
-                    {transactionType === 'transfer' ? (
-                        <FormField
-                            control={form.control}
-                            name="to_amount"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('forms:transactions.receiveAmount')}</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
-                                            min={0}
-                                            placeholder={t('forms:transactions.receiveAmountPlaceholder')}
-                                            {...field}
-                                            value={field.value ?? ''}
-                                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    ) : (
-                        <FormField
-                            control={form.control}
-                            name="date"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('fields.date')}</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="date"
-                                            {...field}
-                                            value={field.value || ''}
-                                        />
-                                    </FormControl>
-                                    {isPendingDate && (
-                                        <FormDescription>{t('forms:transactions.pendingHint')}</FormDescription>
-                                    )}
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    )}
                 </div>
-
-                {/* Date for transfer */}
-                {transactionType === 'transfer' && (
-                    <FormField
-                        control={form.control}
-                        name="date"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('fields.date')}</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="date"
-                                            {...field}
-                                            value={field.value || ''}
-                                        />
-                                    </FormControl>
-                                    {isPendingDate && (
-                                        <FormDescription>{t('forms:transactions.pendingHint')}</FormDescription>
-                                    )}
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    )}
 
                 {/* Description */}
                 <FormField
@@ -574,7 +588,7 @@ export function TransactionForm({
                                             <th className="text-left p-2 font-medium">{t('fields.name')}</th>
                                             <th className="text-left p-2 font-medium w-20">{t('forms:transactions.qty')}</th>
                                             <th className="text-left p-2 font-medium w-28">{t('forms:transactions.price')}</th>
-                                            <th className="text-right p-2 font-medium w-28">{t('forms:transactions.total')}</th>
+                                            <th className="text-right p-2 font-medium w-20">{t('forms:transactions.total')}</th>
                                             <th className="w-10"></th>
                                         </tr>
                                     </thead>

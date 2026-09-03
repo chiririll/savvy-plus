@@ -14,7 +14,6 @@ const SetPasswordPage = lazy(() => import('@/pages/auth/set-password'))
 // Protected pages
 const DashboardPage = lazy(() => import('@/pages/dashboard'))
 const TransactionsPage = lazy(() => import('@/pages/transactions'))
-const TransactionEditPage = lazy(() => import('@/pages/transactions/[id]/edit'))
 const AccountsPage = lazy(() => import('@/pages/accounts'))
 const CategoriesPage = lazy(() => import('@/pages/categories'))
 const CategoryCreatePage = lazy(() => import('@/pages/categories/create'))
@@ -50,6 +49,11 @@ function TransactionCreateRedirect() {
     next.set('create', '1')
     const query = next.toString()
     return <Navigate to={query ? `/transactions?${query}` : '/transactions?create=1'} replace />
+}
+
+function TransactionEditRedirect() {
+    const { id } = useParams()
+    return <Navigate to={id ? `/transactions?edit=${id}` : '/transactions'} replace />
 }
 
 function RecurringEditRedirect() {
@@ -113,7 +117,7 @@ export const router = createBrowserRouter([
                     { index: true, element: withSuspense(DashboardPage) },
                     { path: 'transactions', element: withSuspense(TransactionsPage) },
                     { path: 'transactions/create', element: <TransactionCreateRedirect /> },
-                    { path: 'transactions/:id/edit', element: withSuspense(TransactionEditPage) },
+                    { path: 'transactions/:id/edit', element: <TransactionEditRedirect /> },
                     { path: 'accounts', element: withSuspense(AccountsPage) },
                     { path: 'accounts/create', element: <Navigate to="/accounts?create=1" replace /> },
                     { path: 'accounts/:id/edit', element: <AccountEditRedirect /> },

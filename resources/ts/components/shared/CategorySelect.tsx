@@ -45,7 +45,7 @@ export function CategorySelect({
             disabled={disabled}
         >
             <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                     <SelectValue placeholder={placeholder ?? t('selectCategory')} />
                 </SelectTrigger>
             </FormControl>
