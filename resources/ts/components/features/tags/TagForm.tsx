@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -28,15 +29,21 @@ type TagFormValues = z.infer<typeof tagSchema>
 interface TagFormProps {
     defaultValues?: Partial<TagFormValues>
     onSubmit: (data: TagFormValues) => void
+    onValuesChange?: (data: TagFormValues) => void
     isSubmitting?: boolean
     submitLabel?: string
+    formId?: string
+    hideSubmit?: boolean
 }
 
 export function TagForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
+    formId,
+    hideSubmit,
 }: TagFormProps) {
     const { t } = useTranslation(['common', 'forms'])
     const form = useForm<TagFormValues>({
@@ -46,10 +53,22 @@ export function TagForm({
         },
     })
 
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as TagFormValues)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
+
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                     control={form.control}
                     name="name"
@@ -73,9 +92,11 @@ export function TagForm({
                     )}
                 />
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>

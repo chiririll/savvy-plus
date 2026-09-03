@@ -16,13 +16,9 @@ const DashboardPage = lazy(() => import('@/pages/dashboard'))
 const TransactionsPage = lazy(() => import('@/pages/transactions'))
 const AccountsPage = lazy(() => import('@/pages/accounts'))
 const CategoriesPage = lazy(() => import('@/pages/categories'))
-const CategoryCreatePage = lazy(() => import('@/pages/categories/create'))
-const CategoryEditPage = lazy(() => import('@/pages/categories/[id]/edit'))
 const CurrenciesPage = lazy(() => import('@/pages/currencies'))
 const BudgetsPage = lazy(() => import('@/pages/budgets'))
 const TagsPage = lazy(() => import('@/pages/tags'))
-const TagCreatePage = lazy(() => import('@/pages/tags/create'))
-const TagEditPage = lazy(() => import('@/pages/tags/[id]/edit'))
 const DebtsPage = lazy(() => import('@/pages/debts'))
 const RecurringPage = lazy(() => import('@/pages/recurring'))
 const AutomationPage = lazy(() => import('@/pages/automation'))
@@ -88,13 +84,9 @@ export const router = createBrowserRouter([
                     { path: 'transactions', element: withSuspense(TransactionsPage) },
                     { path: 'accounts', element: withSuspense(AccountsPage) },
                     { path: 'categories', element: withSuspense(CategoriesPage) },
-                    { path: 'categories/create', element: withSuspense(CategoryCreatePage) },
-                    { path: 'categories/:id/edit', element: withSuspense(CategoryEditPage) },
                     { path: 'currencies', element: withSuspense(CurrenciesPage) },
                     { path: 'budgets', element: withSuspense(BudgetsPage) },
                     { path: 'tags', element: withSuspense(TagsPage) },
-                    { path: 'tags/create', element: withSuspense(TagCreatePage) },
-                    { path: 'tags/:id/edit', element: withSuspense(TagEditPage) },
                     { path: 'debts', element: withSuspense(DebtsPage) },
                     { path: 'recurring', element: withSuspense(RecurringPage) },
                     { path: 'automation', element: withSuspense(AutomationPage) },

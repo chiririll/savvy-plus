@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
 import { Pencil, Trash2, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -27,7 +26,8 @@ import i18n from '@/lib/i18n'
 export const createCategoryColumns = (
     onDelete: (id: number) => void,
     typeCounts: { income: number; expense: number },
-    isReadOnly?: boolean
+    isReadOnly?: boolean,
+    onEdit?: (category: Category) => void
 ): ColumnDef<Category>[] => [
     {
         accessorKey: 'name',
@@ -79,12 +79,12 @@ export const createCategoryColumns = (
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                            <Link to={`/categories/${row.original.id}/edit`}>
+                        {onEdit && (
+                            <DropdownMenuItem onClick={() => onEdit(row.original)}>
                                 <Pencil className="mr-2 size-4" />
                                 {i18n.t('actions.edit')}
-                            </Link>
-                        </DropdownMenuItem>
+                            </DropdownMenuItem>
+                        )}
                         {!isReadOnly && (
                         <>
                         <DropdownMenuSeparator />
