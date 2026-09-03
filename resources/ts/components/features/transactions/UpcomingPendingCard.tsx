@@ -1,6 +1,7 @@
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Banknote, Check, HandCoins, SkipForward } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { HoldButton } from '@/components/ui/hold-button'
 import { formatCurrency } from '@/lib/utils'
 import { parseDateKey, pendingDateClassName } from '@/lib/dates'
 import { intlLocale } from '@/lib/i18n'
@@ -71,10 +72,14 @@ export function UpcomingPendingCard({
                             }
                         />
                     )}
-                    <Button size="sm" variant="outline" onClick={() => onConfirm(transaction.id)}>
+                    <HoldButton
+                        title={t('actions.holdToConfirm')}
+                        aria-label={t('actions.holdToConfirm')}
+                        onConfirm={() => onConfirm(transaction.id)}
+                    >
                         <Check className="size-4" />
                         {t('actions.confirm')}
-                    </Button>
+                    </HoldButton>
                 </div>
             )}
         </div>
