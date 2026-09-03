@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { backupsApi } from '@/api/backups'
+import { getApiErrorMessage } from '@/lib/api-error'
 import { toast } from 'sonner'
 import i18n from '@/lib/i18n'
 
@@ -22,7 +23,7 @@ export function useCreateBackup() {
             toast.success(i18n.t('toasts.backup.created'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.backup.createFailed'))
+            toast.error(getApiErrorMessage(error, i18n.t('toasts.backup.createFailed')))
         },
     })
 }
@@ -38,7 +39,7 @@ export function useUploadBackup() {
             toast.success(i18n.t('toasts.backup.uploaded'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.backup.uploadFailed'))
+            toast.error(getApiErrorMessage(error, i18n.t('toasts.backup.uploadFailed')))
         },
     })
 }
@@ -53,7 +54,7 @@ export function useRestoreBackup() {
             toast.success(i18n.t('toasts.backup.restored'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.backup.restoreFailed'))
+            toast.error(getApiErrorMessage(error, i18n.t('toasts.backup.restoreFailed')))
         },
     })
 }
@@ -68,7 +69,7 @@ export function useDeleteBackup() {
             toast.success(i18n.t('toasts.backup.deleted'))
         },
         onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.backup.deleteFailed'))
+            toast.error(getApiErrorMessage(error, i18n.t('toasts.backup.deleteFailed')))
         },
     })
 }

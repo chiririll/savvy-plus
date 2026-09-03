@@ -277,8 +277,22 @@
         "upload": "Upload Backup",
         "date": "Date",
         "size": "Size",
+        "version": "Version",
         "note": "Note",
         "actions": "Actions",
+        "versionUnknown": "Unknown",
+        "schemaStatus": {
+            "current": "Matches this app",
+            "outdated": "From an older version",
+            "newer": "Needs a newer app",
+            "unknown": "Version unknown"
+        },
+        "schemaStatusHelp": {
+            "current": "This backup’s schema matches the running app.",
+            "outdated": "This backup is older. Restore will apply pending migrations.",
+            "newer": "This backup was made with a newer app and cannot be restored here.",
+            "unknown": "Could not determine this backup’s schema."
+        },
         "empty": "No backups yet. Create your first backup to get started.",
         "download": "Download",
         "restore": "Restore",
@@ -292,6 +306,10 @@
         "uploadNotePlaceholder": "e.g., Backup from old device",
         "restoreTitle": "Restore Backup?",
         "restoreDescription": "This will replace all current data with the backup from {{date}}. This action cannot be undone.",
+        "restoreNewerTitle": "Cannot restore this backup",
+        "restoreNewerDescription": "This backup is from a newer version of the app. Restore it on that version, or upgrade Savvy first.",
+        "restoreMigrationsDescription_one": "This backup is {{count}} migration behind. Savvy will apply it after restore — otherwise the app will not run. The backup file is not changed.",
+        "restoreMigrationsDescription_other": "This backup is {{count}} migrations behind. Savvy will apply them after restore — otherwise the app will not run. The backup file is not changed.",
         "deleteTitle": "Delete Backup?",
         "deleteDescription": "This will permanently delete the backup from {{date}}."
     }

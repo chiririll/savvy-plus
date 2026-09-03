@@ -151,6 +151,9 @@ return [
 
     'backup' => [
         'restored' => 'Database restored successfully',
+        'invalid' => 'This file is not a valid SQLite backup.',
+        'missing' => 'Backup file not found.',
+        'newer' => 'This backup is from a newer version and cannot be restored.',
     ],
 
     'import' => [

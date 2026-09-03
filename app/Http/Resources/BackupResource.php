@@ -14,6 +14,8 @@ class BackupResource extends JsonResource
             'filename' => $this->filename,
             'size' => $this->size,
             'note' => $this->note,
+            'schemaVersion' => $this->app_version,
+            'schemaStatus' => $this->schema_status ?? $this->schemaStatus()->value,
             'createdAt' => $this->created_at?->toISOString(),
         ];
     }

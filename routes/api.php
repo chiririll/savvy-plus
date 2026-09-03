@@ -191,6 +191,7 @@ Route::middleware(['session', 'csrf'])->group(function () {
             Route::post('/', [BackupController::class, 'store']);
             Route::post('upload', [BackupController::class, 'upload']);
             Route::get('{backup}/download', [BackupController::class, 'download']);
+            Route::get('{backup}/inspect', [BackupController::class, 'inspect']);
             Route::post('{backup}/restore', [BackupController::class, 'restore']);
             Route::delete('{backup}', [BackupController::class, 'destroy']);
         });
