@@ -21,16 +21,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { recurringSchema, RecurringFormData } from '@/schemas'
-import { useAccounts, useCategories, useTags } from '@/hooks'
-import { Badge } from '@/components/ui/badge'
-import { cn, formatDateLocal } from '@/lib/utils'
-import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react'
-import { AccountSelect } from '@/components/shared/AccountSelect'
-import { CategorySelect } from '@/components/shared/CategorySelect'
-import { FormActiveField } from '@/components/shared/FormActiveField'
-import { FormWrapper } from '@/components/shared/FormWrapper'
+import { useAccounts, useCategories } from '@/hooks'
+import { formatDateLocal } from '@/lib/utils'
+import {
+    CategorySelect,
+    FormActiveField,
+    FormWrapper,
+    MoneyAccountFields,
+    TagSelect,
+    TransactionTypeTabs,
+} from '@/components/shared'
 
 interface RecurringFormProps {
     defaultValues?: Partial<RecurringFormData>
@@ -41,12 +42,6 @@ interface RecurringFormProps {
     formId?: string
     hideSubmit?: boolean
 }
-
-const typeOptions = [
-    { value: 'income', icon: ArrowDownLeft, color: 'text-green-500' },
-    { value: 'expense', icon: ArrowUpRight, color: 'text-red-500' },
-    { value: 'transfer', icon: ArrowLeftRight, color: 'text-blue-500' },
-] as const
 
 const frequencyOptions = ['daily', 'weekly', 'monthly', 'yearly'] as const
 const weekdayValues = [0, 1, 2, 3, 4, 5, 6] as const
@@ -60,10 +55,9 @@ export function RecurringForm({
     formId,
     hideSubmit,
 }: RecurringFormProps) {
-    const { t } = useTranslation(['common', 'forms', 'pages'])
+    const { t } = useTranslation(['common', 'forms'])
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
     const { data: categories } = useCategories()
-    const { data: tags } = useTags()
 
     const form = useForm<RecurringFormData>({
         resolver: zodResolver(recurringSchema),
@@ -89,7 +83,6 @@ export function RecurringForm({
 
     const type = form.watch('type')
     const frequency = form.watch('frequency')
-    const selectedTagIds = form.watch('tag_ids') ?? []
     const accountId = form.watch('account_id')
     const toAccountId = form.watch('to_account_id')
 
@@ -132,15 +125,14 @@ export function RecurringForm({
         <FormWrapper>
         <Form {...form}>
             <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {/* Type Selection */}
                 <FormField
                     control={form.control}
                     name="type"
                     render={({ field }) => (
                         <FormItem>
-                            <Tabs
+                            <TransactionTypeTabs
                                 value={field.value}
-                                onValueChange={(value) => {
+                                onChange={(value) => {
                                     field.onChange(value)
                                     if (value === 'transfer') {
                                         form.setValue('category_id', null)
@@ -149,110 +141,20 @@ export function RecurringForm({
                                         form.setValue('to_amount', null)
                                     }
                                 }}
-                                className="w-full"
-                            >
-                                <TabsList className="w-full">
-                                    {typeOptions.map(({ value, icon: Icon, color }) => (
-                                        <TabsTrigger key={value} value={value} className="flex-1">
-                                            <Icon className={cn('size-4', field.value === value && color)} />
-                                            {t(`pages:transactions.types.${value}`)}
-                                        </TabsTrigger>
-                                    ))}
-                                </TabsList>
-                            </Tabs>
+                            />
                             <FormMessage />
                         </FormItem>
                     )}
                 />
 
-                <div className={isTransfer ? 'space-y-2' : undefined}>
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="amount"
-                            render={({ field }) => (
-                                <FormItem className="min-w-0">
-                                    <FormLabel>
-                                        {isTransfer ? t('forms:transactions.sendAmount') : t('fields.amount')}
-                                        {selectedAccount?.currency?.symbol && (
-                                            <span className="text-muted-foreground ml-1">
-                                                ({selectedAccount.currency.symbol})
-                                            </span>
-                                        )}
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input type="number" step="0.01" min="0" placeholder="0.00" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="account_id"
-                            render={({ field }) => (
-                                <FormItem className="min-w-0">
-                                    <FormLabel>{isTransfer ? t('forms:fromAccount') : t('fields.account')}</FormLabel>
-                                    <AccountSelect
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                    />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-
-                    {isTransfer && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="to_amount"
-                                render={({ field }) => (
-                                    <FormItem className="min-w-0">
-                                        <FormLabel>
-                                            {t('forms:transactions.receiveAmount')}
-                                            {selectedToAccount?.currency?.symbol && (
-                                                <span className="text-muted-foreground ml-1">
-                                                    ({selectedToAccount.currency.symbol})
-                                                </span>
-                                            )}
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                placeholder={t('forms:recurring.toAmountPlaceholder')}
-                                                {...field}
-                                                value={field.value ?? ''}
-                                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="to_account_id"
-                                render={({ field }) => (
-                                    <FormItem className="min-w-0">
-                                        <FormLabel>{t('forms:transactions.toAccount')}</FormLabel>
-                                        <AccountSelect
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                            excludeId={accountId}
-                                        />
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                    )}
-                </div>
+                <MoneyAccountFields
+                    control={form.control}
+                    isTransfer={isTransfer}
+                    accountId={accountId}
+                    fromCurrencySymbol={selectedAccount?.currency?.symbol}
+                    toCurrencySymbol={selectedToAccount?.currency?.symbol}
+                    toAmountPlaceholder={t('forms:recurring.toAmountPlaceholder')}
+                />
 
                 {!isTransfer && (
                     <FormField
@@ -434,42 +336,18 @@ export function RecurringForm({
                     </div>
                 </div>
 
-                {/* Tags */}
-                {tags && tags.length > 0 && (
-                    <FormField
-                        control={form.control}
-                        name="tag_ids"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('forms:tags.label')}</FormLabel>
-                                <div className="flex flex-wrap gap-2 p-3 rounded-md border">
-                                    {tags.map((tag) => {
-                                        const isSelected = selectedTagIds.includes(tag.id)
-                                        return (
-                                            <Badge
-                                                key={tag.id}
-                                                variant={isSelected ? 'default' : 'outline'}
-                                                className={cn(
-                                                    'cursor-pointer transition-colors',
-                                                    isSelected ? 'hover:bg-primary/80' : 'hover:bg-muted'
-                                                )}
-                                                onClick={() => {
-                                                    const newTagIds = isSelected
-                                                        ? selectedTagIds.filter((id) => id !== tag.id)
-                                                        : [...selectedTagIds, tag.id]
-                                                    field.onChange(newTagIds)
-                                                }}
-                                            >
-                                                #{tag.name}
-                                            </Badge>
-                                        )
-                                    })}
-                                </div>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
+                <FormField
+                    control={form.control}
+                    name="tag_ids"
+                    render={({ field }) => (
+                        <TagSelect
+                            value={field.value ?? []}
+                            onChange={field.onChange}
+                            asFormItem
+                            bordered
+                        />
+                    )}
+                />
 
                 <FormActiveField
                     control={form.control}

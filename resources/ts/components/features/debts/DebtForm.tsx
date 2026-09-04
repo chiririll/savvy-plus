@@ -17,10 +17,15 @@ import {
 } from '@/components/ui/form'
 import { getDebtSchema, DebtFormData } from '@/schemas'
 import { useCurrencies, useAccounts } from '@/hooks'
-import { AccountSelect } from '@/components/shared/AccountSelect'
-import { CurrencySelect } from '@/components/shared/CurrencySelect'
 import { Banknote, HandCoins } from 'lucide-react'
-import { FieldHelp, FormDialogFooterStart, FormWrapper } from '@/components/shared'
+import {
+    AccountSelect,
+    CurrencySelect,
+    FieldHelp,
+    FormDialogFooterStart,
+    FormWrapper,
+    SegmentedChoice,
+} from '@/components/shared'
 import { cn, formatCurrency, formatDateLocal } from '@/lib/utils'
 
 interface DebtFormProps {
@@ -117,24 +122,14 @@ export function DebtForm({
         <FormWrapper>
         <Form {...form}>
             <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="flex gap-2 p-1 bg-muted rounded-lg">
-                    {DEBT_TYPES.map(({ value, icon: Icon, color }) => (
-                        <button
-                            key={value}
-                            type="button"
-                            onClick={() => form.setValue('debt_type', value)}
-                            className={cn(
-                                'flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all',
-                                debtType === value
-                                    ? 'bg-background shadow-sm'
-                                    : 'hover:bg-background/50'
-                            )}
-                        >
-                            <Icon className={cn('size-4', debtType === value && color)} />
-                            {t(`pages:debts.types.${value}`)}
-                        </button>
-                    ))}
-                </div>
+                <SegmentedChoice
+                    value={debtType}
+                    onChange={(value) => form.setValue('debt_type', value)}
+                    options={DEBT_TYPES.map((option) => ({
+                        ...option,
+                        label: t(`pages:debts.types.${option.value}`),
+                    }))}
+                />
 
                 <FormField
                     control={form.control}

@@ -14,19 +14,16 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { transactionSchema, TransactionFormValues } from '@/schemas/transactions'
-import { useAccounts, useCategories, useTags } from '@/hooks'
+import { useAccounts, useCategories } from '@/hooks'
 import { cn, formatCurrency, formatDateLocal, isDateInFuture } from '@/lib/utils'
-import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { AccountSelect } from '@/components/shared/AccountSelect'
-import { CategorySelect } from '@/components/shared/CategorySelect'
-import { FormWrapper } from '@/components/shared/FormWrapper'
-
-const TRANSACTION_TYPES = [
-    { value: 'income', icon: ArrowDownLeft, color: 'text-green-600' },
-    { value: 'expense', icon: ArrowUpRight, color: 'text-red-600' },
-    { value: 'transfer', icon: ArrowLeftRight, color: 'text-blue-600' },
-] as const
+import { Plus, Trash2 } from 'lucide-react'
+import {
+    CategorySelect,
+    FormWrapper,
+    MoneyAccountFields,
+    TagSelect,
+    TransactionTypeTabs,
+} from '@/components/shared'
 
 type BalancePreview = {
     currentBalance: number
@@ -106,10 +103,9 @@ export function TransactionForm({
     hideSubmit,
     onPreviewChange,
 }: TransactionFormProps) {
-    const { t } = useTranslation(['common', 'forms', 'pages'])
+    const { t } = useTranslation(['common', 'forms'])
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
     const { data: categories } = useCategories()
-    const { data: tags } = useTags()
 
     const formDefaults = useMemo(() => {
         const today = formatDateLocal()
@@ -164,8 +160,6 @@ export function TransactionForm({
     const isPendingDate = isDateInFuture(date)
     const toAccountId = useWatch({ control: form.control, name: 'to_account_id' })
     const toAmount = useWatch({ control: form.control, name: 'to_amount' })
-    const selectedTagIds = useWatch({ control: form.control, name: 'tag_ids' }) ?? []
-
     // Filter categories based on transaction type and sort by popularity
     const filteredCategories = useMemo(() => {
         return (categories?.filter(c => c.type === transactionType) ?? [])
@@ -343,130 +337,25 @@ export function TransactionForm({
                 })}
                 className="space-y-6"
             >
-                {/* Transaction Type Tabs */}
-                <div className="flex gap-2 p-1 bg-muted rounded-lg">
-                    {TRANSACTION_TYPES.map(({ value, icon: Icon, color }) => (
-                        <button
-                            key={value}
-                            type="button"
-                            onClick={() => {
-                                form.setValue('type', value)
-                                onTypeChange?.(value)
-                            }}
-                            className={cn(
-                                'flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all',
-                                transactionType === value
-                                    ? 'bg-background shadow-sm'
-                                    : 'hover:bg-background/50'
-                            )}
-                        >
-                            <Icon className={cn('size-4', transactionType === value && color)} />
-                            {t(`pages:transactions.types.${value}`)}
-                        </button>
-                    ))}
-                </div>
+                <TransactionTypeTabs
+                    value={transactionType}
+                    onChange={(value) => {
+                        form.setValue('type', value)
+                        onTypeChange?.(value)
+                    }}
+                />
 
                 {!onPreviewChange && balanceHint}
 
-                <div className={transactionType === 'transfer' ? 'space-y-2' : undefined}>
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="amount"
-                            render={({ field }) => (
-                                <FormItem className="min-w-0">
-                                    <FormLabel>
-                                        {transactionType === 'transfer' ? t('forms:transactions.sendAmount') : t('fields.amount')}
-                                        {selectedAccount?.currency?.symbol && (
-                                            <span className="text-muted-foreground ml-1">
-                                                ({selectedAccount.currency.symbol})
-                                            </span>
-                                        )}
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
-                                            min={0}
-                                            placeholder="0.00"
-                                            {...field}
-                                            disabled={items && items.length > 0}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="account_id"
-                            render={({ field }) => (
-                                <FormItem className="min-w-0">
-                                    <FormLabel>
-                                        {transactionType === 'transfer' ? t('forms:fromAccount') : t('fields.account')}
-                                    </FormLabel>
-                                    <AccountSelect
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                    />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-
-                    {transactionType === 'transfer' && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="to_amount"
-                                render={({ field }) => (
-                                    <FormItem className="min-w-0">
-                                        <FormLabel>
-                                            {t('forms:transactions.receiveAmount')}
-                                            {selectedToAccount?.currency?.symbol && (
-                                                <span className="text-muted-foreground ml-1">
-                                                    ({selectedToAccount.currency.symbol})
-                                                </span>
-                                            )}
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="number"
-                                                step="0.01"
-                                                min={0}
-                                                placeholder="0.00"
-                                                {...field}
-                                                value={field.value ?? ''}
-                                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
-                                                readOnly={sameTransferCurrency}
-                                                disabled={sameTransferCurrency}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="to_account_id"
-                                render={({ field }) => (
-                                    <FormItem className="min-w-0">
-                                        <FormLabel>{t('forms:transactions.toAccount')}</FormLabel>
-                                        <AccountSelect
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                            excludeId={Number(accountId)}
-                                        />
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                    )}
-                </div>
+                <MoneyAccountFields
+                    control={form.control}
+                    isTransfer={transactionType === 'transfer'}
+                    accountId={accountId}
+                    fromCurrencySymbol={selectedAccount?.currency?.symbol}
+                    toCurrencySymbol={selectedToAccount?.currency?.symbol}
+                    amountDisabled={Boolean(items && items.length > 0)}
+                    toAmountReadOnly={sameTransferCurrency}
+                />
 
                 <div className="grid grid-cols-2 gap-4">
                     {transactionType !== 'transfer' && (
@@ -525,44 +414,17 @@ export function TransactionForm({
                     )}
                 />
 
-                {/* Tags */}
-                {tags && tags.length > 0 && (
-                    <FormField
-                        control={form.control}
-                        name="tag_ids"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('forms:tags.label')}</FormLabel>
-                                <div className="flex flex-wrap gap-2">
-                                    {tags.map((tag) => {
-                                        const isSelected = selectedTagIds.includes(tag.id)
-                                        return (
-                                            <Badge
-                                                key={tag.id}
-                                                variant={isSelected ? 'default' : 'outline'}
-                                                className={cn(
-                                                    'cursor-pointer transition-colors',
-                                                    isSelected
-                                                        ? 'hover:bg-primary/80'
-                                                        : 'hover:bg-muted'
-                                                )}
-                                                onClick={() => {
-                                                    const newTagIds = isSelected
-                                                        ? selectedTagIds.filter((id) => id !== tag.id)
-                                                        : [...selectedTagIds, tag.id]
-                                                    field.onChange(newTagIds)
-                                                }}
-                                            >
-                                                #{tag.name}
-                                            </Badge>
-                                        )
-                                    })}
-                                </div>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
+                <FormField
+                    control={form.control}
+                    name="tag_ids"
+                    render={({ field }) => (
+                        <TagSelect
+                            value={field.value ?? []}
+                            onChange={field.onChange}
+                            asFormItem
+                        />
+                    )}
+                />
 
                 {/* Items (Expense only typically, but allow for Income) */}
                 {transactionType !== 'transfer' && (
