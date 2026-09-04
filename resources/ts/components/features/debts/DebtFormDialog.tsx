@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { FormDialog } from '@/components/shared'
-import { useCreateFormDraft } from '@/hooks'
+import { EntityFormDialog } from '@/components/shared'
+import { DebtFormData as DebtFormValues } from '@/schemas'
 import { Debt, DebtFormData } from '@/types'
 import { DebtForm } from './DebtForm'
 
@@ -14,18 +14,6 @@ interface DebtFormDialogProps {
     isSubmitting?: boolean
 }
 
-function toFormValues(debt: Debt): Partial<DebtFormData> {
-    return {
-        name: debt.name,
-        debt_type: debt.debtType,
-        currency_id: debt.currencyId,
-        amount: debt.targetAmount,
-        due_date: debt.dueDate ?? '',
-        counterparty: debt.counterparty ?? '',
-        description: debt.description ?? '',
-    }
-}
-
 export function DebtFormDialog({
     debt,
     open,
@@ -34,34 +22,39 @@ export function DebtFormDialog({
     isSubmitting,
 }: DebtFormDialogProps) {
     const { t } = useTranslation('pages')
-    const isEdit = !!debt
-    const { draft, onValuesChange, formKey } = useCreateFormDraft<DebtFormData>({
-        enabled: !isEdit,
-        open,
-        isSubmitting,
-        entityKey: debt?.id,
-    })
 
     return (
-        <FormDialog
+        <EntityFormDialog<Debt, DebtFormData, DebtFormValues>
+            entity={debt}
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? t('debts.editTitle') : t('debts.createTitle')}
-            description={t('debts.description')}
-            formId={FORM_ID}
+            onSubmit={onSubmit}
             isSubmitting={isSubmitting}
-            isEdit={isEdit}
+            formId={FORM_ID}
+            title={debt ? t('debts.editTitle') : t('debts.createTitle')}
+            description={t('debts.description')}
+            toFormValues={(item) => ({
+                name: item.name,
+                debt_type: item.debtType,
+                currency_id: item.currencyId,
+                amount: item.targetAmount,
+                due_date: item.dueDate ?? '',
+                counterparty: item.counterparty ?? '',
+                description: item.description ?? '',
+            })}
         >
-            <DebtForm
-                key={formKey}
-                mode={isEdit ? 'edit' : 'create'}
-                defaultValues={debt ? toFormValues(debt) : draft}
-                onSubmit={onSubmit}
-                onValuesChange={onValuesChange}
-                isSubmitting={isSubmitting}
-                formId={FORM_ID}
-                hideSubmit
-            />
-        </FormDialog>
+            {({ formKey, formProps, isEdit }) => (
+                <DebtForm
+                    key={formKey}
+                    defaultValues={formProps.defaultValues}
+                    onSubmit={onSubmit}
+                    onValuesChange={formProps.onValuesChange}
+                    isSubmitting={formProps.isSubmitting}
+                    formId={formProps.formId}
+                    hideSubmit
+                    mode={isEdit ? 'edit' : 'create'}
+                />
+            )}
+        </EntityFormDialog>
     )
 }

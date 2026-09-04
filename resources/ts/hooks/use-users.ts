@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import i18n from '@/lib/i18n'
+import { useQuery } from '@tanstack/react-query'
 import { usersApi } from '@/api/users'
-import type { User, UserFormData } from '@/types/users'
+import type { UserFormData } from '@/types/users'
+import { useResourceItem, useResourceMutation } from './use-crud'
+import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['users']
 
@@ -14,70 +14,38 @@ export function useUsers() {
 }
 
 export function useUser(id: string | number) {
-    return useQuery({
-        queryKey: [...QUERY_KEY, id],
-        queryFn: () => usersApi.getById(id),
-        enabled: !!id,
-    })
+    return useResourceItem(QUERY_KEY, () => usersApi.getById(id), id)
 }
 
 export function useCreateUser() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (data: UserFormData) => usersApi.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.user.created'))
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.user.createFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.user.created'),
     })
 }
 
 export function useUpdateUser() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: ({ id, data }: { id: string | number; data: Partial<UserFormData> }) =>
             usersApi.update(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.user.updated'))
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.user.updateFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.user.updated'),
     })
 }
 
 export function useDeleteUser() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (id: string | number) => usersApi.delete(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.user.deleted'))
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.user.deleteFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.user.deleted'),
     })
 }
 
 export function useIssuePasswordToken() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (id: string | number) => usersApi.issuePasswordToken(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.user.passwordLink'))
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.user.passwordLinkFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.user.passwordLink'),
     })
 }

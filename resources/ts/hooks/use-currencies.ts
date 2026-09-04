@@ -1,10 +1,9 @@
 import { useRef } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { currenciesApi } from '@/api'
 import { useCurrenciesStore } from '@/stores/currencies'
 import { Currency, CurrencyFormData } from '@/types'
-import { toast } from 'sonner'
+import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['currencies']
@@ -39,74 +38,40 @@ export function useCurrencyCatalog(enabled = true) {
 }
 
 export function useCurrency(id: string | number) {
-    return useQuery({
-        queryKey: [...QUERY_KEY, id],
-        queryFn: () => currenciesApi.getById(id),
-        enabled: !!id,
-    })
+    return useResourceItem(QUERY_KEY, () => currenciesApi.getById(id), id)
 }
 
 export function useCreateCurrency(redirectTo?: string) {
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (data: CurrencyFormData) => currenciesApi.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.currency.created'))
-            if (redirectTo) navigate(redirectTo)
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.currency.createFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.currency.created'),
+        redirectTo,
     })
 }
 
 export function useUpdateCurrency(redirectTo?: string) {
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: ({ id, data }: { id: string | number; data: Partial<CurrencyFormData> }) =>
             currenciesApi.update(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.currency.updated'))
-            if (redirectTo) navigate(redirectTo)
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.currency.updateFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.currency.updated'),
+        redirectTo,
     })
 }
 
 export function useDeleteCurrency() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (id: string | number) => currenciesApi.delete(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.currency.deleted'))
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.currency.deleteFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.currency.deleted'),
     })
 }
 
 export function useSetBaseCurrency() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (id: string | number) => currenciesApi.setBase(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries()
-            toast.success(i18n.t('toasts.currency.baseUpdated'))
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.currency.baseFailed'))
-        },
+        invalidateAll: true,
+        successMessage: i18n.t('toasts.currency.baseUpdated'),
     })
 }

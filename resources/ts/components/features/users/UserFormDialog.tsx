@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { FormDialog } from '@/components/shared'
-import { useCreateFormDraft } from '@/hooks'
+import { EntityFormDialog } from '@/components/shared'
 import { User } from '@/types/users'
 import { CreateUserFormData, UpdateUserFormData } from '@/schemas/users'
 import { UserForm } from './UserForm'
@@ -23,36 +22,36 @@ export function UserFormDialog({
     isSubmitting,
 }: UserFormDialogProps) {
     const { t } = useTranslation('pages')
-    const isEdit = !!user
-    const { draft, onValuesChange, formKey } = useCreateFormDraft<CreateUserFormData>({
-        enabled: !isEdit,
-        open,
-        isSubmitting,
-        entityKey: user?.id,
-    })
 
     return (
-        <FormDialog
+        <EntityFormDialog<User, CreateUserFormData | UpdateUserFormData, CreateUserFormData & { id?: number }>
+            entity={user}
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? t('users.editTitle') : t('users.createTitle')}
-            description={isEdit ? t('users.editDescription') : t('users.createDescription')}
-            formId={FORM_ID}
+            onSubmit={onSubmit}
             isSubmitting={isSubmitting}
-            isEdit={isEdit}
+            formId={FORM_ID}
+            title={user ? t('users.editTitle') : t('users.createTitle')}
+            description={user ? t('users.editDescription') : t('users.createDescription')}
+            toFormValues={(item) => ({
+                id: item.id,
+                name: item.name,
+                email: item.email,
+                role: item.role,
+            })}
         >
-            <UserForm
-                key={formKey}
-                defaultValues={user
-                    ? { id: user.id, name: user.name, email: user.email, role: user.role }
-                    : draft}
-                onSubmit={onSubmit}
-                onValuesChange={onValuesChange}
-                isSubmitting={isSubmitting}
-                isEdit={isEdit}
-                formId={FORM_ID}
-                hideSubmit
-            />
-        </FormDialog>
+            {({ formKey, formProps, isEdit }) => (
+                <UserForm
+                    key={formKey}
+                    defaultValues={formProps.defaultValues}
+                    onSubmit={onSubmit}
+                    onValuesChange={formProps.onValuesChange}
+                    isSubmitting={formProps.isSubmitting}
+                    formId={formProps.formId}
+                    hideSubmit
+                    isEdit={isEdit}
+                />
+            )}
+        </EntityFormDialog>
     )
 }

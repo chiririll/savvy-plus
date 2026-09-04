@@ -1,7 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { backupsApi } from '@/api/backups'
-import { getApiErrorMessage } from '@/lib/api-error'
-import { toast } from 'sonner'
+import { useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['backups']
@@ -14,62 +13,34 @@ export function useBackups() {
 }
 
 export function useCreateBackup() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (note?: string) => backupsApi.create(note),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.backup.created'))
-        },
-        onError: (error: Error) => {
-            toast.error(getApiErrorMessage(error, i18n.t('toasts.backup.createFailed')))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.backup.created'),
     })
 }
 
 export function useUploadBackup() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: ({ file, note }: { file: File; note?: string }) =>
             backupsApi.upload(file, note),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.backup.uploaded'))
-        },
-        onError: (error: Error) => {
-            toast.error(getApiErrorMessage(error, i18n.t('toasts.backup.uploadFailed')))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.backup.uploaded'),
     })
 }
 
 export function useRestoreBackup() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (id: number) => backupsApi.restore(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries()
-            toast.success(i18n.t('toasts.backup.restored'))
-        },
-        onError: (error: Error) => {
-            toast.error(getApiErrorMessage(error, i18n.t('toasts.backup.restoreFailed')))
-        },
+        invalidateAll: true,
+        successMessage: i18n.t('toasts.backup.restored'),
     })
 }
 
 export function useDeleteBackup() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (id: number) => backupsApi.delete(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.backup.deleted'))
-        },
-        onError: (error: Error) => {
-            toast.error(getApiErrorMessage(error, i18n.t('toasts.backup.deleteFailed')))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.backup.deleted'),
     })
 }

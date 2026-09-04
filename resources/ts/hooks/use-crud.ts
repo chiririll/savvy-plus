@@ -1,63 +1,59 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/api/client'
-import { toast } from 'sonner'
+import { useQuery, useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import i18n from '@/lib/i18n'
+import { toast } from 'sonner'
 
-interface UseCrudOptions<T> {
-    endpoint: string
-    queryKey: string[]
+interface UseResourceMutationOptions<TData, TVariables> {
+    mutationFn: (variables: TVariables) => Promise<TData>
+    invalidateKeys?: QueryKey[]
+    successMessage?: string | ((data: TData, variables: TVariables) => string)
     redirectTo?: string
+    invalidateAll?: boolean
 }
 
-export function useCrud<T extends { id: number | string }>({
-                                                               endpoint,
-                                                               queryKey,
-                                                               redirectTo
-                                                           }: UseCrudOptions<T>) {
-    const qc = useQueryClient()
+export function useResourceMutation<TData, TVariables>({
+    mutationFn,
+    invalidateKeys = [],
+    successMessage,
+    redirectTo,
+    invalidateAll = false,
+}: UseResourceMutationOptions<TData, TVariables>) {
+    const queryClient = useQueryClient()
     const navigate = useNavigate()
 
-    const list = useQuery({
-        queryKey,
-        queryFn: () => api.get<T[]>(endpoint),
-    })
+    return useMutation({
+        mutationFn,
+        onSuccess: (data, variables) => {
+            if (invalidateAll) {
+                queryClient.invalidateQueries()
+            } else {
+                invalidateKeys.forEach((queryKey) => {
+                    queryClient.invalidateQueries({ queryKey })
+                })
+            }
 
-    const create = useMutation({
-        mutationFn: (data: Partial<T>) => api.post<T, Partial<T>>(endpoint, data),
-        onSuccess: () => {
-            toast.success(i18n.t('toasts.created'))
-            qc.invalidateQueries({ queryKey })
-            if (redirectTo) navigate(redirectTo)
+            if (successMessage) {
+                toast.success(
+                    typeof successMessage === 'function'
+                        ? successMessage(data, variables)
+                        : successMessage
+                )
+            }
+
+            if (redirectTo) {
+                navigate(redirectTo)
+            }
         },
     })
-
-    const update = useMutation({
-        mutationFn: ({ id, data }: { id: string | number; data: Partial<T> }) =>
-            api.patch<T, Partial<T>>(`${endpoint}/${id}`, data),
-        onSuccess: () => {
-            toast.success(i18n.t('toasts.updated'))
-            qc.invalidateQueries({ queryKey })
-            if (redirectTo) navigate(redirectTo)
-        },
-    })
-
-    const remove = useMutation({
-        mutationFn: (id: string | number) => api.delete<void>(`${endpoint}/${id}`),
-        onSuccess: () => {
-            toast.success(i18n.t('toasts.deleted'))
-            qc.invalidateQueries({ queryKey })
-        },
-    })
-
-    return { list, create, update, remove }
 }
 
-// Separate hook for fetching single item (avoids conditional hook call)
-export function useCrudItem<T>(endpoint: string, queryKey: string[], id: string | number) {
+export function useResourceItem<T>(
+    queryKey: QueryKey,
+    queryFn: () => Promise<T>,
+    id: string | number,
+) {
     return useQuery({
         queryKey: [...queryKey, id],
-        queryFn: () => api.get<T>(`${endpoint}/${id}`),
+        queryFn,
         enabled: !!id,
     })
 }

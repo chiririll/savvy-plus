@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { FormDialog } from '@/components/shared'
-import { useCreateFormDraft } from '@/hooks'
+import { EntityFormDialog } from '@/components/shared'
+import { BudgetFormData as BudgetFormValues } from '@/schemas'
 import { Budget, BudgetFormData } from '@/types'
 import { BudgetForm } from './BudgetForm'
 
@@ -14,22 +14,6 @@ interface BudgetFormDialogProps {
     isSubmitting?: boolean
 }
 
-function toFormValues(budget: Budget): Partial<BudgetFormData> {
-    return {
-        name: budget.name,
-        amount: budget.amount,
-        currency_id: budget.currencyId,
-        period: budget.period,
-        start_date: budget.startDate,
-        end_date: budget.endDate,
-        is_global: budget.isGlobal,
-        notify_at_percent: budget.notifyAtPercent,
-        is_active: budget.isActive,
-        category_ids: budget.categories.map((category) => category.id),
-        tag_ids: budget.tags?.map((tag) => tag.id) ?? [],
-    }
-}
-
 export function BudgetFormDialog({
     budget,
     open,
@@ -38,33 +22,42 @@ export function BudgetFormDialog({
     isSubmitting,
 }: BudgetFormDialogProps) {
     const { t } = useTranslation('pages')
-    const isEdit = !!budget
-    const { draft, onValuesChange, formKey } = useCreateFormDraft<BudgetFormData>({
-        enabled: !isEdit,
-        open,
-        isSubmitting,
-        entityKey: budget?.id,
-    })
 
     return (
-        <FormDialog
+        <EntityFormDialog<Budget, BudgetFormData, BudgetFormValues>
+            entity={budget}
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? t('budgets.editTitle') : t('budgets.createTitle')}
-            description={t('budgets.description')}
-            formId={FORM_ID}
+            onSubmit={onSubmit}
             isSubmitting={isSubmitting}
-            isEdit={isEdit}
+            formId={FORM_ID}
+            title={budget ? t('budgets.editTitle') : t('budgets.createTitle')}
+            description={t('budgets.description')}
+            toFormValues={(item) => ({
+                name: item.name,
+                amount: item.amount,
+                currency_id: item.currencyId,
+                period: item.period,
+                start_date: item.startDate,
+                end_date: item.endDate,
+                is_global: item.isGlobal,
+                notify_at_percent: item.notifyAtPercent,
+                is_active: item.isActive,
+                category_ids: item.categories.map((category) => category.id),
+                tag_ids: item.tags?.map((tag) => tag.id) ?? [],
+            })}
         >
-            <BudgetForm
-                key={formKey}
-                defaultValues={budget ? toFormValues(budget) : draft}
-                onSubmit={onSubmit}
-                onValuesChange={onValuesChange}
-                isSubmitting={isSubmitting}
-                formId={FORM_ID}
-                hideSubmit
-            />
-        </FormDialog>
+            {({ formKey, formProps }) => (
+                <BudgetForm
+                    key={formKey}
+                    defaultValues={formProps.defaultValues}
+                    onSubmit={onSubmit}
+                    onValuesChange={formProps.onValuesChange}
+                    isSubmitting={formProps.isSubmitting}
+                    formId={formProps.formId}
+                    hideSubmit
+                />
+            )}
+        </EntityFormDialog>
     )
 }

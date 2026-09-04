@@ -1,9 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import i18n from '@/lib/i18n'
 import { ssoApi } from '@/api/sso'
 import type { IdentityProviderFormData } from '@/types/sso'
+import { useResourceItem, useResourceMutation } from './use-crud'
 
 const QUERY_KEY = ['identity-providers']
 const PRESETS_KEY = ['sso-presets']
@@ -33,60 +33,33 @@ export function useIdentityProviders() {
 }
 
 export function useIdentityProvider(id: string | number) {
-    return useQuery({
-        queryKey: [...QUERY_KEY, id],
-        queryFn: () => ssoApi.getById(id),
-        enabled: !!id,
-    })
+    return useResourceItem(QUERY_KEY, () => ssoApi.getById(id), id)
 }
 
 export function useCreateIdentityProvider(redirectTo?: string) {
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (data: IdentityProviderFormData) => ssoApi.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.sso.created'))
-            if (redirectTo) navigate(redirectTo)
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.sso.createFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.sso.created'),
+        redirectTo,
     })
 }
 
 export function useUpdateIdentityProvider(redirectTo?: string) {
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: ({ id, data }: { id: string | number; data: Partial<IdentityProviderFormData> }) =>
             ssoApi.update(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.sso.updated'))
-            if (redirectTo) navigate(redirectTo)
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.sso.updateFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.sso.updated'),
+        redirectTo,
     })
 }
 
 export function useDeleteIdentityProvider() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (id: string | number) => ssoApi.delete(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.sso.deleted'))
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.sso.deleteFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.sso.deleted'),
     })
 }
 
@@ -96,12 +69,10 @@ export function useTestIdentityProvider() {
         onSuccess: (result) => {
             if (result.status === 'ok') {
                 toast.success(i18n.t('toasts.sso.testOk'))
-            } else {
-                toast.error(result.message || i18n.t('toasts.sso.testFailed'))
+                return
             }
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.sso.testFailed'))
+
+            toast.error(result.message || i18n.t('toasts.sso.testFailed'))
         },
     })
 }

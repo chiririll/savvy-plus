@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { FormDialog } from '@/components/shared'
-import { useCreateFormDraft } from '@/hooks'
+import { EntityFormDialog } from '@/components/shared'
 import type { AutomationRule, AutomationRuleFormData } from '@/types/automation'
 import { AutomationRuleForm } from './AutomationRuleForm'
 
@@ -14,19 +13,6 @@ interface AutomationRuleFormDialogProps {
     isSubmitting?: boolean
 }
 
-function toFormValues(rule: AutomationRule): Partial<AutomationRuleFormData> {
-    return {
-        name: rule.name,
-        description: rule.description,
-        trigger_type: rule.trigger_type,
-        priority: rule.priority,
-        conditions: rule.conditions,
-        actions: rule.actions,
-        is_active: rule.is_active,
-        stop_processing: rule.stop_processing,
-    }
-}
-
 export function AutomationRuleFormDialog({
     rule,
     open,
@@ -35,34 +21,30 @@ export function AutomationRuleFormDialog({
     isSubmitting,
 }: AutomationRuleFormDialogProps) {
     const { t } = useTranslation('pages')
-    const isEdit = !!rule
-    const { draft, onValuesChange, formKey } = useCreateFormDraft<AutomationRuleFormData>({
-        enabled: !isEdit,
-        open,
-        isSubmitting,
-        entityKey: rule?.id,
-    })
 
     return (
-        <FormDialog
+        <EntityFormDialog
+            entity={rule}
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? t('automation.editTitle') : t('automation.createTitle')}
-            description={t('automation.createDescription')}
-            formId={FORM_ID}
+            onSubmit={onSubmit}
             isSubmitting={isSubmitting}
-            isEdit={isEdit}
+            formId={FORM_ID}
+            title={rule ? t('automation.editTitle') : t('automation.createTitle')}
+            description={t('automation.createDescription')}
             className="sm:max-w-xl"
+            toFormValues={(item) => ({
+                name: item.name,
+                description: item.description,
+                trigger_type: item.trigger_type,
+                priority: item.priority,
+                conditions: item.conditions,
+                actions: item.actions,
+                is_active: item.is_active,
+                stop_processing: item.stop_processing,
+            })}
         >
-            <AutomationRuleForm
-                key={formKey}
-                defaultValues={rule ? toFormValues(rule) : draft}
-                onSubmit={onSubmit}
-                onValuesChange={onValuesChange}
-                isSubmitting={isSubmitting}
-                formId={FORM_ID}
-                hideSubmit
-            />
-        </FormDialog>
+            {({ formKey, formProps }) => <AutomationRuleForm key={formKey} {...formProps} />}
+        </EntityFormDialog>
     )
 }

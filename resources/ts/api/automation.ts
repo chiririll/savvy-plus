@@ -1,23 +1,12 @@
 import { api } from './client'
+import { createCrudApi } from './crud'
 import type { AutomationRule, AutomationRuleFormData, AutomationRuleLog, TriggerOption } from '@/types/automation'
 
 const ENDPOINT = '/automation-rules'
+const crud = createCrudApi<AutomationRule, AutomationRuleFormData>(ENDPOINT)
 
 export const automationApi = {
-    getAll: () =>
-        api.get<AutomationRule[]>(ENDPOINT),
-
-    getById: (id: number | string) =>
-        api.get<AutomationRule>(`${ENDPOINT}/${id}`),
-
-    create: (data: AutomationRuleFormData) =>
-        api.post<AutomationRule, AutomationRuleFormData>(ENDPOINT, data),
-
-    update: (id: number | string, data: Partial<AutomationRuleFormData>) =>
-        api.patch<AutomationRule, Partial<AutomationRuleFormData>>(`${ENDPOINT}/${id}`, data),
-
-    delete: (id: number | string) =>
-        api.delete<void>(`${ENDPOINT}/${id}`),
+    ...crud,
 
     toggle: (id: number | string) =>
         api.post<AutomationRule>(`${ENDPOINT}/${id}/toggle`),

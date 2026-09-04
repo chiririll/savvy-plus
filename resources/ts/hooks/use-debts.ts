@@ -1,12 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { debtsApi } from '@/api'
 import { DebtFormData, DebtPaymentFormData } from '@/types'
-import { toast } from 'sonner'
+import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
-import { getApiErrorMessage } from '@/lib/api-error'
 
 const QUERY_KEY = ['debts']
+const DEBT_INVALIDATE = [QUERY_KEY, ['accounts']] as const
+const DEBT_TX_INVALIDATE = [QUERY_KEY, ['accounts'], ['transactions']] as const
 
 export function useDebts(params?: { include_completed?: boolean }) {
     return useQuery({
@@ -30,114 +30,58 @@ export function useDebtSummary() {
 }
 
 export function useDebt(id: string | number) {
-    return useQuery({
-        queryKey: [...QUERY_KEY, id],
-        queryFn: () => debtsApi.getById(id),
-        enabled: !!id,
-    })
+    return useResourceItem(QUERY_KEY, () => debtsApi.getById(id), id)
 }
 
 export function useCreateDebt(redirectTo?: string) {
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (data: DebtFormData) => debtsApi.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            queryClient.invalidateQueries({ queryKey: ['accounts'] })
-            queryClient.invalidateQueries({ queryKey: ['transactions'] })
-            toast.success(i18n.t('toasts.debt.created'))
-            if (redirectTo) navigate(redirectTo)
-        },
-        onError: (error: Error) => {
-            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.createFailed')))
-        },
+        invalidateKeys: [...DEBT_TX_INVALIDATE],
+        successMessage: i18n.t('toasts.debt.created'),
+        redirectTo,
     })
 }
 
 export function useUpdateDebt(redirectTo?: string) {
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: ({ id, data }: { id: string | number; data: Partial<DebtFormData> }) =>
             debtsApi.update(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            queryClient.invalidateQueries({ queryKey: ['accounts'] })
-            toast.success(i18n.t('toasts.debt.updated'))
-            if (redirectTo) navigate(redirectTo)
-        },
-        onError: (error: Error) => {
-            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.updateFailed')))
-        },
+        invalidateKeys: [...DEBT_INVALIDATE],
+        successMessage: i18n.t('toasts.debt.updated'),
+        redirectTo,
     })
 }
 
 export function useDeleteDebt() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (id: string | number) => debtsApi.delete(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            queryClient.invalidateQueries({ queryKey: ['accounts'] })
-            toast.success(i18n.t('toasts.debt.deleted'))
-        },
-        onError: (error: Error) => {
-            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.deleteFailed')))
-        },
+        invalidateKeys: [...DEBT_INVALIDATE],
+        successMessage: i18n.t('toasts.debt.deleted'),
     })
 }
 
 export function useDebtPayment() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: ({ debtId, data }: { debtId: string | number; data: DebtPaymentFormData }) =>
             debtsApi.makePayment(debtId, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            queryClient.invalidateQueries({ queryKey: ['accounts'] })
-            queryClient.invalidateQueries({ queryKey: ['transactions'] })
-            toast.success(i18n.t('toasts.debt.payment'))
-        },
-        onError: (error: Error) => {
-            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.paymentFailed')))
-        },
+        invalidateKeys: [...DEBT_TX_INVALIDATE],
+        successMessage: i18n.t('toasts.debt.payment'),
     })
 }
 
 export function useDebtCollection() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: ({ debtId, data }: { debtId: string | number; data: DebtPaymentFormData }) =>
             debtsApi.collectPayment(debtId, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            queryClient.invalidateQueries({ queryKey: ['accounts'] })
-            queryClient.invalidateQueries({ queryKey: ['transactions'] })
-            toast.success(i18n.t('toasts.debt.collection'))
-        },
-        onError: (error: Error) => {
-            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.collectionFailed')))
-        },
+        invalidateKeys: [...DEBT_TX_INVALIDATE],
+        successMessage: i18n.t('toasts.debt.collection'),
     })
 }
 
 export function useReopenDebt() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (id: string | number) => debtsApi.reopen(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.debt.reopened'))
-        },
-        onError: (error: Error) => {
-            toast.error(getApiErrorMessage(error, i18n.t('toasts.debt.reopenFailed')))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.debt.reopened'),
     })
 }

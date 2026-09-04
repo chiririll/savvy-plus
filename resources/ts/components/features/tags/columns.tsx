@@ -1,24 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { Tag } from '@/types'
-import { Button } from '@/components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { RowActions } from '@/components/shared'
 import i18n from '@/lib/i18n'
 
 export function createTagColumns(
@@ -45,56 +27,15 @@ export function createTagColumns(
         },
         {
             id: 'actions',
-            cell: ({ row }) => {
-                const tag = row.original
-                return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon-sm">
-                                <MoreHorizontal className="size-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            {onEdit && (
-                            <DropdownMenuItem onClick={() => onEdit(tag)}>
-                                <Pencil className="mr-2 size-4" />
-                                {i18n.t('actions.edit')}
-                            </DropdownMenuItem>
-                            )}
-                            {!isReadOnly && (
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem
-                                        onSelect={(e) => e.preventDefault()}
-                                        className="text-destructive focus:text-destructive"
-                                    >
-                                        <Trash2 className="mr-2 size-4" />
-                                        {i18n.t('actions.delete')}
-                                    </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>{i18n.t('pages:tags.deleteTitle')}</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            {i18n.t('pages:tags.deleteDescription', { name: tag.name })}
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={() => onDelete(tag.id)}
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        >
-                                            {i18n.t('actions.delete')}
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                            )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )
-            },
+            cell: ({ row }) => (
+                <RowActions
+                    onEdit={onEdit ? () => onEdit(row.original) : undefined}
+                    onDelete={() => onDelete(row.original.id)}
+                    deleteTitle={i18n.t('pages:tags.deleteTitle')}
+                    deleteDescription={i18n.t('pages:tags.deleteDescription', { name: row.original.name })}
+                    isReadOnly={isReadOnly}
+                />
+            ),
         },
     ]
 }
