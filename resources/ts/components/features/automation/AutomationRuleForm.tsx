@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useFormValuesChange } from '@/hooks'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -51,7 +51,7 @@ export function AutomationRuleForm({
     const { data: triggers } = useAutomationTriggers()
 
     const form = useForm<AutomationRuleFormData>({
-        resolver: zodResolver(automationRuleSchema),
+        resolver: schemaResolver<AutomationRuleFormData>(automationRuleSchema),
         defaultValues: {
             name: '',
             description: null,

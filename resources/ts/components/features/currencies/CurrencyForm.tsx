@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useForm, type Resolver } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -96,7 +96,7 @@ export function CurrencyForm({
     const { data: catalog = [] } = useCurrencyCatalog(!isEditing)
 
     const form = useForm<CurrencyFormData>({
-        resolver: zodResolver(currencySchema) as Resolver<CurrencyFormData>,
+        resolver: schemaResolver<CurrencyFormData>(currencySchema),
         defaultValues: {
             code: '',
             name: '',

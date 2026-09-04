@@ -8,3 +8,4 @@ export function cn(...inputs: ClassValue[]) {
 export { formatCurrency, formatCurrencyCompact } from '@/lib/currency'
 export { formatDateLocal, formatYearMonth, addDaysLocal, isDateInFuture } from '@/lib/dates'
 export { toggleIdInArray } from '@/lib/ids'
+export { schemaResolver } from '@/lib/form-resolver'

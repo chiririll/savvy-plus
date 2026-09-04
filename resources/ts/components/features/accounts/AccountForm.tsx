@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useFormValuesChange } from '@/hooks'
-import { useForm, type Resolver } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -71,7 +71,7 @@ export function AccountForm({
     const { t } = useTranslation(['common', 'forms', 'pages'])
 
     const form = useForm<AccountFormValues>({
-        resolver: zodResolver(accountSchema) as Resolver<AccountFormValues>,
+        resolver: schemaResolver<AccountFormValues>(accountSchema),
         defaultValues: {
             name: '',
             type: 'bank',

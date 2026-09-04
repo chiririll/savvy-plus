@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -50,7 +50,7 @@ export function BudgetForm({
     const { data: categories } = useCategories('expense')
 
     const form = useForm<BudgetFormData>({
-        resolver: zodResolver(budgetSchema),
+        resolver: schemaResolver<BudgetFormData>(budgetSchema),
         defaultValues: {
             name: '',
             amount: 0,

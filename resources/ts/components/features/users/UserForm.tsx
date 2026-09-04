@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useFormValuesChange } from '@/hooks'
-import { useForm, type Resolver } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -56,7 +56,7 @@ export function UserForm({
     const isEditingSelf = isEdit && defaultValues?.id === currentUser?.id
 
     const form = useForm<CreateUserFormData>({
-        resolver: zodResolver(isEdit ? updateUserSchema : createUserSchema) as Resolver<CreateUserFormData>,
+        resolver: schemaResolver<CreateUserFormData>(isEdit ? updateUserSchema : createUserSchema),
         defaultValues: {
             name: '',
             email: '',

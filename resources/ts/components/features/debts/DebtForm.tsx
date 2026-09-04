@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -70,7 +70,7 @@ export function DebtForm({
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
 
     const form = useForm<DebtFormData>({
-        resolver: zodResolver(getDebtSchema(mode)),
+        resolver: schemaResolver<DebtFormData>(getDebtSchema(mode)),
         defaultValues: {
             origin: 'new',
             name: '',

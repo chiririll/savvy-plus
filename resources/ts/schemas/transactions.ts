@@ -10,11 +10,11 @@ export const transactionItemSchema = z.object({
 
 export const transactionSchema = z.object({
     type: z.enum(['income', 'expense', 'transfer'], {
-        required_error: i18n.t('validation.selectTransactionType'),
+        error: i18n.t('validation.selectTransactionType'),
     }),
 
     account_id: z.coerce.number({
-        required_error: i18n.t('validation.selectAccount'),
+        error: i18n.t('validation.selectAccount'),
     }).positive(i18n.t('validation.selectAccount')),
 
     to_account_id: z.coerce.number().positive().optional().nullable(),
@@ -22,7 +22,7 @@ export const transactionSchema = z.object({
     category_id: z.coerce.number().positive().optional().nullable(),
 
     amount: z.coerce.number({
-        required_error: i18n.t('validation.amountRequired'),
+        error: i18n.t('validation.amountRequired'),
     }).positive(i18n.t('validation.amountPositive')),
 
     to_amount: z.coerce.number().positive().optional().nullable(),

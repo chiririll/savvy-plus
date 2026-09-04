@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -59,7 +59,7 @@ export function RecurringForm({
     const { data: categories } = useCategories()
 
     const form = useForm<RecurringFormData>({
-        resolver: zodResolver(recurringSchema),
+        resolver: schemaResolver<RecurringFormData>(recurringSchema),
         defaultValues: {
             type: 'expense',
             account_id: 0,

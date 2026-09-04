@@ -1,5 +1,5 @@
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { schemaResolver } from '@/lib/form-resolver'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, type KeyboardEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -124,7 +124,7 @@ export function TransactionForm({
     }, [defaultValues])
 
     const form = useForm<TransactionFormValues>({
-        resolver: zodResolver(transactionSchema),
+        resolver: schemaResolver<TransactionFormValues>(transactionSchema),
         defaultValues: formDefaults,
     })
 
