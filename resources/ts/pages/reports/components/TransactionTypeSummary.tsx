@@ -5,7 +5,7 @@ import { cn, formatCurrency } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Calendar, CalendarDays } from 'lucide-react'
 import { useTransactionReportSummary } from '@/hooks'
 import type { ReportFilters } from '../types'
-import type { TransactionType } from '@/api/reports'
+import type { ReportTransactionType } from '@/api/reports'
 
 const TONE = {
     income: {
@@ -28,7 +28,7 @@ const TONE = {
 
 interface TransactionTypeSummaryProps {
     filters: ReportFilters
-    type: TransactionType
+    type: ReportTransactionType
 }
 
 export function TransactionTypeSummary({ filters, type }: TransactionTypeSummaryProps) {

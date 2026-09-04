@@ -4,6 +4,12 @@ export function parseDateKey(dateKey: string): Date {
     return new Date(year, (month || 1) - 1, day || 1)
 }
 
+export function formatYearMonth(date: Date = new Date()): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    return `${year}-${month}`
+}
+
 export function formatDateLocal(date: Date = new Date()): string {
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')

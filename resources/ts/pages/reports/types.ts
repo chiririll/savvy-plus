@@ -1,4 +1,5 @@
 import type { CashFlowGroupBy } from '@/api/reports'
+import { formatDateLocal, formatYearMonth } from '@/lib/dates'
 
 export type PeriodType = 'last_30_days' | 'month' | 'quarter' | 'year' | 'ytd' | 'custom'
 export type CompareType = 'none' | 'previous_period' | 'same_period_last_year'
@@ -17,21 +18,6 @@ export interface ReportFilters {
     tagIds: number[]
 }
 
-// Helper to format date as YYYY-MM-DD (timezone-safe)
-function formatDate(date: Date): string {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-}
-
-// Helper to format date as YYYY-MM (timezone-safe)
-function formatYearMonth(date: Date): string {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    return `${year}-${month}`
-}
-
 const now = new Date()
 
 export const DEFAULT_FILTERS: ReportFilters = {
@@ -39,8 +25,8 @@ export const DEFAULT_FILTERS: ReportFilters = {
     selectedMonth: formatYearMonth(now),
     selectedQuarter: `${now.getFullYear()}-Q${Math.ceil((now.getMonth() + 1) / 3)}`,
     selectedYear: now.getFullYear().toString(),
-    customStartDate: formatDate(new Date(now.getFullYear(), now.getMonth(), 1)),
-    customEndDate: formatDate(now),
+    customStartDate: formatDateLocal(new Date(now.getFullYear(), now.getMonth(), 1)),
+    customEndDate: formatDateLocal(now),
     compareWith: 'previous_period',
     accountIds: [],
     categoryIds: [],
@@ -71,10 +57,4 @@ export function defaultGroupBy(filters: ReportFilters): CashFlowGroupBy {
     }
 }
 
-export const TABS: { value: ReportTab; label: string }[] = [
-    { value: 'overview', label: 'Overview' },
-    { value: 'cashflow', label: 'Cash Flow' },
-    { value: 'expenses', label: 'Expenses' },
-    { value: 'income', label: 'Income' },
-    { value: 'networth', label: 'Net Worth' },
-]
+export const TABS: ReportTab[] = ['overview', 'cashflow', 'expenses', 'income', 'networth']

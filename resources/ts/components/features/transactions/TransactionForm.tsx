@@ -14,7 +14,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { transactionSchema, TransactionFormValues } from '@/schemas/transactions'
-import { useAccounts, useCategories } from '@/hooks'
+import { useAccounts, useCategories, useFormValuesChange, useTransactionPartyDefaults } from '@/hooks'
 import { cn, formatCurrency, formatDateLocal, isDateInFuture } from '@/lib/utils'
 import { Plus, Trash2 } from 'lucide-react'
 import {
@@ -128,17 +128,7 @@ export function TransactionForm({
         defaultValues: formDefaults,
     })
 
-    useEffect(() => {
-        if (!onValuesChange) {
-            return
-        }
-
-        const subscription = form.watch((value) => {
-            onValuesChange(value as TransactionFormValues)
-        })
-
-        return () => subscription.unsubscribe()
-    }, [form, onValuesChange])
+    useFormValuesChange(form, onValuesChange)
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,
@@ -147,7 +137,6 @@ export function TransactionForm({
 
     const transactionType = useWatch({ control: form.control, name: 'type' })
     const accountId = useWatch({ control: form.control, name: 'account_id' })
-    const categoryId = useWatch({ control: form.control, name: 'category_id' })
     const items = useWatch({ control: form.control, name: 'items' })
     const amount = useWatch({ control: form.control, name: 'amount' })
     const date = useWatch({ control: form.control, name: 'date' })
@@ -160,19 +149,7 @@ export function TransactionForm({
             .sort((a, b) => (b.transactionsCount ?? 0) - (a.transactionsCount ?? 0))
     }, [categories, transactionType])
 
-    // Auto-select first account if none selected
-    useEffect(() => {
-        if (!accountId && accounts && accounts.length > 0) {
-            form.setValue('account_id', accounts[0].id)
-        }
-    }, [accountId, accounts, form])
-
-    // Auto-select most popular category if none selected (only for income/expense)
-    useEffect(() => {
-        if (!categoryId && transactionType !== 'transfer' && filteredCategories.length > 0) {
-            form.setValue('category_id', filteredCategories[0].id)
-        }
-    }, [categoryId, transactionType, filteredCategories, form])
+    useTransactionPartyDefaults(form, accounts, categories)
 
     // Calculate items total
     const itemsTotal = items?.reduce((sum, item) => {

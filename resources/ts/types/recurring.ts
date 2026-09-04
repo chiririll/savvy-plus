@@ -3,11 +3,13 @@ import { Account } from './accounts'
 import { Category } from './categories'
 import { Tag } from './tags'
 
+import type { TransactionType } from './transactions'
+
 export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
-export type TransactionType = 'income' | 'expense' | 'transfer'
+export type RecurringTransactionType = Extract<TransactionType, 'income' | 'expense' | 'transfer'>
 
 export interface RecurringTransaction extends BaseEntity {
-    type: TransactionType
+    type: RecurringTransactionType
     accountId: number
     toAccountId?: number
     categoryId?: number

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -54,6 +55,19 @@ export function DebtPaymentDialog({
             description: '',
         },
     })
+
+    useEffect(() => {
+        if (!open) {
+            return
+        }
+
+        form.reset({
+            account_id: 0,
+            amount: 0,
+            date: formatDateLocal(),
+            description: '',
+        })
+    }, [open, debt?.id, mode, form])
 
     const handleSubmit = (data: DebtPaymentFormData) => {
         if (debt) {

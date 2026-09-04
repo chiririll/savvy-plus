@@ -1,8 +1,10 @@
+import type { UserRole } from './users'
+
 export interface User {
     id: number
     name: string
     email: string
-    role?: string
+    role?: UserRole
     isSsoOnly?: boolean
 }
 

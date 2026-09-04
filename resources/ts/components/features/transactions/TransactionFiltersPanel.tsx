@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Filter, ArrowUpDown, X } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { Filter, ArrowUpDown, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -19,14 +20,21 @@ import {
 } from '@/components/ui/collapsible'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
+import { TRANSACTION_TYPE_OPTIONS } from '@/constants/transactions'
 import type { Category, Tag } from '@/types'
 import type { TransactionListFilters } from '@/hooks/use-transaction-list-filters'
 
-const TYPE_FILTERS: { value: 'income' | 'expense' | 'transfer' | null; labelKey: string; icon?: typeof ArrowDownLeft }[] = [
+const TYPE_FILTERS: {
+    value: 'income' | 'expense' | 'transfer' | null
+    labelKey: string
+    icon?: LucideIcon
+}[] = [
     { value: null, labelKey: 'all' },
-    { value: 'income', labelKey: 'income', icon: ArrowDownLeft },
-    { value: 'expense', labelKey: 'expense', icon: ArrowUpRight },
-    { value: 'transfer', labelKey: 'transfer', icon: ArrowLeftRight },
+    ...TRANSACTION_TYPE_OPTIONS.map((option) => ({
+        value: option.value,
+        labelKey: option.value,
+        icon: option.icon,
+    })),
 ]
 
 const SORT_OPTIONS = [

@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useFormValuesChange } from '@/hooks'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -52,17 +52,7 @@ export function CategoryForm({
 
     const watchedValues = form.watch()
 
-    useEffect(() => {
-        if (!onValuesChange) {
-            return
-        }
-
-        const subscription = form.watch((value) => {
-            onValuesChange(value as CategoryFormData)
-        })
-
-        return () => subscription.unsubscribe()
-    }, [form, onValuesChange])
+    useFormValuesChange(form, onValuesChange)
 
     return (
         <FormWrapper>

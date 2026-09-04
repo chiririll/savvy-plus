@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { reportsApi } from '@/api'
 import type { ReportFilters } from '@/pages/reports/types'
-import type { CashFlowGroupBy, TransactionType } from '@/api/reports'
+import type { CashFlowGroupBy, ReportTransactionType } from '@/api/reports'
 
 export function useOverviewMetrics(filters: ReportFilters) {
     return useQuery({
@@ -46,28 +46,28 @@ export function useActivityHeatmap(filters: ReportFilters) {
 }
 
 // Transaction Reports (Expenses/Income)
-export function useTransactionReportSummary(filters: ReportFilters, type: TransactionType) {
+export function useTransactionReportSummary(filters: ReportFilters, type: ReportTransactionType) {
     return useQuery({
         queryKey: ['reports', 'transaction-summary', filters, type],
         queryFn: () => reportsApi.getTransactionSummary(filters, type),
     })
 }
 
-export function useTransactionReportByCategory(filters: ReportFilters, type: TransactionType) {
+export function useTransactionReportByCategory(filters: ReportFilters, type: ReportTransactionType) {
     return useQuery({
         queryKey: ['reports', 'transactions-by-category', filters, type],
         queryFn: () => reportsApi.getTransactionsByCategory(filters, type),
     })
 }
 
-export function useTransactionReportDynamics(filters: ReportFilters, type: TransactionType, groupBy: CashFlowGroupBy = 'day') {
+export function useTransactionReportDynamics(filters: ReportFilters, type: ReportTransactionType, groupBy: CashFlowGroupBy = 'day') {
     return useQuery({
         queryKey: ['reports', 'transaction-dynamics', filters, type, groupBy],
         queryFn: () => reportsApi.getTransactionDynamics(filters, type, groupBy),
     })
 }
 
-export function useTransactionReportTop(filters: ReportFilters, type: TransactionType, limit: number = 10) {
+export function useTransactionReportTop(filters: ReportFilters, type: ReportTransactionType, limit: number = 10) {
     return useQuery({
         queryKey: ['reports', 'top-transactions', filters, type, limit],
         queryFn: () => reportsApi.getTopTransactions(filters, type, limit),

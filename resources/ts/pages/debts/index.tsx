@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, HandCoins, Banknote, TrendingDown, TrendingUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { HandCoins, Banknote, TrendingDown, TrendingUp } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { DataTable } from '@/components/shared'
+import { DataTable, Page, PageHeader } from '@/components/shared'
 import { createDebtColumns, DebtFormDialog, DebtPaymentDialog } from '@/components/features/debts'
 import {
     useDebtsWithSummary,
@@ -82,19 +81,14 @@ export default function DebtsPage() {
     })
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">{t('debts.title')}</h1>
-                    <p className="text-muted-foreground">{t('debts.description')}</p>
-                </div>
-                {!isReadOnly && (
-                    <Button onClick={form.openCreate}>
-                        <Plus className="mr-2 size-4" />
-                        {t('debts.create')}
-                    </Button>
-                )}
-            </div>
+        <Page title={t('debts.title')}>
+            <div className="space-y-6">
+            <PageHeader
+                title={t('debts.title')}
+                description={t('debts.description')}
+                onCreateClick={isReadOnly ? undefined : form.openCreate}
+                createLabel={t('debts.create')}
+            />
 
             {summary && (
                 <div className="grid gap-4 md:grid-cols-3">
@@ -176,6 +170,7 @@ export default function DebtsPage() {
                 isSubmitting={debtPayment.isPending || debtCollection.isPending}
                 mode={paymentMode}
             />
-        </div>
+            </div>
+        </Page>
     )
 }

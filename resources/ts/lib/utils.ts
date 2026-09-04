@@ -6,4 +6,5 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export { formatCurrency, formatCurrencyCompact } from '@/lib/currency'
-export { formatDateLocal, addDaysLocal, isDateInFuture } from '@/lib/dates'
+export { formatDateLocal, formatYearMonth, addDaysLocal, isDateInFuture } from '@/lib/dates'
+export { toggleIdInArray } from '@/lib/ids'

@@ -18,7 +18,7 @@ import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { defaultGroupBy } from '../types'
 import { dynamicsSeriesName, formatReportPeriodLabel } from '../utils'
 import type { ReportFilters } from '../types'
-import type { CashFlowGroupBy, TransactionType } from '@/api/reports'
+import type { CashFlowGroupBy, ReportTransactionType } from '@/api/reports'
 
 type ChartType = 'line' | 'bar'
 
@@ -31,7 +31,7 @@ interface SeriesConfig {
 
 interface TransactionDynamicsChartProps {
     filters: ReportFilters
-    type: TransactionType
+    type: ReportTransactionType
 }
 
 export function TransactionDynamicsChart({ filters, type }: TransactionDynamicsChartProps) {

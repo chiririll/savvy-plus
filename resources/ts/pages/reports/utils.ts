@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next'
 import i18n, { intlLocale } from '@/lib/i18n'
-import { parseDateKey } from '@/lib/dates'
+import { formatYearMonth, parseDateKey } from '@/lib/dates'
 import type { CashFlowGroupBy } from '@/api/reports'
 
 const SAVINGS_NODE_IDS = new Set(['__savings__', 'Savings', 'messages.reports.savings'])
@@ -51,13 +51,6 @@ export function formatReportPeriodLabel(
 
 export function formatExpensePaceMonthLabel(monthStart: string): string {
     return parseDateKey(monthStart).toLocaleDateString(intlLocale(), { month: 'short', year: 'numeric' })
-}
-
-// Format date as YYYY-MM (timezone-safe)
-function formatYearMonth(date: Date): string {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    return `${year}-${month}`
 }
 
 // Generate months for the last 2 years

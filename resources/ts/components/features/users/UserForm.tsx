@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useFormValuesChange } from '@/hooks'
 import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -70,17 +70,7 @@ export function UserForm({
     const setPassword = form.watch('setPassword')
     const showPassword = isEdit || setPassword
 
-    useEffect(() => {
-        if (!onValuesChange) {
-            return
-        }
-
-        const subscription = form.watch((value) => {
-            onValuesChange(value as CreateUserFormData)
-        })
-
-        return () => subscription.unsubscribe()
-    }, [form, onValuesChange])
+    useFormValuesChange(form, onValuesChange)
 
     return (
         <FormWrapper>

@@ -1,4 +1,5 @@
 import { api } from './client'
+import { createCrudApi } from './crud'
 import type {
     IdentityProvider,
     PublicProvider,
@@ -8,20 +9,15 @@ import type {
 import type { IdentityProviderFormData } from '@/schemas'
 
 const ENDPOINT = '/identity-providers'
+const crud = createCrudApi<IdentityProvider, IdentityProviderFormData>(ENDPOINT)
 
 export const ssoApi = {
-    // Public
+    ...crud,
+    list: crud.getAll,
+
     providers: () => api.get<PublicProvider[]>('/auth/sso/providers'),
     exchange: (ticket: string) => api.post<SsoExchangeResponse>('/auth/sso/exchange', { ticket }),
-
-    // Admin
     presets: () => api.get<SsoPresetCatalogEntry[]>('/auth/sso/presets'),
-    list: () => api.get<IdentityProvider[]>(ENDPOINT),
-    getById: (id: number | string) => api.get<IdentityProvider>(`${ENDPOINT}/${id}`),
-    create: (data: IdentityProviderFormData) => api.post<IdentityProvider, IdentityProviderFormData>(ENDPOINT, data),
-    update: (id: number | string, data: Partial<IdentityProviderFormData>) =>
-        api.patch<IdentityProvider, Partial<IdentityProviderFormData>>(`${ENDPOINT}/${id}`, data),
-    delete: (id: number | string) => api.delete<void>(`${ENDPOINT}/${id}`),
     test: (id: number | string) => api.post<{ status: string; message?: string }>(`${ENDPOINT}/${id}/test`),
 }
 

@@ -32,7 +32,7 @@ import {
 import { Progress } from '@/components/ui/progress'
 import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
 import { useOverviewMetrics } from '@/hooks/use-reports'
-import { cn, formatCurrency, formatCurrencyCompact, formatDateLocal, addDaysLocal } from '@/lib/utils'
+import { cn, formatCurrency, formatCurrencyCompact, formatDateLocal, formatYearMonth, addDaysLocal } from '@/lib/utils'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
@@ -103,12 +103,6 @@ function getPresetDates(preset: PeriodPreset): { start_date: string; end_date: s
         default:
             return getPresetDates('last_30_days')
     }
-}
-
-function formatYearMonth(date: Date): string {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    return `${year}-${month}`
 }
 
 function toReportFilters(

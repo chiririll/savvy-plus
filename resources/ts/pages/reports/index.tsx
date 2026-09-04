@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Activity } from 'lucide-react'
 import { FiltersBar } from './components'
 import { OverviewTab, CashFlowTab, ExpensesTab, IncomeTab, NetWorthTab } from './tabs'
+import { toggleIdInArray } from '@/lib/utils'
 import { DEFAULT_FILTERS, TABS, type ReportFilters, type ReportTab } from './types'
 
 export default function ReportsPage() {
@@ -20,9 +21,7 @@ export default function ReportsPage() {
     const toggleArrayFilter = (key: 'accountIds' | 'categoryIds' | 'tagIds', id: number) => {
         setFilters(f => {
             const current = f[key]
-            const newIds = current.includes(id)
-                ? current.filter(i => i !== id)
-                : [...current, id]
+            const newIds = toggleIdInArray(current, id)
             return { ...f, [key]: newIds }
         })
     }
@@ -50,8 +49,8 @@ export default function ReportsPage() {
             <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as ReportTab)} className="mb-6">
                 <TabsList className="h-auto flex-wrap md:flex-nowrap md:h-9 md:w-fit">
                     {TABS.map(tab => (
-                        <TabsTrigger key={tab.value} value={tab.value}>
-                            {t(`reports.tabs.${tab.value}`)}
+                        <TabsTrigger key={tab} value={tab}>
+                            {t(`reports.tabs.${tab}`)}
                         </TabsTrigger>
                     ))}
                 </TabsList>

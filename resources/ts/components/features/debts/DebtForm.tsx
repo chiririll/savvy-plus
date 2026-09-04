@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -16,11 +15,11 @@ import {
     FormDescription,
 } from '@/components/ui/form'
 import { getDebtSchema, DebtFormData } from '@/schemas'
-import { useCurrencies, useAccounts } from '@/hooks'
+import { useCurrencies, useAccounts, useFormValuesChange } from '@/hooks'
 import { Banknote, HandCoins } from 'lucide-react'
 import {
     AccountSelect,
-    CurrencySelect,
+    CurrencyIdField,
     FieldHelp,
     FormDialogFooterStart,
     FormWrapper,
@@ -100,17 +99,7 @@ export function DebtForm({
         && !!selectedAccount
         && amount > selectedAccount.currentBalance
 
-    useEffect(() => {
-        if (!onValuesChange) {
-            return
-        }
-
-        const subscription = form.watch((value) => {
-            onValuesChange(value as DebtFormData)
-        })
-
-        return () => subscription.unsubscribe()
-    }, [form, onValuesChange])
+    useFormValuesChange(form, onValuesChange)
 
     const showAccount = mode === 'create' && origin === 'new'
     const showCurrency = mode === 'edit' || origin === 'existing'
@@ -233,14 +222,9 @@ export function DebtForm({
                             render={({ field }) => (
                                 <FormItem className="min-w-0">
                                     <FormLabel>{t('fields.currency')}</FormLabel>
-                                    <CurrencySelect
-                                        value={field.value ? { source: 'existing', id: Number(field.value) } : null}
-                                        onChange={(next) => {
-                                            if (next.source === 'existing') {
-                                                field.onChange(next.id)
-                                            }
-                                        }}
-                                        allowCatalog={false}
+                                    <CurrencyIdField
+                                        value={field.value}
+                                        onChange={field.onChange}
                                         placeholder={t('forms:selectCurrency')}
                                     />
                                     <FormMessage />
