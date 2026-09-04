@@ -128,12 +128,6 @@ export function TransactionForm({
         defaultValues: formDefaults,
     })
 
-    // Reset form when defaults change (e.g., when editing and data loads)
-    useEffect(() => {
-        form.reset(formDefaults)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [formDefaults])
-
     useEffect(() => {
         if (!onValuesChange) {
             return
@@ -450,7 +444,7 @@ export function TransactionForm({
                                             <th className="text-left p-2 font-medium">{t('fields.name')}</th>
                                             <th className="text-left p-2 font-medium w-20">{t('forms:transactions.qty')}</th>
                                             <th className="text-left p-2 font-medium w-28">{t('forms:transactions.price')}</th>
-                                            <th className="text-right p-2 font-medium w-20">{t('forms:transactions.total')}</th>
+                                            <th className="text-right p-2 font-medium w-24">{t('forms:transactions.total')}</th>
                                             <th className="w-10"></th>
                                         </tr>
                                     </thead>
@@ -518,13 +512,12 @@ export function TransactionForm({
                                     </tbody>
                                     <tfoot className="border-t bg-muted/30">
                                         <tr>
-                                            <td colSpan={4} className="p-2 text-right font-medium">
-                                                {t('forms:transactions.total')}:
+                                            <td colSpan={5} className="p-2 text-right font-medium">
+                                                {t('forms:transactions.total')}:{' '}
+                                                <span className="font-mono font-semibold">
+                                                    {formatCurrency(itemsTotal, selectedAccount?.currency, { showSymbol: false })}
+                                                </span>
                                             </td>
-                                            <td className="p-2 text-right font-mono font-semibold">
-                                                {formatCurrency(itemsTotal, selectedAccount?.currency, { showSymbol: false })}
-                                            </td>
-                                            <td></td>
                                         </tr>
                                     </tfoot>
                                 </table>
