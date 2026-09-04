@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { transactionsApi } from '@/api'
-import { Transaction, TransactionFormData, TransactionFilters } from '@/types'
+import { Transaction, TransactionFilters } from '@/types'
+import { TransactionFormData } from '@/schemas'
 import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 

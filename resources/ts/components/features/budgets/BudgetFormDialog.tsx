@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { EntityFormDialog } from '@/components/shared'
-import { BudgetFormData as BudgetFormValues } from '@/schemas'
-import { Budget, BudgetFormData } from '@/types'
+import { BudgetFormData } from '@/schemas'
+import { Budget } from '@/types'
 import { BudgetForm } from './BudgetForm'
 
 const FORM_ID = 'budget-form'
@@ -24,7 +24,7 @@ export function BudgetFormDialog({
     const { t } = useTranslation('pages')
 
     return (
-        <EntityFormDialog<Budget, BudgetFormData, BudgetFormValues>
+        <EntityFormDialog<Budget, BudgetFormData, BudgetFormData>
             entity={budget}
             open={open}
             onOpenChange={onOpenChange}

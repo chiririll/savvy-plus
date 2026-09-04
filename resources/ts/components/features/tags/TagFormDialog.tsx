@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { EntityFormDialog } from '@/components/shared'
-import { Tag, TagFormData } from '@/types'
+import { Tag } from '@/types'
+import { TagFormData } from '@/schemas'
 import { TagForm } from './TagForm'
 
 const FORM_ID = 'tag-form'
@@ -23,7 +24,7 @@ export function TagFormDialog({
     const { t } = useTranslation('pages')
 
     return (
-        <EntityFormDialog
+        <EntityFormDialog<Tag, TagFormData, TagFormData>
             entity={tag}
             open={open}
             onOpenChange={onOpenChange}

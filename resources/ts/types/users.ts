@@ -12,13 +12,6 @@ export interface User {
     expiresAt?: string
 }
 
-export interface UserFormData {
-    name: string
-    email: string
-    password?: string
-    role?: UserRole
-}
-
 export interface PasswordTokenPreview {
     name: string
     email: string

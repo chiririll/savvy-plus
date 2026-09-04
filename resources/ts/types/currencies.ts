@@ -16,12 +16,3 @@ export interface CurrencyCatalogItem {
     decimals: number
     rate: number | null
 }
-
-export interface CurrencyFormData {
-    code: string
-    name: string
-    symbol: string
-    decimals: number
-    isBase?: boolean
-    rate?: number
-}

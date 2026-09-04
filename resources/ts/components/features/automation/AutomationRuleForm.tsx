@@ -21,11 +21,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { automationRuleSchema, type AutomationRuleSchema } from '@/schemas/automation'
+import { automationRuleSchema, type AutomationRuleFormData } from '@/schemas'
+import type { Action, ConditionGroup } from '@/types/automation'
 import { useAutomationTriggers } from '@/hooks/use-automation'
 import { ConditionBuilder } from './ConditionBuilder'
 import { ActionBuilder } from './ActionBuilder'
-import type { AutomationRuleFormData } from '@/types/automation'
 import { FieldHelp, FormActiveField, FormWrapper } from '@/components/shared'
 
 interface AutomationRuleFormProps {
@@ -50,7 +50,7 @@ export function AutomationRuleForm({
     const { t } = useTranslation(['common', 'forms'])
     const { data: triggers } = useAutomationTriggers()
 
-    const form = useForm<AutomationRuleSchema>({
+    const form = useForm<AutomationRuleFormData>({
         resolver: zodResolver(automationRuleSchema),
         defaultValues: {
             name: '',
@@ -77,8 +77,8 @@ export function AutomationRuleForm({
         return () => subscription.unsubscribe()
     }, [form, onValuesChange])
 
-    const handleSubmit = (data: AutomationRuleSchema) => {
-        onSubmit(data as AutomationRuleFormData)
+    const handleSubmit = (data: AutomationRuleFormData) => {
+        onSubmit(data)
     }
 
     return (
@@ -180,7 +180,7 @@ export function AutomationRuleForm({
                         render={({ field }) => (
                             <FormItem>
                                 <ConditionBuilder
-                                    value={field.value}
+                                    value={field.value as ConditionGroup}
                                     onChange={field.onChange}
                                 />
                                 <FormMessage />
@@ -197,7 +197,7 @@ export function AutomationRuleForm({
                         render={({ field }) => (
                             <FormItem>
                                 <ActionBuilder
-                                    value={field.value}
+                                    value={field.value as Action[]}
                                     onChange={field.onChange}
                                 />
                                 <FormMessage />

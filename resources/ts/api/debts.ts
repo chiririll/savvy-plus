@@ -1,8 +1,8 @@
 import { api, apiClient } from './client'
 import { createCrudApi } from './crud'
 import { toQueryString } from '@/lib/query-string'
-import { Debt, DebtFormData, DebtPaymentFormData, DebtSummary, DebtsResponse } from '@/types'
-import { Transaction } from '@/types'
+import { Debt, DebtSummary, DebtsResponse, Transaction } from '@/types'
+import { DebtFormData, DebtPaymentFormData } from '@/schemas'
 
 const ENDPOINT = '/debts'
 const crud = createCrudApi<Debt, DebtFormData>(ENDPOINT)

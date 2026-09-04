@@ -22,6 +22,11 @@ export const accountSchema = z.object({
 
 export type AccountFormValues = z.infer<typeof accountSchema>
 
+export type AccountFormData = Omit<AccountFormValues, 'currency'> & {
+    currency_id?: number
+    currency_code?: string
+}
+
 export function encodeAccountCurrency(value: { id?: number; code?: string }): string {
     if (value.code) {
         return `code:${value.code}`

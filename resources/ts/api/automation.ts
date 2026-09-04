@@ -1,6 +1,7 @@
 import { api } from './client'
 import { createCrudApi } from './crud'
-import type { AutomationRule, AutomationRuleFormData, AutomationRuleLog, TriggerOption } from '@/types/automation'
+import type { AutomationRule, AutomationRuleLog, TriggerOption } from '@/types/automation'
+import type { AutomationRuleFormData } from '@/schemas'
 
 const ENDPOINT = '/automation-rules'
 const crud = createCrudApi<AutomationRule, AutomationRuleFormData>(ENDPOINT)

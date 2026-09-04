@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { EntityFormDialog } from '@/components/shared'
-import { DebtFormData as DebtFormValues } from '@/schemas'
-import { Debt, DebtFormData } from '@/types'
+import { DebtFormData } from '@/schemas'
+import { Debt } from '@/types'
 import { DebtForm } from './DebtForm'
 
 const FORM_ID = 'debt-form'
@@ -24,7 +24,7 @@ export function DebtFormDialog({
     const { t } = useTranslation('pages')
 
     return (
-        <EntityFormDialog<Debt, DebtFormData, DebtFormValues>
+        <EntityFormDialog<Debt, DebtFormData, DebtFormData>
             entity={debt}
             open={open}
             onOpenChange={onOpenChange}

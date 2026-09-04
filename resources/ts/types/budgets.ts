@@ -30,17 +30,3 @@ export interface Budget extends BaseEntity {
     tags: Tag[]
     progress?: BudgetProgress
 }
-
-export interface BudgetFormData {
-    name: string
-    amount: number
-    currency_id?: number | null
-    period: BudgetPeriod
-    start_date?: string | null
-    end_date?: string | null
-    is_global: boolean
-    notify_at_percent?: number | null
-    is_active: boolean
-    category_ids: number[]
-    tag_ids?: number[]
-}

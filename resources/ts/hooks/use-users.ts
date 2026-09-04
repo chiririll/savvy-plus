@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { usersApi } from '@/api/users'
-import type { UserFormData } from '@/types/users'
+import type { UserFormData } from '@/schemas'
 import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 

@@ -3,7 +3,8 @@ import { ListPage } from '@/components/shared'
 import { AccountFormDialog, createAccountColumns } from '@/components/features/accounts'
 import { useAccounts, useCreateAccount, useDeleteAccount, useReorderAccounts, useUpdateAccount, useResourceFormDialog } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
-import type { Account, AccountFormData } from '@/types'
+import type { Account } from '@/types'
+import type { AccountFormData } from '@/schemas'
 
 export default function AccountsPage() {
     const { t } = useTranslation('pages')

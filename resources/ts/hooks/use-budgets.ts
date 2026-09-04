@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { budgetsApi } from '@/api'
-import { BudgetFormData } from '@/types'
+import { BudgetFormData } from '@/schemas'
 import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 

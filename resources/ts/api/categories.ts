@@ -1,7 +1,8 @@
 import { apiClient } from './client'
 import { createCrudApi } from './crud'
 import { toQueryString } from '@/lib/query-string'
-import { Category, CategoryFormData, CategorySummaryResponse } from '@/types'
+import { Category, CategorySummaryResponse } from '@/types'
+import { CategoryFormData } from '@/schemas'
 
 export const categoriesApi = {
     ...createCrudApi<Category, CategoryFormData>('/categories'),

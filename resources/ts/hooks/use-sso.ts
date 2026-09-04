@@ -2,7 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import i18n from '@/lib/i18n'
 import { ssoApi } from '@/api/sso'
-import type { IdentityProviderFormData } from '@/types/sso'
+import type { IdentityProviderFormData } from '@/schemas'
 import { useResourceItem, useResourceMutation } from './use-crud'
 
 const QUERY_KEY = ['identity-providers']

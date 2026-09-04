@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, QueryKey } from '@tanstack/react-query'
 import { accountsApi } from '@/api'
-import { Account, AccountFormData } from '@/types'
+import { Account } from '@/types'
+import { AccountFormData } from '@/schemas'
 import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 

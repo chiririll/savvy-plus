@@ -21,28 +21,6 @@ export interface Debt extends BaseEntity {
     currency?: Currency
 }
 
-export type DebtOrigin = 'new' | 'existing'
-
-export interface DebtFormData {
-    origin?: DebtOrigin
-    name: string
-    debt_type: DebtType
-    currency_id?: number
-    account_id?: number
-    date?: string
-    amount: number
-    due_date?: string
-    counterparty?: string
-    description?: string
-}
-
-export interface DebtPaymentFormData {
-    account_id: number
-    amount: number
-    date: string
-    description?: string
-}
-
 export interface DebtSummary {
     total_i_owe: number
     total_owed_to_me: number

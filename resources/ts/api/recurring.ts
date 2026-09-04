@@ -1,6 +1,7 @@
 import { api } from './client'
 import { createCrudApi } from './crud'
-import { RecurringTransaction, RecurringFormData } from '@/types'
+import { RecurringTransaction } from '@/types'
+import { RecurringFormData } from '@/schemas'
 
 export const recurringApi = {
     ...createCrudApi<RecurringTransaction, RecurringFormData>('/recurring'),

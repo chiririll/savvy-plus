@@ -2,8 +2,6 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import i18n from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -16,20 +14,12 @@ import {
     FormDescription,
 } from '@/components/ui/form'
 import { FormWrapper } from '@/components/shared/FormWrapper'
-
-const tagSchema = z.object({
-    name: z.string()
-        .min(1, i18n.t('validation.nameRequired'))
-        .max(50, i18n.t('validation.maxChars', { count: 50 }))
-        .regex(/^[a-zA-Zа-яА-ЯёЁ0-9_-]+$/, i18n.t('validation.tagFormat')),
-})
-
-type TagFormValues = z.infer<typeof tagSchema>
+import { tagSchema, TagFormData } from '@/schemas'
 
 interface TagFormProps {
-    defaultValues?: Partial<TagFormValues>
-    onSubmit: (data: TagFormValues) => void
-    onValuesChange?: (data: TagFormValues) => void
+    defaultValues?: Partial<TagFormData>
+    onSubmit: (data: TagFormData) => void
+    onValuesChange?: (data: TagFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
     formId?: string
@@ -46,7 +36,7 @@ export function TagForm({
     hideSubmit,
 }: TagFormProps) {
     const { t } = useTranslation(['common', 'forms'])
-    const form = useForm<TagFormValues>({
+    const form = useForm<TagFormData>({
         resolver: zodResolver(tagSchema),
         defaultValues: {
             name: defaultValues?.name ?? '',
@@ -59,7 +49,7 @@ export function TagForm({
         }
 
         const subscription = form.watch((value) => {
-            onValuesChange(value as TagFormValues)
+            onValuesChange(value as TagFormData)
         })
 
         return () => subscription.unsubscribe()

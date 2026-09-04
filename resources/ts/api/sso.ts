@@ -1,11 +1,11 @@
 import { api } from './client'
 import type {
     IdentityProvider,
-    IdentityProviderFormData,
     PublicProvider,
     SsoExchangeResponse,
     SsoPresetCatalogEntry,
 } from '@/types/sso'
+import type { IdentityProviderFormData } from '@/schemas'
 
 const ENDPOINT = '/identity-providers'
 

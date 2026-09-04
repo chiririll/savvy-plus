@@ -10,7 +10,8 @@ import {
     useResourceFormDialog,
 } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
-import type { AutomationRule, AutomationRuleFormData } from '@/types/automation'
+import type { AutomationRule } from '@/types/automation'
+import type { AutomationRuleFormData } from '@/schemas'
 
 export default function AutomationPage() {
     const { t } = useTranslation('pages')

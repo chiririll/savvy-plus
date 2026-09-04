@@ -1,6 +1,7 @@
 import { api } from './client'
 import { createCrudApi } from './crud'
-import type { User, UserFormData } from '@/types/users'
+import type { User } from '@/types/users'
+import type { UserFormData } from '@/schemas'
 
 export const usersApi = {
     ...createCrudApi<User, UserFormData>('/users'),

@@ -1,7 +1,8 @@
 import { api, apiClient } from './client'
 import { createCrudApi } from './crud'
 import { toQueryString } from '@/lib/query-string'
-import { Transaction, TransactionFormData, TransactionFilters, TransactionSummary } from '@/types'
+import { Transaction, TransactionFilters, TransactionSummary } from '@/types'
+import { TransactionFormData } from '@/schemas'
 
 const ENDPOINT = '/transactions'
 

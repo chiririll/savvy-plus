@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { recurringApi } from '@/api'
-import { RecurringFormData } from '@/types'
+import { RecurringFormData } from '@/schemas'
 import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 

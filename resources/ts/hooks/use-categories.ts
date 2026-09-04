@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { categoriesApi } from '@/api'
-import { CategoryFormData, CategoryType } from '@/types'
+import { CategoryType } from '@/types'
+import { CategoryFormData } from '@/schemas'
 import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 

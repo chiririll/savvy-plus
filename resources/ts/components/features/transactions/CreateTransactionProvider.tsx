@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useCreateTransaction, useUpdateTransaction } from '@/hooks'
-import { TransactionFormValues } from '@/schemas/transactions'
-import { Transaction, TransactionFormData } from '@/types'
+import { TransactionFormValues } from '@/schemas'
+import { Transaction } from '@/types'
 import { TransactionFormDialog } from './TransactionFormDialog'
 
 export type CreateTransactionDefaults = Partial<TransactionFormValues>
@@ -42,13 +42,13 @@ export function CreateTransactionProvider({ children }: { children: React.ReactN
     const handleSubmit = (data: TransactionFormValues) => {
         if (transaction) {
             updateTransaction.mutate(
-                { id: transaction.id, data: data as TransactionFormData },
+                { id: transaction.id, data },
                 { onSuccess: () => setOpen(false) }
             )
             return
         }
 
-        createTransaction.mutate(data as TransactionFormData, {
+        createTransaction.mutate(data, {
             onSuccess: () => {
                 setOpen(false)
                 if (location.pathname !== '/transactions') {

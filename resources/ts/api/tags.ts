@@ -1,4 +1,5 @@
 import { createCrudApi } from './crud'
-import { Tag, TagFormData } from '@/types'
+import { Tag } from '@/types'
+import { TagFormData } from '@/schemas'
 
 export const tagsApi = createCrudApi<Tag, TagFormData>('/tags')

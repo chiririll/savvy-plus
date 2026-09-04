@@ -1,7 +1,8 @@
 import { api, apiClient } from './client'
 import { createCrudApi } from './crud'
 import { toQueryString } from '@/lib/query-string'
-import { Account, AccountFormData } from '@/types'
+import { Account } from '@/types'
+import { AccountFormData } from '@/schemas'
 
 export interface AccountsSummary {
     total_balance: number

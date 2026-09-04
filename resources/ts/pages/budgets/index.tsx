@@ -3,7 +3,8 @@ import { ListPage } from '@/components/shared'
 import { BudgetFormDialog, createBudgetColumns } from '@/components/features/budgets'
 import { useBudgets, useCreateBudget, useDeleteBudget, useUpdateBudget, useResourceFormDialog } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
-import type { Budget, BudgetFormData } from '@/types'
+import type { Budget } from '@/types'
+import type { BudgetFormData } from '@/schemas'
 
 export default function BudgetsPage() {
     const { t } = useTranslation('pages')

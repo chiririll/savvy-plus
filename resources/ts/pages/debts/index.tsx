@@ -17,7 +17,8 @@ import {
     useResourceFormDialog,
 } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
-import { Debt, DebtFormData, DebtPaymentFormData } from '@/types'
+import { Debt } from '@/types'
+import { DebtFormData, DebtPaymentFormData } from '@/schemas'
 import { formatCurrency } from '@/lib/utils'
 
 export default function DebtsPage() {

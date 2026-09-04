@@ -3,7 +3,8 @@ import { ListPage } from '@/components/shared'
 import { createTagColumns, TagFormDialog } from '@/components/features/tags'
 import { useTags, useCreateTag, useDeleteTag, useUpdateTag, useResourceFormDialog } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
-import { Tag, TagFormData } from '@/types'
+import { Tag } from '@/types'
+import { TagFormData } from '@/schemas'
 
 export default function TagsPage() {
     const { t } = useTranslation('pages')

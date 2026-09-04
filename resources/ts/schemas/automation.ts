@@ -30,4 +30,4 @@ export const automationRuleSchema = z.object({
     stop_processing: z.boolean().default(false),
 })
 
-export type AutomationRuleSchema = z.infer<typeof automationRuleSchema>
+export type AutomationRuleFormData = z.infer<typeof automationRuleSchema>

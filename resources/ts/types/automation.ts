@@ -80,17 +80,6 @@ export interface TriggerOption {
     description: string
 }
 
-export interface AutomationRuleFormData {
-    name: string
-    description: string | null
-    trigger_type: TriggerType
-    priority: number
-    conditions: ConditionGroup
-    actions: Action[]
-    is_active: boolean
-    stop_processing: boolean
-}
-
 export const CONDITION_FIELDS = [
     { value: 'type', label: 'Transaction Type', operators: ['equals', 'in'] },
     { value: 'amount', label: 'Amount', operators: ['equals', 'gt', 'gte', 'lt', 'lte', 'between'] },

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { EntityFormDialog } from '@/components/shared'
-import type { AutomationRule, AutomationRuleFormData } from '@/types/automation'
+import type { AutomationRule } from '@/types/automation'
+import type { AutomationRuleFormData } from '@/schemas'
 import { AutomationRuleForm } from './AutomationRuleForm'
 
 const FORM_ID = 'automation-rule-form'
@@ -23,7 +24,7 @@ export function AutomationRuleFormDialog({
     const { t } = useTranslation('pages')
 
     return (
-        <EntityFormDialog
+        <EntityFormDialog<AutomationRule, AutomationRuleFormData, AutomationRuleFormData>
             entity={rule}
             open={open}
             onOpenChange={onOpenChange}
@@ -44,7 +45,17 @@ export function AutomationRuleFormDialog({
                 stop_processing: item.stop_processing,
             })}
         >
-            {({ formKey, formProps }) => <AutomationRuleForm key={formKey} {...formProps} />}
+            {({ formKey, formProps }) => (
+                <AutomationRuleForm
+                    key={formKey}
+                    defaultValues={formProps.defaultValues}
+                    onSubmit={onSubmit}
+                    onValuesChange={formProps.onValuesChange}
+                    isSubmitting={formProps.isSubmitting}
+                    formId={formProps.formId}
+                    hideSubmit
+                />
+            )}
         </EntityFormDialog>
     )
 }

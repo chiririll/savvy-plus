@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { debtsApi } from '@/api'
-import { DebtFormData, DebtPaymentFormData } from '@/types'
+import { DebtFormData, DebtPaymentFormData } from '@/schemas'
 import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 

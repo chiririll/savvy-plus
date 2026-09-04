@@ -17,12 +17,3 @@ export interface Account extends BaseEntity {
     sortOrder: number
     currency?: Currency
 }
-
-export interface AccountFormData {
-    name: string
-    type: RegularAccountType
-    currency_id?: number
-    currency_code?: string
-    initial_balance?: number
-    is_active?: boolean
-}

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { tagsApi } from '@/api'
-import { TagFormData } from '@/types'
+import { TagFormData } from '@/schemas'
 import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 

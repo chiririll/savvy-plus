@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { EntityFormDialog } from '@/components/shared'
-import { AccountFormValues, encodeAccountCurrency } from '@/schemas'
-import { Account, AccountFormData } from '@/types'
+import { AccountFormValues, AccountFormData, encodeAccountCurrency } from '@/schemas'
+import { Account } from '@/types'
 import { AccountForm } from './AccountForm'
 
 const FORM_ID = 'account-form'
