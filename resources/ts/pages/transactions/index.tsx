@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf, parseAsStringLiteral } from 'nuqs'
-import { Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Filter, ArrowUpDown, X, Check, SkipForward } from 'lucide-react'
+import { Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Filter, ArrowUpDown, X } from 'lucide-react'
 import { Row } from '@tanstack/react-table'
 import { Page, PageHeader, DataTable, ServerPagination } from '@/components/shared'
 import { Button } from '@/components/ui/button'
@@ -21,13 +21,12 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { createTransactionColumns } from '@/components/features/transactions'
+import { createTransactionColumns, UpcomingPendingCard, useTransactionFormDialog } from '@/components/features/transactions'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useTransactions, useDeleteTransaction, useDuplicateTransaction, useConfirmTransaction, useSkipTransaction, useCategories, useTags } from '@/hooks'
+import { useTransactions, useTransaction, useDeleteTransaction, useDuplicateTransaction, useConfirmTransaction, useSkipTransaction, useCategories, useTags } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { TransactionType, Transaction } from '@/types'
 import { addDaysLocal, cn, formatCurrency } from '@/lib/utils'
-import { displayTransactionDescription } from '@/lib/transaction-description'
 
 const TYPE_FILTERS: { value: TransactionType | null; labelKey: string; icon?: typeof ArrowDownLeft }[] = [
     { value: null, labelKey: 'all' },
@@ -90,7 +89,11 @@ const transactionSearchParams = {
 export default function TransactionsPage() {
     const { t } = useTranslation('pages')
     const [params, setParams] = useQueryStates(transactionSearchParams)
+    const [searchParams, setSearchParams] = useSearchParams()
     const [filtersOpen, setFiltersOpen] = useState(false)
+    const { openCreate, openEdit } = useTransactionFormDialog()
+    const editId = searchParams.get('edit')
+    const { data: editTransaction, isError: editNotFound } = useTransaction(editId ?? '')
 
     const filters = {
         per_page: 20,
@@ -111,7 +114,7 @@ export default function TransactionsPage() {
         end_date: addDaysLocal(new Date(), 7),
         sort_by: 'date',
         sort_direction: 'asc',
-        per_page: 5,
+        per_page: 20,
     })
     const deleteTransaction = useDeleteTransaction()
     const duplicateTransaction = useDuplicateTransaction()
@@ -121,11 +124,64 @@ export default function TransactionsPage() {
     const { data: tags } = useTags()
     const isReadOnly = useReadOnly()
 
+    useEffect(() => {
+        if (searchParams.get('create') !== '1') {
+            return
+        }
+
+        const type = searchParams.get('type')
+        const accountId = searchParams.get('account_id')
+        const amount = searchParams.get('amount')
+        const description = searchParams.get('description')
+
+        openCreate({
+            type: type === 'income' || type === 'expense' || type === 'transfer' ? type : undefined,
+            account_id: accountId ? Number(accountId) : undefined,
+            amount: amount ? Number(amount) : undefined,
+            description: description ?? undefined,
+        })
+
+        setSearchParams((prev) => {
+            prev.delete('create')
+            prev.delete('account_id')
+            prev.delete('amount')
+            prev.delete('description')
+            prev.delete('type')
+            return prev
+        }, { replace: true })
+    }, [openCreate, searchParams, setSearchParams])
+
+    useEffect(() => {
+        if (!editId) {
+            return
+        }
+
+        const found = (data?.data ?? []).find((item) => String(item.id) === editId)
+        const transaction = found ?? editTransaction
+        if (!transaction && !editNotFound) {
+            return
+        }
+
+        if (transaction) {
+            openEdit(transaction)
+        }
+
+        setSearchParams((prev) => {
+            prev.delete('edit')
+            return prev
+        }, { replace: true })
+    }, [data?.data, editId, editNotFound, editTransaction, openEdit, setSearchParams])
+
+    const handleCreate = () => {
+        openCreate(params.type ? { type: params.type } : undefined)
+    }
+
     const columns = createTransactionColumns({
         onDelete: (id) => deleteTransaction.mutate(id),
         onDuplicate: (id) => duplicateTransaction.mutate(id),
         onConfirm: (id) => confirmTransaction.mutate(id),
         onSkip: (id) => skipTransaction.mutate(id),
+        onEdit: openEdit,
         isReadOnly,
     })
     const highlight = upcomingPending?.data ?? []
@@ -177,7 +233,7 @@ export default function TransactionsPage() {
             <PageHeader
                 title={t('transactions.title')}
                 description={t('transactions.description')}
-                createLink={params.type ? `/transactions/create?type=${params.type}` : '/transactions/create'}
+                onCreateClick={isReadOnly ? undefined : handleCreate}
                 createLabel={t('transactions.create')}
             />
 
@@ -193,84 +249,66 @@ export default function TransactionsPage() {
             </Tabs>
 
             {showHighlight && (
-                <Card className="mb-4">
-                    <CardContent className="pt-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium">{t('transactions.upcomingTitle')}</p>
-                            <Button variant="ghost" size="sm" onClick={() => setParams({ status: 'pending', page: 1 })}>
-                                {t('transactions.viewAllPending')}
-                            </Button>
-                        </div>
-                        <div className="space-y-2">
+                <div className="mb-4 min-w-0">
+                    <p className="text-sm font-medium mb-2">{t('transactions.upcomingTitle')}</p>
+                    <div className="overflow-x-auto overscroll-x-contain pb-3">
+                        <div className="flex w-max gap-2">
                             {highlight.map((transaction) => (
-                                <div key={transaction.id} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2">
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium truncate">
-                                            {displayTransactionDescription(transaction)}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {new Date(transaction.date).toLocaleDateString()}
-                                            {' · '}
-                                            {formatCurrency(transaction.amount, transaction.account.currency)}
-                                        </p>
-                                    </div>
-                                    {!isReadOnly && (
-                                        <div className="flex gap-1 shrink-0">
-                                            <Button size="sm" variant="outline" onClick={() => confirmTransaction.mutate(transaction.id)}>
-                                                <Check className="size-4 mr-1" />
-                                                {t('common:actions.confirm')}
-                                            </Button>
-                                            {transaction.recurringTransactionId && (
-                                                <Button size="sm" variant="ghost" onClick={() => skipTransaction.mutate(transaction.id)}>
-                                                    <SkipForward className="size-4 mr-1" />
-                                                    {t('common:actions.skip')}
-                                                </Button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
+                                <UpcomingPendingCard
+                                    key={transaction.id}
+                                    transaction={transaction}
+                                    isReadOnly={isReadOnly}
+                                    onConfirm={(id) => confirmTransaction.mutate(id)}
+                                    onSkip={(id) => skipTransaction.mutate(id)}
+                                />
                             ))}
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             )}
 
             {/* Type Filter & Sort */}
-            <div className="flex items-center justify-between gap-4 mb-4">
-                <div className="flex gap-2">
-                    {TYPE_FILTERS.map(({ value, labelKey, icon: Icon }) => (
-                        <Button
-                            key={labelKey}
-                            variant={params.type === value ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setParams({ type: value, page: 1 })}
-                        >
-                            {Icon && <Icon className="size-4 mr-1" />}
-                            {labelKey === 'all' ? t('common:actions.all') : t(`transactions.types.${labelKey}`)}
-                        </Button>
-                    ))}
+            <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="grid min-w-0 grid-cols-4 gap-1.5 sm:flex sm:gap-2">
+                    {TYPE_FILTERS.map(({ value, labelKey, icon: Icon }) => {
+                        const label = labelKey === 'all'
+                            ? t('common:actions.all')
+                            : t(`transactions.types.${labelKey}`)
+
+                        return (
+                            <Button
+                                key={labelKey}
+                                variant={params.type === value ? 'default' : 'outline'}
+                                size="sm"
+                                className="min-w-0 px-2 sm:shrink-0 sm:px-2.5"
+                                onClick={() => setParams({ type: value, page: 1 })}
+                                aria-pressed={params.type === value}
+                            >
+                                {Icon && <Icon className="hidden size-4 sm:block" />}
+                                <span className="truncate">{label}</span>
+                            </Button>
+                        )
+                    })}
                 </div>
-                <div className="flex items-center gap-2">
-                    <Select
-                        value={`${params.sortBy}:${params.sortDir}`}
-                        onValueChange={(val) => {
-                            const [sortBy, sortDir] = val.split(':') as ['date' | 'amount', 'asc' | 'desc']
-                            setParams({ sortBy, sortDir, page: 1 })
-                        }}
-                    >
-                        <SelectTrigger className="w-[180px] h-9">
-                            <ArrowUpDown className="size-4 mr-2" />
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {SORT_OPTIONS.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                    {t(`transactions.sort.${opt.labelKey}`)}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+                <Select
+                    value={`${params.sortBy}:${params.sortDir}`}
+                    onValueChange={(val) => {
+                        const [sortBy, sortDir] = val.split(':') as ['date' | 'amount', 'asc' | 'desc']
+                        setParams({ sortBy, sortDir, page: 1 })
+                    }}
+                >
+                    <SelectTrigger className="h-9 w-full min-w-0 sm:w-[180px]">
+                        <ArrowUpDown className="size-4" />
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {SORT_OPTIONS.map(opt => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                                {t(`transactions.sort.${opt.labelKey}`)}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Advanced Filters */}
@@ -384,12 +422,12 @@ export default function TransactionsPage() {
                 emptyTitle={params.status === 'pending' ? t('transactions.emptyPendingTitle') : t('transactions.emptyTitle')}
                 emptyDescription={params.status === 'pending' ? t('transactions.emptyPendingDescription') : t('transactions.emptyDescription')}
                 emptyAction={
-                    <Button asChild>
-                        <Link to={params.type ? `/transactions/create?type=${params.type}` : '/transactions/create'}>
+                    !isReadOnly ? (
+                        <Button onClick={handleCreate}>
                             <Plus className="size-4" />
                             {t('transactions.create')}
-                        </Link>
-                    </Button>
+                        </Button>
+                    ) : undefined
                 }
                 renderSubComponent={TransactionItems}
                 getRowCanExpand={(row) => (row.original.itemsCount ?? row.original.items?.length ?? 0) > 1}
@@ -403,6 +441,7 @@ export default function TransactionsPage() {
                     infoLabel={t('transactions.itemLabel')}
                 />
             )}
+
         </Page>
     )
 }

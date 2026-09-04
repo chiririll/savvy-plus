@@ -166,7 +166,7 @@ it('rejects deleting a debt after a repayment', function () {
         'account_id' => $account->id,
         'amount' => 50,
         'date' => '2026-09-02',
-    ], $user)->assertOk();
+    ], $user)->assertCreated();
 
     callAs('DELETE', "/api/debts/{$debtId}", [], $user)->assertStatus(422);
     expect(Account::find($debtId))->not->toBeNull();

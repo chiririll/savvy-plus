@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -21,15 +22,21 @@ import { FormWrapper } from '@/components/shared/FormWrapper'
 interface CategoryFormProps {
     defaultValues?: Partial<CategoryFormData>
     onSubmit: (data: CategoryFormData) => void
+    onValuesChange?: (data: CategoryFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
+    formId?: string
+    hideSubmit?: boolean
 }
 
 export function CategoryForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
+    formId,
+    hideSubmit,
 }: CategoryFormProps) {
     const { t } = useTranslation(['common', 'forms'])
     const form = useForm<CategoryFormData>({
@@ -45,10 +52,22 @@ export function CategoryForm({
 
     const watchedValues = form.watch()
 
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as CategoryFormData)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
+
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-md space-y-4">
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                     control={form.control}
                     name="name"
@@ -111,9 +130,11 @@ export function CategoryForm({
                     color={watchedValues.color}
                 />
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -21,17 +22,20 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { budgetSchema, BudgetFormData } from '@/schemas'
-import { useCategories, useCurrencies, useTags } from '@/hooks'
+import { useCategories, useTags } from '@/hooks'
 import { Category } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { FormWrapper } from '@/components/shared/FormWrapper'
+import { CurrencySelect, FieldHelp, FormActiveField, FormWrapper } from '@/components/shared'
 
 interface BudgetFormProps {
     defaultValues?: Partial<BudgetFormData>
     onSubmit: (data: BudgetFormData) => void
+    onValuesChange?: (data: BudgetFormData) => void
     isSubmitting?: boolean
     submitLabel?: string
+    formId?: string
+    hideSubmit?: boolean
 }
 
 const periodOptions = ['weekly', 'monthly', 'yearly', 'one_time'] as const
@@ -39,12 +43,14 @@ const periodOptions = ['weekly', 'monthly', 'yearly', 'one_time'] as const
 export function BudgetForm({
     defaultValues,
     onSubmit,
+    onValuesChange,
     isSubmitting,
     submitLabel,
+    formId,
+    hideSubmit,
 }: BudgetFormProps) {
     const { t } = useTranslation(['common', 'forms'])
     const { data: categories } = useCategories('expense')
-    const { data: currencies } = useCurrencies()
     const { data: tags } = useTags()
 
     const form = useForm<BudgetFormData>({
@@ -70,10 +76,22 @@ export function BudgetForm({
     const isGlobal = form.watch('is_global')
     const period = form.watch('period')
 
+    useEffect(() => {
+        if (!onValuesChange) {
+            return
+        }
+
+        const subscription = form.watch((value) => {
+            onValuesChange(value as BudgetFormData)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [form, onValuesChange])
+
     return (
         <FormWrapper>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-lg space-y-4">
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                     control={form.control}
                     name="name"
@@ -93,7 +111,7 @@ export function BudgetForm({
                         control={form.control}
                         name="amount"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="min-w-0">
                                 <FormLabel>{t('forms:budgets.limit')}</FormLabel>
                                 <FormControl>
                                     <Input
@@ -113,22 +131,41 @@ export function BudgetForm({
                         control={form.control}
                         name="currency_id"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="min-w-0">
                                 <FormLabel>{t('fields.currency')}</FormLabel>
-                                <Select
-                                    onValueChange={(val) => field.onChange(val ? Number(val) : null)}
-                                    value={field.value?.toString() ?? ''}
-                                >
+                                <CurrencySelect
+                                    value={field.value ? { source: 'existing', id: Number(field.value) } : null}
+                                    onChange={(next) => {
+                                        if (next.source === 'existing') {
+                                            field.onChange(next.id)
+                                        }
+                                    }}
+                                    allowCatalog={false}
+                                    placeholder={t('forms:budgets.baseCurrency')}
+                                />
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="period"
+                        render={({ field }) => (
+                            <FormItem className="min-w-0">
+                                <FormLabel className="flex min-h-4 items-center">{t('forms:budgets.period')}</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder={t('forms:budgets.baseCurrency')} />
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder={t('forms:selectPeriod')} />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {currencies?.map((currency) => (
-                                            <SelectItem key={currency.id} value={currency.id.toString()}>
-                                                {currency.code} ({currency.symbol})
-                                                {currency.isBase && ` — ${t('forms:budgets.baseSuffix')}`}
+                                        {periodOptions.map((option) => (
+                                            <SelectItem key={option} value={option}>
+                                                {t(`forms:budgets.periods.${option}`)}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -137,32 +174,35 @@ export function BudgetForm({
                             </FormItem>
                         )}
                     />
-                </div>
 
-                <FormField
-                    control={form.control}
-                    name="period"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>{t('forms:budgets.period')}</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                    <FormField
+                        control={form.control}
+                        name="notify_at_percent"
+                        render={({ field }) => (
+                            <FormItem className="min-w-0">
+                                <FormLabel className="flex min-h-4 items-center gap-1.5">
+                                    {t('forms:budgets.notifyAt')}
+                                    <FieldHelp>{t('forms:budgets.notifyHelp')}</FieldHelp>
+                                </FormLabel>
                                 <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder={t('forms:selectPeriod')} />
-                                    </SelectTrigger>
+                                    <Input
+                                        type="number"
+                                        min="1"
+                                        max="100"
+                                        placeholder={t('forms:budgets.notifyPlaceholder')}
+                                        {...field}
+                                        value={field.value ?? ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value
+                                            field.onChange(val === '' ? null : Number(val))
+                                        }}
+                                    />
                                 </FormControl>
-                                <SelectContent>
-                                    {periodOptions.map((option) => (
-                                        <SelectItem key={option} value={option}>
-                                            {t(`forms:budgets.periods.${option}`)}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
 
                 {period === 'one_time' && (
                     <div className="grid grid-cols-2 gap-4">
@@ -319,53 +359,16 @@ export function BudgetForm({
                     />
                 )}
 
-                <FormField
+                <FormActiveField
                     control={form.control}
-                    name="notify_at_percent"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>{t('forms:budgets.notifyAt')}</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="number"
-                                    min="1"
-                                    max="100"
-                                    placeholder={t('forms:budgets.notifyPlaceholder')}
-                                    {...field}
-                                    value={field.value ?? ''}
-                                    onChange={(e) => {
-                                        const val = e.target.value
-                                        field.onChange(val === '' ? null : Number(val))
-                                    }}
-                                />
-                            </FormControl>
-                            <FormDescription>
-                                {t('forms:budgets.notifyHelp')}
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
+                    help={t('forms:budgets.activeHelp')}
                 />
 
-                <FormField
-                    control={form.control}
-                    name="is_active"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                            <FormControl>
-                                <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                />
-                            </FormControl>
-                            <FormLabel>{t('fields.active')}</FormLabel>
-                        </FormItem>
-                    )}
-                />
-
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
-                </Button>
+                {!hideSubmit && (
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
+                    </Button>
+                )}
             </form>
         </Form>
         </FormWrapper>

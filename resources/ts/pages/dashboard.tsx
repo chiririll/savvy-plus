@@ -28,7 +28,6 @@ import {
     Banknote,
     TrendingDown,
     TrendingUp,
-    Repeat
 } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
@@ -40,7 +39,8 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactECharts from 'echarts-for-react'
 import { useTheme } from '@/hooks/use-theme'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { useCreateTransactionDialog } from '@/components/features/transactions'
 import { Transaction, AccountType } from '@/types'
 import { ACCOUNT_TYPE_CONFIG, CHART_COLORS, CATEGORY_COLORS } from '@/constants'
 import { DEFAULT_FILTERS, type ReportFilters } from '@/pages/reports/types'
@@ -165,7 +165,7 @@ export default function DashboardPage() {
     const { t: tCommon } = useTranslation('common')
     const { t: tNav } = useTranslation('nav')
     const { theme } = useTheme()
-    const navigate = useNavigate()
+    const { openCreate } = useCreateTransactionDialog()
     const { data: balance } = useTotalBalance()
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
 
@@ -195,13 +195,6 @@ export default function DashboardPage() {
     const { data: debtsData } = useDebtsWithSummary()
     const { data: overviewData } = useOverviewMetrics(reportFilters)
     const { data: balanceComparison } = useBalanceComparison()
-    const { data: upcomingPending } = useTransactions({
-        status: 'pending',
-        sort_by: 'date',
-        sort_direction: 'asc',
-        per_page: 5,
-    })
-
     const activeBudgets = useMemo(() => {
         return budgets?.filter(b => b.isActive).slice(0, 4) ?? []
     }, [budgets])
@@ -600,19 +593,19 @@ export default function DashboardPage() {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuItem
-                                                        onClick={() => navigate(`/transactions/create?type=income&account_id=${account.id}`)}
+                                                        onClick={() => openCreate({ type: 'income', account_id: account.id })}
                                                     >
                                                         <ArrowDownLeft className="size-4 mr-2 text-green-600" />
                                                         {tNav('income')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
-                                                        onClick={() => navigate(`/transactions/create?type=expense&account_id=${account.id}`)}
+                                                        onClick={() => openCreate({ type: 'expense', account_id: account.id })}
                                                     >
                                                         <ArrowUpRight className="size-4 mr-2 text-red-600" />
                                                         {tNav('expense')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
-                                                        onClick={() => navigate(`/transactions/create?type=transfer&account_id=${account.id}`)}
+                                                        onClick={() => openCreate({ type: 'transfer', account_id: account.id })}
                                                     >
                                                         <ArrowLeftRight className="size-4 mr-2 text-blue-600" />
                                                         {tNav('transfer')}
@@ -744,7 +737,7 @@ export default function DashboardPage() {
                                 return (
                                     <Link
                                         key={budget.id}
-                                        to={`/budgets/${budget.id}/edit`}
+                                        to={`/budgets?edit=${budget.id}`}
                                         className="block p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                                     >
                                         <div className="flex items-center justify-between mb-2">
@@ -775,7 +768,7 @@ export default function DashboardPage() {
                             <PiggyBank className="size-12 mx-auto text-muted-foreground/50 mb-3" />
                             <p className="text-muted-foreground mb-3">{t('dashboard.noBudgets')}</p>
                             <Button asChild size="sm">
-                                <Link to="/budgets/create">
+                                <Link to="/budgets?create=1">
                                     <Plus className="size-4 mr-1" />
                                     {t('dashboard.createBudget')}
                                 </Link>
@@ -889,71 +882,6 @@ export default function DashboardPage() {
                                 <Link to="/debts?create=1">
                                     <Plus className="size-4 mr-1" />
                                     {t('dashboard.addDebt')}
-                                </Link>
-                            </Button>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                        <Repeat className="size-5" />
-                        {t('dashboard.upcoming')}
-                    </CardTitle>
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link to="/transactions?status=pending">
-                            {tCommon('actions.viewAll')}
-                            <ArrowRight className="ml-1 size-4" />
-                        </Link>
-                    </Button>
-                </CardHeader>
-                <CardContent>
-                    {upcomingPending?.data && upcomingPending.data.length > 0 ? (
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                            {upcomingPending.data.map((transaction) => (
-                                <Link
-                                    key={transaction.id}
-                                    to="/transactions?status=pending"
-                                    className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                                >
-                                    <div className="flex items-center gap-2 mb-2">
-                                        {transaction.type === 'income' ? (
-                                            <ArrowDownLeft className="size-4 text-green-600" />
-                                        ) : transaction.type === 'expense' ? (
-                                            <ArrowUpRight className="size-4 text-red-600" />
-                                        ) : (
-                                            <ArrowLeftRight className="size-4 text-blue-600" />
-                                        )}
-                                        <p className="font-medium text-sm truncate">
-                                            {transaction.description || transaction.category?.name || t('dashboard.transaction')}
-                                        </p>
-                                    </div>
-                                    <p className={`font-mono text-sm ${
-                                        transaction.type === 'income' ? 'text-green-600' :
-                                        transaction.type === 'expense' ? 'text-red-600' : ''
-                                    }`}>
-                                        {transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : ''}
-                                        {formatCurrency(transaction.amount, transaction.account.currency)}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        {new Date(transaction.date).toLocaleDateString(intlLocale(), {
-                                            month: 'short',
-                                            day: 'numeric'
-                                        })}
-                                    </p>
-                                </Link>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8">
-                            <Repeat className="size-12 mx-auto text-muted-foreground/50 mb-3" />
-                            <p className="text-muted-foreground mb-3">{t('dashboard.noPending')}</p>
-                            <Button asChild size="sm">
-                                <Link to="/recurring?create=1">
-                                    <Plus className="size-4 mr-1" />
-                                    {t('dashboard.createRecurring')}
                                 </Link>
                             </Button>
                         </div>

@@ -224,7 +224,10 @@ it('does not revoke sessions when the current password is wrong', function () {
         ],
         ['svy_session' => $current['token']],
         [],
-        ['HTTP_X_CSRF_TOKEN' => $current['csrf']],
+        [
+            'HTTP_ACCEPT' => 'application/json',
+            'HTTP_X_CSRF_TOKEN' => $current['csrf'],
+        ],
     )->assertStatus(422);
 
     $this->call('GET', '/api/auth/2fa/status', [], ['svy_session' => $other['token']])->assertOk();

@@ -63,8 +63,9 @@ class TransactionService
 
     public function update(Transaction $transaction, TransactionData $data): Transaction
     {
-        if ($transaction->isSkipped()) {
-            throw new DomainException(__('messages.transactions.cannot_edit_skipped'));
+        $kind = $transaction->kind();
+        if (! $kind->canEdit()) {
+            throw new DomainException($kind->cannotEditMessage());
         }
 
         $transaction = DB::transaction(function () use ($transaction, $data) {
@@ -95,8 +96,9 @@ class TransactionService
 
     public function delete(Transaction $transaction): void
     {
-        if ($transaction->isRecurringLinked() && ($transaction->isPending() || $transaction->isSkipped())) {
-            throw new DomainException(__('messages.transactions.cannot_delete_recurring'));
+        $kind = $transaction->kind();
+        if (! $kind->canDelete()) {
+            throw new DomainException($kind->cannotDeleteMessage());
         }
 
         DB::transaction(function () use ($transaction) {
@@ -107,8 +109,9 @@ class TransactionService
 
     public function confirm(Transaction $transaction): Transaction
     {
-        if (! $transaction->isPending()) {
-            throw new DomainException(__('messages.transactions.not_pending'));
+        $kind = $transaction->kind();
+        if (! $kind->canConfirm()) {
+            throw new DomainException($kind->cannotConfirmMessage());
         }
 
         $this->assertSufficientFunds($transaction);
@@ -132,8 +135,9 @@ class TransactionService
 
     public function skip(Transaction $transaction): Transaction
     {
-        if (! $transaction->isPending() || ! $transaction->isRecurringLinked()) {
-            throw new DomainException(__('messages.transactions.cannot_skip'));
+        $kind = $transaction->kind();
+        if (! $kind->canSkip()) {
+            throw new DomainException($kind->cannotSkipMessage());
         }
 
         return DB::transaction(function () use ($transaction) {
@@ -149,11 +153,20 @@ class TransactionService
 
     public function duplicate(Transaction $transaction): Transaction
     {
-        return DB::transaction(function () use ($transaction) {
+        $kind = $transaction->kind();
+        if (! $kind->canDuplicate()) {
+            throw new DomainException($kind->cannotDuplicateMessage());
+        }
+
+        return DB::transaction(function () use ($transaction, $kind) {
             $newTransaction = $transaction->replicate(['created_at', 'updated_at']);
-            $newTransaction->date = now()->toDateString();
-            $newTransaction->status = TransactionStatus::Confirmed;
             $newTransaction->recurring_transaction_id = null;
+
+            if (! $kind->keepsPendingOnDuplicate()) {
+                $newTransaction->date = now()->toDateString();
+                $newTransaction->status = TransactionStatus::Confirmed;
+            }
+
             $newTransaction->save();
 
             foreach ($transaction->items as $item) {

@@ -3,6 +3,7 @@ import { AppSidebar } from './Sidebar'
 import { Header } from './Header'
 import { ReadOnlyBanner } from './ReadOnlyBanner'
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
+import { CreateTransactionProvider } from '@/components/features/transactions'
 import { useCurrencies } from '@/hooks/use-currencies'
 import { useUiStore } from '@/stores/ui'
 
@@ -14,12 +15,14 @@ export function AppLayout() {
     return (
         <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <AppSidebar />
-            <SidebarInset>
+            <SidebarInset className="min-w-0">
                 <ReadOnlyBanner />
-                <Header />
-                <main className="flex-1 overflow-y-auto p-6">
-                    <Outlet />
-                </main>
+                <CreateTransactionProvider>
+                    <Header />
+                    <main className="min-w-0 flex-1 overflow-y-auto p-6">
+                        <Outlet />
+                    </main>
+                </CreateTransactionProvider>
             </SidebarInset>
         </SidebarProvider>
     )

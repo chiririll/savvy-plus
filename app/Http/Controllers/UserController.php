@@ -10,6 +10,7 @@ use App\Services\Auth\PasswordTokenService;
 use App\Services\UserService;
 use DomainException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
 
@@ -66,9 +67,9 @@ class UserController extends Controller
         }
     }
 
-    public function issuePasswordToken(User $user): JsonResponse
+    public function issuePasswordToken(Request $request, User $user): JsonResponse
     {
-        if ($user->id === auth()->id()) {
+        if ($user->id === $request->user()?->id) {
             return response()->json(['message' => __('messages.users.reset_self')], 422);
         }
 

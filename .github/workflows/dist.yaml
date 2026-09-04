@@ -18,6 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Resolve version
         id: ver
@@ -28,6 +31,44 @@ jobs:
             echo "::error::Push a v* tag to build a release (git tag v1.2.3 && git push origin v1.2.3)"
             exit 1
           fi
+
+      - name: Generate changelog
+        uses: orhun/git-cliff-action@v4
+        id: cliff
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          OUTPUT: CHANGES.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Compose release notes
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          {
+            if [ -s CHANGES.md ]; then
+              cat CHANGES.md
+              echo
+            else
+              echo "Savvy ${{ steps.ver.outputs.tag }}"
+              echo
+            fi
+            echo "---"
+            echo
+            echo "Tarball: \`https://github.com/${REPO}/releases/latest/download/savvy.tar.gz\`"
+            echo
+            echo "Debian 13+ / PHP 8.4:"
+            echo
+            echo '```bash'
+            echo "curl -fsSLO https://github.com/${REPO}/releases/latest/download/savvy.deb"
+            echo "sudo apt install ./savvy.deb"
+            echo '```'
+          } > RELEASE_NOTES.md
+          echo "::group::Release notes"
+          cat RELEASE_NOTES.md
+          echo "::endgroup::"
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -46,6 +87,8 @@ jobs:
         run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-progress
 
       - name: Build frontend
+        env:
+          APP_VERSION: ${{ steps.ver.outputs.tag }}
         run: npm ci && npm run build
 
       - name: Package tarball
@@ -74,13 +117,4 @@ jobs:
           files: |
             dist/savvy.tar.gz
             dist/*.deb
-          body: |
-            Savvy ${{ steps.ver.outputs.tag }}
-
-            Tarball: `https://github.com/${{ github.repository }}/releases/latest/download/savvy.tar.gz`
-
-            Debian 13+ / PHP 8.4:
-            ```bash
-            curl -fsSLO https://github.com/${{ github.repository }}/releases/latest/download/savvy.deb
-            sudo apt install ./savvy.deb
-            ```
+          body_path: RELEASE_NOTES.md

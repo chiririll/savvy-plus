@@ -19,6 +19,7 @@ class TransactionResource extends JsonResource
             'date' => $this->date->format('Y-m-d'),
             'status' => $this->status->value,
             'recurringTransactionId' => $this->recurring_transaction_id,
+            'actions' => $this->kind()->actions(),
             'account' => new AccountResource($this->whenLoaded('account')),
             'toAccount' => new AccountResource($this->whenLoaded('toAccount')),
             'category' => new CategoryResource($this->whenLoaded('category')),

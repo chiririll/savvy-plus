@@ -1,0 +1,49 @@
+# git-cliff ~ https://git-cliff.org/docs/configuration
+[changelog]
+header = """
+# Changelog
+"""
+body = """
+{% if version %}\
+    ## {{ version }} — {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+    ## Unreleased
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+    ### {{ group | striptags | trim | upper_first }}
+    {% for commit in commits %}
+        - {% if commit.scope %}**{{ commit.scope }}:** {% endif %}\
+          {% if commit.breaking %}[**breaking**] {% endif %}\
+          {{ commit.message | split(pat="\n") | first | trim }}\
+          {% if commit.remote.username %} (@{{ commit.remote.username }}){% endif %}\
+    {% endfor %}
+{% endfor %}
+
+"""
+trim = true
+footer = ""
+
+[git]
+conventional_commits = true
+filter_unconventional = false
+split_commits = false
+protect_breaking_commits = false
+filter_commits = false
+tag_pattern = "v[0-9].*"
+topo_order = false
+sort_commits = "newest"
+commit_parsers = [
+    { message = "^feat", group = "Features" },
+    { message = "^fix", group = "Bug Fixes" },
+    { message = "^perf", group = "Performance" },
+    { message = "^refactor", group = "Refactor" },
+    { message = "^doc", group = "Documentation" },
+    { message = "^style", group = "Styling" },
+    { message = "^test", group = "Testing" },
+    { message = "^chore\\(release\\)", skip = true },
+    { message = "^chore|^ci", group = "Miscellaneous" },
+    { message = "^revert", group = "Revert" },
+    { message = "^Merge ", skip = true },
+    { message = ".*", group = "Other" },
+]
+

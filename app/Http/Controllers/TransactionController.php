@@ -102,7 +102,11 @@ class TransactionController extends Controller
 
     public function duplicate(Transaction $transaction): JsonResponse
     {
-        $newTransaction = $this->transactionService->duplicate($transaction);
+        try {
+            $newTransaction = $this->transactionService->duplicate($transaction);
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return (new TransactionResource($newTransaction))
             ->response()

@@ -350,6 +350,67 @@ it('keeps summary confirmed-only when listing pending transactions', function ()
     expect((float) $response->json('summary.expense'))->toBe(100.0);
 });
 
+it('duplicates a one-off pending transaction as pending with the same date', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+    $date = now()->addDays(4)->toDateString();
+
+    $created = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 25,
+        'date' => $date,
+    ], $user);
+
+    $response = callAs('POST', '/api/transactions/'.$created->json('data.id').'/duplicate', [], $user);
+
+    $response->assertCreated()
+        ->assertJsonPath('data.status', 'pending')
+        ->assertJsonPath('data.date', $date)
+        ->assertJsonPath('data.recurringTransactionId', null)
+        ->assertJsonPath('data.actions.edit', true)
+        ->assertJsonPath('data.actions.duplicate', true)
+        ->assertJsonPath('data.actions.confirm', true)
+        ->assertJsonPath('data.actions.skip', false);
+
+    expect((float) $account->fresh()->current_balance)->toBe(1000.0);
+});
+
+it('rejects editing or duplicating a recurring pending occurrence', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    $created = callAs('POST', '/api/recurring', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 20,
+        'frequency' => 'daily',
+        'interval' => 1,
+        'start_date' => now()->toDateString(),
+        'is_active' => true,
+    ], $user);
+
+    $pending = Transaction::pending()->where('recurring_transaction_id', $created->json('data.id'))->first();
+
+    callAs('GET', "/api/transactions/{$pending->id}", [], $user)
+        ->assertOk()
+        ->assertJsonPath('data.actions.edit', false)
+        ->assertJsonPath('data.actions.duplicate', false)
+        ->assertJsonPath('data.actions.delete', false)
+        ->assertJsonPath('data.actions.confirm', true)
+        ->assertJsonPath('data.actions.skip', true);
+
+    callAs('PUT', "/api/transactions/{$pending->id}", [
+        'amount' => 99,
+    ], $user)->assertStatus(422);
+
+    callAs('POST', "/api/transactions/{$pending->id}/duplicate", [], $user)->assertStatus(422);
+});
+
 it('no longer registers the recurring process command', function () {
     expect(collect(Illuminate\Support\Facades\Artisan::all())->has('recurring:process'))->toBeFalse();
 });

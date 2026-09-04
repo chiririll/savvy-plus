@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
     Form,
     FormField,
@@ -14,19 +15,12 @@ import {
     FormMessage,
     FormDescription,
 } from '@/components/ui/form'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getDebtSchema, DebtFormData } from '@/schemas'
 import { useCurrencies, useAccounts } from '@/hooks'
 import { AccountSelect } from '@/components/shared/AccountSelect'
+import { CurrencySelect } from '@/components/shared/CurrencySelect'
 import { Banknote, HandCoins } from 'lucide-react'
-import { FormWrapper } from '@/components/shared/FormWrapper'
+import { FieldHelp, FormDialogFooterStart, FormWrapper } from '@/components/shared'
 import { cn, formatCurrency, formatDateLocal } from '@/lib/utils'
 
 interface DebtFormProps {
@@ -68,7 +62,7 @@ export function DebtForm({
     mode = 'create',
 }: DebtFormProps) {
     const { t } = useTranslation(['common', 'forms', 'pages'])
-    const { data: currencies, isLoading: currenciesLoading } = useCurrencies()
+    const { data: currencies } = useCurrencies()
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
 
     const form = useForm<DebtFormData>({
@@ -91,8 +85,10 @@ export function DebtForm({
     const origin = form.watch('origin') ?? 'new'
     const debtType = form.watch('debt_type')
     const accountId = form.watch('account_id')
+    const currencyId = form.watch('currency_id')
     const amount = Number(form.watch('amount')) || 0
     const selectedAccount = accounts?.find((account) => account.id === Number(accountId))
+    const selectedCurrency = currencies?.find((currency) => currency.id === Number(currencyId))
     const insufficientFunds = mode === 'create'
         && origin === 'new'
         && debtType === 'owed_to_me'
@@ -111,40 +107,34 @@ export function DebtForm({
         return () => subscription.unsubscribe()
     }, [form, onValuesChange])
 
+    const showAccount = mode === 'create' && origin === 'new'
+    const showCurrency = mode === 'edit' || origin === 'existing'
+    const amountCurrencySymbol = showAccount
+        ? selectedAccount?.currency?.symbol
+        : selectedCurrency?.symbol
+
     return (
         <FormWrapper>
         <Form {...form}>
             <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {mode === 'create' && (
-                    <FormField
-                        control={form.control}
-                        name="origin"
-                        render={({ field }) => (
-                            <FormItem>
-                                <Tabs
-                                    value={field.value}
-                                    onValueChange={(value) => field.onChange(value as DebtFormData['origin'])}
-                                    className="w-full"
-                                >
-                                    <TabsList className="w-full">
-                                        <TabsTrigger value="new" className="flex-1">
-                                            {t('forms:debts.originNew')}
-                                        </TabsTrigger>
-                                        <TabsTrigger value="existing" className="flex-1">
-                                            {t('forms:debts.originExisting')}
-                                        </TabsTrigger>
-                                    </TabsList>
-                                </Tabs>
-                                <FormDescription>
-                                    {field.value === 'existing'
-                                        ? t('forms:debts.originExistingHelp')
-                                        : t('forms:debts.originNewHelp')}
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
+                <div className="flex gap-2 p-1 bg-muted rounded-lg">
+                    {DEBT_TYPES.map(({ value, icon: Icon, color }) => (
+                        <button
+                            key={value}
+                            type="button"
+                            onClick={() => form.setValue('debt_type', value)}
+                            className={cn(
+                                'flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all',
+                                debtType === value
+                                    ? 'bg-background shadow-sm'
+                                    : 'hover:bg-background/50'
+                            )}
+                        >
+                            <Icon className={cn('size-4', debtType === value && color)} />
+                            {t(`pages:debts.types.${value}`)}
+                        </button>
+                    ))}
+                </div>
 
                 <FormField
                     control={form.control}
@@ -160,44 +150,72 @@ export function DebtForm({
                     )}
                 />
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                {mode === 'create' && (
+                    <FormDialogFooterStart>
+                        <FormField
+                            control={form.control}
+                            name="origin"
+                            render={({ field }) => (
+                                <label className="flex items-center gap-2 text-sm font-normal leading-none">
+                                    <Checkbox
+                                        checked={field.value === 'new'}
+                                        onCheckedChange={(checked) => {
+                                            field.onChange(checked === true ? 'new' : 'existing')
+                                        }}
+                                    />
+                                    <span>{t('forms:debts.createTransaction')}</span>
+                                    <FieldHelp>
+                                        {field.value === 'existing'
+                                            ? t('forms:debts.originExistingHelp')
+                                            : t('forms:debts.originNewHelp')}
+                                    </FieldHelp>
+                                </label>
+                            )}
+                        />
+                    </FormDialogFooterStart>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
-                        name="debt_type"
+                        name="amount"
                         render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('fields.type')}</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder={t('forms:selectDebtType')} />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {DEBT_TYPES.map((type) => {
-                                            const Icon = type.icon
-                                            return (
-                                                <SelectItem key={type.value} value={type.value}>
-                                                    <div className="flex items-center gap-2">
-                                                        <Icon className={`size-4 ${type.color}`} />
-                                                        <span>{t(`pages:debts.types.${type.value}`)}</span>
-                                                    </div>
-                                                </SelectItem>
-                                            )
-                                        })}
-                                    </SelectContent>
-                                </Select>
+                            <FormItem className="min-w-0">
+                                <FormLabel>
+                                    {t('fields.amount')}
+                                    {amountCurrencySymbol && (
+                                        <span className="text-muted-foreground ml-1">
+                                            ({amountCurrencySymbol})
+                                        </span>
+                                    )}
+                                </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        min={0}
+                                        placeholder="1000.00"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormDescription className={insufficientFunds ? 'text-destructive' : undefined}>
+                                    {insufficientFunds && selectedAccount
+                                        ? t('forms:debts.insufficientFunds', {
+                                            available: formatCurrency(selectedAccount.currentBalance, selectedAccount.currency),
+                                        })
+                                        : t('forms:debts.amountHelp')}
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
 
-                    {mode === 'create' && origin === 'new' && (
+                    {showAccount && (
                         <FormField
                             control={form.control}
                             name="account_id"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="min-w-0">
                                     <FormLabel>
                                         {debtType === 'i_owe'
                                             ? t('forms:debts.payment.accountReceiveInto')
@@ -213,70 +231,29 @@ export function DebtForm({
                         />
                     )}
 
-                    {(mode === 'edit' || origin === 'existing') && (
+                    {showCurrency && (
                         <FormField
                             control={form.control}
                             name="currency_id"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="min-w-0">
                                     <FormLabel>{t('fields.currency')}</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value?.toString()}
-                                        disabled={currenciesLoading}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder={t('forms:selectCurrency')} />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {currencies?.map((currency) => (
-                                                <SelectItem
-                                                    key={currency.id}
-                                                    value={currency.id.toString()}
-                                                >
-                                                    <span className="font-mono">{currency.code}</span>
-                                                    <span className="text-muted-foreground ml-2">
-                                                        {currency.symbol} · {currency.name}
-                                                    </span>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <CurrencySelect
+                                        value={field.value ? { source: 'existing', id: Number(field.value) } : null}
+                                        onChange={(next) => {
+                                            if (next.source === 'existing') {
+                                                field.onChange(next.id)
+                                            }
+                                        }}
+                                        allowCatalog={false}
+                                        placeholder={t('forms:selectCurrency')}
+                                    />
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                     )}
                 </div>
-
-                <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>{t('fields.amount')}</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="number"
-                                    step="0.01"
-                                    min={0}
-                                    placeholder="1000.00"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormDescription className={insufficientFunds ? 'text-destructive' : undefined}>
-                                {insufficientFunds && selectedAccount
-                                    ? t('forms:debts.insufficientFunds', {
-                                        available: formatCurrency(selectedAccount.currentBalance, selectedAccount.currency),
-                                    })
-                                    : t('forms:debts.amountHelp')}
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
 
                 <FormField
                     control={form.control}

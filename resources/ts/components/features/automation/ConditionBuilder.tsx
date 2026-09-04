@@ -8,11 +8,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Trash2 } from 'lucide-react'
 import type { Condition, ConditionGroup, ConditionOperator } from '@/types/automation'
 import { CONDITION_FIELDS } from '@/types/automation'
 import { useAccounts, useCategories, useTags } from '@/hooks'
+import { cn } from '@/lib/utils'
+
+const MATCH_OPTIONS = [
+    { value: 'all', labelKey: 'automation.matchAll' },
+    { value: 'any', labelKey: 'automation.matchAny' },
+] as const
 
 interface ConditionBuilderProps {
     value: ConditionGroup
@@ -103,7 +108,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                     value={condition.value as string}
                     onValueChange={(val) => updateCondition(index, { value: val })}
                 >
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-full min-w-0">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -123,7 +128,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                     value={condition.value ? String(condition.value) : undefined}
                     onValueChange={(val) => updateCondition(index, { value: Number(val) })}
                 >
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-full min-w-0">
                         <SelectValue placeholder={t('selectAccount')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -143,7 +148,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                     value={condition.value ? String(condition.value) : undefined}
                     onValueChange={(val) => updateCondition(index, { value: Number(val) })}
                 >
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-full min-w-0">
                         <SelectValue placeholder={t('selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -159,7 +164,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
 
         if (field === 'tags') {
             return (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                     {tags?.map(tag => (
                         <Button
                             key={tag.id}
@@ -188,14 +193,14 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
                     <div className="flex items-center gap-2">
                         <Input
                             type="number"
-                            className="w-24"
+                            className="min-w-0 flex-1"
                             value={min}
                             onChange={(e) => updateCondition(index, { value: [Number(e.target.value), max] })}
                         />
                         <span className="text-muted-foreground">{t('automation.and')}</span>
                         <Input
                             type="number"
-                            className="w-24"
+                            className="min-w-0 flex-1"
                             value={max}
                             onChange={(e) => updateCondition(index, { value: [min, Number(e.target.value)] })}
                         />
@@ -205,7 +210,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
             return (
                 <Input
                     type="number"
-                    className="w-32"
+                    className="w-full min-w-0"
                     value={condition.value as number}
                     onChange={(e) => updateCondition(index, { value: Number(e.target.value) })}
                 />
@@ -214,7 +219,7 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
 
         return (
             <Input
-                className="w-48"
+                className="w-full min-w-0"
                 value={condition.value as string}
                 onChange={(e) => updateCondition(index, { value: e.target.value })}
                 placeholder={t('automation.enterValue')}
@@ -224,70 +229,85 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
 
     return (
         <div className="space-y-4">
-            <Tabs
-                value={value.match}
-                onValueChange={(match) => onChange({ ...value, match: match as 'all' | 'any' })}
-            >
-                <TabsList>
-                    <TabsTrigger value="all">{t('automation.matchAll')}</TabsTrigger>
-                    <TabsTrigger value="any">{t('automation.matchAny')}</TabsTrigger>
-                </TabsList>
-            </Tabs>
+            <div className="flex gap-2 p-1 bg-muted rounded-lg">
+                {MATCH_OPTIONS.map(({ value: matchValue, labelKey }) => (
+                    <button
+                        key={matchValue}
+                        type="button"
+                        onClick={() => onChange({ ...value, match: matchValue })}
+                        className={cn(
+                            'flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all',
+                            value.match === matchValue
+                                ? 'bg-background shadow-sm'
+                                : 'hover:bg-background/50'
+                        )}
+                    >
+                        {t(labelKey)}
+                    </button>
+                ))}
+            </div>
 
             <div className="space-y-2">
-                {value.conditions.map((condition, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-muted/50 rounded">
-                        <Select
-                            value={condition.field}
-                            onValueChange={(field) => {
-                                const operators = getOperatorsForField(field)
-                                updateCondition(index, {
-                                    field,
-                                    op: operators[0] || 'equals',
-                                    value: null,
-                                })
-                            }}
-                        >
-                            <SelectTrigger className="w-36">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {CONDITION_FIELDS.map(field => (
-                                    <SelectItem key={field.value} value={field.value}>
-                                        {t(`automation.fields.${field.value}`)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                {value.conditions.map((condition, index) => {
+                    const valueInput = renderValueInput(condition, index)
 
-                        <Select
-                            value={condition.op}
-                            onValueChange={(op) => updateCondition(index, { op: op as ConditionOperator })}
-                        >
-                            <SelectTrigger className="w-40">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {getOperatorsForField(condition.field).map(op => (
-                                    <SelectItem key={op} value={op}>
-                                        {t(`automation.operators.${op}`)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    return (
+                    <div key={index} className="space-y-2 p-2 bg-muted/50 rounded">
+                        <div className="flex items-center gap-2">
+                            <Select
+                                value={condition.field}
+                                onValueChange={(field) => {
+                                    const operators = getOperatorsForField(field)
+                                    updateCondition(index, {
+                                        field,
+                                        op: operators[0] || 'equals',
+                                        value: null,
+                                    })
+                                }}
+                            >
+                                <SelectTrigger className="w-full min-w-0 flex-1">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {CONDITION_FIELDS.map(field => (
+                                        <SelectItem key={field.value} value={field.value}>
+                                            {t(`automation.fields.${field.value}`)}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
 
-                        {renderValueInput(condition, index)}
+                            <Select
+                                value={condition.op}
+                                onValueChange={(op) => updateCondition(index, { op: op as ConditionOperator })}
+                            >
+                                <SelectTrigger className="w-full min-w-0 flex-1">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {getOperatorsForField(condition.field).map(op => (
+                                        <SelectItem key={op} value={op}>
+                                            {t(`automation.operators.${op}`)}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
 
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeCondition(index)}
-                        >
-                            <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
-                        </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="shrink-0"
+                                onClick={() => removeCondition(index)}
+                            >
+                                <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
+                            </Button>
+                        </div>
+
+                        {valueInput}
                     </div>
-                ))}
+                    )
+                })}
             </div>
 
             <Button type="button" variant="outline" size="sm" onClick={addCondition}>

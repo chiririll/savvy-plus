@@ -16,10 +16,11 @@ import i18n from '@/lib/i18n'
 interface ColumnOptions {
     onDelete: (id: number) => void
     onToggle: (id: number) => void
+    onEdit: (rule: AutomationRule) => void
     isReadOnly?: boolean
 }
 
-export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: ColumnOptions): ColumnDef<AutomationRule>[] {
+export function createAutomationColumns({ onDelete, onToggle, onEdit, isReadOnly }: ColumnOptions): ColumnDef<AutomationRule>[] {
     return [
         {
             accessorKey: 'priority',
@@ -96,11 +97,9 @@ export function createAutomationColumns({ onDelete, onToggle, isReadOnly }: Colu
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                            <Link to={`/automation/${row.original.id}/edit`}>
-                                <Pencil className="size-4 mr-2" />
-                                {i18n.t('actions.edit')}
-                            </Link>
+                        <DropdownMenuItem onClick={() => onEdit(row.original)}>
+                            <Pencil className="size-4 mr-2" />
+                            {i18n.t('actions.edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Link to={`/automation/${row.original.id}/logs`}>

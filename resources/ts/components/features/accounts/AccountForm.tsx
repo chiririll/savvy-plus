@@ -4,7 +4,6 @@ import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
 import {
     Form,
     FormField,
@@ -31,6 +30,7 @@ import { AccountFormData } from '@/types'
 import { REGULAR_ACCOUNT_TYPE_CONFIG, REGULAR_ACCOUNT_TYPES } from '@/constants'
 import { cn } from '@/lib/utils'
 import { CurrencySelect, type CurrencySelectValue } from '@/components/shared/CurrencySelect'
+import { FormActiveField } from '@/components/shared/FormActiveField'
 import { FormWrapper } from '@/components/shared/FormWrapper'
 
 interface AccountFormProps {
@@ -198,25 +198,9 @@ export function AccountForm({
                     )}
                 />
 
-                <FormField
+                <FormActiveField
                     control={form.control}
-                    name="is_active"
-                    render={({ field }) => (
-                        <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                                <FormLabel className="text-base">{t('fields.active')}</FormLabel>
-                                <FormDescription>
-                                    {t('forms:accounts.activeHelp')}
-                                </FormDescription>
-                            </div>
-                            <FormControl>
-                                <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                />
-                            </FormControl>
-                        </FormItem>
-                    )}
+                    help={t('forms:accounts.activeHelp')}
                 />
 
                 {!hideSubmit && (

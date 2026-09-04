@@ -19,12 +19,12 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import i18n from '@/lib/i18n'
 
 export function createTagColumns(
     onDelete: (id: number) => void,
-    isReadOnly?: boolean
+    isReadOnly?: boolean,
+    onEdit?: (tag: Tag) => void
 ): ColumnDef<Tag>[] {
     return [
         {
@@ -55,12 +55,12 @@ export function createTagColumns(
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                                <Link to={`/tags/${tag.id}/edit`}>
-                                    <Pencil className="mr-2 size-4" />
-                                    {i18n.t('actions.edit')}
-                                </Link>
+                            {onEdit && (
+                            <DropdownMenuItem onClick={() => onEdit(tag)}>
+                                <Pencil className="mr-2 size-4" />
+                                {i18n.t('actions.edit')}
                             </DropdownMenuItem>
+                            )}
                             {!isReadOnly && (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>

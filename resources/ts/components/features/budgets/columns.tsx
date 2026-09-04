@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
 import { Pencil, Trash2, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -26,10 +25,17 @@ import { Budget } from '@/types'
 import { formatCurrency } from '@/lib/utils'
 import i18n from '@/lib/i18n'
 
-export const createBudgetColumns = (
-    onDelete: (id: number) => void,
+interface ColumnOptions {
+    onDelete: (id: number) => void
+    onEdit: (budget: Budget) => void
     isReadOnly?: boolean
-): ColumnDef<Budget>[] => [
+}
+
+export const createBudgetColumns = ({
+    onDelete,
+    onEdit,
+    isReadOnly,
+}: ColumnOptions): ColumnDef<Budget>[] => [
     {
         accessorKey: 'name',
         header: () => i18n.t('pages:budgets.columns.budget'),
@@ -114,11 +120,9 @@ export const createBudgetColumns = (
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                        <Link to={`/budgets/${row.original.id}/edit`}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            {i18n.t('actions.edit')}
-                        </Link>
+                    <DropdownMenuItem onClick={() => onEdit(row.original)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        {i18n.t('actions.edit')}
                     </DropdownMenuItem>
                     {!isReadOnly && (
                     <>

@@ -23,6 +23,9 @@ return [
         'not_pending' => 'Only pending transactions can be confirmed.',
         'cannot_skip' => 'Only a pending scheduled transaction can be skipped.',
         'cannot_delete_recurring' => 'Scheduled occurrences cannot be deleted. Skip or confirm them instead.',
+        'cannot_edit_recurring' => 'Scheduled occurrences cannot be edited. Change the recurring template instead.',
+        'cannot_duplicate_recurring' => 'Scheduled occurrences cannot be duplicated.',
+        'cannot_duplicate' => 'This transaction cannot be duplicated.',
         'cannot_edit_skipped' => 'Skipped transactions cannot be edited.',
     ],
 

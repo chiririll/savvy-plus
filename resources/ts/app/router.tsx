@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, createBrowserRouter, useParams } from 'react-router-dom'
+import { createBrowserRouter, Navigate, useParams } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
@@ -14,25 +14,25 @@ const SetPasswordPage = lazy(() => import('@/pages/auth/set-password'))
 // Protected pages
 const DashboardPage = lazy(() => import('@/pages/dashboard'))
 const TransactionsPage = lazy(() => import('@/pages/transactions'))
-const TransactionCreatePage = lazy(() => import('@/pages/transactions/create'))
-const TransactionEditPage = lazy(() => import('@/pages/transactions/[id]/edit'))
 const AccountsPage = lazy(() => import('@/pages/accounts'))
 const CategoriesPage = lazy(() => import('@/pages/categories'))
-const CategoryCreatePage = lazy(() => import('@/pages/categories/create'))
-const CategoryEditPage = lazy(() => import('@/pages/categories/[id]/edit'))
 const CurrenciesPage = lazy(() => import('@/pages/currencies'))
 const BudgetsPage = lazy(() => import('@/pages/budgets'))
-const BudgetCreatePage = lazy(() => import('@/pages/budgets/create'))
-const BudgetEditPage = lazy(() => import('@/pages/budgets/[id]/edit'))
 const TagsPage = lazy(() => import('@/pages/tags'))
-const TagCreatePage = lazy(() => import('@/pages/tags/create'))
-const TagEditPage = lazy(() => import('@/pages/tags/[id]/edit'))
 const DebtsPage = lazy(() => import('@/pages/debts'))
 const RecurringPage = lazy(() => import('@/pages/recurring'))
 const AutomationPage = lazy(() => import('@/pages/automation'))
-const AutomationCreatePage = lazy(() => import('@/pages/automation/create'))
-const AutomationEditPage = lazy(() => import('@/pages/automation/[id]/edit'))
 const AutomationLogsPage = lazy(() => import('@/pages/automation/[id]/logs'))
+
+function AutomationCreateRedirect() {
+    return <Navigate to="/automation?create=1" replace />
+}
+
+function AutomationEditRedirect() {
+    const { id } = useParams<{ id: string }>()
+    return <Navigate to={id ? `/automation?edit=${id}` : '/automation'} replace />
+}
+
 const UsersPage = lazy(() => import('@/pages/users'))
 const ReportsPage = lazy(() => import('@/pages/reports'))
 const MonitoringPage = lazy(() => import('@/pages/settings/monitoring'))
@@ -44,21 +44,6 @@ const ProvidersPage = lazy(() => import('@/pages/settings/providers'))
 const ProviderCreatePage = lazy(() => import('@/pages/settings/providers/create'))
 const ProviderEditPage = lazy(() => import('@/pages/settings/providers/[id]/edit'))
 const NotFoundPage = lazy(() => import('@/pages/not-found'))
-
-function RecurringEditRedirect() {
-    const { id } = useParams()
-    return <Navigate to={id ? `/recurring?edit=${id}` : '/recurring'} replace />
-}
-
-function AccountEditRedirect() {
-    const { id } = useParams()
-    return <Navigate to={id ? `/accounts?edit=${id}` : '/accounts'} replace />
-}
-
-function CurrencyEditRedirect() {
-    const { id } = useParams()
-    return <Navigate to={id ? `/currencies?edit=${id}` : '/currencies'} replace />
-}
 
 const withSuspense = (Component: React.LazyExoticComponent<() => React.JSX.Element>) => (
     <ErrorBoundary>
@@ -105,30 +90,16 @@ export const router = createBrowserRouter([
                 children: [
                     { index: true, element: withSuspense(DashboardPage) },
                     { path: 'transactions', element: withSuspense(TransactionsPage) },
-                    { path: 'transactions/create', element: withSuspense(TransactionCreatePage) },
-                    { path: 'transactions/:id/edit', element: withSuspense(TransactionEditPage) },
                     { path: 'accounts', element: withSuspense(AccountsPage) },
-                    { path: 'accounts/create', element: <Navigate to="/accounts?create=1" replace /> },
-                    { path: 'accounts/:id/edit', element: <AccountEditRedirect /> },
                     { path: 'categories', element: withSuspense(CategoriesPage) },
-                    { path: 'categories/create', element: withSuspense(CategoryCreatePage) },
-                    { path: 'categories/:id/edit', element: withSuspense(CategoryEditPage) },
                     { path: 'currencies', element: withSuspense(CurrenciesPage) },
-                    { path: 'currencies/create', element: <Navigate to="/currencies?create=1" replace /> },
-                    { path: 'currencies/:id/edit', element: <CurrencyEditRedirect /> },
                     { path: 'budgets', element: withSuspense(BudgetsPage) },
-                    { path: 'budgets/create', element: withSuspense(BudgetCreatePage) },
-                    { path: 'budgets/:id/edit', element: withSuspense(BudgetEditPage) },
                     { path: 'tags', element: withSuspense(TagsPage) },
-                    { path: 'tags/create', element: withSuspense(TagCreatePage) },
-                    { path: 'tags/:id/edit', element: withSuspense(TagEditPage) },
                     { path: 'debts', element: withSuspense(DebtsPage) },
                     { path: 'recurring', element: withSuspense(RecurringPage) },
-                    { path: 'recurring/create', element: <Navigate to="/recurring?create=1" replace /> },
-                    { path: 'recurring/:id/edit', element: <RecurringEditRedirect /> },
                     { path: 'automation', element: withSuspense(AutomationPage) },
-                    { path: 'automation/create', element: withSuspense(AutomationCreatePage) },
-                    { path: 'automation/:id/edit', element: withSuspense(AutomationEditPage) },
+                    { path: 'automation/create', element: <AutomationCreateRedirect /> },
+                    { path: 'automation/:id/edit', element: <AutomationEditRedirect /> },
                     { path: 'automation/:id/logs', element: withSuspense(AutomationLogsPage) },
                     { path: 'users', element: withSuspense(UsersPage) },
                     { path: 'reports', element: withSuspense(ReportsPage) },
