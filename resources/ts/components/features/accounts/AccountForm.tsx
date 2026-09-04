@@ -23,10 +23,10 @@ import {
 import {
     accountSchema,
     AccountFormValues,
+    AccountFormData,
     decodeAccountCurrency,
     encodeAccountCurrency,
 } from '@/schemas'
-import { AccountFormData } from '@/types'
 import { REGULAR_ACCOUNT_TYPE_CONFIG, REGULAR_ACCOUNT_TYPES } from '@/constants'
 import { cn } from '@/lib/utils'
 import { CurrencySelect, type CurrencySelectValue } from '@/components/shared/CurrencySelect'

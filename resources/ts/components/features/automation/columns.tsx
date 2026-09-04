@@ -1,15 +1,10 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Pencil, Trash2, History } from 'lucide-react'
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { History } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { RowActions } from '@/components/shared'
 import type { AutomationRule } from '@/types/automation'
 import i18n from '@/lib/i18n'
 
@@ -90,34 +85,20 @@ export function createAutomationColumns({ onDelete, onToggle, onEdit, isReadOnly
         {
             id: 'actions',
             cell: ({ row }) => (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="size-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onEdit(row.original)}>
-                            <Pencil className="size-4 mr-2" />
-                            {i18n.t('actions.edit')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                            <Link to={`/automation/${row.original.id}/logs`}>
-                                <History className="size-4 mr-2" />
-                                {i18n.t('actions.viewLogs')}
-                            </Link>
-                        </DropdownMenuItem>
-                        {!isReadOnly && (
-                        <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => onDelete(row.original.id)}
-                        >
-                            <Trash2 className="size-4 mr-2" />
-                            {i18n.t('actions.delete')}
-                        </DropdownMenuItem>
-                        )}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <RowActions
+                    onEdit={() => onEdit(row.original)}
+                    onDelete={() => onDelete(row.original.id)}
+                    deleteTitle={i18n.t('pages:automation.deleteTitle')}
+                    deleteDescription={i18n.t('pages:automation.deleteDescription')}
+                    isReadOnly={isReadOnly}
+                >
+                    <DropdownMenuItem asChild>
+                        <Link to={`/automation/${row.original.id}/logs`}>
+                            <History className="size-4 mr-2" />
+                            {i18n.t('actions.viewLogs')}
+                        </Link>
+                    </DropdownMenuItem>
+                </RowActions>
             ),
         },
     ]

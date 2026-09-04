@@ -11,7 +11,7 @@ import {
 import { Plus, Trash2 } from 'lucide-react'
 import type { Action, ActionType } from '@/types/automation'
 import { ACTION_TYPES } from '@/types/automation'
-import { useAccounts, useCategories, useTags } from '@/hooks'
+import { AccountSelect, CategorySelect, TagSelect } from '@/components/shared'
 
 interface ActionBuilderProps {
     value: Action[]
@@ -20,9 +20,6 @@ interface ActionBuilderProps {
 
 export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
     const { t } = useTranslation('forms')
-    const { data: accounts } = useAccounts()
-    const { data: categories } = useCategories()
-    const { data: tags } = useTags()
 
     const addAction = () => {
         onChange([
@@ -46,45 +43,20 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
         switch (action.type) {
             case 'set_category':
                 return (
-                    <Select
-                        value={action.category_id ? String(action.category_id) : undefined}
-                        onValueChange={(val) => updateAction(index, { category_id: Number(val) })}
-                    >
-                        <SelectTrigger className="w-full min-w-0">
-                            <SelectValue placeholder={t('selectCategory')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {categories?.map(category => (
-                                <SelectItem key={category.id} value={String(category.id)}>
-                                    {category.icon} {category.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <CategorySelect
+                        plain
+                        value={action.category_id as number | undefined}
+                        onChange={(categoryId) => updateAction(index, { category_id: categoryId })}
+                    />
                 )
 
             case 'add_tags':
             case 'remove_tags':
                 return (
-                    <div className="flex flex-wrap gap-1.5">
-                        {tags?.map(tag => (
-                            <Button
-                                key={tag.id}
-                                type="button"
-                                variant={(action.tag_ids as number[])?.includes(tag.id) ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => {
-                                    const current = (action.tag_ids as number[]) || []
-                                    const newValue = current.includes(tag.id)
-                                        ? current.filter(v => v !== tag.id)
-                                        : [...current, tag.id]
-                                    updateAction(index, { tag_ids: newValue })
-                                }}
-                            >
-                                #{tag.name}
-                            </Button>
-                        ))}
-                    </div>
+                    <TagSelect
+                        value={(action.tag_ids as number[]) || []}
+                        onChange={(tagIds) => updateAction(index, { tag_ids: tagIds })}
+                    />
                 )
 
             case 'set_description':
@@ -100,21 +72,14 @@ export function ActionBuilder({ value, onChange }: ActionBuilderProps) {
             case 'create_transfer':
                 return (
                     <div className="grid grid-cols-2 gap-2">
-                        <Select
-                            value={action.to_account_id ? String(action.to_account_id) : undefined}
-                            onValueChange={(val) => updateAction(index, { to_account_id: Number(val) })}
-                        >
-                            <SelectTrigger className="w-full min-w-0">
-                                <SelectValue placeholder={t('automation.toAccount')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {accounts?.map(account => (
-                                    <SelectItem key={account.id} value={String(account.id)}>
-                                        {account.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <AccountSelect
+                            plain
+                            excludeDebts={false}
+                            activeOnly={false}
+                            value={action.to_account_id as number | undefined}
+                            onChange={(accountId) => updateAction(index, { to_account_id: accountId })}
+                            placeholder={t('automation.toAccount')}
+                        />
                         <Input
                             className="min-w-0"
                             value={String(action.amount_formula ?? '')}

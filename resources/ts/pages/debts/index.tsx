@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router-dom'
 import { Plus, HandCoins, Banknote, TrendingDown, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -15,20 +14,19 @@ import {
     useReopenDebt,
     useCreateDebt,
     useUpdateDebt,
+    useResourceFormDialog,
 } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
-import { Debt, DebtFormData, DebtPaymentFormData } from '@/types'
+import { Debt } from '@/types'
+import { DebtFormData, DebtPaymentFormData } from '@/schemas'
 import { formatCurrency } from '@/lib/utils'
 
 export default function DebtsPage() {
     const { t } = useTranslation('pages')
-    const [searchParams, setSearchParams] = useSearchParams()
     const [includeCompleted, setIncludeCompleted] = useState(false)
     const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
     const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null)
     const [paymentMode, setPaymentMode] = useState<'payment' | 'collection'>('payment')
-    const [formOpen, setFormOpen] = useState(false)
-    const [formDebt, setFormDebt] = useState<Debt | null>(null)
 
     const { data, isLoading } = useDebtsWithSummary({ include_completed: includeCompleted })
     const deleteDebt = useDeleteDebt()
@@ -41,56 +39,12 @@ export default function DebtsPage() {
     const debts = data?.data ?? []
     const summary = data?.summary
     const isReadOnly = useReadOnly()
-
-    useEffect(() => {
-        if (searchParams.get('create') === '1') {
-            setFormDebt(null)
-            setFormOpen(true)
-            setSearchParams((prev) => {
-                prev.delete('create')
-                return prev
-            }, { replace: true })
-        }
-    }, [searchParams, setSearchParams])
-
-    useEffect(() => {
-        const editId = searchParams.get('edit')
-        if (!editId) return
-
-        const found = debts.find((debt) => String(debt.id) === editId)
-        if (!found && isLoading) return
-
-        if (found) {
-            setFormDebt(found)
-            setFormOpen(true)
-        }
-
-        setSearchParams((prev) => {
-            prev.delete('edit')
-            return prev
-        }, { replace: true })
-    }, [searchParams, debts, isLoading, setSearchParams])
-
-    const handleCreate = () => {
-        setFormDebt(null)
-        setFormOpen(true)
-    }
-
-    const handleEdit = (debt: Debt) => {
-        setFormDebt(debt)
-        setFormOpen(true)
-    }
-
-    const handleFormSubmit = (formData: DebtFormData) => {
-        if (formDebt) {
-            updateDebt.mutate(
-                { id: formDebt.id, data: formData },
-                { onSuccess: () => setFormOpen(false) }
-            )
-        } else {
-            createDebt.mutate(formData, { onSuccess: () => setFormOpen(false) })
-        }
-    }
+    const form = useResourceFormDialog<Debt, DebtFormData>({
+        items: debts,
+        isLoading,
+        create: createDebt,
+        update: updateDebt,
+    })
 
     const handlePayment = (debt: Debt) => {
         setSelectedDebt(debt)
@@ -123,7 +77,7 @@ export default function DebtsPage() {
         onPayment: handlePayment,
         onCollect: handleCollect,
         onReopen: (id) => reopenDebt.mutate(id),
-        onEdit: handleEdit,
+        onEdit: form.openEdit,
         isReadOnly,
     })
 
@@ -135,7 +89,7 @@ export default function DebtsPage() {
                     <p className="text-muted-foreground">{t('debts.description')}</p>
                 </div>
                 {!isReadOnly && (
-                    <Button onClick={handleCreate}>
+                    <Button onClick={form.openCreate}>
                         <Plus className="mr-2 size-4" />
                         {t('debts.create')}
                     </Button>
@@ -207,11 +161,11 @@ export default function DebtsPage() {
             />
 
             <DebtFormDialog
-                debt={formDebt}
-                open={formOpen}
-                onOpenChange={setFormOpen}
-                onSubmit={handleFormSubmit}
-                isSubmitting={createDebt.isPending || updateDebt.isPending}
+                debt={form.entity}
+                open={form.open}
+                onOpenChange={form.setOpen}
+                onSubmit={form.submit}
+                isSubmitting={form.isSubmitting}
             />
 
             <DebtPaymentDialog

@@ -60,20 +60,6 @@ export interface SsoPresetCatalogEntry {
     default_claim_mappings: Record<string, string | null>
 }
 
-export interface IdentityProviderFormData {
-    name: string
-    slug: string
-    preset: string
-    enabled: boolean
-    sort_order?: number
-    fields: Record<string, string>
-    role_mapping?: RoleMappingRule[]
-    default_role?: UserRole
-    allow_jit?: boolean
-    sync_role_on_login?: boolean
-    link_by_email?: boolean
-}
-
 export type SsoExchangeResponse =
     | { user: User; expires_at: string; refresh_at: string | null }
     | { requires_2fa: true; two_factor_token: string }

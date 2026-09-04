@@ -11,13 +11,6 @@ export interface Category extends BaseEntity {
     totalAmount?: number
 }
 
-export interface CategoryFormData {
-    name: string
-    type: CategoryType
-    icon: string
-    color: string
-}
-
 export interface CategorySummaryResponse {
     data: Category[]
     total: number

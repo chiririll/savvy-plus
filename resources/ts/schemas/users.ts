@@ -28,3 +28,9 @@ export const updateUserSchema = z.object({
 
 export type CreateUserFormData = z.infer<typeof createUserSchema>
 export type UpdateUserFormData = z.infer<typeof updateUserSchema>
+export type UserFormData = {
+    name: string
+    email: string
+    password?: string
+    role?: z.infer<typeof roleSchema>
+}

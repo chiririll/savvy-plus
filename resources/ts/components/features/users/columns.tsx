@@ -1,26 +1,9 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { KeyRound, Pencil, Trash2, MoreHorizontal } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { KeyRound } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { RowActions } from '@/components/shared'
 import { User } from '@/types/users'
 import { getUserAvatarUrl, getUserInitials } from '@/lib/avatar'
 import i18n from '@/lib/i18n'
@@ -75,59 +58,22 @@ export const createUserColumns = (
             const canReset = !isCurrentUser && !row.original.isSsoOnly && !isReadOnly
 
             return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="size-8">
-                            <MoreHorizontal className="size-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onEdit(row.original)}>
-                            <Pencil className="mr-2 size-4" />
-                            {i18n.t('actions.edit')}
+                <RowActions
+                    onEdit={() => onEdit(row.original)}
+                    onDelete={() => onDelete(row.original.id)}
+                    deleteTitle={i18n.t('pages:users.deleteTitle')}
+                    deleteDescription={i18n.t('pages:users.deleteDescription', { name: row.original.name })}
+                    deleteDisabled={isCurrentUser}
+                    deleteDisabledLabel={i18n.t('actions.cannotDeleteSelf')}
+                    isReadOnly={isReadOnly}
+                >
+                    {canReset && (
+                        <DropdownMenuItem onClick={() => onResetPassword(row.original)}>
+                            <KeyRound className="mr-2 size-4" />
+                            {i18n.t('pages:users.resetPassword')}
                         </DropdownMenuItem>
-                        {canReset && (
-                            <DropdownMenuItem onClick={() => onResetPassword(row.original)}>
-                                <KeyRound className="mr-2 size-4" />
-                                {i18n.t('pages:users.resetPassword')}
-                            </DropdownMenuItem>
-                        )}
-                        {!isReadOnly && (
-                        <>
-                        <DropdownMenuSeparator />
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <DropdownMenuItem
-                                    onSelect={(e) => e.preventDefault()}
-                                    className="text-destructive focus:text-destructive"
-                                    disabled={isCurrentUser}
-                                >
-                                    <Trash2 className="mr-2 size-4" />
-                                    {isCurrentUser ? i18n.t('actions.cannotDeleteSelf') : i18n.t('actions.delete')}
-                                </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>{i18n.t('pages:users.deleteTitle')}</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        {i18n.t('pages:users.deleteDescription', { name: row.original.name })}
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
-                                    <AlertDialogAction
-                                        onClick={() => onDelete(row.original.id)}
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    >
-                                        {i18n.t('actions.delete')}
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                        </>
-                        )}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                    )}
+                </RowActions>
             )
         },
     },

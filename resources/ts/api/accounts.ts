@@ -1,7 +1,8 @@
 import { api, apiClient } from './client'
-import { Account, AccountFormData } from '@/types'
-
-const ENDPOINT = '/accounts'
+import { createCrudApi } from './crud'
+import { toQueryString } from '@/lib/query-string'
+import { Account } from '@/types'
+import { AccountFormData } from '@/schemas'
 
 export interface AccountsSummary {
     total_balance: number
@@ -36,51 +37,33 @@ export interface BalanceComparisonResponse {
     decimals: number
 }
 
+const crud = createCrudApi<Account, AccountFormData>('/accounts')
+
 export const accountsApi = {
-    getAll: (params?: { active?: boolean; exclude_debts?: boolean }) => {
-        const searchParams = new URLSearchParams()
-        if (params?.active) searchParams.set('active', 'true')
-        if (params?.exclude_debts) searchParams.set('exclude_debts', 'true')
-        const query = searchParams.toString()
-        return api.get<Account[]>(`${ENDPOINT}${query ? `?${query}` : ''}`)
-    },
+    ...crud,
+
+    getAll: (params?: { active?: boolean; exclude_debts?: boolean }) =>
+        crud.getAll(params),
 
     getAllWithSummary: async (params?: { active?: boolean; exclude_debts?: boolean }): Promise<AccountsResponse> => {
-        const searchParams = new URLSearchParams()
-        searchParams.set('with_summary', 'true')
-        if (params?.active) searchParams.set('active', 'true')
-        if (params?.exclude_debts) searchParams.set('exclude_debts', 'true')
-        const query = searchParams.toString()
-        const response = await apiClient.get(`${ENDPOINT}?${query}`)
+        const response = await apiClient.get(`/accounts${toQueryString({
+            with_summary: true,
+            active: params?.active,
+            exclude_debts: params?.exclude_debts,
+        })}`)
         return response.data
     },
 
-    getById: (id: number | string) =>
-        api.get<Account>(`${ENDPOINT}/${id}`),
-
-    create: (data: AccountFormData) =>
-        api.post<Account, AccountFormData>(ENDPOINT, data),
-
-    update: (id: number | string, data: Partial<AccountFormData>) =>
-        api.patch<Account, Partial<AccountFormData>>(`${ENDPOINT}/${id}`, data),
-
-    delete: (id: number | string) =>
-        api.delete<void>(`${ENDPOINT}/${id}`),
-
     reorder: (ids: number[]) =>
-        api.post<{ success: boolean }, { ids: number[] }>(`${ENDPOINT}/reorder`, { ids }),
+        api.post<{ success: boolean }, { ids: number[] }>('/accounts/reorder', { ids }),
 
     getBalanceHistory: async (params?: { start_date?: string; end_date?: string }): Promise<BalanceHistoryResponse> => {
-        const searchParams = new URLSearchParams()
-        if (params?.start_date) searchParams.set('start_date', params.start_date)
-        if (params?.end_date) searchParams.set('end_date', params.end_date)
-        const query = searchParams.toString()
-        const response = await apiClient.get(`${ENDPOINT}-balance-history${query ? `?${query}` : ''}`)
+        const response = await apiClient.get(`/accounts-balance-history${toQueryString(params)}`)
         return response.data
     },
 
     getBalanceComparison: async (): Promise<BalanceComparisonResponse> => {
-        const response = await apiClient.get(`${ENDPOINT}-balance-comparison`)
+        const response = await apiClient.get('/accounts-balance-comparison')
         return response.data
     },
 }

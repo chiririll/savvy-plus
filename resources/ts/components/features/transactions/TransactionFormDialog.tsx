@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FormDialog } from '@/components/shared'
-import { useCreateFormDraft } from '@/hooks'
+import { EntityFormDialog } from '@/components/shared'
 import { TransactionFormValues } from '@/schemas/transactions'
 import { Transaction } from '@/types'
 import { TransactionForm } from './TransactionForm'
@@ -47,35 +46,28 @@ export function TransactionFormDialog({
 }: TransactionFormDialogProps) {
     const { t } = useTranslation('pages')
     const [preview, setPreview] = useState<ReactNode>(null)
-    const isEdit = !!transaction
-    const { draft, onValuesChange, formKey } = useCreateFormDraft<TransactionFormValues>({
-        enabled: !isEdit,
-        open,
-        isSubmitting,
-        entityKey: transaction?.id,
-    })
 
     return (
-        <FormDialog
+        <EntityFormDialog
+            entity={transaction}
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? t('transactions.editTitle') : t('transactions.createTitle')}
-            formId={FORM_ID}
+            onSubmit={onSubmit}
             isSubmitting={isSubmitting}
-            isEdit={isEdit}
+            formId={FORM_ID}
+            title={transaction ? t('transactions.editTitle') : t('transactions.createTitle')}
             className="sm:max-w-xl"
             headerExtra={preview}
+            fallbackValues={defaultValues}
+            toFormValues={toTransactionFormValues}
         >
-            <TransactionForm
-                key={formKey}
-                defaultValues={transaction ? toTransactionFormValues(transaction) : (draft ?? defaultValues)}
-                onSubmit={onSubmit}
-                onValuesChange={onValuesChange}
-                onPreviewChange={setPreview}
-                isSubmitting={isSubmitting}
-                formId={FORM_ID}
-                hideSubmit
-            />
-        </FormDialog>
+            {({ formKey, formProps }) => (
+                <TransactionForm
+                    key={formKey}
+                    {...formProps}
+                    onPreviewChange={setPreview}
+                />
+            )}
+        </EntityFormDialog>
     )
 }

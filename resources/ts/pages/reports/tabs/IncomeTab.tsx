@@ -1,125 +1,15 @@
-import { useTranslation } from 'react-i18next'
-import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn, formatCurrency } from '@/lib/utils'
-import { TrendingUp, TrendingDown, Calendar, CalendarDays } from 'lucide-react'
+import { TransactionTypeSummary } from '../components/TransactionTypeSummary'
 import { IncomeStructureChart } from '../components/IncomeStructureChart'
 import { IncomeDynamicsChart } from '../components/IncomeDynamicsChart'
 import { TopIncome } from '../components/TopIncome'
-import { useTransactionReportSummary } from '@/hooks'
 import type { ReportFilters } from '../types'
 
-interface IncomeTabProps {
-    filters: ReportFilters
-}
-
-export function IncomeTab({ filters }: IncomeTabProps) {
-    const { t } = useTranslation('pages')
-    const { data, isLoading } = useTransactionReportSummary(filters, 'income')
-
-    const percentChange = data?.previous
-        ? ((data.total - data.previous) / data.previous) * 100
-        : 0
-    const absoluteChange = data ? data.total - (data.previous || 0) : 0
-    const isIncrease = percentChange > 0
-
+export function IncomeTab({ filters }: { filters: ReportFilters }) {
     return (
         <div className="space-y-6">
-            {/* Block 1 — Total Income */}
-            <Card>
-                <CardContent className="pt-6">
-                    {isLoading ? (
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-24" />
-                                <Skeleton className="h-12 w-40" />
-                                <Skeleton className="h-4 w-48" />
-                            </div>
-                            <div className="flex gap-6">
-                                <Skeleton className="h-20 w-36" />
-                                <Skeleton className="h-20 w-36" />
-                            </div>
-                        </div>
-                    ) : data ? (
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                            {/* Main metric */}
-                            <div className="space-y-2">
-                                <p className="text-sm text-muted-foreground font-medium">
-                                    {t('reports.metrics.totalIncome')}
-                                </p>
-                                <p className="text-5xl font-bold text-green-600 tracking-tight">
-                                    {formatCurrency(data.total, data.currency)}
-                                </p>
-
-                                {/* Comparison */}
-                                {filters.compareWith !== 'none' && data.previous !== null && (
-                                    <div className="flex items-center gap-3 pt-1">
-                                        <span className={cn(
-                                            'flex items-center gap-1 text-sm font-medium',
-                                            isIncrease ? 'text-green-600' : 'text-red-600'
-                                        )}>
-                                            {isIncrease ? (
-                                                <TrendingUp className="size-4" />
-                                            ) : (
-                                                <TrendingDown className="size-4" />
-                                            )}
-                                            {Math.abs(percentChange).toFixed(1)}%
-                                        </span>
-                                        <span className="text-sm text-muted-foreground">
-                                            {t('reports.vsPreviousAmount', {
-                                                amount: `${isIncrease ? '+' : ''}${formatCurrency(absoluteChange, data.currency)}`,
-                                            })}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Average stats */}
-                            <div className="flex gap-6">
-                                {/* Average per day */}
-                                <div className="flex items-center gap-3 px-5 py-4 bg-muted/50 rounded-xl">
-                                    <div className="flex items-center justify-center size-10 rounded-lg bg-green-100 text-green-600">
-                                        <Calendar className="size-5" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">{t('reports.metrics.avgPerDay')}</p>
-                                        <p className="text-xl font-semibold">{formatCurrency(data.avgPerDay, data.currency)}</p>
-                                        {filters.compareWith !== 'none' && data.prevAvgPerDay !== null && (
-                                            <p className="text-xs text-muted-foreground">
-                                                {t('reports.vsAmount', { amount: formatCurrency(data.prevAvgPerDay, data.currency) })}
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Average per week */}
-                                <div className="flex items-center gap-3 px-5 py-4 bg-muted/50 rounded-xl">
-                                    <div className="flex items-center justify-center size-10 rounded-lg bg-emerald-100 text-emerald-600">
-                                        <CalendarDays className="size-5" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">{t('reports.metrics.avgPerWeek')}</p>
-                                        <p className="text-xl font-semibold">{formatCurrency(data.avgPerWeek, data.currency)}</p>
-                                        {filters.compareWith !== 'none' && data.prevAvgPerWeek !== null && (
-                                            <p className="text-xs text-muted-foreground">
-                                                {t('reports.vsAmount', { amount: formatCurrency(data.prevAvgPerWeek, data.currency) })}
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ) : null}
-                </CardContent>
-            </Card>
-
-            {/* Block 2 — Income Structure */}
+            <TransactionTypeSummary filters={filters} type="income" />
             <IncomeStructureChart filters={filters} />
-
-            {/* Block 3 — Income Dynamics */}
             <IncomeDynamicsChart filters={filters} />
-
-            {/* Block 4 — Top Income */}
             <TopIncome filters={filters} />
         </div>
     )

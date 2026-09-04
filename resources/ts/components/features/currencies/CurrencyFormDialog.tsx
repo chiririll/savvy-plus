@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { FormDialog } from '@/components/shared'
-import { useCreateFormDraft, useSettings } from '@/hooks'
+import { EntityFormDialog } from '@/components/shared'
+import { useSettings } from '@/hooks'
 import { CurrencyFormData } from '@/schemas'
 import { Currency } from '@/types'
 import { CurrencyForm } from './CurrencyForm'
@@ -15,16 +15,6 @@ interface CurrencyFormDialogProps {
     isSubmitting?: boolean
 }
 
-function toFormValues(currency: Currency): Partial<CurrencyFormData> {
-    return {
-        code: currency.code,
-        name: currency.name,
-        symbol: currency.symbol,
-        decimals: currency.decimals,
-        rate: currency.rate,
-    }
-}
-
 export function CurrencyFormDialog({
     currency,
     open,
@@ -34,36 +24,39 @@ export function CurrencyFormDialog({
 }: CurrencyFormDialogProps) {
     const { t } = useTranslation('pages')
     const { data: settings } = useSettings()
-    const isEdit = !!currency
-    const { draft, onValuesChange, formKey } = useCreateFormDraft<CurrencyFormData>({
-        enabled: !isEdit,
-        open,
-        isSubmitting,
-        entityKey: currency?.id,
-    })
 
     return (
-        <FormDialog
+        <EntityFormDialog<Currency, CurrencyFormData, CurrencyFormData>
+            entity={currency}
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? t('currencies.editTitle') : t('currencies.createTitle')}
-            description={t('currencies.description')}
-            formId={FORM_ID}
+            onSubmit={onSubmit}
             isSubmitting={isSubmitting}
-            isEdit={isEdit}
+            formId={FORM_ID}
+            title={currency ? t('currencies.editTitle') : t('currencies.createTitle')}
+            description={t('currencies.description')}
+            toFormValues={(item) => ({
+                code: item.code,
+                name: item.name,
+                symbol: item.symbol,
+                decimals: item.decimals,
+                rate: item.rate,
+            })}
         >
-            <CurrencyForm
-                key={formKey}
-                defaultValues={currency ? toFormValues(currency) : draft}
-                onSubmit={onSubmit}
-                onValuesChange={onValuesChange}
-                isSubmitting={isSubmitting}
-                isEditing={isEdit}
-                autoUpdateEnabled={settings?.auto_update_currencies}
-                isBase={currency?.isBase}
-                formId={FORM_ID}
-                hideSubmit
-            />
-        </FormDialog>
+            {({ formKey, formProps, isEdit }) => (
+                <CurrencyForm
+                    key={formKey}
+                    defaultValues={formProps.defaultValues}
+                    onSubmit={onSubmit}
+                    onValuesChange={formProps.onValuesChange}
+                    isSubmitting={formProps.isSubmitting}
+                    formId={formProps.formId}
+                    hideSubmit
+                    isEditing={isEdit}
+                    autoUpdateEnabled={settings?.auto_update_currencies}
+                    isBase={currency?.isBase}
+                />
+            )}
+        </EntityFormDialog>
     )
 }

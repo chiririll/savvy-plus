@@ -13,10 +13,11 @@ import { useCategories } from '@/hooks'
 interface CategorySelectProps {
     value?: number | null
     onChange: (value: number) => void
-    type: 'income' | 'expense'
+    type?: 'income' | 'expense'
     placeholder?: string
     disabled?: boolean
     sortByPopularity?: boolean
+    plain?: boolean
 }
 
 export function CategorySelect({
@@ -26,17 +27,26 @@ export function CategorySelect({
     placeholder,
     disabled,
     sortByPopularity = true,
+    plain,
 }: CategorySelectProps) {
     const { t } = useTranslation('forms')
     const { data: categories } = useCategories()
 
     const filteredCategories = useMemo(() => {
-        const filtered = categories?.filter(c => c.type === type) ?? []
+        const filtered = type
+            ? (categories?.filter((category) => category.type === type) ?? [])
+            : [...(categories ?? [])]
         if (sortByPopularity) {
             return filtered.sort((a, b) => (b.transactionsCount ?? 0) - (a.transactionsCount ?? 0))
         }
         return filtered
     }, [categories, type, sortByPopularity])
+
+    const trigger = (
+        <SelectTrigger className="w-full">
+            <SelectValue placeholder={placeholder ?? t('selectCategory')} />
+        </SelectTrigger>
+    )
 
     return (
         <Select
@@ -44,11 +54,7 @@ export function CategorySelect({
             value={value ? value.toString() : undefined}
             disabled={disabled}
         >
-            <FormControl>
-                <SelectTrigger className="w-full">
-                    <SelectValue placeholder={placeholder ?? t('selectCategory')} />
-                </SelectTrigger>
-            </FormControl>
+            {plain ? trigger : <FormControl>{trigger}</FormControl>}
             <SelectContent>
                 {filteredCategories.map((category) => (
                     <SelectItem

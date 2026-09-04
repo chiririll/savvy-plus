@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { FormDialog } from '@/components/shared'
-import { useCreateFormDraft } from '@/hooks'
+import { EntityFormDialog } from '@/components/shared'
 import { RecurringFormData } from '@/schemas'
 import { RecurringTransaction } from '@/types'
 import { RecurringForm } from './RecurringForm'
@@ -15,26 +14,6 @@ interface RecurringFormDialogProps {
     isSubmitting?: boolean
 }
 
-function toFormValues(recurring: RecurringTransaction): Partial<RecurringFormData> {
-    return {
-        type: recurring.type,
-        account_id: recurring.accountId,
-        to_account_id: recurring.toAccountId,
-        category_id: recurring.categoryId,
-        amount: recurring.amount,
-        to_amount: recurring.toAmount,
-        description: recurring.description,
-        frequency: recurring.frequency,
-        interval: recurring.interval,
-        day_of_week: recurring.dayOfWeek,
-        day_of_month: recurring.dayOfMonth,
-        start_date: recurring.startDate,
-        end_date: recurring.endDate,
-        is_active: recurring.isActive,
-        tag_ids: recurring.tags.map((tag) => tag.id),
-    }
-}
-
 export function RecurringFormDialog({
     recurring,
     open,
@@ -43,33 +22,46 @@ export function RecurringFormDialog({
     isSubmitting,
 }: RecurringFormDialogProps) {
     const { t } = useTranslation('pages')
-    const isEdit = !!recurring
-    const { draft, onValuesChange, formKey } = useCreateFormDraft<RecurringFormData>({
-        enabled: !isEdit,
-        open,
-        isSubmitting,
-        entityKey: recurring?.id,
-    })
 
     return (
-        <FormDialog
+        <EntityFormDialog<RecurringTransaction, RecurringFormData, RecurringFormData>
+            entity={recurring}
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? t('recurring.editTitle') : t('recurring.createTitle')}
-            description={t('recurring.description')}
-            formId={FORM_ID}
+            onSubmit={onSubmit}
             isSubmitting={isSubmitting}
-            isEdit={isEdit}
+            formId={FORM_ID}
+            title={recurring ? t('recurring.editTitle') : t('recurring.createTitle')}
+            description={t('recurring.description')}
+            toFormValues={(item) => ({
+                type: item.type,
+                account_id: item.accountId,
+                to_account_id: item.toAccountId,
+                category_id: item.categoryId,
+                amount: item.amount,
+                to_amount: item.toAmount,
+                description: item.description,
+                frequency: item.frequency,
+                interval: item.interval,
+                day_of_week: item.dayOfWeek,
+                day_of_month: item.dayOfMonth,
+                start_date: item.startDate,
+                end_date: item.endDate,
+                is_active: item.isActive,
+                tag_ids: item.tags.map((tag) => tag.id),
+            })}
         >
-            <RecurringForm
-                key={formKey}
-                defaultValues={recurring ? toFormValues(recurring) : draft}
-                onSubmit={onSubmit}
-                onValuesChange={onValuesChange}
-                isSubmitting={isSubmitting}
-                formId={FORM_ID}
-                hideSubmit
-            />
-        </FormDialog>
+            {({ formKey, formProps }) => (
+                <RecurringForm
+                    key={formKey}
+                    defaultValues={formProps.defaultValues}
+                    onSubmit={onSubmit}
+                    onValuesChange={formProps.onValuesChange}
+                    isSubmitting={formProps.isSubmitting}
+                    formId={formProps.formId}
+                    hideSubmit
+                />
+            )}
+        </EntityFormDialog>
     )
 }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListPage } from '@/components/shared'
 import { createUserColumns, UserFormDialog, UserPasswordLinkDialog } from '@/components/features/users'
-import { useUsers, useDeleteUser, useCreateUser, useUpdateUser, useIssuePasswordToken } from '@/hooks'
+import { useUsers, useDeleteUser, useCreateUser, useUpdateUser, useIssuePasswordToken, useResourceFormDialog } from '@/hooks'
 import { useUser as useCurrentUser } from '@/stores/auth'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { User } from '@/types/users'
@@ -22,32 +22,25 @@ export default function UsersPage() {
     const issueToken = useIssuePasswordToken()
     const isReadOnly = useReadOnly()
 
-    const [formOpen, setFormOpen] = useState(false)
-    const [editingUser, setEditingUser] = useState<User | null>(null)
     const [linkUrl, setLinkUrl] = useState<string | null>(null)
-
-    const openCreate = () => {
-        setEditingUser(null)
-        setFormOpen(true)
-    }
-
-    const openEdit = (user: User) => {
-        setEditingUser(user)
-        setFormOpen(true)
-    }
+    const form = useResourceFormDialog<User, CreateUserFormData | UpdateUserFormData>({
+        items: users ?? [],
+        isLoading,
+        syncSearchParams: false,
+    })
 
     const showLink = (token?: string) => {
         if (!token) return
-        setFormOpen(false)
+        form.setOpen(false)
         setLinkUrl(setPasswordUrl(token))
     }
 
     const handleSubmit = (data: CreateUserFormData | UpdateUserFormData) => {
-        if (editingUser) {
+        if (form.entity) {
             const { password, ...rest } = data
             updateUser.mutate(
-                { id: editingUser.id, data: { ...rest, password: password || undefined } },
-                { onSuccess: () => setFormOpen(false) },
+                { id: form.entity.id, data: { ...rest, password: password || undefined } },
+                { onSuccess: () => form.setOpen(false) },
             )
             return
         }
@@ -65,7 +58,7 @@ export default function UsersPage() {
                     if (user.token) {
                         showLink(user.token)
                     } else {
-                        setFormOpen(false)
+                        form.setOpen(false)
                     }
                 },
             },
@@ -80,7 +73,7 @@ export default function UsersPage() {
 
     const columns = createUserColumns(
         (id) => deleteUser.mutate(id),
-        openEdit,
+        form.openEdit,
         handleReset,
         currentUser?.id,
         isReadOnly
@@ -92,16 +85,16 @@ export default function UsersPage() {
                 title={t('users.title')}
                 description={t('users.description')}
                 createLabel={t('users.create')}
-                onCreateClick={isReadOnly ? undefined : openCreate}
+                onCreateClick={isReadOnly ? undefined : form.openCreate}
                 data={users ?? []}
                 columns={columns}
                 isLoading={isLoading}
             />
 
             <UserFormDialog
-                user={editingUser}
-                open={formOpen}
-                onOpenChange={setFormOpen}
+                user={form.entity}
+                open={form.open}
+                onOpenChange={form.setOpen}
                 onSubmit={handleSubmit}
                 isSubmitting={createUser.isPending || updateUser.isPending}
             />

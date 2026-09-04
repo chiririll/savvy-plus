@@ -11,8 +11,8 @@ import {
 import { Plus, Trash2 } from 'lucide-react'
 import type { Condition, ConditionGroup, ConditionOperator } from '@/types/automation'
 import { CONDITION_FIELDS } from '@/types/automation'
-import { useAccounts, useCategories, useTags } from '@/hooks'
-import { cn } from '@/lib/utils'
+import { TRANSACTION_TYPES } from '@/constants'
+import { AccountSelect, CategorySelect, SegmentedChoice, TagSelect } from '@/components/shared'
 
 const MATCH_OPTIONS = [
     { value: 'all', labelKey: 'automation.matchAll' },
@@ -33,13 +33,8 @@ const OPERATORS: Record<string, ConditionOperator[]> = {
     has_any: ['has_any', 'has_all', 'has_none'],
 }
 
-const TRANSACTION_TYPES = ['income', 'expense', 'transfer'] as const
-
 export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
     const { t } = useTranslation(['forms', 'pages', 'common'])
-    const { data: accounts } = useAccounts()
-    const { data: categories } = useCategories()
-    const { data: tags } = useTags()
 
     const addCondition = () => {
         onChange({
@@ -124,65 +119,32 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
 
         if (field === 'account_id') {
             return (
-                <Select
-                    value={condition.value ? String(condition.value) : undefined}
-                    onValueChange={(val) => updateCondition(index, { value: Number(val) })}
-                >
-                    <SelectTrigger className="w-full min-w-0">
-                        <SelectValue placeholder={t('selectAccount')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {accounts?.map(account => (
-                            <SelectItem key={account.id} value={String(account.id)}>
-                                {account.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <AccountSelect
+                    plain
+                    excludeDebts={false}
+                    activeOnly={false}
+                    value={condition.value as number | undefined}
+                    onChange={(accountId) => updateCondition(index, { value: accountId })}
+                />
             )
         }
 
         if (field === 'category_id') {
             return (
-                <Select
-                    value={condition.value ? String(condition.value) : undefined}
-                    onValueChange={(val) => updateCondition(index, { value: Number(val) })}
-                >
-                    <SelectTrigger className="w-full min-w-0">
-                        <SelectValue placeholder={t('selectCategory')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {categories?.map(category => (
-                            <SelectItem key={category.id} value={String(category.id)}>
-                                {category.icon} {category.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <CategorySelect
+                    plain
+                    value={condition.value as number | undefined}
+                    onChange={(categoryId) => updateCondition(index, { value: categoryId })}
+                />
             )
         }
 
         if (field === 'tags') {
             return (
-                <div className="flex flex-wrap gap-1.5">
-                    {tags?.map(tag => (
-                        <Button
-                            key={tag.id}
-                            type="button"
-                            variant={(condition.value as number[])?.includes(tag.id) ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => {
-                                const current = (condition.value as number[]) || []
-                                const newValue = current.includes(tag.id)
-                                    ? current.filter(v => v !== tag.id)
-                                    : [...current, tag.id]
-                                updateCondition(index, { value: newValue })
-                            }}
-                        >
-                            #{tag.name}
-                        </Button>
-                    ))}
-                </div>
+                <TagSelect
+                    value={(condition.value as number[]) || []}
+                    onChange={(tagIds) => updateCondition(index, { value: tagIds })}
+                />
             )
         }
 
@@ -229,23 +191,14 @@ export function ConditionBuilder({ value, onChange }: ConditionBuilderProps) {
 
     return (
         <div className="space-y-4">
-            <div className="flex gap-2 p-1 bg-muted rounded-lg">
-                {MATCH_OPTIONS.map(({ value: matchValue, labelKey }) => (
-                    <button
-                        key={matchValue}
-                        type="button"
-                        onClick={() => onChange({ ...value, match: matchValue })}
-                        className={cn(
-                            'flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all',
-                            value.match === matchValue
-                                ? 'bg-background shadow-sm'
-                                : 'hover:bg-background/50'
-                        )}
-                    >
-                        {t(labelKey)}
-                    </button>
-                ))}
-            </div>
+            <SegmentedChoice
+                value={value.match}
+                onChange={(match) => onChange({ ...value, match })}
+                options={MATCH_OPTIONS.map((option) => ({
+                    value: option.value,
+                    label: t(option.labelKey),
+                }))}
+            />
 
             <div className="space-y-2">
                 {value.conditions.map((condition, index) => {

@@ -1,26 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { Pencil, Trash2, MoreHorizontal } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import { RowActions } from '@/components/shared'
 import { Budget } from '@/types'
 import { formatCurrency } from '@/lib/utils'
 import i18n from '@/lib/i18n'
@@ -113,52 +94,13 @@ export const createBudgetColumns = ({
         id: 'actions',
         header: '',
         cell: ({ row }) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(row.original)}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        {i18n.t('actions.edit')}
-                    </DropdownMenuItem>
-                    {!isReadOnly && (
-                    <>
-                    <DropdownMenuSeparator />
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <DropdownMenuItem
-                                onSelect={(e) => e.preventDefault()}
-                                className="text-destructive focus:text-destructive"
-                            >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                {i18n.t('actions.delete')}
-                            </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>{i18n.t('pages:budgets.deleteTitle')}</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    {i18n.t('pages:budgets.deleteDescription')}
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
-                                <AlertDialogAction
-                                    onClick={() => onDelete(row.original.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                    {i18n.t('actions.delete')}
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    </>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
+            <RowActions
+                onEdit={() => onEdit(row.original)}
+                onDelete={() => onDelete(row.original.id)}
+                deleteTitle={i18n.t('pages:budgets.deleteTitle')}
+                deleteDescription={i18n.t('pages:budgets.deleteDescription')}
+                isReadOnly={isReadOnly}
+            />
         ),
     },
 ]

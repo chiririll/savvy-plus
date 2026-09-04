@@ -21,15 +21,8 @@ import {
     FormMessage,
     FormDescription,
 } from '@/components/ui/form'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import { debtPaymentSchema, DebtPaymentFormData } from '@/schemas'
-import { useAccounts } from '@/hooks'
+import { AccountSelect } from '@/components/shared'
 import { Debt } from '@/types'
 import { formatCurrency, formatDateLocal } from '@/lib/utils'
 
@@ -51,7 +44,6 @@ export function DebtPaymentDialog({
     mode,
 }: DebtPaymentDialogProps) {
     const { t } = useTranslation(['forms', 'pages', 'common'])
-    const { data: accounts, isLoading: accountsLoading } = useAccounts({ active: true, exclude_debts: true })
 
     const form = useForm<DebtPaymentFormData>({
         resolver: zodResolver(debtPaymentSchema),
@@ -111,32 +103,11 @@ export function DebtPaymentDialog({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>{t('common:fields.account')}</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value?.toString()}
-                                        disabled={accountsLoading}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder={t('selectAccount')} />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {accounts?.map((account) => (
-                                                <SelectItem
-                                                    key={account.id}
-                                                    value={account.id.toString()}
-                                                >
-                                                    <div className="flex items-center justify-between gap-4">
-                                                        <span>{account.name}</span>
-                                                        <span className="text-muted-foreground text-xs font-mono">
-                                                            {formatCurrency(account.currentBalance, account.currency)}
-                                                        </span>
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <AccountSelect
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        showBalance
+                                    />
                                     <FormDescription>
                                         {mode === 'payment'
                                             ? t('debts.payment.accountPayFrom')

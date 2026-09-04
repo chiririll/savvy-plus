@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { categoriesApi } from '@/api'
-import { CategoryFormData, CategoryType } from '@/types'
-import { toast } from 'sonner'
+import { CategoryType } from '@/types'
+import { CategoryFormData } from '@/schemas'
+import { useResourceItem, useResourceMutation } from './use-crud'
 import i18n from '@/lib/i18n'
 
 const QUERY_KEY = ['categories']
@@ -10,7 +10,7 @@ const QUERY_KEY = ['categories']
 export function useCategories(type?: CategoryType) {
     return useQuery({
         queryKey: type ? [...QUERY_KEY, type] : QUERY_KEY,
-        queryFn: () => type ? categoriesApi.getByType(type) : categoriesApi.getAll(),
+        queryFn: () => categoriesApi.getAll(type ? { type } : undefined),
     })
 }
 
@@ -27,59 +27,32 @@ export function useCategorySummary(params: {
 }
 
 export function useCategory(id: string | number) {
-    return useQuery({
-        queryKey: [...QUERY_KEY, id],
-        queryFn: () => categoriesApi.getById(id),
-        enabled: !!id,
-    })
+    return useResourceItem(QUERY_KEY, () => categoriesApi.getById(id), id)
 }
 
 export function useCreateCategory(redirectTo?: string) {
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (data: CategoryFormData) => categoriesApi.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.category.created'))
-            if (redirectTo) navigate(redirectTo)
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.category.createFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.category.created'),
+        redirectTo,
     })
 }
 
 export function useUpdateCategory(redirectTo?: string) {
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: ({ id, data }: { id: string | number; data: Partial<CategoryFormData> }) =>
             categoriesApi.update(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.category.updated'))
-            if (redirectTo) navigate(redirectTo)
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.category.updateFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.category.updated'),
+        redirectTo,
     })
 }
 
 export function useDeleteCategory() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
+    return useResourceMutation({
         mutationFn: (id: string | number) => categoriesApi.delete(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-            toast.success(i18n.t('toasts.category.deleted'))
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || i18n.t('toasts.category.deleteFailed'))
-        },
+        invalidateKeys: [QUERY_KEY],
+        successMessage: i18n.t('toasts.category.deleted'),
     })
 }

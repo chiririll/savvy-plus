@@ -1,27 +1,16 @@
 import { api } from './client'
-import { Currency, CurrencyCatalogItem, CurrencyFormData } from '@/types'
+import { createCrudApi } from './crud'
+import { Currency, CurrencyCatalogItem } from '@/types'
+import { CurrencyFormData } from '@/schemas'
 
-const ENDPOINT = '/currencies'
+const crud = createCrudApi<Currency, CurrencyFormData>('/currencies')
 
 export const currenciesApi = {
-    getAll: () =>
-        api.get<Currency[]>(ENDPOINT),
+    ...crud,
 
     getCatalog: () =>
-        api.get<CurrencyCatalogItem[]>(`${ENDPOINT}/catalog`),
-
-    getById: (id: number | string) =>
-        api.get<Currency>(`${ENDPOINT}/${id}`),
-
-    create: (data: CurrencyFormData) =>
-        api.post<Currency, CurrencyFormData>(ENDPOINT, data),
-
-    update: (id: number | string, data: Partial<CurrencyFormData>) =>
-        api.patch<Currency, Partial<CurrencyFormData>>(`${ENDPOINT}/${id}`, data),
-
-    delete: (id: number | string) =>
-        api.delete<void>(`${ENDPOINT}/${id}`),
+        api.get<CurrencyCatalogItem[]>('/currencies/catalog'),
 
     setBase: (id: number | string) =>
-        api.post<Currency>(`${ENDPOINT}/${id}/set-base`),
+        api.post<Currency>(`/currencies/${id}/set-base`),
 }

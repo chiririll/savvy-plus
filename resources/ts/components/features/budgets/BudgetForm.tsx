@@ -22,11 +22,9 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { budgetSchema, BudgetFormData } from '@/schemas'
-import { useCategories, useTags } from '@/hooks'
+import { useCategories } from '@/hooks'
 import { Category } from '@/types'
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
-import { CurrencySelect, FieldHelp, FormActiveField, FormWrapper } from '@/components/shared'
+import { CurrencySelect, FieldHelp, FormActiveField, FormWrapper, TagSelect } from '@/components/shared'
 
 interface BudgetFormProps {
     defaultValues?: Partial<BudgetFormData>
@@ -51,7 +49,6 @@ export function BudgetForm({
 }: BudgetFormProps) {
     const { t } = useTranslation(['common', 'forms'])
     const { data: categories } = useCategories('expense')
-    const { data: tags } = useTags()
 
     const form = useForm<BudgetFormData>({
         resolver: zodResolver(budgetSchema),
@@ -70,8 +67,6 @@ export function BudgetForm({
             ...defaultValues,
         },
     })
-
-    const selectedTagIds = form.watch('tag_ids') ?? []
 
     const isGlobal = form.watch('is_global')
     const period = form.watch('period')
@@ -318,46 +313,19 @@ export function BudgetForm({
                     />
                 )}
 
-                {tags && tags.length > 0 && (
-                    <FormField
-                        control={form.control}
-                        name="tag_ids"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('forms:tags.label')}</FormLabel>
-                                <FormDescription>
-                                    {t('forms:budgets.tagsHelp')}
-                                </FormDescription>
-                                <div className="flex flex-wrap gap-2 p-3 rounded-md border">
-                                    {tags.map((tag) => {
-                                        const isSelected = selectedTagIds.includes(tag.id)
-                                        return (
-                                            <Badge
-                                                key={tag.id}
-                                                variant={isSelected ? 'default' : 'outline'}
-                                                className={cn(
-                                                    'cursor-pointer transition-colors',
-                                                    isSelected
-                                                        ? 'hover:bg-primary/80'
-                                                        : 'hover:bg-muted'
-                                                )}
-                                                onClick={() => {
-                                                    const newTagIds = isSelected
-                                                        ? selectedTagIds.filter((id) => id !== tag.id)
-                                                        : [...selectedTagIds, tag.id]
-                                                    field.onChange(newTagIds)
-                                                }}
-                                            >
-                                                #{tag.name}
-                                            </Badge>
-                                        )
-                                    })}
-                                </div>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
+                <FormField
+                    control={form.control}
+                    name="tag_ids"
+                    render={({ field }) => (
+                        <TagSelect
+                            value={field.value ?? []}
+                            onChange={field.onChange}
+                            asFormItem
+                            bordered
+                            description={t('forms:budgets.tagsHelp')}
+                        />
+                    )}
+                />
 
                 <FormActiveField
                     control={form.control}

@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { FormDialog } from '@/components/shared'
-import { useCreateFormDraft } from '@/hooks'
+import { EntityFormDialog } from '@/components/shared'
 import { CategoryFormData } from '@/schemas'
 import { Category } from '@/types'
 import { CategoryForm } from './CategoryForm'
@@ -15,15 +14,6 @@ interface CategoryFormDialogProps {
     isSubmitting?: boolean
 }
 
-function toFormValues(category: Category): Partial<CategoryFormData> {
-    return {
-        name: category.name,
-        type: category.type,
-        icon: category.icon,
-        color: category.color,
-    }
-}
-
 export function CategoryFormDialog({
     category,
     open,
@@ -32,33 +22,25 @@ export function CategoryFormDialog({
     isSubmitting,
 }: CategoryFormDialogProps) {
     const { t } = useTranslation('pages')
-    const isEdit = !!category
-    const { draft, onValuesChange, formKey } = useCreateFormDraft<CategoryFormData>({
-        enabled: !isEdit,
-        open,
-        isSubmitting,
-        entityKey: category?.id,
-    })
 
     return (
-        <FormDialog
+        <EntityFormDialog
+            entity={category}
             open={open}
             onOpenChange={onOpenChange}
-            title={isEdit ? t('categories.editTitle') : t('categories.createTitle')}
-            description={t('categories.description')}
-            formId={FORM_ID}
+            onSubmit={onSubmit}
             isSubmitting={isSubmitting}
-            isEdit={isEdit}
+            formId={FORM_ID}
+            title={category ? t('categories.editTitle') : t('categories.createTitle')}
+            description={t('categories.description')}
+            toFormValues={(item) => ({
+                name: item.name,
+                type: item.type,
+                icon: item.icon,
+                color: item.color,
+            })}
         >
-            <CategoryForm
-                key={formKey}
-                defaultValues={category ? toFormValues(category) : draft}
-                onSubmit={onSubmit}
-                onValuesChange={onValuesChange}
-                isSubmitting={isSubmitting}
-                formId={FORM_ID}
-                hideSubmit
-            />
-        </FormDialog>
+            {({ formKey, formProps }) => <CategoryForm key={formKey} {...formProps} />}
+        </EntityFormDialog>
     )
 }

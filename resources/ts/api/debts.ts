@@ -1,37 +1,25 @@
 import { api, apiClient } from './client'
-import { Debt, DebtFormData, DebtPaymentFormData, DebtSummary, DebtsResponse } from '@/types'
-import { Transaction } from '@/types'
+import { createCrudApi } from './crud'
+import { toQueryString } from '@/lib/query-string'
+import { Debt, DebtSummary, DebtsResponse, Transaction } from '@/types'
+import { DebtFormData, DebtPaymentFormData } from '@/schemas'
 
 const ENDPOINT = '/debts'
+const crud = createCrudApi<Debt, DebtFormData>(ENDPOINT)
 
 export const debtsApi = {
-    getAll: (params?: { include_completed?: boolean }) => {
-        const searchParams = new URLSearchParams()
-        if (params?.include_completed) searchParams.set('include_completed', 'true')
-        const query = searchParams.toString()
-        return api.get<Debt[]>(`${ENDPOINT}${query ? `?${query}` : ''}`)
-    },
+    ...crud,
+
+    getAll: (params?: { include_completed?: boolean }) =>
+        crud.getAll(params),
 
     getAllWithSummary: async (params?: { include_completed?: boolean }): Promise<DebtsResponse> => {
-        const searchParams = new URLSearchParams()
-        searchParams.set('with_summary', 'true')
-        if (params?.include_completed) searchParams.set('include_completed', 'true')
-        const query = searchParams.toString()
-        const response = await apiClient.get(`${ENDPOINT}?${query}`)
+        const response = await apiClient.get(`${ENDPOINT}${toQueryString({
+            with_summary: true,
+            include_completed: params?.include_completed,
+        })}`)
         return response.data
     },
-
-    getById: (id: number | string) =>
-        api.get<Debt>(`${ENDPOINT}/${id}`),
-
-    create: (data: DebtFormData) =>
-        api.post<Debt, DebtFormData>(ENDPOINT, data),
-
-    update: (id: number | string, data: Partial<DebtFormData>) =>
-        api.patch<Debt, Partial<DebtFormData>>(`${ENDPOINT}/${id}`, data),
-
-    delete: (id: number | string) =>
-        api.delete<void>(`${ENDPOINT}/${id}`),
 
     makePayment: (debtId: number | string, data: DebtPaymentFormData) =>
         api.post<Transaction, DebtPaymentFormData>(`${ENDPOINT}/${debtId}/payment`, data),
@@ -40,7 +28,7 @@ export const debtsApi = {
         api.post<Transaction, DebtPaymentFormData>(`${ENDPOINT}/${debtId}/collect`, data),
 
     reopen: (id: number | string) =>
-        api.post<Debt, {}>(`${ENDPOINT}/${id}/reopen`, {}),
+        api.post<Debt, Record<string, never>>(`${ENDPOINT}/${id}/reopen`, {}),
 
     getSummary: async (): Promise<DebtSummary> => {
         const response = await apiClient.get(`${ENDPOINT}-summary`)

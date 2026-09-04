@@ -1,25 +1,10 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { Transaction } from '@/types'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { MoreHorizontal, Pencil, Trash2, Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins, Check, SkipForward } from 'lucide-react'
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { RowActions } from '@/components/shared'
+import { Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins, Check, SkipForward } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import i18n, { intlLocale } from '@/lib/i18n'
@@ -203,26 +188,19 @@ export function createTransactionColumns({
                 }
 
                 return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon-sm">
-                                <MoreHorizontal className="size-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            {canEdit && (
-                            <DropdownMenuItem onClick={() => onEdit(transaction)}>
-                                <Pencil className="mr-2 size-4" />
-                                {i18n.t('actions.edit')}
-                            </DropdownMenuItem>
-                            )}
-                            {canConfirm && (
+                    <RowActions
+                        onEdit={canEdit ? () => onEdit(transaction) : undefined}
+                        onDelete={canDelete ? () => onDelete(transaction.id) : undefined}
+                        deleteTitle={i18n.t('pages:transactions.deleteTitle')}
+                        deleteDescription={i18n.t('pages:transactions.deleteDescription')}
+                    >
+                        {canConfirm && (
                             <DropdownMenuItem onClick={() => onConfirm(transaction.id)}>
                                 <Check className="mr-2 size-4" />
                                 {i18n.t('actions.confirm')}
                             </DropdownMenuItem>
-                            )}
-                            {canSkip && (
+                        )}
+                        {canSkip && (
                             <SkipTransactionAlert
                                 onConfirm={() => onSkip(transaction.id)}
                                 trigger={
@@ -232,45 +210,14 @@ export function createTransactionColumns({
                                     </DropdownMenuItem>
                                 }
                             />
-                            )}
-                            {canDuplicate && (
+                        )}
+                        {canDuplicate && (
                             <DropdownMenuItem onClick={() => onDuplicate(transaction.id)}>
                                 <Copy className="mr-2 size-4" />
                                 {i18n.t('actions.duplicate')}
                             </DropdownMenuItem>
-                            )}
-                            {canDelete && (
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem
-                                        onSelect={(e) => e.preventDefault()}
-                                        className="text-destructive focus:text-destructive"
-                                    >
-                                        <Trash2 className="mr-2 size-4" />
-                                        {i18n.t('actions.delete')}
-                                    </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>{i18n.t('pages:transactions.deleteTitle')}</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            {i18n.t('pages:transactions.deleteDescription')}
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>{i18n.t('actions.cancel')}</AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={() => onDelete(transaction.id)}
-                                            className={buttonVariants({ variant: 'destructive' })}
-                                        >
-                                            {i18n.t('actions.delete')}
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                            )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                        )}
+                    </RowActions>
                 )
             },
         },

@@ -40,26 +40,6 @@ export interface Transaction extends BaseEntity {
     tags: Tag[]
 }
 
-export interface TransactionItemFormData {
-    name: string
-    quantity: number
-    price_per_unit: number
-}
-
-export interface TransactionFormData {
-    type: TransactionType
-    account_id: number
-    to_account_id?: number
-    category_id?: number
-    amount: number
-    to_amount?: number
-    exchange_rate?: number
-    description?: string
-    date: string
-    items?: TransactionItemFormData[]
-    tag_ids?: number[]
-}
-
 export interface TransactionFilters {
     type?: TransactionType
     account_id?: number
