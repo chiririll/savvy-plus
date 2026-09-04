@@ -416,9 +416,9 @@ export default function BackupsPage() {
                     <AlertDialogFooter>
                         <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
                         <AlertDialogAction
+                            variant="destructive"
                             onClick={handleDelete}
                             disabled={deleteBackup.isPending}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                             {deleteBackup.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
                             {tCommon('actions.delete')}

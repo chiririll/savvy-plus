@@ -100,8 +100,8 @@ export function ProviderCard({ provider, index, onDelete, onTest }: ProviderCard
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem
+                                    variant="destructive"
                                     onSelect={(e) => e.preventDefault()}
-                                    className="text-destructive focus:text-destructive"
                                 >
                                     <Trash2 className="mr-2 size-4" />
                                     {tCommon('actions.delete')}
@@ -117,8 +117,8 @@ export function ProviderCard({ provider, index, onDelete, onTest }: ProviderCard
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
                                     <AlertDialogAction
+                                        variant="destructive"
                                         onClick={() => onDelete(provider.id)}
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     >
                                         {tCommon('actions.delete')}
                                     </AlertDialogAction>

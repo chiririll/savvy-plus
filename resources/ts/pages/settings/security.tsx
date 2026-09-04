@@ -26,6 +26,17 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import {
     InputOTP,
     InputOTPGroup,
     InputOTPSlot,
@@ -391,15 +402,37 @@ export default function SecuritySettingsPage() {
                                                             : t('security.passkeys.neverUsed')}
                                                     </p>
                                                 </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => deletePasskey.mutate(passkey.id)}
-                                                    disabled={isReadOnly || deletePasskey.isPending}
-                                                    aria-label={t('security.passkeys.removeAria')}
-                                                >
-                                                    <Trash2 className="size-4 text-destructive" />
-                                                </Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            disabled={isReadOnly || deletePasskey.isPending}
+                                                            aria-label={t('security.passkeys.removeAria')}
+                                                        >
+                                                            <Trash2 className="size-4 text-destructive" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>
+                                                                {t('security.passkeys.deleteTitle')}
+                                                            </AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                {t('security.passkeys.deleteDescription')}
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                variant="destructive"
+                                                                onClick={() => deletePasskey.mutate(passkey.id)}
+                                                            >
+                                                                {tCommon('actions.delete')}
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </div>
                                         ))}
                                     </div>
