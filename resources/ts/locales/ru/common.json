@@ -149,6 +149,10 @@
     "sidebar": {
         "toggle": "Показать или скрыть меню"
     },
+    "header": {
+        "accountBalances": "Состояние счетов",
+        "accountsEmpty": "Нет активных счетов"
+    },
     "searchEmoji": "Найти эмодзи...",
     "toasts": {
         "created": "Создано",

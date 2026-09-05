@@ -149,6 +149,10 @@
     "sidebar": {
         "toggle": "Toggle sidebar"
     },
+    "header": {
+        "accountBalances": "Account balances",
+        "accountsEmpty": "No active accounts"
+    },
     "searchEmoji": "Search emoji...",
     "toasts": {
         "created": "Created successfully",
