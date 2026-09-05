@@ -34,6 +34,7 @@
         "toAccount": "Destination account",
         "sendAmount": "Send amount",
         "receiveAmount": "Receive amount",
+        "transferRate": "Transfer rate",
         "notesPlaceholder": "Optional notes...",
         "balance": "Balance",
         "after": "After",

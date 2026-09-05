@@ -34,6 +34,7 @@
         "toAccount": "Счёт назначения",
         "sendAmount": "Сумма отправки",
         "receiveAmount": "Сумма получения",
+        "transferRate": "Курс перевода",
         "notesPlaceholder": "Необязательные заметки...",
         "balance": "Баланс",
         "after": "После",

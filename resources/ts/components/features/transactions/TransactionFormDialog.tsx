@@ -63,8 +63,9 @@ export function TransactionFormDialog({
         >
             {({ formKey, formProps, isEdit }) => (
                 <TransactionForm
-                    key={formKey}
+                    key={`${formKey}-${open}`}
                     {...formProps}
+                    open={open}
                     isEdit={isEdit}
                     originalAffectsBalance={transaction?.status === 'confirmed'}
                     onPreviewChange={setPreview}
