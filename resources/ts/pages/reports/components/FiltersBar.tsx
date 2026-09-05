@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/sheet'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useCategories, useAccounts, useTags } from '@/hooks'
+import { localizeDefaultName } from '@/lib/localized-name'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { RotateCcw, ChevronDown, Calendar, Filter, SlidersHorizontal } from 'lucide-react'
 import type { ReportFilters, PeriodType, CompareType } from '../types'
@@ -267,6 +268,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
                 selectedIds={filters.categoryIds}
                 onToggle={(id) => onToggleArrayFilter('categoryIds', id)}
                 inSheet={inSheet}
+                formatName={(item) => localizeDefaultName(item.name)}
                 popoverClassName="w-64 p-2"
             />
             <EntityFilter

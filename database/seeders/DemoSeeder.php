@@ -27,36 +27,34 @@ class DemoSeeder extends Seeder
     private const MONTHS_OF_HISTORY = 12;
 
     private array $merchants = [
-        'Food & Groceries' => ['Whole Foods Market', 'Trader Joe\'s', 'Costco Wholesale', 'Walmart', 'Kroger', 'Aldi', 'Target', 'Safeway'],
-        'Transport' => ['Shell', 'BP', 'Chevron', 'Uber', 'Lyft', 'Metro Transit', 'ParkMobile', 'Jiffy Lube'],
-        'Restaurants & Cafes' => ['Starbucks', 'Chipotle Mexican Grill', 'McDonald\'s', 'Olive Garden', 'Subway', 'Domino\'s Pizza', 'Panera Bread', 'Five Guys'],
-        'Entertainment' => ['AMC Theatres', 'Steam', 'PlayStation Store', 'Ticketmaster', 'Dave & Buster\'s', 'Topgolf'],
-        'Shopping' => ['Amazon', 'Best Buy', 'IKEA', 'Nike', 'Apple Store', 'Zara', 'H&M', 'Home Depot'],
-        'Healthcare' => ['CVS Pharmacy', 'Walgreens', 'City Medical Clinic', 'Planet Fitness', 'LA Fitness', 'Quest Diagnostics'],
-        'Personal Care' => ['Supercuts', 'Sephora', 'Ulta Beauty', 'The Barber Shop'],
-        'Gifts' => ['Etsy', 'Amazon', 'Tiffany & Co.', 'Local Florist'],
-        'Travel' => ['Booking.com', 'Airbnb', 'Delta Air Lines', 'Marriott', 'Expedia', 'Hertz'],
-        'Education' => ['Udemy', 'Coursera', 'O\'Reilly Media', 'Amazon Books'],
-        'Utilities' => ['ConEdison', 'AT&T', 'Xfinity', 'National Grid', 'Verizon Wireless'],
-        'Subscriptions' => ['Netflix', 'Spotify', 'YouTube Premium', 'iCloud+', 'Adobe Creative Cloud', 'GitHub', 'ChatGPT Plus'],
-        'Other Expenses' => ['PayPal', 'Venmo', 'Cash Withdrawal', 'Square'],
+        '#GROCERIES' => ['Whole Foods Market', 'Trader Joe\'s', 'Costco Wholesale', 'Walmart', 'Kroger', 'Aldi', 'Target', 'Safeway'],
+        '#TRANSPORT' => ['Shell', 'BP', 'Chevron', 'Uber', 'Lyft', 'Metro Transit', 'ParkMobile', 'Jiffy Lube'],
+        '#DINING' => ['Starbucks', 'Chipotle Mexican Grill', 'McDonald\'s', 'Olive Garden', 'Subway', 'Domino\'s Pizza', 'Panera Bread', 'Five Guys'],
+        '#ENTERTAINMENT' => ['AMC Theatres', 'Steam', 'PlayStation Store', 'Ticketmaster', 'Netflix', 'Spotify'],
+        '#SHOPPING' => ['Amazon', 'Best Buy', 'IKEA', 'Nike', 'Apple Store', 'Zara', 'H&M', 'Home Depot'],
+        '#HEALTH' => ['CVS Pharmacy', 'Walgreens', 'City Medical Clinic', 'Planet Fitness', 'LA Fitness', 'Quest Diagnostics'],
+        '#PERSONAL_CARE' => ['Supercuts', 'Sephora', 'Ulta Beauty', 'The Barber Shop'],
+        '#GIFTS' => ['Etsy', 'Amazon', 'Tiffany & Co.', 'Local Florist'],
+        '#TRAVEL' => ['Booking.com', 'Airbnb', 'Delta Air Lines', 'Marriott', 'Expedia', 'Hertz'],
+        '#UTILITIES' => ['ConEdison', 'AT&T', 'Xfinity', 'National Grid', 'Verizon Wireless'],
+        '#HOUSING' => ['IKEA', 'Home Depot', 'Bed Bath & Beyond'],
+        '#OTHER' => ['PayPal', 'Venmo', 'Cash Withdrawal', 'Square'],
     ];
 
     private array $catalogs = [
-        'Food & Groceries' => ['Organic Bananas', 'Whole Milk', 'Sourdough Bread', 'Free-range Eggs', 'Chicken Breast', 'Avocados', 'Greek Yogurt', 'Baby Spinach', 'Ground Coffee', 'Cheddar Cheese', 'Pasta', 'Olive Oil', 'Roma Tomatoes', 'Atlantic Salmon', 'Brown Rice', 'Butter', 'Orange Juice', 'Granola'],
-        'Restaurants & Cafes' => ['Latte', 'Avocado Toast', 'Caesar Salad', 'Burger Combo', 'Iced Americano', 'Chicken Bowl', 'Fries', 'Cheesecake', 'Iced Tea', 'Soup of the Day', 'Fish Tacos', 'Espresso'],
-        'Transport' => ['Regular Gasoline', 'Premium Gasoline', 'Airport Parking', 'Car Wash', 'Metro Day Pass', 'Oil Change', 'Tire Rotation', 'Tolls'],
-        'Shopping' => ['Cotton T-Shirt', 'Wireless Earbuds', 'Desk Lamp', 'Running Shorts', 'Phone Case', 'Notebook Set', 'Kitchen Towels', 'HDMI Cable', 'Sneakers', 'Backpack'],
-        'Entertainment' => ['Movie Ticket', 'Popcorn Combo', 'Game Download', 'Arcade Tokens', 'Concert Ticket', 'Streaming Rental', 'Bowling Lane'],
-        'Healthcare' => ['Prescription Refill', 'Vitamin D', 'Ibuprofen', 'Allergy Test', 'Contact Lenses', 'First Aid Kit', 'Protein Powder'],
-        'Personal Care' => ['Haircut', 'Shampoo', 'Face Moisturizer', 'Toothpaste', 'Sunscreen', 'Nail Polish', 'Beard Oil'],
-        'Travel' => ['Hotel Night', 'Airport Transfer', 'City Museum Pass', 'Travel Adapter', 'Bottled Water', 'Snack Box', 'Souvenir'],
-        'Education' => ['Online Course', 'Paperback Textbook', 'Notebook', 'Highlighter Set', 'USB Flash Drive', 'Practice Exam'],
-        'Gifts' => ['Greeting Card', 'Gift Wrap', 'Scented Candle', 'Chocolate Box', 'Bouquet', 'Mug'],
-        'Utilities' => ['Electricity Usage', 'Delivery Charge', 'Service Fee'],
-        'Subscriptions' => ['Base Plan', 'Add-on Storage', 'Family Seat'],
-        'Housing' => ['Base Rent', 'Parking Spot', 'Pet Fee'],
-        'Other Expenses' => ['Service Fee', 'Convenience Charge', 'Misc. Purchase', 'Packaging'],
+        '#GROCERIES' => ['Organic Bananas', 'Whole Milk', 'Sourdough Bread', 'Free-range Eggs', 'Chicken Breast', 'Avocados', 'Greek Yogurt', 'Baby Spinach', 'Ground Coffee', 'Cheddar Cheese', 'Pasta', 'Olive Oil', 'Roma Tomatoes', 'Atlantic Salmon', 'Brown Rice', 'Butter', 'Orange Juice', 'Granola'],
+        '#DINING' => ['Latte', 'Avocado Toast', 'Caesar Salad', 'Burger Combo', 'Iced Americano', 'Chicken Bowl', 'Fries', 'Cheesecake', 'Iced Tea', 'Soup of the Day', 'Fish Tacos', 'Espresso'],
+        '#TRANSPORT' => ['Regular Gasoline', 'Premium Gasoline', 'Airport Parking', 'Car Wash', 'Metro Day Pass', 'Oil Change', 'Tire Rotation', 'Tolls'],
+        '#SHOPPING' => ['Cotton T-Shirt', 'Wireless Earbuds', 'Desk Lamp', 'Running Shorts', 'Phone Case', 'Notebook Set', 'Kitchen Towels', 'HDMI Cable', 'Sneakers', 'Backpack'],
+        '#ENTERTAINMENT' => ['Movie Ticket', 'Popcorn Combo', 'Game Download', 'Arcade Tokens', 'Concert Ticket', 'Streaming Rental', 'Base Plan'],
+        '#HEALTH' => ['Prescription Refill', 'Vitamin D', 'Ibuprofen', 'Allergy Test', 'Contact Lenses', 'First Aid Kit', 'Protein Powder'],
+        '#PERSONAL_CARE' => ['Haircut', 'Shampoo', 'Face Moisturizer', 'Toothpaste', 'Sunscreen', 'Nail Polish', 'Beard Oil'],
+        '#TRAVEL' => ['Hotel Night', 'Airport Transfer', 'City Museum Pass', 'Travel Adapter', 'Bottled Water', 'Snack Box', 'Souvenir'],
+        '#GIFTS' => ['Greeting Card', 'Gift Wrap', 'Scented Candle', 'Chocolate Box', 'Bouquet', 'Mug'],
+        '#UTILITIES' => ['Electricity Usage', 'Delivery Charge', 'Service Fee'],
+        '#HOUSING' => ['Shelf brackets', 'Light bulbs', 'Paint', 'Towels'],
+        '#RENT' => ['Base Rent'],
+        '#OTHER' => ['Service Fee', 'Convenience Charge', 'Misc. Purchase', 'Packaging'],
     ];
 
     public function run(): void
@@ -195,10 +193,10 @@ class DemoSeeder extends Seeder
 
     private function seedIncome(array $accounts, $incomeCategories, Carbon $start, Carbon $end): void
     {
-        $salary = $incomeCategories->firstWhere('name', 'Salary');
-        $freelance = $incomeCategories->firstWhere('name', 'Freelance');
-        $investments = $incomeCategories->firstWhere('name', 'Investments');
-        $other = $incomeCategories->firstWhere('name', 'Other Income');
+        $salary = $incomeCategories->firstWhere('name', '#SALARY');
+        $freelance = $incomeCategories->firstWhere('name', '#FREELANCE');
+        $investments = $incomeCategories->firstWhere('name', '#INVESTMENTS');
+        $other = $incomeCategories->firstWhere('name', '#OTHER_INCOME');
 
         $baseSalary = 6400;
         $cursor = $start->copy();
@@ -254,9 +252,9 @@ class DemoSeeder extends Seeder
 
     private function seedFixedExpenses(array $accounts, $expenseCategories, Carbon $start, Carbon $end): void
     {
-        $housing = $expenseCategories->firstWhere('name', 'Housing');
-        $utilities = $expenseCategories->firstWhere('name', 'Utilities');
-        $subscriptions = $expenseCategories->firstWhere('name', 'Subscriptions');
+        $rent = $expenseCategories->firstWhere('name', '#RENT');
+        $utilities = $expenseCategories->firstWhere('name', '#UTILITIES');
+        $entertainment = $expenseCategories->firstWhere('name', '#ENTERTAINMENT');
 
         $subs = [
             ['Netflix', 22.99], ['Spotify', 11.99], ['iCloud+', 9.99],
@@ -265,12 +263,12 @@ class DemoSeeder extends Seeder
 
         $cursor = $start->copy();
         while ($cursor->lte($end)) {
-            if ($housing) {
+            if ($rent) {
                 $d = $cursor->copy()->startOfMonth();
                 if ($d->between($start, $end)) {
                     Transaction::create([
                         'type' => TransactionType::Expense, 'account_id' => $accounts['checking']->id,
-                        'category_id' => $housing->id, 'amount' => 2150.00,
+                        'category_id' => $rent->id, 'amount' => 2150.00,
                         'description' => 'Rent — Greystar Apartments', 'date' => $d,
                     ]);
                 }
@@ -290,13 +288,13 @@ class DemoSeeder extends Seeder
                 }
             }
 
-            if ($subscriptions) {
+            if ($entertainment) {
                 foreach ($subs as [$name, $price]) {
                     $d = $cursor->copy()->day(min(mt_rand(2, 9), $cursor->daysInMonth));
                     if ($d->between($start, $end)) {
                         Transaction::create([
                             'type' => TransactionType::Expense, 'account_id' => $accounts['credit']->id,
-                            'category_id' => $subscriptions->id, 'amount' => $price,
+                            'category_id' => $entertainment->id, 'amount' => $price,
                             'description' => $name.' subscription', 'date' => $d,
                         ]);
                     }
@@ -310,9 +308,9 @@ class DemoSeeder extends Seeder
     private function seedVariableExpenses(array $accounts, $expenseCategories, $tags, Carbon $start, Carbon $end): void
     {
         $weights = [
-            'Food & Groceries' => 22, 'Restaurants & Cafes' => 20, 'Transport' => 16,
-            'Shopping' => 12, 'Entertainment' => 9, 'Healthcare' => 6, 'Personal Care' => 5,
-            'Travel' => 3, 'Education' => 3, 'Gifts' => 2, 'Other Expenses' => 2,
+            '#GROCERIES' => 22, '#DINING' => 20, '#TRANSPORT' => 16,
+            '#SHOPPING' => 12, '#ENTERTAINMENT' => 9, '#HEALTH' => 6, '#PERSONAL_CARE' => 5,
+            '#TRAVEL' => 3, '#HOUSING' => 2, '#GIFTS' => 2, '#OTHER' => 2,
         ];
         $pool = [];
         foreach ($weights as $name => $w) {
@@ -325,10 +323,10 @@ class DemoSeeder extends Seeder
         }
 
         $ranges = [
-            'Food & Groceries' => [18, 145], 'Restaurants & Cafes' => [9, 70], 'Transport' => [4, 65],
-            'Shopping' => [15, 240], 'Entertainment' => [12, 95], 'Healthcare' => [10, 160],
-            'Personal Care' => [15, 85], 'Travel' => [120, 950], 'Education' => [12, 90],
-            'Gifts' => [20, 180], 'Other Expenses' => [10, 120],
+            '#GROCERIES' => [18, 145], '#DINING' => [9, 70], '#TRANSPORT' => [4, 65],
+            '#SHOPPING' => [15, 240], '#ENTERTAINMENT' => [12, 95], '#HEALTH' => [10, 160],
+            '#PERSONAL_CARE' => [15, 85], '#TRAVEL' => [120, 950], '#HOUSING' => [25, 180],
+            '#GIFTS' => [20, 180], '#OTHER' => [10, 120],
         ];
 
         $vacationTag = $tags->firstWhere('name', 'Vacation');
@@ -345,7 +343,7 @@ class DemoSeeder extends Seeder
             for ($i = 0; $i < $count; $i++) {
                 $cat = $pool[array_rand($pool)];
 
-                if ($cat->name === 'Travel' && mt_rand(1, 100) > 12) {
+                if ($cat->name === '#TRAVEL' && mt_rand(1, 100) > 12) {
                     continue;
                 }
 
@@ -354,8 +352,8 @@ class DemoSeeder extends Seeder
                 $merchant = $this->merchantFor($cat->name);
 
                 $account = match (true) {
-                    $cat->name === 'Travel' && isset($accounts['eur']) && mt_rand(0, 1) === 1 => $accounts['eur'],
-                    in_array($cat->name, ['Food & Groceries', 'Shopping', 'Travel', 'Healthcare']) && mt_rand(1, 100) <= 60 => $accounts['credit'],
+                    $cat->name === '#TRAVEL' && isset($accounts['eur']) && mt_rand(0, 1) === 1 => $accounts['eur'],
+                    in_array($cat->name, ['#GROCERIES', '#SHOPPING', '#TRAVEL', '#HEALTH']) && mt_rand(1, 100) <= 60 => $accounts['credit'],
                     $amount < 25 && mt_rand(1, 100) <= 35 => $accounts['cash'],
                     default => $accounts['checking'],
                 };
@@ -367,13 +365,13 @@ class DemoSeeder extends Seeder
                 ]);
 
                 $attach = [];
-                if ($cat->name === 'Travel' && $vacationTag) {
+                if ($cat->name === '#TRAVEL' && $vacationTag) {
                     $attach[] = $vacationTag->id;
                 }
-                if (in_array($cat->name, ['Food & Groceries', 'Healthcare']) && $essentialTag && mt_rand(1, 100) <= 35) {
+                if (in_array($cat->name, ['#GROCERIES', '#HEALTH']) && $essentialTag && mt_rand(1, 100) <= 35) {
                     $attach[] = $essentialTag->id;
                 }
-                if ($cat->name === 'Education' && $businessTag && mt_rand(1, 100) <= 50) {
+                if ($cat->name === '#HOUSING' && $businessTag && mt_rand(1, 100) <= 20) {
                     $attach[] = $businessTag->id;
                 }
                 if ($attach) {
@@ -464,14 +462,14 @@ class DemoSeeder extends Seeder
         $categoriesById = $expenseCategories->keyBy('id');
 
         foreach ($sample as $tx) {
-            $catName = $categoriesById->get($tx->category_id)?->name ?? 'Other Expenses';
+            $catName = $categoriesById->get($tx->category_id)?->name ?? '#OTHER';
             $this->attachRandomItems($tx, $catName);
         }
     }
 
     private function attachRandomItems(Transaction $tx, string $category): void
     {
-        $catalog = $this->catalogs[$category] ?? $this->catalogs['Other Expenses'];
+        $catalog = $this->catalogs[$category] ?? $this->catalogs['#OTHER'];
         $remainingCents = (int) round((float) $tx->amount * 100);
 
         if ($remainingCents < 1) {
@@ -528,7 +526,7 @@ class DemoSeeder extends Seeder
 
     private function createBudgets(Currency $usd, $expenseCategories, $tags): void
     {
-        $food = $expenseCategories->firstWhere('name', 'Food & Groceries');
+        $food = $expenseCategories->firstWhere('name', '#GROCERIES');
         if ($food) {
             $b = Budget::create([
                 'name' => 'Groceries', 'amount' => 750, 'currency_id' => $usd->id,
@@ -538,7 +536,7 @@ class DemoSeeder extends Seeder
             $b->categories()->sync([$food->id]);
         }
 
-        $dining = $expenseCategories->firstWhere('name', 'Restaurants & Cafes');
+        $dining = $expenseCategories->firstWhere('name', '#DINING');
         if ($dining) {
             $b = Budget::create([
                 'name' => 'Dining Out', 'amount' => 450, 'currency_id' => $usd->id,
@@ -548,7 +546,7 @@ class DemoSeeder extends Seeder
             $b->categories()->sync([$dining->id]);
         }
 
-        $ent = $expenseCategories->firstWhere('name', 'Entertainment');
+        $ent = $expenseCategories->firstWhere('name', '#ENTERTAINMENT');
         if ($ent) {
             $b = Budget::create([
                 'name' => 'Fun Money', 'amount' => 300, 'currency_id' => $usd->id,
@@ -578,7 +576,7 @@ class DemoSeeder extends Seeder
 
     private function createRecurringTransactions(array $accounts, $expenseCategories, $incomeCategories): void
     {
-        $salary = $incomeCategories->firstWhere('name', 'Salary');
+        $salary = $incomeCategories->firstWhere('name', '#SALARY');
         if ($salary) {
             RecurringTransaction::create([
                 'type' => TransactionType::Income, 'account_id' => $accounts['checking']->id,
@@ -589,18 +587,18 @@ class DemoSeeder extends Seeder
             ]);
         }
 
-        $housing = $expenseCategories->firstWhere('name', 'Housing');
-        if ($housing) {
+        $rent = $expenseCategories->firstWhere('name', '#RENT');
+        if ($rent) {
             RecurringTransaction::create([
                 'type' => TransactionType::Expense, 'account_id' => $accounts['checking']->id,
-                'category_id' => $housing->id, 'amount' => 2150, 'description' => 'Rent — Greystar Apartments',
+                'category_id' => $rent->id, 'amount' => 2150, 'description' => 'Rent — Greystar Apartments',
                 'frequency' => RecurringFrequency::Monthly, 'interval' => 1, 'day_of_month' => 1,
                 'start_date' => now()->startOfMonth(), 'next_run_date' => now()->addMonth()->startOfMonth(),
                 'is_active' => true,
             ]);
         }
 
-        $subs = $expenseCategories->firstWhere('name', 'Subscriptions');
+        $subs = $expenseCategories->firstWhere('name', '#ENTERTAINMENT');
         if ($subs) {
             RecurringTransaction::create([
                 'type' => TransactionType::Expense, 'account_id' => $accounts['credit']->id,

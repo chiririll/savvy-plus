@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { RowActions } from '@/components/shared'
 import { RecurringTransaction } from '@/types'
 import { cn, formatCurrency } from '@/lib/utils'
+import { localizeDefaultName } from '@/lib/localized-name'
 import i18n, { intlLocale } from '@/lib/i18n'
 
 const typeConfig = {
@@ -77,7 +78,7 @@ export const createRecurringColumns = ({
                     >
                         {row.original.category.icon}
                     </span>
-                    <span>{row.original.category.name}</span>
+                    <span>{localizeDefaultName(row.original.category.name)}</span>
                 </div>
             )
         },

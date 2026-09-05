@@ -55,30 +55,29 @@ class ReportsTestSeeder extends Seeder
 
         // Создаём категории доходов
         $salaryCategory = Category::firstOrCreate(
-            ['name' => 'Salary', 'type' => 'income'],
-            ['icon' => 'briefcase', 'color' => '#22c55e']
+            ['name' => '#SALARY', 'type' => 'income'],
+            ['icon' => '💵', 'color' => '#22c55e']
         );
 
         $freelanceCategory = Category::firstOrCreate(
-            ['name' => 'Freelance', 'type' => 'income'],
-            ['icon' => 'laptop', 'color' => '#16a34a']
+            ['name' => '#FREELANCE', 'type' => 'income'],
+            ['icon' => '💻', 'color' => '#16a34a']
         );
 
-        // Получаем категории расходов
-        $foodCategory = Category::where('name', 'Food')->where('type', 'expense')->first()
-            ?? Category::create(['name' => 'Food', 'type' => 'expense', 'icon' => 'utensils', 'color' => '#ef4444']);
+        $foodCategory = Category::where('name', '#GROCERIES')->where('type', 'expense')->first()
+            ?? Category::create(['name' => '#GROCERIES', 'type' => 'expense', 'icon' => '🛒', 'color' => '#ef4444']);
 
-        $transportCategory = Category::where('name', 'Transport')->where('type', 'expense')->first()
-            ?? Category::create(['name' => 'Transport', 'type' => 'expense', 'icon' => 'car', 'color' => '#f97316']);
+        $transportCategory = Category::where('name', '#TRANSPORT')->where('type', 'expense')->first()
+            ?? Category::create(['name' => '#TRANSPORT', 'type' => 'expense', 'icon' => '🚗', 'color' => '#f97316']);
 
-        $entertainmentCategory = Category::where('name', 'Entertainment')->where('type', 'expense')->first()
-            ?? Category::create(['name' => 'Entertainment', 'type' => 'expense', 'icon' => 'gamepad', 'color' => '#8b5cf6']);
+        $entertainmentCategory = Category::where('name', '#ENTERTAINMENT')->where('type', 'expense')->first()
+            ?? Category::create(['name' => '#ENTERTAINMENT', 'type' => 'expense', 'icon' => '🎮', 'color' => '#8b5cf6']);
 
-        $utilitiesCategory = Category::where('name', 'Utilities')->where('type', 'expense')->first()
-            ?? Category::create(['name' => 'Utilities', 'type' => 'expense', 'icon' => 'zap', 'color' => '#eab308']);
+        $utilitiesCategory = Category::where('name', '#UTILITIES')->where('type', 'expense')->first()
+            ?? Category::create(['name' => '#UTILITIES', 'type' => 'expense', 'icon' => '⚡', 'color' => '#eab308']);
 
-        $shoppingCategory = Category::where('name', 'Shopping')->where('type', 'expense')->first()
-            ?? Category::create(['name' => 'Shopping', 'type' => 'expense', 'icon' => 'shopping-bag', 'color' => '#ec4899']);
+        $shoppingCategory = Category::where('name', '#SHOPPING')->where('type', 'expense')->first()
+            ?? Category::create(['name' => '#SHOPPING', 'type' => 'expense', 'icon' => '🛍️', 'color' => '#ec4899']);
 
         // Удаляем старые тестовые транзакции (по описанию)
         Transaction::where('description', 'like', '[TEST]%')->delete();

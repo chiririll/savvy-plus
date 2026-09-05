@@ -11,8 +11,10 @@ import {
     FormLabel,
     FormControl,
     FormMessage,
+    FormDescription,
 } from '@/components/ui/form'
 import { categorySchema, CategoryFormData } from '@/schemas'
+import { defaultNameKey, localizeDefaultName, toStoredDefaultName } from '@/lib/localized-name'
 import { TypeSelector } from './TypeSelector'
 import { IconPicker } from './IconPicker'
 import { ColorPicker } from './ColorPicker'
@@ -42,22 +44,31 @@ export function CategoryForm({
     const form = useForm<CategoryFormData>({
         resolver: zodResolver(categorySchema),
         defaultValues: {
-            name: '',
             type: 'expense',
             icon: '🏠',
             color: '#3B82F6',
             ...defaultValues,
+            name: defaultValues?.name ? localizeDefaultName(defaultValues.name) : '',
         },
     })
 
     const watchedValues = form.watch()
+    const storedName = toStoredDefaultName(watchedValues.name ?? '', defaultValues?.name)
+    const isDefaultName = Boolean(defaultNameKey(storedName))
 
     useFormValuesChange(form, onValuesChange)
 
     return (
         <FormWrapper>
         <Form {...form}>
-            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form
+                id={formId}
+                onSubmit={form.handleSubmit((data) => onSubmit({
+                    ...data,
+                    name: toStoredDefaultName(data.name, defaultValues?.name),
+                }))}
+                className="space-y-4"
+            >
                 <FormField
                     control={form.control}
                     name="name"
@@ -67,6 +78,11 @@ export function CategoryForm({
                             <FormControl>
                                 <Input placeholder={t('forms:categories.namePlaceholder')} {...field} />
                             </FormControl>
+                            {isDefaultName && (
+                                <FormDescription>
+                                    {t('forms:categories.defaultNameHelp')}
+                                </FormDescription>
+                            )}
                             <FormMessage />
                         </FormItem>
                     )}

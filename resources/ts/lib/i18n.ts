@@ -8,12 +8,14 @@ import enAuth from '@/locales/en/auth.json'
 import enSettings from '@/locales/en/settings.json'
 import enPages from '@/locales/en/pages.json'
 import enForms from '@/locales/en/forms.json'
+import enDefaults from '@/locales/en/defaults.json'
 import ruCommon from '@/locales/ru/common.json'
 import ruNav from '@/locales/ru/nav.json'
 import ruAuth from '@/locales/ru/auth.json'
 import ruSettings from '@/locales/ru/settings.json'
 import ruPages from '@/locales/ru/pages.json'
 import ruForms from '@/locales/ru/forms.json'
+import ruDefaults from '@/locales/ru/defaults.json'
 
 export const SUPPORTED_LOCALES = ['en', 'ru'] as const
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number]
@@ -29,7 +31,7 @@ export function isAppLocale(value: string): value is AppLocale {
     return (SUPPORTED_LOCALES as readonly string[]).includes(value)
 }
 
-const I18N_NAMESPACES = ['common', 'nav', 'auth', 'settings', 'pages', 'forms'] as const
+const I18N_NAMESPACES = ['common', 'nav', 'auth', 'settings', 'pages', 'forms', 'defaults'] as const
 
 /** BCP 47 tag for Intl formatters. */
 export function intlLocale(locale: string = i18n.resolvedLanguage ?? i18n.language): string {
@@ -60,8 +62,8 @@ void i18n
     .use(initReactI18next)
     .init({
         resources: {
-            en: { common: enCommon, nav: enNav, auth: enAuth, settings: enSettings, pages: enPages, forms: enForms },
-            ru: { common: ruCommon, nav: ruNav, auth: ruAuth, settings: ruSettings, pages: ruPages, forms: ruForms },
+            en: { common: enCommon, nav: enNav, auth: enAuth, settings: enSettings, pages: enPages, forms: enForms, defaults: enDefaults },
+            ru: { common: ruCommon, nav: ruNav, auth: ruAuth, settings: ruSettings, pages: ruPages, forms: ruForms, defaults: ruDefaults },
         },
         fallbackLng: 'en',
         supportedLngs: [...SUPPORTED_LOCALES],

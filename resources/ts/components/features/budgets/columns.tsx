@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress'
 import { RowActions } from '@/components/shared'
 import { Budget } from '@/types'
 import { formatCurrency } from '@/lib/utils'
+import { localizeDefaultName } from '@/lib/localized-name'
 import i18n from '@/lib/i18n'
 
 interface ColumnOptions {
@@ -26,7 +27,7 @@ export const createBudgetColumns = ({
                 <p className="text-xs text-muted-foreground">
                     {row.original.isGlobal
                         ? i18n.t('pages:budgets.allExpenses')
-                        : row.original.categories.map(c => c.name).join(', ') || i18n.t('pages:budgets.noCategories')}
+                        : row.original.categories.map(c => localizeDefaultName(c.name)).join(', ') || i18n.t('pages:budgets.noCategories')}
                 </p>
             </div>
         ),
