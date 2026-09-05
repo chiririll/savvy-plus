@@ -175,23 +175,23 @@ export function BalanceDynamicsChart({ startDate, endDate, className }: BalanceD
     const hasData = Boolean(historyData && historyData.series.length > 0 && historyData.dates.length > 0)
 
     return (
-        <Card className={className}>
+        <Card className={cn('min-w-0', className)}>
             <CardHeader>
                 <CardTitle>{t('dashboard.balanceDynamics')}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="min-w-0">
                 {isLoading ? (
                     <Skeleton className="h-[250px] sm:h-[300px]" />
                 ) : hasData ? (
-                    <div className="space-y-3">
+                    <div className="min-w-0 space-y-3 overflow-x-auto overscroll-x-contain">
                         <ReactECharts
                             key={periodKey}
                             option={chartOption}
-                            style={{ height: '250px' }}
-                            className="sm:[&]:!h-[300px]"
+                            style={{ height: '250px', width: '100%' }}
+                            className="min-w-0 max-w-full sm:[&]:!h-[300px]"
                             opts={{ renderer: 'svg' }}
                         />
-                        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5">
+                        <div className="flex min-w-0 flex-wrap justify-center gap-x-3 gap-y-1.5">
                             {labeledSeries.map((series) => {
                                 const hidden = hiddenKeys.has(series.key)
                                 return (
@@ -201,7 +201,7 @@ export function BalanceDynamicsChart({ startDate, endDate, className }: BalanceD
                                         onClick={() => toggleSeries(series.key)}
                                         aria-pressed={!hidden}
                                         className={cn(
-                                            'inline-flex max-w-full items-center gap-1.5 rounded-md px-1.5 py-0.5 text-xs transition-opacity hover:bg-muted',
+                                            'inline-flex max-w-full min-w-0 items-center gap-1.5 overflow-hidden rounded-md px-1.5 py-0.5 text-xs transition-opacity hover:bg-muted',
                                             hidden && 'opacity-40 line-through',
                                         )}
                                     >
@@ -209,8 +209,8 @@ export function BalanceDynamicsChart({ startDate, endDate, className }: BalanceD
                                             className="size-2 shrink-0 rounded-sm"
                                             style={{ backgroundColor: series.color }}
                                         />
-                                        <span className="truncate">{series.label}</span>
-                                        <span className="font-mono text-muted-foreground">
+                                        <span className="min-w-0 truncate">{series.label}</span>
+                                        <span className="shrink-0 font-mono text-muted-foreground">
                                             {formatCurrency(lastAmount(series), series.currency)}
                                         </span>
                                     </button>

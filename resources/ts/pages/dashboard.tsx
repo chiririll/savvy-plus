@@ -303,8 +303,8 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-6">
+            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
                     <p className="text-muted-foreground">{t('dashboard.welcome')}</p>
@@ -347,16 +347,16 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <Card>
+            <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             {t('dashboard.totalBalance')}
                         </CardTitle>
                         <Wallet className="size-4 text-muted-foreground" />
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-mono">
+                    <CardContent className="min-w-0">
+                        <div className="text-2xl font-bold font-mono break-all">
                             {formatCurrency(totalBalance, currency)}
                         </div>
                         {balanceChange !== null && (
@@ -375,15 +375,15 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             {t('dashboard.income')}
                         </CardTitle>
                         <ArrowDownLeft className="size-4 text-green-600" />
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-mono text-green-600">
+                    <CardContent className="min-w-0">
+                        <div className="text-2xl font-bold font-mono text-green-600 break-all">
                             +{formatCurrency(periodIncome, currency)}
                         </div>
                         {incomeChange !== null && (
@@ -402,15 +402,15 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             {t('dashboard.expenses')}
                         </CardTitle>
                         <ArrowUpRight className="size-4 text-red-600" />
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-mono text-red-600">
+                    <CardContent className="min-w-0">
+                        <div className="text-2xl font-bold font-mono text-red-600 break-all">
                             -{formatCurrency(periodExpense, currency)}
                         </div>
                         {expenseChange !== null && (
@@ -429,17 +429,17 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             {t('dashboard.pending')}
                         </CardTitle>
                         <Clock className="size-4 text-muted-foreground" />
                     </CardHeader>
-                    <CardContent>
-                        <Link to="/transactions?status=pending" className="block">
+                    <CardContent className="min-w-0">
+                        <Link to="/transactions?status=pending" className="block min-w-0">
                             <div className={cn(
-                                'text-2xl font-bold font-mono',
+                                'text-2xl font-bold font-mono break-all',
                                 (pendingSummary?.balance ?? 0) > 0 && 'text-green-600',
                                 (pendingSummary?.balance ?? 0) < 0 && 'text-red-600',
                             )}>
@@ -455,24 +455,24 @@ export default function DashboardPage() {
                 </Card>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="grid min-w-0 gap-4 lg:grid-cols-3">
                 <BalanceDynamicsChart
-                    className="lg:col-span-2"
+                    className="min-w-0 overflow-x-auto lg:col-span-2"
                     startDate={periodDates.start_date}
                     endDate={periodDates.end_date}
                 />
 
-                <Card>
+                <Card className="min-w-0">
                     <CardHeader>
                         <CardTitle>{t('dashboard.accountBalances')}</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="space-y-3">
+                    <CardContent className="min-w-0">
+                        <div className="min-w-0 space-y-3">
                             {accounts && accounts.length > 0 ? (
                                 accounts.map((account) => (
                                     <div
                                         key={account.id}
-                                        className="flex items-center justify-between gap-2"
+                                        className="flex min-w-0 items-center justify-between gap-2"
                                     >
                                         <div className="flex items-center gap-3 min-w-0 flex-1">
                                             {(() => {
@@ -491,9 +491,9 @@ export default function DashboardPage() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="text-right">
-                                                <p className="text-sm font-mono font-medium">
+                                        <div className="flex min-w-0 items-center gap-2">
+                                            <div className="min-w-0 text-right">
+                                                <p className="text-sm font-mono font-medium break-all">
                                                     {formatCurrency(account.currentBalance ?? 0, account.currency, { showSymbol: false })}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
@@ -540,18 +540,21 @@ export default function DashboardPage() {
                 </Card>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-2">
-                <Card>
+            <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+                <Card className="min-w-0">
                     <CardHeader>
                         <CardTitle>{t('dashboard.expensesByCategory')}</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="min-w-0">
                         {expensesByCategory && expensesByCategory.data.some((c) => (c.totalAmount ?? 0) > 0) ? (
-                            <ReactECharts
-                                option={pieChartOption}
-                                style={{ height: '280px' }}
-                                opts={{ renderer: 'svg' }}
-                            />
+                            <div className="min-w-0 overflow-x-auto overscroll-x-contain">
+                                <ReactECharts
+                                    option={pieChartOption}
+                                    style={{ height: '280px', width: '100%' }}
+                                    className="min-w-0 max-w-full"
+                                    opts={{ renderer: 'svg' }}
+                                />
+                            </div>
                         ) : (
                             <div className="flex items-center justify-center h-[280px] text-muted-foreground">
                                 {t('dashboard.noDataPeriod')}
@@ -560,9 +563,9 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between gap-2">
-                        <CardTitle className="truncate">{t('dashboard.recentTransactions')}</CardTitle>
+                <Card className="min-w-0">
+                    <CardHeader className="flex min-w-0 flex-row items-center justify-between gap-2">
+                        <CardTitle className="min-w-0 truncate">{t('dashboard.recentTransactions')}</CardTitle>
                         <Button variant="ghost" size="sm" asChild className="shrink-0">
                             <Link to="/transactions">
                                 <span className="hidden sm:inline">{tCommon('actions.viewAll')}</span>
@@ -571,15 +574,15 @@ export default function DashboardPage() {
                             </Link>
                         </Button>
                     </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
+                    <CardContent className="min-w-0">
+                        <div className="min-w-0 space-y-4 overflow-x-auto overscroll-x-contain">
                             {recentTransactions?.data && recentTransactions.data.length > 0 ? (
                                 recentTransactions.data.map((transaction) => (
                                     <div
                                         key={transaction.id}
-                                        className="flex items-center justify-between gap-3"
+                                        className="flex min-w-0 items-center justify-between gap-3"
                                     >
-                                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                                        <div className="flex min-w-0 flex-1 items-center gap-3">
                                             <div
                                                 className="flex size-9 shrink-0 items-center justify-center rounded-lg"
                                                 style={{
@@ -605,9 +608,9 @@ export default function DashboardPage() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="text-right shrink-0">
+                                        <div className="min-w-0 text-right">
                                             <p
-                                                className={`text-sm font-mono font-medium ${getTransactionColor(transaction.type)}`}
+                                                className={`text-sm font-mono font-medium break-all ${getTransactionColor(transaction.type)}`}
                                             >
                                                 {getTransactionSign(transaction.type)}
                                                 {formatCurrency(transaction.amount, transaction.account.currency, { showSymbol: false })}
@@ -628,10 +631,10 @@ export default function DashboardPage() {
                 </Card>
             </div>
 
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                        <PiggyBank className="size-5" />
+            <Card className="min-w-0">
+                <CardHeader className="flex min-w-0 flex-row items-center justify-between gap-2">
+                    <CardTitle className="flex min-w-0 items-center gap-2">
+                        <PiggyBank className="size-5 shrink-0" />
                         {t('dashboard.budgets')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
@@ -641,9 +644,9 @@ export default function DashboardPage() {
                         </Link>
                     </Button>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="min-w-0">
                     {activeBudgets.length > 0 ? (
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             {activeBudgets.map((budget) => {
                                 const progress = budget.progress
                                 const percent = progress ? Math.min(progress.percent, 100) : 0
@@ -693,10 +696,10 @@ export default function DashboardPage() {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                        <HandCoins className="size-5" />
+            <Card className="min-w-0">
+                <CardHeader className="flex min-w-0 flex-row items-center justify-between gap-2">
+                    <CardTitle className="flex min-w-0 items-center gap-2">
+                        <HandCoins className="size-5 shrink-0" />
                         {t('dashboard.debts')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
@@ -706,17 +709,17 @@ export default function DashboardPage() {
                         </Link>
                     </Button>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="min-w-0">
                     {debtSummary && (debtSummary.total_i_owe > 0 || debtSummary.total_owed_to_me > 0) ? (
-                        <div className="space-y-4">
-                            <div className="grid gap-4 sm:grid-cols-3">
+                        <div className="min-w-0 space-y-4">
+                            <div className="grid min-w-0 gap-4 sm:grid-cols-3">
                                 <div className="flex items-center gap-3 p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
                                     <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
                                         <TrendingDown className="size-4 text-red-600" />
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">{t('debts.types.i_owe')}</p>
-                                        <p className="font-mono font-semibold text-red-600">
+                                        <p className="font-mono font-semibold text-red-600 break-all">
                                             {formatCurrency(debtSummary.total_i_owe, debtSummary.currency)}
                                         </p>
                                     </div>
@@ -727,7 +730,7 @@ export default function DashboardPage() {
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">{t('debts.types.owed_to_me')}</p>
-                                        <p className="font-mono font-semibold text-green-600">
+                                        <p className="font-mono font-semibold text-green-600 break-all">
                                             {formatCurrency(debtSummary.total_owed_to_me, debtSummary.currency)}
                                         </p>
                                     </div>
@@ -742,7 +745,7 @@ export default function DashboardPage() {
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">{t('debts.netPosition')}</p>
-                                        <p className={`font-mono font-semibold ${debtSummary.net_debt >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        <p className={`font-mono font-semibold break-all ${debtSummary.net_debt >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                             {formatCurrency(Math.abs(debtSummary.net_debt), debtSummary.currency)}
                                         </p>
                                     </div>
