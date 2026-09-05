@@ -130,21 +130,24 @@ class UpdateTransactionRequest extends FormRequest
             return;
         }
 
-        // Calculate available balance
-        // Current balance already reflects the original transaction
-        $currentBalance = $account->current_balance;
-
-        // If same account, add back the original amount (if it was expense/transfer)
+        // Current balance already reflects the original transaction. Only the
+        // amount delta (new outflow minus what is already applied) is checked.
+        $alreadyApplied = 0.0;
         if ($newAccountId == $originalAccountId) {
             if (in_array($originalType, [TransactionType::Expense->value, TransactionType::Transfer->value])) {
-                $currentBalance += $originalAmount;
+                $alreadyApplied = $originalAmount;
             } elseif ($originalType === TransactionType::Income->value) {
-                $currentBalance -= $originalAmount;
+                $alreadyApplied = -$originalAmount;
             }
         }
 
-        if ($currentBalance < $newAmount) {
-            $validator->errors()->add('amount', __('messages.validation.insufficient_funds', ['available' => number_format($currentBalance, 2)]));
+        $delta = $newAmount - $alreadyApplied;
+        $available = $account->current_balance;
+
+        if ($available < $delta) {
+            $validator->errors()->add('amount', __('messages.validation.insufficient_funds', [
+                'available' => number_format($available + $alreadyApplied, 2),
+            ]));
         }
     }
 }

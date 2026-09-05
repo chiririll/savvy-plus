@@ -80,6 +80,44 @@ function TransactionBalanceHint({
     )
 }
 
+const SOURCE_SIGN = { income: 1, expense: -1, transfer: -1 } as const
+
+type BalanceImpact = {
+    type?: keyof typeof SOURCE_SIGN
+    amount: number
+    accountId?: number | null
+    toAccountId?: number | null
+    toAmount?: number
+}
+
+function impactOn(
+    accountId: number,
+    tx: BalanceImpact,
+    side: 'source' | 'destination',
+): number {
+    if (side === 'destination') {
+        return tx.type === 'transfer' && tx.toAccountId === accountId
+            ? (tx.toAmount ?? tx.amount)
+            : 0
+    }
+
+    return tx.accountId === accountId && tx.type
+        ? SOURCE_SIGN[tx.type] * tx.amount
+        : 0
+}
+
+function projectedBalance(
+    current: number,
+    accountId: number,
+    next: BalanceImpact,
+    posted: BalanceImpact | null,
+    side: 'source' | 'destination',
+): number {
+    return current
+        - (posted ? impactOn(accountId, posted, side) : 0)
+        + impactOn(accountId, next, side)
+}
+
 interface TransactionFormProps {
     defaultValues?: Partial<TransactionFormValues>
     onSubmit: (data: TransactionFormValues) => void
@@ -89,6 +127,8 @@ interface TransactionFormProps {
     submitLabel?: string
     formId?: string
     hideSubmit?: boolean
+    isEdit?: boolean
+    originalAffectsBalance?: boolean
     onPreviewChange?: (preview: ReactNode) => void
 }
 
@@ -101,6 +141,8 @@ export function TransactionForm({
     submitLabel,
     formId,
     hideSubmit,
+    isEdit,
+    originalAffectsBalance,
     onPreviewChange,
 }: TransactionFormProps) {
     const { t } = useTranslation(['common', 'forms'])
@@ -244,20 +286,38 @@ export function TransactionForm({
         }
     }, [transactionType, sameTransferCurrency, amount, form])
 
-    // Calculate balance preview
+    const original = useMemo((): BalanceImpact | null => {
+        if (!isEdit || !originalAffectsBalance) return null
+        return {
+            type: defaultValues?.type,
+            amount: Number(defaultValues?.amount) || 0,
+            accountId: defaultValues?.account_id,
+            toAccountId: defaultValues?.to_account_id ?? null,
+            toAmount: Number(defaultValues?.to_amount) || Number(defaultValues?.amount) || 0,
+        }
+    }, [
+        isEdit,
+        originalAffectsBalance,
+        defaultValues?.type,
+        defaultValues?.amount,
+        defaultValues?.account_id,
+        defaultValues?.to_account_id,
+        defaultValues?.to_amount,
+    ])
+
+    const nextImpact = useMemo((): BalanceImpact => ({
+        type: transactionType,
+        amount: Number(amount) || 0,
+        accountId: Number(accountId) || null,
+        toAccountId: Number(toAccountId) || null,
+        toAmount: Number(toAmount) || Number(amount) || 0,
+    }), [transactionType, amount, accountId, toAccountId, toAmount])
+
     const balancePreview = useMemo(() => {
         if (!selectedAccount) return null
 
         const currentBalance = selectedAccount.currentBalance
-        const txAmount = Number(amount) || 0
-
-        let newBalance = currentBalance
-        if (transactionType === 'income') {
-            newBalance = currentBalance + txAmount
-        } else if (transactionType === 'expense' || transactionType === 'transfer') {
-            newBalance = currentBalance - txAmount
-        }
-
+        const newBalance = projectedBalance(currentBalance, selectedAccount.id, nextImpact, original, 'source')
         const insufficientFunds = (transactionType === 'expense' || transactionType === 'transfer') && newBalance < 0
 
         return {
@@ -266,22 +326,20 @@ export function TransactionForm({
             insufficientFunds,
             currency: selectedAccount.currency,
         }
-    }, [selectedAccount, amount, transactionType])
+    }, [selectedAccount, nextImpact, original, transactionType])
 
-    // Balance preview for destination account (transfer)
     const toBalancePreview = useMemo(() => {
         if (!selectedToAccount || transactionType !== 'transfer') return null
 
         const currentBalance = selectedToAccount.currentBalance
-        const txAmount = Number(toAmount) || Number(amount) || 0
-        const newBalance = currentBalance + txAmount
+        const newBalance = projectedBalance(currentBalance, selectedToAccount.id, nextImpact, original, 'destination')
 
         return {
             currentBalance,
             newBalance,
             currency: selectedToAccount.currency,
         }
-    }, [selectedToAccount, toAmount, amount, transactionType])
+    }, [selectedToAccount, nextImpact, original, transactionType])
 
     const balanceHint = (
         <TransactionBalanceHint

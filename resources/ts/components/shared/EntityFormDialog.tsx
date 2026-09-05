@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { FormDialog } from './FormDialog'
 import { useCreateFormDraft } from '@/hooks/use-create-form-draft'
 
@@ -53,6 +53,10 @@ export function EntityFormDialog<TEntity extends { id?: string | number }, TForm
         isSubmitting,
         entityKey: entity?.id,
     })
+    const defaultValues = useMemo(
+        () => (entity ? toFormValues(entity) : (draft ?? fallbackValues)),
+        [entity, toFormValues, draft, fallbackValues],
+    )
 
     return (
         <FormDialog
@@ -70,7 +74,7 @@ export function EntityFormDialog<TEntity extends { id?: string | number }, TForm
                 formKey,
                 isEdit,
                 formProps: {
-                    defaultValues: entity ? toFormValues(entity) : (draft ?? fallbackValues),
+                    defaultValues,
                     onValuesChange,
                     formId,
                     onSubmit,

@@ -61,10 +61,12 @@ export function TransactionFormDialog({
             fallbackValues={defaultValues}
             toFormValues={toTransactionFormValues}
         >
-            {({ formKey, formProps }) => (
+            {({ formKey, formProps, isEdit }) => (
                 <TransactionForm
                     key={formKey}
                     {...formProps}
+                    isEdit={isEdit}
+                    originalAffectsBalance={transaction?.status === 'confirmed'}
                     onPreviewChange={setPreview}
                 />
             )}
