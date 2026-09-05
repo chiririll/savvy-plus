@@ -101,10 +101,12 @@ it('confirms a pending transaction and deducts the amount', function () {
     ], $user);
 
     $id = $created->json('data.id');
+    $today = now()->toDateString();
 
-    callAs('POST', "/api/transactions/{$id}/confirm", [], $user)
+    callAs('POST', "/api/transactions/{$id}/confirm", ['date' => $today], $user)
         ->assertOk()
-        ->assertJsonPath('data.status', 'confirmed');
+        ->assertJsonPath('data.status', 'confirmed')
+        ->assertJsonPath('data.date', $today);
 
     expect((float) $account->fresh()->current_balance)->toBe(925.0);
 });
@@ -665,6 +667,92 @@ it('duplicates an undated pending transaction as pending without a date', functi
         ->assertJsonPath('data.recurringTransactionId', null);
 
     expect((float) $account->fresh()->current_balance)->toBe(1000.0);
+});
+
+it('rejects confirming a pending transaction with a future date', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+    $future = now()->addDays(3)->toDateString();
+
+    $created = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 30,
+        'date' => $future,
+    ], $user)->assertCreated();
+
+    $id = $created->json('data.id');
+
+    callAs('POST', "/api/transactions/{$id}/confirm", ['date' => $future], $user)
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['date']);
+
+    expect((float) $account->fresh()->current_balance)->toBe(1000.0)
+        ->and(Transaction::query()->find($id)->status->value)->toBe('pending');
+});
+
+it('rejects confirming a future-dated pending transaction without a new date', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    $created = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 22,
+        'date' => now()->addDay()->toDateString(),
+    ], $user)->assertCreated();
+
+    $id = $created->json('data.id');
+
+    callAs('POST', "/api/transactions/{$id}/confirm", [], $user)
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['date']);
+
+    expect((float) $account->fresh()->current_balance)->toBe(1000.0);
+});
+
+it('rejects updating a confirmed transaction to a future date', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    $created = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 12,
+        'date' => now()->toDateString(),
+    ], $user)->assertCreated()->assertJsonPath('data.status', 'confirmed');
+
+    $id = $created->json('data.id');
+
+    callAs('PUT', "/api/transactions/{$id}", [
+        'date' => now()->addDay()->toDateString(),
+    ], $user)
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['date']);
+
+    expect(Transaction::query()->find($id)->date?->toDateString())->toBe(now()->toDateString());
+});
+
+it('rejects creating a confirmed transaction with a future date', function () {
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    expect(fn () => app(App\Services\TransactionService::class)->create(
+        App\DTOs\TransactionData::fromArray([
+            'type' => 'expense',
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+            'amount' => 14,
+            'date' => now()->addDay()->toDateString(),
+            'status' => 'confirmed',
+        ])
+    ))->toThrow(\DomainException::class, __('messages.transactions.date_cannot_be_future'));
 });
 
 it('no longer registers the recurring process command', function () {

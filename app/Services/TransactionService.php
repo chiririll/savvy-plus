@@ -11,6 +11,7 @@ use App\Enums\TriggerType;
 use App\Models\Account;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
+use App\Support\TransactionDates;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -117,6 +118,10 @@ class TransactionService
         $applyDate = $date ?: $transaction->date?->toDateString();
         if (! $applyDate) {
             throw new DomainException(__('messages.transactions.date_required_to_confirm'));
+        }
+
+        if (TransactionDates::isFuture($applyDate)) {
+            throw new DomainException(__('messages.transactions.date_cannot_be_future'));
         }
 
         $this->assertSufficientFunds($transaction);
@@ -280,7 +285,7 @@ class TransactionService
 
     public function resolveStatusForDate(?string $date): TransactionStatus
     {
-        if (! $date || $date > now()->toDateString()) {
+        if (! $date || TransactionDates::isFuture($date)) {
             return TransactionStatus::Pending;
         }
 
@@ -303,6 +308,11 @@ class TransactionService
             $prepared['recurring_transaction_id'] = $data->recurringTransactionId;
         }
 
+        $this->assertConfirmedDateIsNotFuture(
+            $prepared['date'] ?? null,
+            $prepared['status'] ?? $existing?->status,
+        );
+
         if ($data->type->isTransfer()) {
             $prepared['to_account_id'] = $data->toAccountId;
             $prepared['to_amount'] = $data->toAmount ?? $this->calculateToAmount($data);
@@ -314,6 +324,21 @@ class TransactionService
         }
 
         return $prepared;
+    }
+
+    private function assertConfirmedDateIsNotFuture(?string $date, ?TransactionStatus $status): void
+    {
+        if ($status !== TransactionStatus::Confirmed) {
+            return;
+        }
+
+        if (! $date) {
+            throw new DomainException(__('messages.transactions.date_required'));
+        }
+
+        if (TransactionDates::isFuture($date)) {
+            throw new DomainException(__('messages.transactions.date_cannot_be_future'));
+        }
     }
 
     private function assertSufficientFunds(Transaction $transaction): void

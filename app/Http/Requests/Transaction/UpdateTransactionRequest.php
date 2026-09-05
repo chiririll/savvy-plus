@@ -11,6 +11,7 @@ use Illuminate\Validation\Validator;
 class UpdateTransactionRequest extends FormRequest
 {
     use NormalizesNullableDate;
+    use RejectsFutureConfirmedDate;
 
     public function authorize(): bool
     {
@@ -127,7 +128,11 @@ class UpdateTransactionRequest extends FormRequest
 
         if (! $date) {
             $validator->errors()->add('date', __('messages.transactions.date_required'));
+
+            return;
         }
+
+        $this->rejectFutureConfirmedDate($validator, $date);
     }
 
     private function validateSufficientFunds(Validator $validator): void

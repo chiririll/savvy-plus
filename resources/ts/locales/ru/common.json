@@ -73,6 +73,7 @@
         "selectDebtType": "Выберите тип долга",
         "selectIcon": "Выберите иконку",
         "dateRequired": "Укажите дату",
+        "dateCannotBeFuture": "Дата не может быть в будущем",
         "amountRequired": "Укажите сумму",
         "amountPositive": "Сумма должна быть больше нуля",
         "amountGreaterThanZero": "Сумма должна быть больше нуля",

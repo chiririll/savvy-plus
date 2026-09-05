@@ -181,7 +181,7 @@ export function DebtPaymentDialog({
                                 <FormItem>
                                     <FormLabel>{t('common:fields.date')}</FormLabel>
                                     <FormControl>
-                                        <Input type="date" {...field} />
+                                        <Input type="date" max={formatDateLocal()} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

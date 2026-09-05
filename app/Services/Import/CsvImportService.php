@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Currency;
 use App\Models\Tag;
 use App\Models\Upload;
+use App\Support\TransactionDates;
 use App\Services\Upload\UploadManager;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -444,6 +445,12 @@ class CsvImportService
 
             if (! $result['date']) {
                 $result['error'] = __('messages.import.invalid_date', ['value' => $dateValue]);
+
+                return $result;
+            }
+
+            if (TransactionDates::isFuture($result['date'])) {
+                $result['error'] = __('messages.import.date_in_future');
 
                 return $result;
             }

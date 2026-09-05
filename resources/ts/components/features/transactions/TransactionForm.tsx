@@ -13,7 +13,7 @@ import {
     FormControl,
     FormMessage,
 } from '@/components/ui/form'
-import { transactionSchema, TransactionFormValues } from '@/schemas/transactions'
+import { getTransactionSchema, TransactionFormValues } from '@/schemas/transactions'
 import { useAccounts, useCategories, useFormValuesChange, useTransactionPartyDefaults } from '@/hooks'
 import { cn, formatCurrency, formatDateLocal, isDateInFuture } from '@/lib/utils'
 import { Plus, Trash2, X } from 'lucide-react'
@@ -171,7 +171,9 @@ export function TransactionForm({
     }, [defaultValues])
 
     const form = useForm<TransactionFormValues>({
-        resolver: schemaResolver<TransactionFormValues>(transactionSchema),
+        resolver: schemaResolver<TransactionFormValues>(
+            getTransactionSchema({ rejectFutureDate: Boolean(originalAffectsBalance) }),
+        ),
         defaultValues: formDefaults,
     })
 
@@ -188,6 +190,7 @@ export function TransactionForm({
     const amount = useWatch({ control: form.control, name: 'amount' })
     const date = useWatch({ control: form.control, name: 'date' })
     const dateRequired = Boolean(originalAffectsBalance)
+    const today = formatDateLocal()
     const isPendingDate = !date || isDateInFuture(date)
     const toAccountId = useWatch({ control: form.control, name: 'to_account_id' })
     const toAmount = useWatch({ control: form.control, name: 'to_amount' })
@@ -434,6 +437,7 @@ export function TransactionForm({
                                             {...field}
                                             value={field.value || ''}
                                             required={dateRequired}
+                                            max={dateRequired ? today : undefined}
                                         />
                                     </FormControl>
                                     {!dateRequired && field.value && (

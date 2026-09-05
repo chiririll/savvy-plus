@@ -4,6 +4,7 @@ namespace App\DTOs;
 
 use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
+use App\Support\TransactionDates;
 
 readonly class TransactionData
 {
@@ -55,10 +56,6 @@ readonly class TransactionData
             return null;
         }
 
-        if ($date instanceof \DateTimeInterface) {
-            return $date->format('Y-m-d');
-        }
-
-        return (string) $date;
+        return TransactionDates::normalize($date);
     }
 }

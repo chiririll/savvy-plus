@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { formatDateLocal, isDateOverdue, parseDateKey } from '@/lib/dates'
+import { formatDateLocal, isDateInFuture, isDateOverdue, parseDateKey } from '@/lib/dates'
 import { intlLocale } from '@/lib/i18n'
 import { Transaction } from '@/types'
 
@@ -40,8 +40,10 @@ export function ApplyDeferredDateDialog({
     const { t: tCommon } = useTranslation('common')
     const groupId = useId()
     const originalDate = transaction?.date ?? null
+    const originalIsUsable = Boolean(originalDate) && !isDateInFuture(originalDate)
+    const today = formatDateLocal()
     const [choice, setChoice] = useState<ApplyDateChoice>('today')
-    const [customDate, setCustomDate] = useState(formatDateLocal())
+    const [customDate, setCustomDate] = useState(today)
 
     useEffect(() => {
         if (!open) {
@@ -53,16 +55,19 @@ export function ApplyDeferredDateDialog({
     }, [open, transaction?.id])
 
     const selectedDate = choice === 'today'
-        ? formatDateLocal()
+        ? today
         : choice === 'original'
             ? originalDate
             : customDate
 
-    const canSubmit = Boolean(selectedDate) && !isSubmitting
+    const canSubmit = Boolean(selectedDate)
+        && !isDateInFuture(selectedDate)
+        && !(choice === 'original' && !originalIsUsable)
+        && !isSubmitting
 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault()
-        if (!selectedDate) {
+        if (!selectedDate || isDateInFuture(selectedDate)) {
             return
         }
         onConfirm(selectedDate)
@@ -97,7 +102,7 @@ export function ApplyDeferredDateDialog({
                             </span>
                         </label>
 
-                        {originalDate ? (
+                        {originalIsUsable ? (
                             <label className="flex items-start gap-3 rounded-md border p-3 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring">
                                 <input
                                     type="radio"
@@ -139,6 +144,7 @@ export function ApplyDeferredDateDialog({
                                             type="date"
                                             value={customDate}
                                             onChange={(event) => setCustomDate(event.target.value)}
+                                            max={today}
                                             required
                                         />
                                     </div>

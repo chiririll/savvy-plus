@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import i18n from '@/lib/i18n'
+import { isDateInFuture } from '@/lib/dates'
 
 export const transactionItemSchema = z.object({
     name: z.string().min(1, i18n.t('validation.nameRequired')).max(255),
@@ -82,6 +83,18 @@ export const transactionSchema = z.object({
         }
     }
 })
+
+export function getTransactionSchema(options?: { rejectFutureDate?: boolean }) {
+    return transactionSchema.superRefine((data, ctx) => {
+        if (options?.rejectFutureDate && data.date && isDateInFuture(data.date)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: i18n.t('validation.dateCannotBeFuture'),
+                path: ['date'],
+            })
+        }
+    })
+}
 
 export type TransactionFormValues = z.infer<typeof transactionSchema>
 export type TransactionItemFormValues = z.infer<typeof transactionItemSchema>
