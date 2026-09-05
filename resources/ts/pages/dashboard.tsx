@@ -30,9 +30,10 @@ import {
     TrendingUp,
 } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
-import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
+import { useTotalBalance, useTransactions, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
 import { useOverviewMetrics } from '@/hooks/use-reports'
-import { cn, formatCurrency, formatCurrencyCompact, formatDateLocal, formatYearMonth, addDaysLocal } from '@/lib/utils'
+import { cn, formatCurrency, formatDateLocal, formatYearMonth, addDaysLocal } from '@/lib/utils'
+import { BalanceDynamicsChart } from '@/components/features/accounts'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
@@ -42,7 +43,7 @@ import { useTheme } from '@/hooks/use-theme'
 import { Link } from 'react-router-dom'
 import { useCreateTransactionDialog } from '@/components/features/transactions'
 import { Transaction, AccountType } from '@/types'
-import { ACCOUNT_TYPE_CONFIG, CHART_COLORS, CATEGORY_COLORS } from '@/constants'
+import { ACCOUNT_TYPE_CONFIG, CATEGORY_COLORS } from '@/constants'
 import { DEFAULT_FILTERS, type ReportFilters } from '@/pages/reports/types'
 
 type PeriodPreset = 'last_30_days' | 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'custom'
@@ -180,7 +181,6 @@ export default function DashboardPage() {
     )
 
     const { data: recentTransactions } = useTransactions({ per_page: 5, status: 'confirmed' })
-    const { data: historyData } = useBalanceHistory(periodDates)
     const { data: expensesByCategory } = useCategorySummary({
         type: 'expense',
         ...periodDates,
@@ -228,102 +228,6 @@ export default function DashboardPage() {
         if (previous === 0) return 100
         return ((current - previous) / previous) * 100
     }, [overviewData])
-
-    const balanceChartOption = useMemo(() => {
-        if (!historyData || !historyData.series.length) return {}
-
-        const isDark = theme === 'dark'
-
-        const seriesName = (s: (typeof historyData.series)[number]) =>
-            s.type === 'total' ? t('reports.series.total') : s.name
-
-        const series = historyData.series.map((s, index) => {
-            const isTotal = s.type === 'total'
-            const color = isTotal ? '#6366f1' : CHART_COLORS[index % CHART_COLORS.length]
-
-            return {
-                name: seriesName(s),
-                type: 'line',
-                smooth: true,
-                data: s.data,
-                lineStyle: {
-                    color,
-                    width: isTotal ? 3 : 2,
-                },
-                itemStyle: { color },
-                areaStyle: isTotal
-                    ? {
-                          color: {
-                              type: 'linear',
-                              x: 0,
-                              y: 0,
-                              x2: 0,
-                              y2: 1,
-                              colorStops: [
-                                  { offset: 0, color: 'rgba(99, 102, 241, 0.2)' },
-                                  { offset: 1, color: 'rgba(99, 102, 241, 0.02)' },
-                              ],
-                          },
-                      }
-                    : undefined,
-                emphasis: { focus: 'series' },
-            }
-        })
-
-        // Determine label format based on date range
-        const daysDiff = historyData.dates.length
-        const formatLabel = (d: string) => {
-            const date = new Date(d)
-            if (daysDiff > 90) {
-                return `${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear().toString().slice(2)}`
-            }
-            return `${date.getDate()}.${String(date.getMonth() + 1).padStart(2, '0')}`
-        }
-
-        return {
-            tooltip: {
-                trigger: 'axis',
-                backgroundColor: isDark ? '#1f2937' : '#ffffff',
-                borderColor: isDark ? '#374151' : '#e5e7eb',
-                textStyle: { color: isDark ? '#f3f4f6' : '#1f2937' },
-            },
-            legend: {
-                data: historyData.series.map(seriesName),
-                bottom: 0,
-                textStyle: { color: isDark ? '#9ca3af' : '#6b7280' },
-                icon: 'roundRect',
-                itemWidth: 14,
-                itemHeight: 8,
-            },
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '15%',
-                top: '10%',
-                containLabel: true,
-            },
-            xAxis: {
-                type: 'category',
-                boundaryGap: false,
-                data: historyData.dates.map(formatLabel),
-                axisLine: { lineStyle: { color: isDark ? '#374151' : '#e5e7eb' } },
-                axisLabel: {
-                    color: isDark ? '#9ca3af' : '#6b7280',
-                    interval: daysDiff > 60 ? Math.floor(daysDiff / 10) : 'auto',
-                },
-            },
-            yAxis: {
-                type: 'value',
-                axisLine: { show: false },
-                splitLine: { lineStyle: { color: isDark ? '#374151' : '#e5e7eb' } },
-                axisLabel: {
-                    color: isDark ? '#9ca3af' : '#6b7280',
-                    formatter: (value: number) => formatCurrencyCompact(value, currency, { showSymbol: false }),
-                },
-            },
-            series,
-        }
-    }, [historyData, theme, currency, t])
 
     const pieChartOption = useMemo(() => {
         if (!expensesByCategory?.data.length) return {}
@@ -521,25 +425,11 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-3">
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>{t('dashboard.balanceDynamics')}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {historyData && historyData.series.length > 0 ? (
-                            <ReactECharts
-                                option={balanceChartOption}
-                                style={{ height: '250px' }}
-                                className="sm:[&]:!h-[300px]"
-                                opts={{ renderer: 'svg' }}
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center h-[250px] sm:h-[300px] text-muted-foreground">
-                                {t('dashboard.noDataPeriod')}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                <BalanceDynamicsChart
+                    className="lg:col-span-2"
+                    startDate={periodDates.start_date}
+                    endDate={periodDates.end_date}
+                />
 
                 <Card>
                     <CardHeader>
