@@ -46,7 +46,9 @@
         "total": "Total",
         "itemName": "Item name",
         "noItems": "No items. Click \"Add item\" or enter amount manually.",
-        "pendingHint": "This date is in the future. The transaction will stay pending and will not change the balance until you confirm it."
+        "pendingHint": "This date is in the future. The transaction will stay pending and will not change the balance until you confirm it.",
+        "noDateHint": "No date set. The transaction will stay pending and will not change the balance until you confirm it.",
+        "dateOptionalHelp": "Leave empty to defer without a specific date."
     },
     "currencies": {
         "code": "Code",

@@ -411,6 +411,262 @@ it('rejects editing or duplicating a recurring pending occurrence', function () 
     callAs('POST', "/api/transactions/{$pending->id}/duplicate", [], $user)->assertStatus(422);
 });
 
+it('creates a pending transaction without a date and does not change balance', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    $response = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 40,
+        'date' => null,
+    ], $user);
+
+    $response->assertCreated()
+        ->assertJsonPath('data.status', 'pending')
+        ->assertJsonPath('data.date', null);
+
+    expect((float) $account->fresh()->current_balance)->toBe(1000.0);
+});
+
+it('rejects confirming an undated pending transaction without a date', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    $created = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 40,
+    ], $user);
+
+    $id = $created->json('data.id');
+
+    callAs('POST', "/api/transactions/{$id}/confirm", [], $user)
+        ->assertStatus(422);
+
+    expect((float) $account->fresh()->current_balance)->toBe(1000.0);
+});
+
+it('confirms an undated pending transaction with a chosen date', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+    $date = now()->subDay()->toDateString();
+
+    $created = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 60,
+    ], $user);
+
+    $id = $created->json('data.id');
+
+    callAs('POST', "/api/transactions/{$id}/confirm", ['date' => $date], $user)
+        ->assertOk()
+        ->assertJsonPath('data.status', 'confirmed')
+        ->assertJsonPath('data.date', $date);
+
+    expect((float) $account->fresh()->current_balance)->toBe(940.0);
+});
+
+it('confirms a dated pending transaction using today and persists that date', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+    $today = now()->toDateString();
+    $original = now()->subDays(5)->toDateString();
+
+    $created = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 25,
+        'date' => now()->addDays(2)->toDateString(),
+    ], $user);
+
+    $id = $created->json('data.id');
+
+    Transaction::query()->whereKey($id)->update(['date' => $original]);
+
+    callAs('POST', "/api/transactions/{$id}/confirm", ['date' => $today], $user)
+        ->assertOk()
+        ->assertJsonPath('data.status', 'confirmed')
+        ->assertJsonPath('data.date', $today);
+
+    expect((float) $account->fresh()->current_balance)->toBe(975.0);
+});
+
+it('clears the date on a pending transaction and keeps it pending', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    $created = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 15,
+        'date' => now()->addDay()->toDateString(),
+    ], $user);
+
+    $id = $created->json('data.id');
+
+    callAs('PUT', "/api/transactions/{$id}", [
+        'date' => null,
+    ], $user)
+        ->assertOk()
+        ->assertJsonPath('data.status', 'pending')
+        ->assertJsonPath('data.date', null);
+});
+
+it('rejects clearing the date on a confirmed transaction', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    $created = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 10,
+        'date' => now()->toDateString(),
+    ], $user);
+
+    $id = $created->json('data.id');
+
+    callAs('PUT', "/api/transactions/{$id}", [
+        'date' => null,
+    ], $user)->assertStatus(422);
+});
+
+it('lists undated pending transactions without treating them as epoch', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 12,
+        'date' => now()->addDays(2)->toDateString(),
+    ], $user)->assertCreated();
+
+    $undated = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 8,
+    ], $user)->assertCreated();
+
+    $response = callAs('GET', '/api/transactions?status=pending&sort_by=date&sort_direction=asc', [], $user);
+
+    $response->assertOk();
+    expect($response->json('data'))->toHaveCount(2)
+        ->and($response->json('data.0.date'))->not->toBeNull()
+        ->and($response->json('data.1.id'))->toBe($undated->json('data.id'))
+        ->and($response->json('data.1.date'))->toBeNull();
+});
+
+it('includes undated pending transactions in upcoming date-bounded lists', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 8,
+    ], $user)->assertCreated();
+
+    $response = callAs('GET', '/api/transactions?status=pending&end_date='.now()->addDays(7)->toDateString(), [], $user);
+
+    $response->assertOk();
+    expect($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.date'))->toBeNull();
+});
+
+it('summarizes pending amounts in the base currency', function () {
+    $user = pendingUser();
+    $usd = pendingCurrency();
+    $eur = Currency::create([
+        'code' => 'EUR',
+        'name' => 'Euro',
+        'symbol' => '€',
+        'decimals' => 2,
+        'is_base' => false,
+        'rate' => 2,
+    ]);
+    $cash = pendingAccount($usd);
+    $euroAccount = pendingAccount($eur, 500);
+    $category = pendingCategory();
+    $incomeCategory = Category::create([
+        'name' => 'Salary',
+        'type' => 'income',
+        'icon' => '💼',
+        'color' => '#22c55e',
+    ]);
+
+    callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $cash->id,
+        'category_id' => $category->id,
+        'amount' => 10,
+    ], $user)->assertCreated();
+
+    callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $euroAccount->id,
+        'category_id' => $category->id,
+        'amount' => 5,
+    ], $user)->assertCreated();
+
+    callAs('POST', '/api/transactions', [
+        'type' => 'income',
+        'account_id' => $cash->id,
+        'category_id' => $incomeCategory->id,
+        'amount' => 4,
+        'date' => now()->addDay()->toDateString(),
+    ], $user)->assertCreated();
+
+    $response = callAs('GET', '/api/transactions-pending-summary', [], $user);
+
+    $response->assertOk()
+        ->assertJsonPath('income', 4)
+        ->assertJsonPath('expense', 20)
+        ->assertJsonPath('balance', -16)
+        ->assertJsonPath('transactions_count', 3)
+        ->assertJsonPath('currency', 'USD');
+});
+
+it('duplicates an undated pending transaction as pending without a date', function () {
+    $user = pendingUser();
+    $account = pendingAccount(pendingCurrency());
+    $category = pendingCategory();
+
+    $created = callAs('POST', '/api/transactions', [
+        'type' => 'expense',
+        'account_id' => $account->id,
+        'category_id' => $category->id,
+        'amount' => 18,
+    ], $user);
+
+    $response = callAs('POST', '/api/transactions/'.$created->json('data.id').'/duplicate', [], $user);
+
+    $response->assertCreated()
+        ->assertJsonPath('data.status', 'pending')
+        ->assertJsonPath('data.date', null)
+        ->assertJsonPath('data.recurringTransactionId', null);
+
+    expect((float) $account->fresh()->current_balance)->toBe(1000.0);
+});
+
 it('no longer registers the recurring process command', function () {
     expect(collect(Illuminate\Support\Facades\Artisan::all())->has('recurring:process'))->toBeFalse();
 });

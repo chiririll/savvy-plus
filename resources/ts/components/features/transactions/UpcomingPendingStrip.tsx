@@ -5,7 +5,7 @@ import { UpcomingPendingCard } from './UpcomingPendingCard'
 interface UpcomingPendingStripProps {
     transactions: Transaction[]
     isReadOnly?: boolean
-    onConfirm: (id: number) => void
+    onConfirm: (transaction: Transaction) => void
     onSkip: (id: number) => void
 }
 

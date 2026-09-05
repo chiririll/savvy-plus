@@ -16,9 +16,10 @@ import {
 import { transactionSchema, TransactionFormValues } from '@/schemas/transactions'
 import { useAccounts, useCategories, useFormValuesChange, useTransactionPartyDefaults } from '@/hooks'
 import { cn, formatCurrency, formatDateLocal, isDateInFuture } from '@/lib/utils'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, X } from 'lucide-react'
 import {
     CategorySelect,
+    FieldHelp,
     FormWrapper,
     MoneyAccountFields,
     TagSelect,
@@ -56,17 +57,21 @@ function TransactionBalanceHint({
     from,
     to,
     isPending,
+    isUndated,
 }: {
     from: BalancePreview | null
     to: BalancePreview | null
     isPending: boolean
+    isUndated: boolean
 }) {
     const { t } = useTranslation('forms')
 
     return (
         <div className="flex min-h-5 flex-wrap items-center gap-x-3 gap-y-1 text-xs">
             {isPending ? (
-                <span className="text-muted-foreground">{t('transactions.pendingHint')}</span>
+                <span className="text-muted-foreground">
+                    {isUndated ? t('transactions.noDateHint') : t('transactions.pendingHint')}
+                </span>
             ) : (
                 <>
                     {from && <BalancePair preview={from} label={t('transactions.balance')} />}
@@ -159,7 +164,7 @@ export function TransactionForm({
             amount: defaultValues?.amount ?? 0,
             to_amount: defaultValues?.to_amount ?? null,
             description: defaultValues?.description ?? '',
-            date: defaultValues?.date || today,
+            date: defaultValues?.date !== undefined ? (defaultValues.date ?? '') : today,
             items: defaultValues?.items ?? [],
             tag_ids: defaultValues?.tag_ids ?? [],
         }
@@ -182,7 +187,8 @@ export function TransactionForm({
     const items = useWatch({ control: form.control, name: 'items' })
     const amount = useWatch({ control: form.control, name: 'amount' })
     const date = useWatch({ control: form.control, name: 'date' })
-    const isPendingDate = isDateInFuture(date)
+    const dateRequired = Boolean(originalAffectsBalance)
+    const isPendingDate = !date || isDateInFuture(date)
     const toAccountId = useWatch({ control: form.control, name: 'to_account_id' })
     const toAmount = useWatch({ control: form.control, name: 'to_amount' })
     // Filter categories based on transaction type and sort by popularity
@@ -346,12 +352,13 @@ export function TransactionForm({
             from={balancePreview}
             to={toBalancePreview}
             isPending={isPendingDate}
+            isUndated={!date}
         />
     )
 
     useLayoutEffect(() => {
         onPreviewChange?.(balanceHint)
-    }, [onPreviewChange, balancePreview, toBalancePreview, isPendingDate])
+    }, [onPreviewChange, balancePreview, toBalancePreview, isPendingDate, date])
 
     return (
         <FormWrapper>
@@ -360,6 +367,10 @@ export function TransactionForm({
                 id={formId}
                 onSubmit={form.handleSubmit((data) => {
                     if (balancePreview?.insufficientFunds) {
+                        return
+                    }
+                    if (dateRequired && !data.date) {
+                        form.setError('date', { message: t('validation.dateRequired') })
                         return
                     }
                     onSubmit(data)
@@ -410,14 +421,35 @@ export function TransactionForm({
                         name="date"
                         render={({ field }) => (
                             <FormItem className="min-w-0">
-                                <FormLabel>{t('fields.date')}</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="date"
-                                        {...field}
-                                        value={field.value || ''}
-                                    />
-                                </FormControl>
+                                <FormLabel className="gap-1.5">
+                                    {t('fields.date')}
+                                    {!dateRequired && (
+                                        <FieldHelp>{t('forms:transactions.dateOptionalHelp')}</FieldHelp>
+                                    )}
+                                </FormLabel>
+                                <div className="flex items-center gap-1">
+                                    <FormControl>
+                                        <Input
+                                            type="date"
+                                            {...field}
+                                            value={field.value || ''}
+                                            required={dateRequired}
+                                        />
+                                    </FormControl>
+                                    {!dateRequired && field.value && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon-sm"
+                                            className="shrink-0 text-muted-foreground"
+                                            onClick={() => field.onChange('')}
+                                            aria-label={t('actions.clear')}
+                                            title={t('actions.clear')}
+                                        >
+                                            <X className="size-4" />
+                                        </Button>
+                                    )}
+                                </div>
                                 <FormMessage />
                             </FormItem>
                         )}

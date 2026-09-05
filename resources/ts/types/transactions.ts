@@ -28,7 +28,7 @@ export interface Transaction extends BaseEntity {
     toAmount?: number
     exchangeRate?: number
     description?: string
-    date: string
+    date: string | null
     status: TransactionStatus
     recurringTransactionId?: number | null
     actions: TransactionActions

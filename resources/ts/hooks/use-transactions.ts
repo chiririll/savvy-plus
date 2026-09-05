@@ -69,9 +69,17 @@ export function useDuplicateTransaction() {
 
 export function useConfirmTransaction() {
     return useResourceMutation({
-        mutationFn: (id: string | number) => transactionsApi.confirm(id),
+        mutationFn: ({ id, date }: { id: string | number; date?: string | null }) =>
+            transactionsApi.confirm(id, date),
         invalidateKeys: [...TRANSACTION_CONFIRM_INVALIDATE],
         successMessage: i18n.t('toasts.transaction.confirmed'),
+    })
+}
+
+export function usePendingSummary() {
+    return useQuery({
+        queryKey: [...QUERY_KEY, 'pending-summary'],
+        queryFn: () => transactionsApi.getPendingSummary(),
     })
 }
 

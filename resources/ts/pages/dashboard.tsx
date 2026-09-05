@@ -20,6 +20,7 @@ import {
     ArrowUpRight,
     ArrowRight,
     Calendar,
+    Clock,
     Plus,
     ArrowLeftRight,
     PiggyBank,
@@ -30,7 +31,7 @@ import {
     TrendingUp,
 } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
-import { useTotalBalance, useTransactions, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
+import { useTotalBalance, useTransactions, usePendingSummary, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
 import { useOverviewMetrics } from '@/hooks/use-reports'
 import { cn, formatCurrency, formatDateLocal, formatYearMonth, addDaysLocal } from '@/lib/utils'
 import { BalanceDynamicsChart } from '@/components/features/accounts'
@@ -142,7 +143,11 @@ function toReportFilters(
     }
 }
 
-function formatDate(dateString: string): string {
+function formatDate(dateString: string | null): string {
+    if (!dateString) {
+        return ''
+    }
+
     const date = new Date(dateString)
     return date.toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short' })
 }
@@ -181,6 +186,7 @@ export default function DashboardPage() {
     )
 
     const { data: recentTransactions } = useTransactions({ per_page: 5, status: 'confirmed' })
+    const { data: pendingSummary } = usePendingSummary()
     const { data: expensesByCategory } = useCategorySummary({
         type: 'expense',
         ...periodDates,
@@ -341,7 +347,7 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -420,6 +426,31 @@ export default function DashboardPage() {
                                 <span>{Math.abs(expenseChange).toFixed(1)}%</span>
                             </div>
                         )}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                            {t('dashboard.pending')}
+                        </CardTitle>
+                        <Clock className="size-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <Link to="/transactions?status=pending" className="block">
+                            <div className={cn(
+                                'text-2xl font-bold font-mono',
+                                (pendingSummary?.balance ?? 0) > 0 && 'text-green-600',
+                                (pendingSummary?.balance ?? 0) < 0 && 'text-red-600',
+                            )}>
+                                {formatCurrency(pendingSummary?.balance ?? 0, pendingSummary?.currency ?? currency)}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                {(pendingSummary?.transactions_count ?? 0) > 0
+                                    ? t('dashboard.pendingCount', { count: pendingSummary?.transactions_count ?? 0 })
+                                    : t('dashboard.pendingEmpty')}
+                            </p>
+                        </Link>
                     </CardContent>
                 </Card>
             </div>

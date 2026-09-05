@@ -47,8 +47,11 @@ export const transactionsApi = {
     duplicate: (id: number | string) =>
         api.post<Transaction, void>(`${ENDPOINT}/${id}/duplicate`, undefined),
 
-    confirm: (id: number | string) =>
-        api.post<Transaction>(`${ENDPOINT}/${id}/confirm`),
+    confirm: (id: number | string, date?: string | null) =>
+        api.post<Transaction, { date?: string | null }>(`${ENDPOINT}/${id}/confirm`, date ? { date } : {}),
+
+    getPendingSummary: () =>
+        api.get<TransactionSummary>('/transactions-pending-summary'),
 
     skip: (id: number | string) =>
         api.post<Transaction>(`${ENDPOINT}/${id}/skip`),

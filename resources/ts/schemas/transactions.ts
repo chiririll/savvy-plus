@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import i18n from '@/lib/i18n'
-import { formatDateLocal } from '@/lib/dates'
 
 export const transactionItemSchema = z.object({
     name: z.string().min(1, i18n.t('validation.nameRequired')).max(255),
@@ -32,8 +31,8 @@ export const transactionSchema = z.object({
     description: z.string().max(500).optional(),
 
     date: z.preprocess(
-        (val) => val ?? formatDateLocal(),
-        z.string().min(1, i18n.t('validation.dateRequired'))
+        (val) => (val === '' || val === undefined ? null : val),
+        z.string().nullable()
     ),
 
     items: z.array(transactionItemSchema).optional(),

@@ -107,17 +107,25 @@ class TransactionService
         });
     }
 
-    public function confirm(Transaction $transaction): Transaction
+    public function confirm(Transaction $transaction, ?string $date = null): Transaction
     {
         $kind = $transaction->kind();
         if (! $kind->canConfirm()) {
             throw new DomainException($kind->cannotConfirmMessage());
         }
 
+        $applyDate = $date ?: $transaction->date?->toDateString();
+        if (! $applyDate) {
+            throw new DomainException(__('messages.transactions.date_required_to_confirm'));
+        }
+
         $this->assertSufficientFunds($transaction);
 
-        $transaction = DB::transaction(function () use ($transaction) {
-            $transaction->update(['status' => TransactionStatus::Confirmed]);
+        $transaction = DB::transaction(function () use ($transaction, $applyDate) {
+            $transaction->update([
+                'status' => TransactionStatus::Confirmed,
+                'date' => $applyDate,
+            ]);
 
             if ($transaction->recurring_transaction_id) {
                 app(RecurringTransactionService::class)->advanceAfterOccurrence(
@@ -235,11 +243,48 @@ class TransactionService
         ];
     }
 
-    public function resolveStatusForDate(string $date): TransactionStatus
+    public function getPendingSummary(): array
     {
-        return $date > now()->toDateString()
-            ? TransactionStatus::Pending
-            : TransactionStatus::Confirmed;
+        $transactions = Transaction::pending()
+            ->with('account.currency')
+            ->get();
+
+        $baseCurrency = \App\Models\Currency::getBase();
+
+        $income = 0.0;
+        $expense = 0.0;
+
+        foreach ($transactions as $transaction) {
+            if ($transaction->type->isDebtOperation()) {
+                continue;
+            }
+
+            $currency = $transaction->account->currency;
+            $amountInBase = $currency->convertToBase((float) $transaction->amount);
+
+            if ($transaction->type === TransactionType::Income) {
+                $income += $amountInBase;
+            } elseif ($transaction->type === TransactionType::Expense) {
+                $expense += $amountInBase;
+            }
+        }
+
+        return [
+            'income' => round($income, 2),
+            'expense' => round($expense, 2),
+            'balance' => round($income - $expense, 2),
+            'transactions_count' => $transactions->count(),
+            'currency' => $baseCurrency?->code,
+        ];
+    }
+
+    public function resolveStatusForDate(?string $date): TransactionStatus
+    {
+        if (! $date || $date > now()->toDateString()) {
+            return TransactionStatus::Pending;
+        }
+
+        return TransactionStatus::Confirmed;
     }
 
     private function prepareTransactionData(TransactionData $data, ?Transaction $existing = null): array

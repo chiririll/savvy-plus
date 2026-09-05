@@ -27,6 +27,8 @@ return [
         'cannot_duplicate_recurring' => 'Scheduled occurrences cannot be duplicated.',
         'cannot_duplicate' => 'This transaction cannot be duplicated.',
         'cannot_edit_skipped' => 'Skipped transactions cannot be edited.',
+        'date_required' => 'A date is required for confirmed transactions.',
+        'date_required_to_confirm' => 'Choose a date to confirm this transaction.',
     ],
 
     'categories' => [

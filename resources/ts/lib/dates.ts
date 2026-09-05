@@ -23,12 +23,24 @@ export function addDaysLocal(date: Date, days: number): string {
     return formatDateLocal(next)
 }
 
-export function isDateInFuture(date: string): boolean {
+export function isDateInFuture(date?: string | null): boolean {
+    if (!date) {
+        return false
+    }
+
     return date > formatDateLocal()
 }
 
-/** Overdue → red, within the next 3 days → yellow, later → muted. */
-export function pendingDateClassName(dateKey: string): string {
+export function isDateOverdue(date?: string | null): boolean {
+    return Boolean(date && date < formatDateLocal())
+}
+
+/** Overdue → red, within the next 3 days → yellow, later or unset → muted. */
+export function pendingDateClassName(dateKey?: string | null): string {
+    if (!dateKey) {
+        return 'text-muted-foreground'
+    }
+
     const today = formatDateLocal()
     if (dateKey < today) {
         return 'text-red-600'

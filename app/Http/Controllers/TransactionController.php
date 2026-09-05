@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTOs\TransactionData;
 use App\DTOs\TransactionFilterData;
+use App\Http\Requests\Transaction\ConfirmTransactionRequest;
 use App\Http\Requests\Transaction\StoreTransactionRequest;
 use App\Http\Requests\Transaction\TransactionFilterRequest;
 use App\Http\Requests\Transaction\UpdateTransactionRequest;
@@ -78,11 +79,11 @@ class TransactionController extends Controller
         return response()->json(null, 204);
     }
 
-    public function confirm(Transaction $transaction): TransactionResource|JsonResponse
+    public function confirm(ConfirmTransactionRequest $request, Transaction $transaction): TransactionResource|JsonResponse
     {
         try {
             return new TransactionResource(
-                $this->transactionService->confirm($transaction)
+                $this->transactionService->confirm($transaction, $request->validated('date'))
             );
         } catch (DomainException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
@@ -118,5 +119,10 @@ class TransactionController extends Controller
         $filters = TransactionFilterData::fromArray($request->validated());
 
         return response()->json($this->transactionService->getSummary($filters));
+    }
+
+    public function pendingSummary(): JsonResponse
+    {
+        return response()->json($this->transactionService->getPendingSummary());
     }
 }

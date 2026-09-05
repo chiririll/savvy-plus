@@ -10,9 +10,16 @@ use Illuminate\Validation\Validator;
 
 class UpdateTransactionRequest extends FormRequest
 {
+    use NormalizesNullableDate;
+
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->normalizeNullableDate();
     }
 
     public function rules(): array
@@ -26,7 +33,7 @@ class UpdateTransactionRequest extends FormRequest
             'to_amount' => 'nullable|numeric|gt:0',
             'exchange_rate' => 'nullable|numeric|gt:0',
             'description' => 'nullable|string|max:500',
-            'date' => 'sometimes|date',
+            'date' => 'sometimes|nullable|date',
             'items' => 'nullable|array',
             'items.*.name' => 'required_with:items|string|max:255',
             'items.*.quantity' => 'required_with:items|integer|min:1',
@@ -43,6 +50,7 @@ class UpdateTransactionRequest extends FormRequest
                 $this->validateTransferFields($validator);
                 $this->validateCategoryType($validator);
                 $this->validateItemsTotal($validator);
+                $this->validateConfirmedDate($validator);
                 $this->validateSufficientFunds($validator);
             },
         ];
@@ -102,6 +110,23 @@ class UpdateTransactionRequest extends FormRequest
 
         if (abs($itemsTotal - $amount) > 0.01) {
             $validator->errors()->add('items', __('messages.validation.items_total', ['items' => $itemsTotal, 'amount' => $amount]));
+        }
+    }
+
+    private function validateConfirmedDate(Validator $validator): void
+    {
+        $transaction = $this->route('transaction');
+
+        if ($transaction->isPending() || $transaction->isSkipped()) {
+            return;
+        }
+
+        $date = $this->exists('date')
+            ? $this->input('date')
+            : $transaction->date?->toDateString();
+
+        if (! $date) {
+            $validator->errors()->add('date', __('messages.transactions.date_required'));
         }
     }
 
