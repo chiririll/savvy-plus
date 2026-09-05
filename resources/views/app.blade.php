@@ -11,6 +11,7 @@
     <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#ffffff">
     <meta name="app-version" content="{{ e(config('app.version')) }}">
+    <meta name="app-env" content="{{ e(app()->environment()) }}">
     <script>
         (function () {
             try {

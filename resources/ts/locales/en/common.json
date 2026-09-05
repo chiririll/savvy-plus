@@ -33,6 +33,9 @@
         "banner": "You are in read-only mode. You can view all data but cannot make any changes.",
         "close": "Close banner"
     },
+    "devMode": {
+        "banner": "development mode"
+    },
     "status": {
         "active": "Active",
         "inactive": "Inactive",
