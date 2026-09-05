@@ -34,6 +34,7 @@ import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCa
 import { useOverviewMetrics } from '@/hooks/use-reports'
 import { cn, formatCurrency, formatCurrencyCompact, formatDateLocal, formatYearMonth, addDaysLocal } from '@/lib/utils'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
+import { localizeDefaultName } from '@/lib/localized-name'
 import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -155,7 +156,7 @@ function getTransactionColor(type: Transaction['type']): string {
 }
 
 export default function DashboardPage() {
-    const { t } = useTranslation('pages')
+    const { t, i18n } = useTranslation('pages')
     const { t: tCommon } = useTranslation('common')
     const { t: tNav } = useTranslation('nav')
     const { theme } = useTheme()
@@ -333,7 +334,7 @@ export default function DashboardPage() {
         const data = expensesByCategory.data
             .filter((c) => (c.totalAmount ?? 0) > 0)
             .map((c, i) => ({
-                name: c.name,
+                name: localizeDefaultName(c.name),
                 value: c.totalAmount ?? 0,
                 itemStyle: { color: c.color || CATEGORY_COLORS[i % CATEGORY_COLORS.length] },
             }))
@@ -382,7 +383,7 @@ export default function DashboardPage() {
                 },
             ],
         }
-    }, [expensesByCategory, theme, currency])
+    }, [expensesByCategory, theme, currency, i18n.language])
 
     const handlePeriodChange = (value: PeriodPreset) => {
         setPeriod(value)
@@ -751,7 +752,7 @@ export default function DashboardPage() {
                                         <p className="text-xs text-muted-foreground mt-1">
                                             {budget.isGlobal
                                                 ? t('dashboard.allExpenses')
-                                                : budget.categories.map(c => c.name).join(', ') || t('dashboard.noCategories')}
+                                                : budget.categories.map(c => localizeDefaultName(c.name)).join(', ') || t('dashboard.noCategories')}
                                         </p>
                                     </Link>
                                 )

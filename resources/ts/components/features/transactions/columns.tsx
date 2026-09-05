@@ -7,6 +7,7 @@ import { RowActions } from '@/components/shared'
 import { Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins, Check, SkipForward } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
+import { localizeDefaultName } from '@/lib/localized-name'
 import i18n, { intlLocale } from '@/lib/i18n'
 import { SkipTransactionAlert } from './SkipTransactionAlert'
 
@@ -117,7 +118,7 @@ export function createTransactionColumns({
                     return (
                         <span>
                             {account.name}
-                            {category && ` · ${category.icon} ${category.name}`}
+                            {category && ` · ${category.icon} ${localizeDefaultName(category.name)}`}
                         </span>
                     )
                 }
