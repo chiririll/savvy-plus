@@ -10,7 +10,7 @@ export function useChangePassword() {
 }
 
 export function useLogoutOthers() {
-    return useResourceMutation({
+    return useResourceMutation<Awaited<ReturnType<typeof authApi.logoutOthers>>, void>({
         mutationFn: authApi.logoutOthers,
         successMessage: i18n.t('toasts.accountSecurity.loggedOutOthers'),
     })

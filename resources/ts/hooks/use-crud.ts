@@ -10,7 +10,7 @@ interface UseResourceMutationOptions<TData, TVariables> {
     invalidateAll?: boolean
 }
 
-export function useResourceMutation<TData, TVariables>({
+export function useResourceMutation<TData, TVariables = void>({
     mutationFn,
     invalidateKeys = [],
     successMessage,

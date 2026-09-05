@@ -1,6 +1,7 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -46,7 +47,7 @@ export function DebtPaymentDialog({
     const { t } = useTranslation(['forms', 'pages', 'common'])
 
     const form = useForm<DebtPaymentFormData>({
-        resolver: zodResolver(debtPaymentSchema),
+        resolver: schemaResolver<DebtPaymentFormData>(debtPaymentSchema),
         defaultValues: {
             account_id: 0,
             amount: 0,
@@ -54,6 +55,19 @@ export function DebtPaymentDialog({
             description: '',
         },
     })
+
+    useEffect(() => {
+        if (!open) {
+            return
+        }
+
+        form.reset({
+            account_id: 0,
+            amount: 0,
+            date: formatDateLocal(),
+            description: '',
+        })
+    }, [open, debt?.id, mode, form])
 
     const handleSubmit = (data: DebtPaymentFormData) => {
         if (debt) {

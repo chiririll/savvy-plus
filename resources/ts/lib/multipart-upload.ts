@@ -12,6 +12,14 @@ interface MultipartUploadOptions {
 
 const CHUNK_SIZE = 8 * 1024 * 1024
 
+function requireUploadIds(uploadId?: string, key?: string): { uploadId: string; key: string } {
+    if (!uploadId || !key) {
+        throw new Error('Upload is not initialized')
+    }
+
+    return { uploadId, key }
+}
+
 export async function multipartUpload(
     file: File,
     options: MultipartUploadOptions
@@ -42,11 +50,13 @@ export async function multipartUpload(
         },
 
         listParts: async (_uppyFile, { uploadId, key }) => {
-            return uploadsApi.listParts(uploadId, key)
+            const ids = requireUploadIds(uploadId, key)
+            return uploadsApi.listParts(ids.uploadId, ids.key)
         },
 
         signPart: async (_uppyFile, { uploadId, key, partNumber }) => {
-            const signed = await uploadsApi.signPart(uploadId, key, partNumber)
+            const ids = requireUploadIds(uploadId, key)
+            const signed = await uploadsApi.signPart(ids.uploadId, ids.key, partNumber)
 
             return {
                 method: 'PUT',
@@ -56,9 +66,10 @@ export async function multipartUpload(
         },
 
         completeMultipartUpload: async (_uppyFile, { uploadId, key, parts }) => {
+            const ids = requireUploadIds(uploadId, key)
             const result = await uploadsApi.complete(
-                uploadId,
-                key,
+                ids.uploadId,
+                ids.key,
                 parts.map((part) => ({
                     PartNumber: part.PartNumber as number,
                     ETag: part.ETag as string,
@@ -71,7 +82,8 @@ export async function multipartUpload(
         },
 
         abortMultipartUpload: async (_uppyFile, { uploadId, key }) => {
-            await uploadsApi.abort(uploadId, key)
+            const ids = requireUploadIds(uploadId, key)
+            await uploadsApi.abort(ids.uploadId, ids.key)
         },
     })
 
@@ -106,7 +118,7 @@ export async function multipartUpload(
         if (result?.failed && result.failed.length > 0) {
             const error = result.failed[0].error
 
-            throw new Error(typeof error === 'string' ? error : error?.message || 'Upload failed')
+            throw new Error(typeof error === 'string' ? error : 'Upload failed')
         }
 
         return {

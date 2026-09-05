@@ -1,7 +1,6 @@
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -22,7 +21,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { recurringSchema, RecurringFormData } from '@/schemas'
-import { useAccounts, useCategories } from '@/hooks'
+import { useAccounts, useCategories, useFormValuesChange, useTransactionPartyDefaults } from '@/hooks'
 import { formatDateLocal } from '@/lib/utils'
 import {
     CategorySelect,
@@ -60,7 +59,7 @@ export function RecurringForm({
     const { data: categories } = useCategories()
 
     const form = useForm<RecurringFormData>({
-        resolver: zodResolver(recurringSchema),
+        resolver: schemaResolver<RecurringFormData>(recurringSchema),
         defaultValues: {
             type: 'expense',
             account_id: 0,
@@ -90,36 +89,8 @@ export function RecurringForm({
     const selectedAccount = accounts?.find(a => a.id === accountId)
     const selectedToAccount = accounts?.find(a => a.id === toAccountId)
 
-    // Auto-select first account
-    useEffect(() => {
-        if (!accountId && accounts && accounts.length > 0) {
-            form.setValue('account_id', accounts[0].id)
-        }
-    }, [accountId, accounts, form])
-
-    // Auto-select most popular category
-    useEffect(() => {
-        const filteredCategories = categories?.filter(c => c.type === type) ?? []
-        const sorted = [...filteredCategories].sort((a, b) =>
-            (b.transactionsCount ?? 0) - (a.transactionsCount ?? 0)
-        )
-        const currentCategoryId = form.getValues('category_id')
-        if (!currentCategoryId && type !== 'transfer' && sorted.length > 0) {
-            form.setValue('category_id', sorted[0].id)
-        }
-    }, [type, categories, form])
-
-    useEffect(() => {
-        if (!onValuesChange) {
-            return
-        }
-
-        const subscription = form.watch((value) => {
-            onValuesChange(value as RecurringFormData)
-        })
-
-        return () => subscription.unsubscribe()
-    }, [form, onValuesChange])
+    useTransactionPartyDefaults(form, accounts, categories)
+    useFormValuesChange(form, onValuesChange)
 
     return (
         <FormWrapper>

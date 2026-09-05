@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm, useFieldArray } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Plus, Trash2, Plug, UserCog, Waypoints, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -125,7 +125,7 @@ export function IdentityProviderForm({
     const { data: presets } = useSsoPresets()
 
     const form = useForm<IdentityProviderFormValues>({
-        resolver: zodResolver(identityProviderSchema),
+        resolver: schemaResolver<IdentityProviderFormValues>(identityProviderSchema),
         defaultValues: {
             name: '',
             slug: '',

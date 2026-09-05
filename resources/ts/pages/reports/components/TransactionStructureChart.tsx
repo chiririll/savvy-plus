@@ -9,13 +9,13 @@ import { useTransactionReportByCategory } from '@/hooks'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import i18n from '@/lib/i18n'
 import type { ReportFilters } from '../types'
-import type { TransactionType } from '@/api/reports'
+import type { ReportTransactionType } from '@/api/reports'
 
 type ViewMode = 'donut' | 'bar' | 'treemap'
 
 interface TransactionStructureChartProps {
     filters: ReportFilters
-    type: TransactionType
+    type: ReportTransactionType
 }
 
 export function TransactionStructureChart({ filters, type }: TransactionStructureChartProps) {

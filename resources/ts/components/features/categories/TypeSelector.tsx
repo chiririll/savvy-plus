@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
 import { CATEGORY_TYPE_OPTIONS } from '@/constants/categories'
 import { CategoryType } from '@/types'
-import { cn } from '@/lib/utils'
+import { SegmentedChoice } from '@/components/shared'
 
 interface TypeSelectorProps {
     value: CategoryType
@@ -16,24 +15,15 @@ export function TypeSelector({ value, onChange, error }: TypeSelectorProps) {
     return (
         <div className="space-y-2">
             <label className="text-sm font-medium">{t('fields.type')}</label>
-            <div className="flex gap-2">
-                {CATEGORY_TYPE_OPTIONS.map((option) => (
-                    <Button
-                        key={option.value}
-                        type="button"
-                        variant={value === option.value ? 'default' : 'outline'}
-                        onClick={() => onChange(option.value)}
-                        className={cn(
-                            value === option.value &&
-                                (option.value === 'income'
-                                    ? 'bg-green-600 hover:bg-green-700'
-                                    : 'bg-red-600 hover:bg-red-700')
-                        )}
-                    >
-                        {t(`pages:categories.types.${option.value}`)}
-                    </Button>
-                ))}
-            </div>
+            <SegmentedChoice
+                value={value}
+                onChange={onChange}
+                options={CATEGORY_TYPE_OPTIONS.map((option) => ({
+                    value: option.value,
+                    label: t(`pages:categories.types.${option.value}`),
+                    color: option.value === 'income' ? 'text-green-600' : 'text-red-600',
+                }))}
+            />
             {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
     )

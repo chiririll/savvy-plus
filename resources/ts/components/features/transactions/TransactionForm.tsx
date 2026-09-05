@@ -1,5 +1,5 @@
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { schemaResolver } from '@/lib/form-resolver'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, type KeyboardEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { transactionSchema, TransactionFormValues } from '@/schemas/transactions'
-import { useAccounts, useCategories } from '@/hooks'
+import { useAccounts, useCategories, useFormValuesChange, useTransactionPartyDefaults } from '@/hooks'
 import { cn, formatCurrency, formatDateLocal, isDateInFuture } from '@/lib/utils'
 import { Plus, Trash2 } from 'lucide-react'
 import {
@@ -80,6 +80,44 @@ function TransactionBalanceHint({
     )
 }
 
+const SOURCE_SIGN = { income: 1, expense: -1, transfer: -1 } as const
+
+type BalanceImpact = {
+    type?: keyof typeof SOURCE_SIGN
+    amount: number
+    accountId?: number | null
+    toAccountId?: number | null
+    toAmount?: number
+}
+
+function impactOn(
+    accountId: number,
+    tx: BalanceImpact,
+    side: 'source' | 'destination',
+): number {
+    if (side === 'destination') {
+        return tx.type === 'transfer' && tx.toAccountId === accountId
+            ? (tx.toAmount ?? tx.amount)
+            : 0
+    }
+
+    return tx.accountId === accountId && tx.type
+        ? SOURCE_SIGN[tx.type] * tx.amount
+        : 0
+}
+
+function projectedBalance(
+    current: number,
+    accountId: number,
+    next: BalanceImpact,
+    posted: BalanceImpact | null,
+    side: 'source' | 'destination',
+): number {
+    return current
+        - (posted ? impactOn(accountId, posted, side) : 0)
+        + impactOn(accountId, next, side)
+}
+
 interface TransactionFormProps {
     defaultValues?: Partial<TransactionFormValues>
     onSubmit: (data: TransactionFormValues) => void
@@ -89,6 +127,8 @@ interface TransactionFormProps {
     submitLabel?: string
     formId?: string
     hideSubmit?: boolean
+    isEdit?: boolean
+    originalAffectsBalance?: boolean
     onPreviewChange?: (preview: ReactNode) => void
 }
 
@@ -101,6 +141,8 @@ export function TransactionForm({
     submitLabel,
     formId,
     hideSubmit,
+    isEdit,
+    originalAffectsBalance,
     onPreviewChange,
 }: TransactionFormProps) {
     const { t } = useTranslation(['common', 'forms'])
@@ -124,21 +166,11 @@ export function TransactionForm({
     }, [defaultValues])
 
     const form = useForm<TransactionFormValues>({
-        resolver: zodResolver(transactionSchema),
+        resolver: schemaResolver<TransactionFormValues>(transactionSchema),
         defaultValues: formDefaults,
     })
 
-    useEffect(() => {
-        if (!onValuesChange) {
-            return
-        }
-
-        const subscription = form.watch((value) => {
-            onValuesChange(value as TransactionFormValues)
-        })
-
-        return () => subscription.unsubscribe()
-    }, [form, onValuesChange])
+    useFormValuesChange(form, onValuesChange)
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,
@@ -147,7 +179,6 @@ export function TransactionForm({
 
     const transactionType = useWatch({ control: form.control, name: 'type' })
     const accountId = useWatch({ control: form.control, name: 'account_id' })
-    const categoryId = useWatch({ control: form.control, name: 'category_id' })
     const items = useWatch({ control: form.control, name: 'items' })
     const amount = useWatch({ control: form.control, name: 'amount' })
     const date = useWatch({ control: form.control, name: 'date' })
@@ -160,19 +191,7 @@ export function TransactionForm({
             .sort((a, b) => (b.transactionsCount ?? 0) - (a.transactionsCount ?? 0))
     }, [categories, transactionType])
 
-    // Auto-select first account if none selected
-    useEffect(() => {
-        if (!accountId && accounts && accounts.length > 0) {
-            form.setValue('account_id', accounts[0].id)
-        }
-    }, [accountId, accounts, form])
-
-    // Auto-select most popular category if none selected (only for income/expense)
-    useEffect(() => {
-        if (!categoryId && transactionType !== 'transfer' && filteredCategories.length > 0) {
-            form.setValue('category_id', filteredCategories[0].id)
-        }
-    }, [categoryId, transactionType, filteredCategories, form])
+    useTransactionPartyDefaults(form, accounts, categories)
 
     // Calculate items total
     const itemsTotal = items?.reduce((sum, item) => {
@@ -267,20 +286,38 @@ export function TransactionForm({
         }
     }, [transactionType, sameTransferCurrency, amount, form])
 
-    // Calculate balance preview
+    const original = useMemo((): BalanceImpact | null => {
+        if (!isEdit || !originalAffectsBalance) return null
+        return {
+            type: defaultValues?.type,
+            amount: Number(defaultValues?.amount) || 0,
+            accountId: defaultValues?.account_id,
+            toAccountId: defaultValues?.to_account_id ?? null,
+            toAmount: Number(defaultValues?.to_amount) || Number(defaultValues?.amount) || 0,
+        }
+    }, [
+        isEdit,
+        originalAffectsBalance,
+        defaultValues?.type,
+        defaultValues?.amount,
+        defaultValues?.account_id,
+        defaultValues?.to_account_id,
+        defaultValues?.to_amount,
+    ])
+
+    const nextImpact = useMemo((): BalanceImpact => ({
+        type: transactionType,
+        amount: Number(amount) || 0,
+        accountId: Number(accountId) || null,
+        toAccountId: Number(toAccountId) || null,
+        toAmount: Number(toAmount) || Number(amount) || 0,
+    }), [transactionType, amount, accountId, toAccountId, toAmount])
+
     const balancePreview = useMemo(() => {
         if (!selectedAccount) return null
 
         const currentBalance = selectedAccount.currentBalance
-        const txAmount = Number(amount) || 0
-
-        let newBalance = currentBalance
-        if (transactionType === 'income') {
-            newBalance = currentBalance + txAmount
-        } else if (transactionType === 'expense' || transactionType === 'transfer') {
-            newBalance = currentBalance - txAmount
-        }
-
+        const newBalance = projectedBalance(currentBalance, selectedAccount.id, nextImpact, original, 'source')
         const insufficientFunds = (transactionType === 'expense' || transactionType === 'transfer') && newBalance < 0
 
         return {
@@ -289,22 +326,20 @@ export function TransactionForm({
             insufficientFunds,
             currency: selectedAccount.currency,
         }
-    }, [selectedAccount, amount, transactionType])
+    }, [selectedAccount, nextImpact, original, transactionType])
 
-    // Balance preview for destination account (transfer)
     const toBalancePreview = useMemo(() => {
         if (!selectedToAccount || transactionType !== 'transfer') return null
 
         const currentBalance = selectedToAccount.currentBalance
-        const txAmount = Number(toAmount) || Number(amount) || 0
-        const newBalance = currentBalance + txAmount
+        const newBalance = projectedBalance(currentBalance, selectedToAccount.id, nextImpact, original, 'destination')
 
         return {
             currentBalance,
             newBalance,
             currency: selectedToAccount.currency,
         }
-    }, [selectedToAccount, toAmount, amount, transactionType])
+    }, [selectedToAccount, nextImpact, original, transactionType])
 
     const balanceHint = (
         <TransactionBalanceHint

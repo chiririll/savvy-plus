@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useForm, type Resolver } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form'
 import { currencySchema, CurrencyFormData } from '@/schemas'
 import { FormWrapper } from '@/components/shared/FormWrapper'
-import { useCurrencyCatalog } from '@/hooks'
+import { useCurrencyCatalog, useFormValuesChange } from '@/hooks'
 import type { CurrencyCatalogItem } from '@/types'
 
 interface CurrencyFormProps {
@@ -96,7 +96,7 @@ export function CurrencyForm({
     const { data: catalog = [] } = useCurrencyCatalog(!isEditing)
 
     const form = useForm<CurrencyFormData>({
-        resolver: zodResolver(currencySchema) as Resolver<CurrencyFormData>,
+        resolver: schemaResolver<CurrencyFormData>(currencySchema),
         defaultValues: {
             code: '',
             name: '',
@@ -129,17 +129,7 @@ export function CurrencyForm({
         setSuggestField(null)
     }
 
-    useEffect(() => {
-        if (!onValuesChange) {
-            return
-        }
-
-        const subscription = form.watch((value) => {
-            onValuesChange(value as CurrencyFormData)
-        })
-
-        return () => subscription.unsubscribe()
-    }, [form, onValuesChange])
+    useFormValuesChange(form, onValuesChange)
 
     return (
         <FormWrapper>

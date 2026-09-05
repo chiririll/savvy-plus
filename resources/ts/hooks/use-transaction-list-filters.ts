@@ -1,4 +1,5 @@
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf, parseAsStringLiteral } from 'nuqs'
+import { toggleIdInArray } from '@/lib/utils'
 import type { TransactionFilters } from '@/types'
 
 export const transactionSearchParams = {
@@ -48,15 +49,11 @@ export function useTransactionListFilters() {
         setDateRange: (field: 'startDate' | 'endDate', value: string) =>
             setParams({ [field]: value || null, page: 1 }),
         toggleCategory: (id: number) => {
-            const next = params.categoryIds.includes(id)
-                ? params.categoryIds.filter((categoryId) => categoryId !== id)
-                : [...params.categoryIds, id]
+            const next = toggleIdInArray(params.categoryIds, id)
             setParams({ categoryIds: next.length ? next : null, page: 1 })
         },
         toggleTag: (id: number) => {
-            const next = params.tagIds.includes(id)
-                ? params.tagIds.filter((tagId) => tagId !== id)
-                : [...params.tagIds, id]
+            const next = toggleIdInArray(params.tagIds, id)
             setParams({ tagIds: next.length ? next : null, page: 1 })
         },
         clearFilters: () => setParams({

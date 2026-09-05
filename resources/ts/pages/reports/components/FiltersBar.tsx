@@ -31,6 +31,81 @@ import { RotateCcw, ChevronDown, Calendar, Filter, SlidersHorizontal } from 'luc
 import type { ReportFilters, PeriodType, CompareType } from '../types'
 import { getMonthOptions, getQuarterOptions, getYearOptions } from '../utils'
 
+interface EntityFilterItem {
+    id: number
+    name: string
+}
+
+function EntityFilter({
+    label,
+    items,
+    selectedIds,
+    onToggle,
+    inSheet = false,
+    formatName,
+    popoverClassName,
+    hideWhenEmpty = false,
+}: {
+    label: string
+    items?: EntityFilterItem[]
+    selectedIds: number[]
+    onToggle: (id: number) => void
+    inSheet?: boolean
+    formatName?: (item: EntityFilterItem) => string
+    popoverClassName?: string
+    hideWhenEmpty?: boolean
+}) {
+    if (hideWhenEmpty && (!items || items.length === 0)) {
+        return null
+    }
+
+    const list = (
+        <div className={inSheet ? 'space-y-1 max-h-40 overflow-y-auto' : 'space-y-1 max-h-64 overflow-y-auto'}>
+            {items?.map((item) => (
+                <div
+                    key={item.id}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
+                    onClick={() => onToggle(item.id)}
+                >
+                    <Checkbox
+                        checked={selectedIds.includes(item.id)}
+                        className="pointer-events-none"
+                    />
+                    <span className="text-sm">{formatName?.(item) ?? item.name}</span>
+                </div>
+            ))}
+        </div>
+    )
+
+    if (inSheet) {
+        return (
+            <div className="space-y-2">
+                <Label className="text-sm font-medium">{label}</Label>
+                <div className="border rounded-md p-2">{list}</div>
+            </div>
+        )
+    }
+
+    return (
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8">
+                    {label}
+                    {selectedIds.length > 0 && (
+                        <Badge variant="secondary" className="ml-1 px-1.5">
+                            {selectedIds.length}
+                        </Badge>
+                    )}
+                    <ChevronDown className="ml-1 size-3" />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className={popoverClassName ?? 'w-56 p-2'} align="start">
+                {list}
+            </PopoverContent>
+        </Popover>
+    )
+}
+
 interface FiltersBarProps {
     filters: ReportFilters
     onFilterChange: <K extends keyof ReportFilters>(key: K, value: ReportFilters[K]) => void
@@ -177,184 +252,35 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
         </Select>
     )
 
-    // Filter checkboxes for accounts
-    const AccountsFilter = ({ inSheet = false }: { inSheet?: boolean }) => {
-        if (inSheet) {
-            return (
-                <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t('reports.filters.accounts')}</Label>
-                    <div className="space-y-1 max-h-40 overflow-y-auto border rounded-md p-2">
-                        {accounts?.map(account => (
-                            <div
-                                key={account.id}
-                                className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-                                onClick={() => onToggleArrayFilter('accountIds', account.id)}
-                            >
-                                <Checkbox
-                                    checked={filters.accountIds.includes(account.id)}
-                                    className="pointer-events-none"
-                                />
-                                <span className="text-sm">{account.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )
-        }
-
-        return (
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8">
-                        {t('reports.filters.accounts')}
-                        {filters.accountIds.length > 0 && (
-                            <Badge variant="secondary" className="ml-1 px-1.5">
-                                {filters.accountIds.length}
-                            </Badge>
-                        )}
-                        <ChevronDown className="ml-1 size-3" />
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-2" align="start">
-                    <div className="space-y-1 max-h-64 overflow-y-auto">
-                        {accounts?.map(account => (
-                            <div
-                                key={account.id}
-                                className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-                                onClick={() => onToggleArrayFilter('accountIds', account.id)}
-                            >
-                                <Checkbox
-                                    checked={filters.accountIds.includes(account.id)}
-                                    className="pointer-events-none"
-                                />
-                                <span className="text-sm">{account.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </PopoverContent>
-            </Popover>
-        )
-    }
-
-    // Filter checkboxes for categories
-    const CategoriesFilter = ({ inSheet = false }: { inSheet?: boolean }) => {
-        if (inSheet) {
-            return (
-                <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t('reports.filters.categories')}</Label>
-                    <div className="space-y-1 max-h-40 overflow-y-auto border rounded-md p-2">
-                        {categories?.map(category => (
-                            <div
-                                key={category.id}
-                                className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-                                onClick={() => onToggleArrayFilter('categoryIds', category.id)}
-                            >
-                                <Checkbox
-                                    checked={filters.categoryIds.includes(category.id)}
-                                    className="pointer-events-none"
-                                />
-                                <span className="text-sm">{category.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )
-        }
-
-        return (
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8">
-                        {t('reports.filters.categories')}
-                        {filters.categoryIds.length > 0 && (
-                            <Badge variant="secondary" className="ml-1 px-1.5">
-                                {filters.categoryIds.length}
-                            </Badge>
-                        )}
-                        <ChevronDown className="ml-1 size-3" />
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 p-2" align="start">
-                    <div className="space-y-1 max-h-64 overflow-y-auto">
-                        {categories?.map(category => (
-                            <div
-                                key={category.id}
-                                className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-                                onClick={() => onToggleArrayFilter('categoryIds', category.id)}
-                            >
-                                <Checkbox
-                                    checked={filters.categoryIds.includes(category.id)}
-                                    className="pointer-events-none"
-                                />
-                                <span className="text-sm">{category.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </PopoverContent>
-            </Popover>
-        )
-    }
-
-    // Filter checkboxes for tags
-    const TagsFilter = ({ inSheet = false }: { inSheet?: boolean }) => {
-        if (!tags || tags.length === 0) return null
-
-        if (inSheet) {
-            return (
-                <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t('reports.filters.tags')}</Label>
-                    <div className="space-y-1 max-h-40 overflow-y-auto border rounded-md p-2">
-                        {tags.map(tag => (
-                            <div
-                                key={tag.id}
-                                className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-                                onClick={() => onToggleArrayFilter('tagIds', tag.id)}
-                            >
-                                <Checkbox
-                                    checked={filters.tagIds.includes(tag.id)}
-                                    className="pointer-events-none"
-                                />
-                                <span className="text-sm">#{tag.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )
-        }
-
-        return (
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8">
-                        {t('reports.filters.tags')}
-                        {filters.tagIds.length > 0 && (
-                            <Badge variant="secondary" className="ml-1 px-1.5">
-                                {filters.tagIds.length}
-                            </Badge>
-                        )}
-                        <ChevronDown className="ml-1 size-3" />
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48 p-2" align="start">
-                    <div className="space-y-1 max-h-64 overflow-y-auto">
-                        {tags.map(tag => (
-                            <div
-                                key={tag.id}
-                                className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-                                onClick={() => onToggleArrayFilter('tagIds', tag.id)}
-                            >
-                                <Checkbox
-                                    checked={filters.tagIds.includes(tag.id)}
-                                    className="pointer-events-none"
-                                />
-                                <span className="text-sm">#{tag.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </PopoverContent>
-            </Popover>
-        )
-    }
+    const entityFilters = (inSheet = false) => (
+        <>
+            <EntityFilter
+                label={t('reports.filters.accounts')}
+                items={accounts}
+                selectedIds={filters.accountIds}
+                onToggle={(id) => onToggleArrayFilter('accountIds', id)}
+                inSheet={inSheet}
+            />
+            <EntityFilter
+                label={t('reports.filters.categories')}
+                items={categories}
+                selectedIds={filters.categoryIds}
+                onToggle={(id) => onToggleArrayFilter('categoryIds', id)}
+                inSheet={inSheet}
+                popoverClassName="w-64 p-2"
+            />
+            <EntityFilter
+                label={t('reports.filters.tags')}
+                items={tags}
+                selectedIds={filters.tagIds}
+                onToggle={(id) => onToggleArrayFilter('tagIds', id)}
+                inSheet={inSheet}
+                formatName={(item) => `#${item.name}`}
+                popoverClassName="w-48 p-2"
+                hideWhenEmpty
+            />
+        </>
+    )
 
     // Mobile version
     if (isMobile) {
@@ -406,9 +332,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
                                             <Filter className="size-4" />
                                             {t('reports.filters.filterBy')}
                                         </Label>
-                                        <AccountsFilter inSheet />
-                                        <CategoriesFilter inSheet />
-                                        <TagsFilter inSheet />
+                                        {entityFilters(true)}
                                     </div>
 
                                     {/* Reset */}
@@ -456,9 +380,7 @@ export function FiltersBar({ filters, onFilterChange, onToggleArrayFilter, onRes
                     {/* Filter Dropdowns */}
                     <div className="flex items-center gap-2">
                         <Filter className="size-4 text-muted-foreground" />
-                        <AccountsFilter />
-                        <CategoriesFilter />
-                        <TagsFilter />
+                        {entityFilters()}
                     </div>
 
                     {/* Reset Button */}

@@ -8,11 +8,11 @@ import { ChevronRight } from 'lucide-react'
 import { useTransactionReportTop } from '@/hooks'
 import { formatCurrency } from '@/lib/utils'
 import type { ReportFilters } from '../types'
-import type { TransactionType } from '@/api/reports'
+import type { ReportTransactionType } from '@/api/reports'
 
 interface TopTransactionsProps {
     filters: ReportFilters
-    type: TransactionType
+    type: ReportTransactionType
     limit?: number
 }
 

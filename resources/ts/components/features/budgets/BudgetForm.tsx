@@ -1,7 +1,6 @@
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -22,9 +21,9 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { budgetSchema, BudgetFormData } from '@/schemas'
-import { useCategories } from '@/hooks'
+import { useCategories, useFormValuesChange } from '@/hooks'
 import { Category } from '@/types'
-import { CurrencySelect, FieldHelp, FormActiveField, FormWrapper, TagSelect } from '@/components/shared'
+import { CurrencyIdField, FieldHelp, FormActiveField, FormWrapper, TagSelect } from '@/components/shared'
 
 interface BudgetFormProps {
     defaultValues?: Partial<BudgetFormData>
@@ -51,7 +50,7 @@ export function BudgetForm({
     const { data: categories } = useCategories('expense')
 
     const form = useForm<BudgetFormData>({
-        resolver: zodResolver(budgetSchema),
+        resolver: schemaResolver<BudgetFormData>(budgetSchema),
         defaultValues: {
             name: '',
             amount: 0,
@@ -71,17 +70,7 @@ export function BudgetForm({
     const isGlobal = form.watch('is_global')
     const period = form.watch('period')
 
-    useEffect(() => {
-        if (!onValuesChange) {
-            return
-        }
-
-        const subscription = form.watch((value) => {
-            onValuesChange(value as BudgetFormData)
-        })
-
-        return () => subscription.unsubscribe()
-    }, [form, onValuesChange])
+    useFormValuesChange(form, onValuesChange)
 
     return (
         <FormWrapper>
@@ -128,14 +117,9 @@ export function BudgetForm({
                         render={({ field }) => (
                             <FormItem className="min-w-0">
                                 <FormLabel>{t('fields.currency')}</FormLabel>
-                                <CurrencySelect
-                                    value={field.value ? { source: 'existing', id: Number(field.value) } : null}
-                                    onChange={(next) => {
-                                        if (next.source === 'existing') {
-                                            field.onChange(next.id)
-                                        }
-                                    }}
-                                    allowCatalog={false}
+                                <CurrencyIdField
+                                    value={field.value}
+                                    onChange={field.onChange}
                                     placeholder={t('forms:budgets.baseCurrency')}
                                 />
                                 <FormMessage />

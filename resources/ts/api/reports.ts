@@ -98,7 +98,7 @@ export interface ActivityHeatmapData {
 }
 
 // Transaction Reports (Expenses/Income)
-export type TransactionType = 'expense' | 'income'
+export type ReportTransactionType = 'expense' | 'income'
 
 export interface TransactionSummaryData {
     total: number
@@ -246,22 +246,22 @@ export const reportsApi = {
         api.get<ActivityHeatmapData>('/reports/activity-heatmap', { params: buildParams(filters) }),
 
     // Transaction Reports (Expenses/Income)
-    getTransactionSummary: (filters: ReportFilters, type: TransactionType) =>
+    getTransactionSummary: (filters: ReportFilters, type: ReportTransactionType) =>
         api.get<TransactionSummaryData>('/reports/transactions/summary', {
             params: { ...buildParams(filters), type }
         }),
 
-    getTransactionsByCategory: (filters: ReportFilters, type: TransactionType) =>
+    getTransactionsByCategory: (filters: ReportFilters, type: ReportTransactionType) =>
         api.get<TransactionsByCategoryData>('/reports/transactions/by-category', {
             params: { ...buildParams(filters), type }
         }),
 
-    getTransactionDynamics: (filters: ReportFilters, type: TransactionType, groupBy: CashFlowGroupBy = 'day') =>
+    getTransactionDynamics: (filters: ReportFilters, type: ReportTransactionType, groupBy: CashFlowGroupBy = 'day') =>
         api.get<TransactionDynamicsData>('/reports/transactions/dynamics', {
             params: { ...buildParams(filters), type, group_by: groupBy }
         }),
 
-    getTopTransactions: (filters: ReportFilters, type: TransactionType, limit: number = 10) =>
+    getTopTransactions: (filters: ReportFilters, type: ReportTransactionType, limit: number = 10) =>
         api.get<TopTransactionsData>('/reports/transactions/top', {
             params: { ...buildParams(filters), type, limit }
         }),

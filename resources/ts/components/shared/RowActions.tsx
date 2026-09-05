@@ -69,8 +69,8 @@ export function RowActions({
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem
+                                    variant="destructive"
                                     onSelect={(event) => event.preventDefault()}
-                                    className="text-destructive focus:text-destructive"
                                     disabled={deleteDisabled}
                                 >
                                     <Trash2 className="mr-2 size-4" />
@@ -88,10 +88,7 @@ export function RowActions({
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
-                                    <AlertDialogAction
-                                        onClick={onDelete}
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    >
+                                    <AlertDialogAction variant="destructive" onClick={onDelete}>
                                         {t('actions.delete')}
                                     </AlertDialogAction>
                                 </AlertDialogFooter>

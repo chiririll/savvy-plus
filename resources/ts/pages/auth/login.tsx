@@ -155,7 +155,7 @@ export default function LoginPage() {
         defaultValues: {
             email: '',
             password: '',
-            remember_me: false,
+            remember_me: true,
         },
     })
 

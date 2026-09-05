@@ -70,6 +70,8 @@
             "lastUsed": "Last used {{date}}",
             "neverUsed": "Never used",
             "removeAria": "Remove passkey",
+            "deleteTitle": "Remove passkey",
+            "deleteDescription": "This passkey will no longer be able to sign in to your account.",
             "empty": "No passkeys registered yet.",
             "domainHint": "Passkeys require a secure origin and a valid domain. Open the app over HTTPS or via localhost — raw IP addresses are not allowed.",
             "add": "Add passkey",

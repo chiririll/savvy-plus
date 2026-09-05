@@ -6,7 +6,7 @@ const nameField = z.string()
     .max(255, i18n.t('validation.maxChars', { count: 255 }))
 
 const debtTypeField = z.enum(['i_owe', 'owed_to_me'], {
-    required_error: i18n.t('validation.selectDebtType'),
+    error: i18n.t('validation.selectDebtType'),
 })
 
 const amountField = z.coerce.number()
@@ -22,7 +22,7 @@ export const debtSchema = z.object({
     name: nameField,
     debt_type: debtTypeField,
     currency_id: z.coerce.number({
-        required_error: i18n.t('validation.selectCurrency'),
+        error: i18n.t('validation.selectCurrency'),
     }).positive(i18n.t('validation.selectCurrency')),
     amount: amountField,
     ...optionalNotes,
@@ -74,7 +74,7 @@ export function getDebtSchema(mode: 'create' | 'edit') {
 
 export const debtPaymentSchema = z.object({
     account_id: z.coerce.number({
-        required_error: i18n.t('validation.selectAccount'),
+        error: i18n.t('validation.selectAccount'),
     }).positive(i18n.t('validation.selectAccount')),
 
     amount: z.coerce.number()

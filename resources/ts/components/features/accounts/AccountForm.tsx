@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useForm, type Resolver } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useFormValuesChange } from '@/hooks'
+import { useForm } from 'react-hook-form'
+import { schemaResolver } from '@/lib/form-resolver'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -71,7 +71,7 @@ export function AccountForm({
     const { t } = useTranslation(['common', 'forms', 'pages'])
 
     const form = useForm<AccountFormValues>({
-        resolver: zodResolver(accountSchema) as Resolver<AccountFormValues>,
+        resolver: schemaResolver<AccountFormValues>(accountSchema),
         defaultValues: {
             name: '',
             type: 'bank',
@@ -84,17 +84,7 @@ export function AccountForm({
 
     const currency = form.watch('currency')
 
-    useEffect(() => {
-        if (!onValuesChange) {
-            return
-        }
-
-        const subscription = form.watch((value) => {
-            onValuesChange(value as AccountFormValues)
-        })
-
-        return () => subscription.unsubscribe()
-    }, [form, onValuesChange])
+    useFormValuesChange(form, onValuesChange)
 
     return (
         <FormWrapper>
