@@ -27,6 +27,12 @@ return Application::configure(basePath: dirname(__DIR__))
             '__Host-svy_session',
             'svy_csrf',
         ]);
+        $middleware->web(prepend: [
+            \App\Http\Middleware\PreventCdnCache::class,
+        ]);
+        $middleware->api(prepend: [
+            \App\Http\Middleware\PreventCdnCache::class,
+        ]);
         $middleware->api(append: [
             \App\Http\Middleware\SetLocale::class,
         ]);
