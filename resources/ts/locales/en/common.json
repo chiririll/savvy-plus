@@ -129,7 +129,10 @@
         "next": "Next",
         "morePages": "More pages",
         "goPrevious": "Go to previous page",
-        "goNext": "Go to next page"
+        "goNext": "Go to next page",
+        "loadingMore": "Loading more…",
+        "loadMoreError": "Couldn't load more",
+        "endOfList": "You've reached the end"
     },
     "confirm": {
         "cannotUndo": "This action cannot be undone."

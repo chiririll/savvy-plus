@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 interface UseResourceMutationOptions<TData, TVariables> {
     mutationFn: (variables: TVariables) => Promise<TData>
     invalidateKeys?: QueryKey[]
+    resetKeys?: QueryKey[]
     successMessage?: string | ((data: TData, variables: TVariables) => string)
     redirectTo?: string
     invalidateAll?: boolean
@@ -13,6 +14,7 @@ interface UseResourceMutationOptions<TData, TVariables> {
 export function useResourceMutation<TData, TVariables = void>({
     mutationFn,
     invalidateKeys = [],
+    resetKeys = [],
     successMessage,
     redirectTo,
     invalidateAll = false,
@@ -26,6 +28,9 @@ export function useResourceMutation<TData, TVariables = void>({
             if (invalidateAll) {
                 queryClient.invalidateQueries()
             } else {
+                resetKeys.forEach((queryKey) => {
+                    queryClient.resetQueries({ queryKey })
+                })
                 invalidateKeys.forEach((queryKey) => {
                     queryClient.invalidateQueries({ queryKey })
                 })
