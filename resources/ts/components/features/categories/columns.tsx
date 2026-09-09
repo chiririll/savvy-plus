@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { RowActions } from '@/components/shared'
 import { Category } from '@/types'
 import i18n from '@/lib/i18n'
+import { localizeDefaultName } from '@/lib/localized-name'
 
 export const createCategoryColumns = (
     onDelete: (id: number) => void,
@@ -22,7 +23,7 @@ export const createCategoryColumns = (
                     {row.original.icon}
                 </div>
                 <div>
-                    <p className="font-medium">{row.original.name}</p>
+                    <p className="font-medium">{localizeDefaultName(row.original.name)}</p>
                     <p className="text-xs text-muted-foreground capitalize">
                         {i18n.t(`pages:categories.types.${row.original.type}`)}
                     </p>
@@ -57,7 +58,7 @@ export const createCategoryColumns = (
                     onEdit={onEdit ? () => onEdit(row.original) : undefined}
                     onDelete={() => onDelete(row.original.id)}
                     deleteTitle={i18n.t('pages:categories.deleteTitle')}
-                    deleteDescription={i18n.t('pages:categories.deleteDescription', { name: row.original.name })}
+                    deleteDescription={i18n.t('pages:categories.deleteDescription', { name: localizeDefaultName(row.original.name) })}
                     deleteDisabled={isLastOfType}
                     deleteDisabledLabel={i18n.t('actions.cannotDeleteLast')}
                     isReadOnly={isReadOnly}

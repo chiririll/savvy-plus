@@ -34,6 +34,30 @@ return [
         'delete_last' => 'Cannot delete the last category of this type.',
     ],
 
+    'defaults' => [
+        'categories' => [
+            'RENT' => 'Rent',
+            'HOUSING' => 'Home',
+            'UTILITIES' => 'Utilities',
+            'GROCERIES' => 'Groceries',
+            'TRANSPORT' => 'Transport',
+            'HEALTH' => 'Healthcare',
+            'DINING' => 'Dining & takeout',
+            'ENTERTAINMENT' => 'Entertainment',
+            'SHOPPING' => 'Shopping',
+            'PERSONAL_CARE' => 'Personal care',
+            'GIFTS' => 'Gifts',
+            'TRAVEL' => 'Travel',
+            'OTHER' => 'Other',
+            'SALARY' => 'Salary',
+            'FREELANCE' => 'Freelance',
+            'INVESTMENTS' => 'Investments',
+            'GIFTS_RECEIVED' => 'Gifts received',
+            'REFUNDS' => 'Refunds',
+            'OTHER_INCOME' => 'Other income',
+        ],
+    ],
+
     'users' => [
         'demote_last_admin' => 'Cannot demote the last admin.',
         'delete_self' => 'Cannot delete yourself.',

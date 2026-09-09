@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronRight } from 'lucide-react'
 import { useTransactionReportTop } from '@/hooks'
 import { formatCurrency } from '@/lib/utils'
+import { localizeDefaultName } from '@/lib/localized-name'
 import type { ReportFilters } from '../types'
 import type { ReportTransactionType } from '@/api/reports'
 
@@ -87,12 +88,12 @@ export function TopTransactions({ filters, type, limit = 10 }: TopTransactionsPr
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="font-medium text-sm truncate">
-                                        {transaction.description || transaction.category.name}
+                                        {transaction.description || localizeDefaultName(transaction.category.name)}
                                     </p>
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                         <span>{formatShortDate(transaction.date)}</span>
                                         <span>•</span>
-                                        <span>{transaction.category.name}</span>
+                                        <span>{localizeDefaultName(transaction.category.name)}</span>
                                         <span>•</span>
                                         <span>{transaction.account.name}</span>
                                     </div>

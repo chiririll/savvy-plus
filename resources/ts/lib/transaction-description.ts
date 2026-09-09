@@ -1,4 +1,5 @@
 import i18n from '@/lib/i18n'
+import { localizeDefaultName } from '@/lib/localized-name'
 import type { Transaction, TransactionStatus, TransactionType } from '@/types/transactions'
 
 const INCOMING_TYPES: TransactionType[] = ['income', 'debt_collection', 'debt_borrow']
@@ -30,7 +31,7 @@ export function displayTransactionDescription(
         case 'debt_borrow':
             return i18n.t('pages:transactions.fallback.borrow', { name })
         default:
-            return transaction.category?.name || i18n.t(`pages:transactions.types.${transaction.type}`)
+            return localizeDefaultName(transaction.category?.name) || i18n.t(`pages:transactions.types.${transaction.type}`)
     }
 }
 

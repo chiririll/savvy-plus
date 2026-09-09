@@ -8,6 +8,7 @@ import { PieChart, BarChart3, LayoutGrid } from 'lucide-react'
 import { useTransactionReportByCategory } from '@/hooks'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import i18n from '@/lib/i18n'
+import { localizeDefaultName } from '@/lib/localized-name'
 import type { ReportFilters } from '../types'
 import type { ReportTransactionType } from '@/api/reports'
 
@@ -27,11 +28,11 @@ export function TransactionStructureChart({ filters, type }: TransactionStructur
     const chartData = useMemo(() => {
         if (!data?.items) return []
         return data.items.map((item) => ({
-            name: item.name,
+            name: localizeDefaultName(item.name),
             value: item.value,
             color: item.color,
         }))
-    }, [data])
+    }, [data, i18nInstance.language])
 
     const total = data?.total || 0
     const currency = data?.currency

@@ -34,6 +34,30 @@ return [
         'delete_last' => 'Нельзя удалить последнюю категорию этого типа.',
     ],
 
+    'defaults' => [
+        'categories' => [
+            'RENT' => 'Аренда',
+            'HOUSING' => 'Жильё',
+            'UTILITIES' => 'Коммуналка и связь',
+            'GROCERIES' => 'Продукты',
+            'TRANSPORT' => 'Транспорт',
+            'HEALTH' => 'Здоровье',
+            'DINING' => 'Кафе и доставка',
+            'ENTERTAINMENT' => 'Подписки и развлечения',
+            'SHOPPING' => 'Покупки',
+            'PERSONAL_CARE' => 'Уход за собой',
+            'GIFTS' => 'Подарки',
+            'TRAVEL' => 'Путешествия',
+            'OTHER' => 'Прочее',
+            'SALARY' => 'Зарплата',
+            'FREELANCE' => 'Фриланс',
+            'INVESTMENTS' => 'Инвестиции',
+            'GIFTS_RECEIVED' => 'Подарки полученные',
+            'REFUNDS' => 'Возвраты',
+            'OTHER_INCOME' => 'Прочий доход',
+        ],
+    ],
+
     'users' => [
         'demote_last_admin' => 'Нельзя понизить последнего администратора.',
         'delete_self' => 'Нельзя удалить себя.',

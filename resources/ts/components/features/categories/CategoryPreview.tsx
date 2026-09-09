@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { localizeDefaultName } from '@/lib/localized-name'
 
 interface CategoryPreviewProps {
     name: string
@@ -19,7 +20,7 @@ export function CategoryPreview({ name, icon, color }: CategoryPreviewProps) {
                 >
                     {icon}
                 </span>
-                <span className="font-medium">{name || t('categories.previewName')}</span>
+                <span className="font-medium">{localizeDefaultName(name) || t('categories.previewName')}</span>
             </div>
         </div>
     )

@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/collapsible'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
+import { localizeDefaultName } from '@/lib/localized-name'
 import { TRANSACTION_TYPE_OPTIONS } from '@/constants/transactions'
 import type { Category, Tag } from '@/types'
 import type { TransactionListFilters } from '@/hooks/use-transaction-list-filters'
@@ -176,7 +177,7 @@ export function TransactionFiltersPanel({ list, categories, tags, afterStatus }:
                                                     )}
                                                     onClick={() => toggleCategory(category.id)}
                                                 >
-                                                    {category.icon} {category.name}
+                                                    {category.icon} {localizeDefaultName(category.name)}
                                                 </Badge>
                                             )
                                         })}

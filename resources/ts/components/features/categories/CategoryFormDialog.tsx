@@ -3,6 +3,7 @@ import { EntityFormDialog } from '@/components/shared'
 import { CategoryFormData } from '@/schemas'
 import { Category } from '@/types'
 import { CategoryForm } from './CategoryForm'
+import { localizeDefaultName, toStoredDefaultName } from '@/lib/localized-name'
 
 const FORM_ID = 'category-form'
 
@@ -28,13 +29,16 @@ export function CategoryFormDialog({
             entity={category}
             open={open}
             onOpenChange={onOpenChange}
-            onSubmit={onSubmit}
+            onSubmit={(data) => onSubmit({
+                ...data,
+                name: toStoredDefaultName(data.name, category?.name),
+            })}
             isSubmitting={isSubmitting}
             formId={FORM_ID}
             title={category ? t('categories.editTitle') : t('categories.createTitle')}
             description={t('categories.description')}
             toFormValues={(item) => ({
-                name: item.name,
+                name: localizeDefaultName(item.name),
                 type: item.type,
                 icon: item.icon,
                 color: item.color,

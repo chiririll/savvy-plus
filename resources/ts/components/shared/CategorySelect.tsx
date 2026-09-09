@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/select'
 import { FormControl } from '@/components/ui/form'
 import { useCategories } from '@/hooks'
+import { localizeDefaultName } from '@/lib/localized-name'
 
 interface CategorySelectProps {
     value?: number | null
@@ -68,7 +69,7 @@ export function CategorySelect({
                             >
                                 {category.icon}
                             </span>
-                            <span>{category.name}</span>
+                            <span>{localizeDefaultName(category.name)}</span>
                         </div>
                     </SelectItem>
                 ))}

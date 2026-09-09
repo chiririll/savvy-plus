@@ -23,6 +23,7 @@ import {
 import { budgetSchema, BudgetFormData } from '@/schemas'
 import { useCategories, useFormValuesChange } from '@/hooks'
 import { Category } from '@/types'
+import { localizeDefaultName } from '@/lib/localized-name'
 import { CurrencyIdField, FieldHelp, FormActiveField, FormWrapper, TagSelect } from '@/components/shared'
 
 interface BudgetFormProps {
@@ -284,7 +285,7 @@ export function BudgetForm({
                                                         >
                                                             {category.icon}
                                                         </span>
-                                                        {category.name}
+                                                        {localizeDefaultName(category.name)}
                                                     </FormLabel>
                                                 </FormItem>
                                             )}

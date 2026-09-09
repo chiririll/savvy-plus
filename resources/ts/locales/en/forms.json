@@ -23,7 +23,8 @@
     "categories": {
         "namePlaceholder": "Groceries",
         "preview": "Preview:",
-        "previewName": "Category name"
+        "previewName": "Category name",
+        "defaultNameHelp": "Built-in category. Leave the name unchanged to keep it translated with the interface language."
     },
     "tags": {
         "label": "Tags",
