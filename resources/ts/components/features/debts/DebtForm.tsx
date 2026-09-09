@@ -24,7 +24,9 @@ import {
     FormDialogFooterStart,
     FormWrapper,
     SegmentedChoice,
+    useNegativeBalanceConfirm,
 } from '@/components/shared'
+import { warningsForAccountOutflow } from '@/lib/negative-balance'
 import { cn, formatCurrency, formatDateLocal } from '@/lib/utils'
 
 interface DebtFormProps {
@@ -68,6 +70,7 @@ export function DebtForm({
     const { t } = useTranslation(['common', 'forms', 'pages'])
     const { data: currencies } = useCurrencies()
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
+    const { confirmIfNeeded, dialog: negativeBalanceDialog } = useNegativeBalanceConfirm<DebtFormData>()
 
     const form = useForm<DebtFormData>({
         resolver: schemaResolver<DebtFormData>(getDebtSchema(mode)),
@@ -110,7 +113,16 @@ export function DebtForm({
     return (
         <FormWrapper>
         <Form {...form}>
-            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form
+                id={formId}
+                onSubmit={form.handleSubmit((data) => {
+                    const warnings = mode === 'create' && origin === 'new' && debtType === 'owed_to_me'
+                        ? warningsForAccountOutflow(selectedAccount, amount)
+                        : []
+                    confirmIfNeeded(data, warnings, onSubmit)
+                })}
+                className="space-y-4"
+            >
                 <SegmentedChoice
                     value={debtType}
                     onChange={(value) => form.setValue('debt_type', value)}
@@ -307,6 +319,7 @@ export function DebtForm({
                 )}
             </form>
         </Form>
+        {negativeBalanceDialog}
         </FormWrapper>
     )
 }

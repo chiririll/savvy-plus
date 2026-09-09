@@ -24,7 +24,9 @@ import {
     MoneyAccountFields,
     TagSelect,
     TransactionTypeTabs,
+    useNegativeBalanceConfirm,
 } from '@/components/shared'
+import { collectNegativeBalanceWarnings, warningIfResultNegative } from '@/lib/negative-balance'
 
 type BalancePreview = {
     currentBalance: number
@@ -77,7 +79,7 @@ function TransactionBalanceHint({
                     {from && <BalancePair preview={from} label={t('transactions.balance')} />}
                     {to && <BalancePair preview={to} label={t('transactions.toBalance')} />}
                     {from?.insufficientFunds && (
-                        <span className="font-medium text-destructive">{t('transactions.insufficientFunds')}</span>
+                        <span className="font-medium text-destructive">{t('transactions.willGoNegative')}</span>
                     )}
                 </>
             )}
@@ -199,6 +201,7 @@ export function TransactionForm({
     const { t } = useTranslation(['common', 'forms'])
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
     const { data: categories } = useCategories()
+    const { confirmIfNeeded, dialog: negativeBalanceDialog } = useNegativeBalanceConfirm<TransactionFormValues>()
 
     const formDefaults = useMemo(() => {
         const today = formatDateLocal()
@@ -526,6 +529,33 @@ export function TransactionForm({
         }
     }, [selectedToAccount, nextImpact, original, transactionType])
 
+    const willPostBalance = Boolean(originalAffectsBalance) || (!isEdit && !isPendingDate)
+
+    const negativeBalanceWarnings = useMemo(() => {
+        if (!willPostBalance) {
+            return []
+        }
+
+        return collectNegativeBalanceWarnings([
+            selectedAccount && balancePreview
+                ? warningIfResultNegative({
+                    accountName: selectedAccount.name,
+                    currentBalance: balancePreview.currentBalance,
+                    resultingBalance: balancePreview.newBalance,
+                    currency: balancePreview.currency,
+                })
+                : null,
+            selectedToAccount && toBalancePreview
+                ? warningIfResultNegative({
+                    accountName: selectedToAccount.name,
+                    currentBalance: toBalancePreview.currentBalance,
+                    resultingBalance: toBalancePreview.newBalance,
+                    currency: toBalancePreview.currency,
+                })
+                : null,
+        ])
+    }, [willPostBalance, selectedAccount, selectedToAccount, balancePreview, toBalancePreview])
+
     const balanceHint = (
         <TransactionBalanceHint
             from={balancePreview}
@@ -545,9 +575,6 @@ export function TransactionForm({
             <form
                 id={formId}
                 onSubmit={form.handleSubmit((data) => {
-                    if (balancePreview?.insufficientFunds) {
-                        return
-                    }
                     if (dateRequired && !data.date) {
                         form.setError('date', { message: t('validation.dateRequired') })
                         return
@@ -556,11 +583,15 @@ export function TransactionForm({
                         commitTransferRate()
                     }
                     const next = form.getValues()
-                    onSubmit({
-                        ...data,
-                        to_amount: next.to_amount,
-                        exchange_rate: next.exchange_rate,
-                    })
+                    confirmIfNeeded(
+                        {
+                            ...data,
+                            to_amount: next.to_amount,
+                            exchange_rate: next.exchange_rate,
+                        },
+                        negativeBalanceWarnings,
+                        onSubmit,
+                    )
                 })}
                 className="space-y-6"
             >
@@ -843,12 +874,13 @@ export function TransactionForm({
                 )}
 
                 {!hideSubmit && (
-                    <Button type="submit" disabled={isSubmitting || balancePreview?.insufficientFunds} className="w-full">
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
                         {isSubmitting ? t('actions.saving') : (submitLabel ?? t('actions.save'))}
                     </Button>
                 )}
             </form>
         </Form>
+        {negativeBalanceDialog}
         </FormWrapper>
     )
 }

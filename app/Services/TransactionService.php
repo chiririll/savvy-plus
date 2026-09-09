@@ -124,8 +124,6 @@ class TransactionService
             throw new DomainException(__('messages.transactions.date_cannot_be_future'));
         }
 
-        $this->assertSufficientFunds($transaction);
-
         $transaction = DB::transaction(function () use ($transaction, $applyDate) {
             $transaction->update([
                 'status' => TransactionStatus::Confirmed,
@@ -338,20 +336,6 @@ class TransactionService
 
         if (TransactionDates::isFuture($date)) {
             throw new DomainException(__('messages.transactions.date_cannot_be_future'));
-        }
-    }
-
-    private function assertSufficientFunds(Transaction $transaction): void
-    {
-        if (! in_array($transaction->type, [TransactionType::Expense, TransactionType::Transfer], true)) {
-            return;
-        }
-
-        $account = $transaction->account;
-        if ($account && $account->current_balance < (float) $transaction->amount) {
-            throw new DomainException(__('messages.validation.insufficient_funds', [
-                'available' => number_format($account->current_balance, 2),
-            ]));
         }
     }
 

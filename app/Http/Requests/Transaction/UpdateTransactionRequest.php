@@ -52,7 +52,6 @@ class UpdateTransactionRequest extends FormRequest
                 $this->validateCategoryType($validator);
                 $this->validateItemsTotal($validator);
                 $this->validateConfirmedDate($validator);
-                $this->validateSufficientFunds($validator);
             },
         ];
     }
@@ -133,51 +132,5 @@ class UpdateTransactionRequest extends FormRequest
         }
 
         $this->rejectFutureConfirmedDate($validator, $date);
-    }
-
-    private function validateSufficientFunds(Validator $validator): void
-    {
-        $transaction = $this->route('transaction');
-        $originalType = $transaction->type->value;
-        $originalAmount = (float) $transaction->amount;
-        $originalAccountId = $transaction->account_id;
-
-        $newType = $this->input('type') ?? $originalType;
-        $newAmount = (float) ($this->input('amount') ?? $originalAmount);
-        $newAccountId = $this->input('account_id') ?? $originalAccountId;
-
-        if ($transaction->isPending() || $transaction->isSkipped()) {
-            return;
-        }
-
-        // Only check for expense and transfer
-        if (! in_array($newType, [TransactionType::Expense->value, TransactionType::Transfer->value])) {
-            return;
-        }
-
-        $account = \App\Models\Account::find($newAccountId);
-        if (! $account) {
-            return;
-        }
-
-        // Current balance already reflects the original transaction. Only the
-        // amount delta (new outflow minus what is already applied) is checked.
-        $alreadyApplied = 0.0;
-        if ($newAccountId == $originalAccountId) {
-            if (in_array($originalType, [TransactionType::Expense->value, TransactionType::Transfer->value])) {
-                $alreadyApplied = $originalAmount;
-            } elseif ($originalType === TransactionType::Income->value) {
-                $alreadyApplied = -$originalAmount;
-            }
-        }
-
-        $delta = $newAmount - $alreadyApplied;
-        $available = $account->current_balance;
-
-        if ($available < $delta) {
-            $validator->errors()->add('amount', __('messages.validation.insufficient_funds', [
-                'available' => number_format($available + $alreadyApplied, 2),
-            ]));
-        }
     }
 }

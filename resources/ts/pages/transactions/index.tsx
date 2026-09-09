@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
-import { Page, PageHeader, DataTable, ServerPagination } from '@/components/shared'
+import { Page, PageHeader, DataTable, ServerPagination, useNegativeBalanceConfirm } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import {
     ApplyDeferredDateDialog,
@@ -23,6 +23,7 @@ import {
     useTransactionListFilters,
 } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
+import { warningsForConfirmedDuplicate } from '@/lib/negative-balance'
 import { addDaysLocal } from '@/lib/utils'
 
 export default function TransactionsPage() {
@@ -46,6 +47,7 @@ export default function TransactionsPage() {
     const transactions = data?.data ?? []
     const { openCreate, openEdit } = useTransactionDeepLink(data?.data)
     const [applying, setApplying] = useState<Transaction | null>(null)
+    const { confirmIfNeeded, dialog: negativeBalanceDialog } = useNegativeBalanceConfirm<number>()
 
     const handleCreate = () => {
         openCreate(list.params.type ? { type: list.params.type } : undefined)
@@ -53,7 +55,14 @@ export default function TransactionsPage() {
 
     const columns = createTransactionColumns({
         onDelete: (id) => deleteTransaction.mutate(id),
-        onDuplicate: (id) => duplicateTransaction.mutate(id),
+        onDuplicate: (id) => {
+            const transaction = transactions.find((item) => item.id === id)
+            confirmIfNeeded(
+                id,
+                transaction ? warningsForConfirmedDuplicate(transaction) : [],
+                (payload) => duplicateTransaction.mutate(payload),
+            )
+        },
         onConfirm: setApplying,
         onSkip: (id) => skipTransaction.mutate(id),
         onEdit: openEdit,
@@ -113,6 +122,8 @@ export default function TransactionsPage() {
                     infoLabel={t('transactions.itemLabel')}
                 />
             )}
+
+            {negativeBalanceDialog}
 
             <ApplyDeferredDateDialog
                 transaction={applying}

@@ -11,8 +11,10 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useNegativeBalanceConfirm } from '@/components/shared'
 import { formatDateLocal, isDateInFuture, isDateOverdue, parseDateKey } from '@/lib/dates'
 import { intlLocale } from '@/lib/i18n'
+import { warningsForTransactionOutflow } from '@/lib/negative-balance'
 import { Transaction } from '@/types'
 
 type ApplyDateChoice = 'today' | 'original' | 'other'
@@ -38,6 +40,7 @@ export function ApplyDeferredDateDialog({
 }: ApplyDeferredDateDialogProps) {
     const { t } = useTranslation('pages')
     const { t: tCommon } = useTranslation('common')
+    const { confirmIfNeeded, dialog: negativeBalanceDialog } = useNegativeBalanceConfirm<string>()
     const groupId = useId()
     const originalDate = transaction?.date ?? null
     const originalIsUsable = Boolean(originalDate) && !isDateInFuture(originalDate)
@@ -70,7 +73,11 @@ export function ApplyDeferredDateDialog({
         if (!selectedDate || isDateInFuture(selectedDate)) {
             return
         }
-        onConfirm(selectedDate)
+        confirmIfNeeded(
+            selectedDate,
+            transaction ? warningsForTransactionOutflow(transaction) : [],
+            onConfirm,
+        )
     }
 
     return (
@@ -119,7 +126,7 @@ export function ApplyDeferredDateDialog({
                                             : 'transactions.applyOriginal')}
                                     </span>
                                     <span className="text-xs text-muted-foreground">
-                                        {formatStoredDate(originalDate)}
+                                        {originalDate ? formatStoredDate(originalDate) : null}
                                     </span>
                                 </span>
                             </label>
@@ -163,6 +170,7 @@ export function ApplyDeferredDateDialog({
                     </DialogFooter>
                 </form>
             </DialogContent>
+            {negativeBalanceDialog}
         </Dialog>
     )
 }

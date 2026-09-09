@@ -41,6 +41,7 @@
         "after": "After",
         "toBalance": "To balance",
         "insufficientFunds": "Insufficient funds",
+        "willGoNegative": "Balance will go negative",
         "items": "Items",
         "addItem": "Add item",
         "qty": "Qty",

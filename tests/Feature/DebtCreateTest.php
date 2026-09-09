@@ -172,7 +172,7 @@ it('rejects deleting a debt after a repayment', function () {
     expect(Account::find($debtId))->not->toBeNull();
 });
 
-it('rejects lending more than the account balance', function () {
+it('allows lending more than the account balance', function () {
     $user = debtUser();
     $account = cashAccount(debtCurrency(), 100);
 
@@ -183,5 +183,7 @@ it('rejects lending more than the account balance', function () {
         'account_id' => $account->id,
         'amount' => 150,
         'date' => '2026-09-01',
-    ], $user)->assertStatus(422)->assertJsonValidationErrors(['amount']);
+    ], $user)->assertCreated();
+
+    expect((float) $account->fresh()->current_balance)->toBe(-50.0);
 });

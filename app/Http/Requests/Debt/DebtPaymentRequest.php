@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Debt;
 
-use App\Enums\DebtType;
 use App\Models\Account;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -36,7 +35,6 @@ class DebtPaymentRequest extends FormRequest
         return [
             function (Validator $validator) {
                 $this->validateAccountIsNotDebt($validator);
-                $this->validateSufficientFunds($validator);
                 $this->validateNotOverpaying($validator);
             },
         ];
@@ -47,26 +45,6 @@ class DebtPaymentRequest extends FormRequest
         $account = Account::find($this->input('account_id'));
         if ($account && $account->isDebt()) {
             $validator->errors()->add('account_id', __('messages.validation.cannot_use_debt_account'));
-        }
-    }
-
-    private function validateSufficientFunds(Validator $validator): void
-    {
-        $debt = $this->route('debt');
-
-        if (! $debt || ! $debt->isDebt()) {
-            return;
-        }
-
-        // For "i_owe" type, check source account balance
-        if ($debt->debt_type === DebtType::IOwe) {
-            $account = Account::find($this->input('account_id'));
-            if ($account && $account->current_balance < $this->input('amount')) {
-                $validator->errors()->add(
-                    'amount',
-                    __('messages.validation.insufficient_funds', ['available' => number_format($account->current_balance, 2)])
-                );
-            }
         }
     }
 

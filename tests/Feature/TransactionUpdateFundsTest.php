@@ -105,7 +105,7 @@ it('allows saving an expense without changing the amount', function () {
     expect((float) $account->fresh()->current_balance)->toBe(20.0);
 });
 
-it('rejects editing an expense when the amount delta exceeds the remaining balance', function () {
+it('allows editing an expense when the amount delta exceeds the remaining balance', function () {
     $user = updateFundsUser();
     $account = updateFundsAccount(updateFundsCurrency());
     $category = updateFundsCategory();
@@ -123,8 +123,8 @@ it('rejects editing an expense when the amount delta exceeds the remaining balan
     callAs('PATCH', "/api/transactions/{$id}", [
         'amount' => 150,
     ], $user)
-        ->assertStatus(422)
-        ->assertJsonValidationErrors('amount');
+        ->assertOk()
+        ->assertJsonPath('data.amount', 150);
 
-    expect((float) $account->fresh()->current_balance)->toBe(20.0);
+    expect((float) $account->fresh()->current_balance)->toBe(-50.0);
 });

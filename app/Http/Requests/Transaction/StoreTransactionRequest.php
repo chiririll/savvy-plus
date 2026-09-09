@@ -49,7 +49,6 @@ class StoreTransactionRequest extends FormRequest
                 $this->validateTransferFields($validator);
                 $this->validateCategoryType($validator);
                 $this->validateItemsTotal($validator);
-                $this->validateSufficientFunds($validator);
             },
         ];
     }
@@ -100,33 +99,6 @@ class StoreTransactionRequest extends FormRequest
 
         if (abs($itemsTotal - $amount) > 0.01) {
             $validator->errors()->add('items', __('messages.validation.items_total', ['items' => $itemsTotal, 'amount' => $amount]));
-        }
-    }
-
-    private function validateSufficientFunds(Validator $validator): void
-    {
-        $type = $this->input('type');
-
-        // Only check for expense and transfer
-        if (! in_array($type, [TransactionType::Expense->value, TransactionType::Transfer->value])) {
-            return;
-        }
-
-        $accountId = $this->input('account_id');
-        $amount = (float) $this->input('amount');
-        $date = $this->input('date');
-
-        if (! $date || $date > now()->toDateString()) {
-            return;
-        }
-
-        $account = \App\Models\Account::find($accountId);
-        if (! $account) {
-            return;
-        }
-
-        if ($account->current_balance < $amount) {
-            $validator->errors()->add('amount', __('messages.validation.insufficient_funds', ['available' => number_format($account->current_balance, 2)]));
         }
     }
 }

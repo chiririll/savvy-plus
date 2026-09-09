@@ -29,6 +29,13 @@
         "reorder": "Reorder",
         "help": "Help"
     },
+    "negativeBalance": {
+        "title": "Balance will go negative",
+        "description": "This operation will put the following accounts below zero.",
+        "descriptionOne": "This operation will put {{name}} below zero.",
+        "current": "Current",
+        "resulting": "After"
+    },
     "readOnly": {
         "banner": "You are in read-only mode. You can view all data but cannot make any changes.",
         "close": "Close banner"
