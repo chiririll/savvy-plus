@@ -284,7 +284,7 @@ function TransactionItemRow({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    className="shrink-0 text-muted-foreground"
+                    className="size-6 shrink-0 text-muted-foreground"
                     onClick={() => {
                         if (expanded) {
                             onToggle()
@@ -297,7 +297,7 @@ function TransactionItemRow({
                     aria-label={foldLabel}
                     title={foldLabel}
                 >
-                    <ChevronDown className={cn('size-4 transition-transform duration-200', expanded && 'rotate-180')} />
+                    <ChevronDown className={cn('size-3 transition-transform duration-200', expanded && 'rotate-180')} />
                 </Button>
 
                 <FormField
@@ -305,20 +305,26 @@ function TransactionItemRow({
                     name={`items.${index}.name`}
                     render={({ field }) => (
                         <FormItem className="min-w-0 flex-1 space-y-1">
-                            <FormControl>
-                                <Input
-                                    {...field}
-                                    ref={(element) => {
-                                        field.ref(element)
-                                        nameRef.current = element
-                                    }}
-                                    placeholder={t('forms:transactions.itemName')}
-                                    className="h-8 min-w-0 border-0 shadow-none focus-visible:ring-1"
-                                    data-item-name
-                                    data-index={index}
-                                    onKeyDown={(event) => handleItemKeyDown(event, 'name')}
-                                />
-                            </FormControl>
+                            <div className="flex min-w-0 items-center gap-2">
+                                <FormLabel className="m-0 w-16 shrink-0 text-xs font-normal text-muted-foreground">
+                                    {t('fields.name')}
+                                </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        ref={(element) => {
+                                            field.ref(element)
+                                            nameRef.current = element
+                                        }}
+                                        placeholder={t('forms:transactions.itemName')}
+                                        className="h-8 min-w-0 border-0 shadow-none focus-visible:ring-1"
+                                        data-item-name
+                                        data-index={index}
+                                        onFocus={() => onExpand()}
+                                        onKeyDown={(event) => handleItemKeyDown(event, 'name')}
+                                    />
+                                </FormControl>
+                            </div>
                             <FormMessage />
                         </FormItem>
                     )}
@@ -350,40 +356,43 @@ function TransactionItemRow({
                 inert={!expanded}
             >
                 <div className="min-h-0 overflow-hidden">
-                    <div className="grid min-w-0 grid-cols-[5.5rem_minmax(0,1fr)] items-start gap-2 py-1 pl-9">
+                    <div className="grid min-w-0 grid-cols-[minmax(0,7rem)_minmax(0,1fr)] items-start gap-3 py-1 pl-7">
                         <FormField
                             control={form.control}
                             name={`items.${index}.quantity`}
                             render={({ field }) => (
                                 <FormItem className="min-w-0 space-y-1">
-                                    <FormLabel className="sr-only">
-                                        {t('forms:transactions.qty')}
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            ref={(element) => {
-                                                field.ref(element)
-                                                quantityRef.current = element
-                                            }}
-                                            type="number"
-                                            step={priceInputStep(ITEM_QTY_DECIMALS)}
-                                            min={0}
-                                            placeholder={t('forms:transactions.qty')}
-                                            className="h-8 min-w-0"
-                                            data-item-quantity
-                                            data-index={index}
-                                            value={field.value ?? ''}
-                                            onChange={(event) => {
-                                                field.onChange(
-                                                    event.target.value === ''
-                                                        ? ''
-                                                        : Number(event.target.value),
-                                                )
-                                            }}
-                                            onKeyDown={(event) => handleItemKeyDown(event, 'quantity')}
-                                        />
-                                    </FormControl>
+                                    <div className="flex min-w-0 items-center gap-2">
+                                        <FormLabel className="m-0 w-16 shrink-0 text-xs font-normal text-muted-foreground">
+                                            {t('forms:transactions.qty')}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                ref={(element) => {
+                                                    field.ref(element)
+                                                    quantityRef.current = element
+                                                }}
+                                                type="number"
+                                                step={priceInputStep(ITEM_QTY_DECIMALS)}
+                                                min={0}
+                                                placeholder="1"
+                                                className="h-8 min-w-0"
+                                                data-item-quantity
+                                                data-index={index}
+                                                value={field.value ?? ''}
+                                                onFocus={() => onExpand()}
+                                                onChange={(event) => {
+                                                    field.onChange(
+                                                        event.target.value === ''
+                                                            ? ''
+                                                            : Number(event.target.value),
+                                                    )
+                                                }}
+                                                onKeyDown={(event) => handleItemKeyDown(event, 'quantity')}
+                                            />
+                                        </FormControl>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -394,34 +403,37 @@ function TransactionItemRow({
                             name={`items.${index}.price_per_unit`}
                             render={({ field }) => (
                                 <FormItem className="min-w-0 space-y-1">
-                                    <FormLabel className="sr-only">
-                                        {t('forms:transactions.price')}
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            ref={(element) => {
-                                                field.ref(element)
-                                                priceRef.current = element
-                                            }}
-                                            type="number"
-                                            step={priceInputStep(decimals)}
-                                            min={0}
-                                            placeholder={t('forms:transactions.price')}
-                                            className="h-8 min-w-0"
-                                            data-item-price_per_unit
-                                            data-index={index}
-                                            value={field.value ?? ''}
-                                            onChange={(event) => {
-                                                field.onChange(
-                                                    event.target.value === ''
-                                                        ? ''
-                                                        : Number(event.target.value),
-                                                )
-                                            }}
-                                            onKeyDown={(event) => handleItemKeyDown(event, 'price_per_unit')}
-                                        />
-                                    </FormControl>
+                                    <div className="flex min-w-0 items-center gap-2">
+                                        <FormLabel className="m-0 w-16 shrink-0 text-xs font-normal text-muted-foreground">
+                                            {t('forms:transactions.price')}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                ref={(element) => {
+                                                    field.ref(element)
+                                                    priceRef.current = element
+                                                }}
+                                                type="number"
+                                                step={priceInputStep(decimals)}
+                                                min={0}
+                                                placeholder={decimals <= 0 ? '0' : (0).toFixed(decimals)}
+                                                className="h-8 min-w-0"
+                                                data-item-price_per_unit
+                                                data-index={index}
+                                                value={field.value ?? ''}
+                                                onFocus={() => onExpand()}
+                                                onChange={(event) => {
+                                                    field.onChange(
+                                                        event.target.value === ''
+                                                            ? ''
+                                                            : Number(event.target.value),
+                                                    )
+                                                }}
+                                                onKeyDown={(event) => handleItemKeyDown(event, 'price_per_unit')}
+                                            />
+                                        </FormControl>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
