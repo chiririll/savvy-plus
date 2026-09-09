@@ -27,7 +27,9 @@
         "clear": "Clear",
         "processing": "Processing...",
         "reorder": "Reorder",
-        "help": "Help"
+        "help": "Help",
+        "expand": "Expand",
+        "collapse": "Collapse"
     },
     "negativeBalance": {
         "title": "Balance will go negative",

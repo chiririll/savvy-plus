@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useFieldArray, useFormContext, useWatch, type UseFormReturn } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -37,14 +37,22 @@ export function TransactionFormItems({ form, currency }: TransactionFormItemsPro
     })
     const items = useWatch({ control: form.control, name: 'items' })
     const decimals = currencyDecimals(currency)
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
     const pendingNameFocus = useRef(false)
+    const pendingExpandNew = useRef(false)
 
     const addItem = useCallback(() => {
         pendingNameFocus.current = true
+        pendingExpandNew.current = true
         append({ name: '', quantity: 1, price_per_unit: 0 })
     }, [append])
 
     useEffect(() => {
+        if (pendingExpandNew.current) {
+            pendingExpandNew.current = false
+            setExpandedIndex(fields.length > 0 ? fields.length - 1 : null)
+        }
+
         if (!pendingNameFocus.current) {
             return
         }
@@ -58,6 +66,14 @@ export function TransactionFormItems({ form, currency }: TransactionFormItemsPro
         document.querySelector<HTMLInputElement>(
             `[data-item-${field}][data-index="${index}"]`,
         )?.focus()
+    }, [])
+
+    const expandRow = useCallback((index: number) => {
+        setExpandedIndex(index)
+    }, [])
+
+    const toggleRow = useCallback((index: number) => {
+        setExpandedIndex((current) => (current === index ? null : index))
     }, [])
 
     return (
@@ -86,9 +102,21 @@ export function TransactionFormItems({ form, currency }: TransactionFormItemsPro
                                 Number(items?.[index]?.price_per_unit) || 0,
                                 decimals,
                             )}
+                            expanded={expandedIndex === index}
+                            onExpand={() => expandRow(index)}
+                            onToggle={() => toggleRow(index)}
                             canRemove={fields.length > 0}
                             onRemove={() => {
                                 remove(index)
+                                setExpandedIndex((current) => {
+                                    if (current === null) {
+                                        return null
+                                    }
+                                    if (current === index) {
+                                        return null
+                                    }
+                                    return current > index ? current - 1 : current
+                                })
                                 requestAnimationFrame(() => {
                                     focusItemField(Math.max(0, index - 1), 'name')
                                 })
@@ -133,6 +161,9 @@ function TransactionItemRow({
     currency,
     decimals,
     lineTotal,
+    expanded,
+    onExpand,
+    onToggle,
     canRemove,
     onRemove,
     onAddItem,
@@ -144,6 +175,9 @@ function TransactionItemRow({
     currency?: Currency | null
     decimals: number
     lineTotal: number
+    expanded: boolean
+    onExpand: () => void
+    onToggle: () => void
     canRemove: boolean
     onRemove: () => void
     onAddItem: () => void
@@ -152,7 +186,6 @@ function TransactionItemRow({
 }) {
     const { t } = useTranslation(['common', 'forms'])
     const { getFieldState, formState } = useFormContext<TransactionFormValues>()
-    const [expanded, setExpanded] = useState(false)
     const nameRef = useRef<HTMLInputElement | null>(null)
     const quantityRef = useRef<HTMLInputElement | null>(null)
     const priceRef = useRef<HTMLInputElement | null>(null)
@@ -163,9 +196,9 @@ function TransactionItemRow({
 
     useEffect(() => {
         if (quantityState.error || priceState.error) {
-            setExpanded(true)
+            onExpand()
         }
-    }, [quantityState.error, priceState.error])
+    }, [onExpand, quantityState.error, priceState.error])
 
     useLayoutEffect(() => {
         if (!expanded || !pendingPriceFocus.current) {
@@ -183,8 +216,8 @@ function TransactionItemRow({
         }
 
         pendingPriceFocus.current = true
-        setExpanded(true)
-    }, [expanded])
+        onExpand()
+    }, [expanded, onExpand])
 
     const handleItemKeyDown = useCallback((
         event: KeyboardEvent<HTMLInputElement>,
@@ -242,10 +275,31 @@ function TransactionItemRow({
     }, [expandToPrice, index, onAddItem, onFocusField, onRemove, rowCount])
 
     const formattedTotal = formatCurrency(lineTotal, currency, { showSymbol: false })
+    const foldLabel = expanded ? t('actions.collapse') : t('actions.expand')
 
     return (
         <div className="min-w-0 rounded-lg border px-2 py-1.5">
             <div className="flex min-w-0 items-start gap-1">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="shrink-0 text-muted-foreground"
+                    onClick={() => {
+                        if (expanded) {
+                            onToggle()
+                            return
+                        }
+                        pendingPriceFocus.current = true
+                        onExpand()
+                    }}
+                    aria-expanded={expanded}
+                    aria-label={foldLabel}
+                    title={foldLabel}
+                >
+                    <ChevronDown className={cn('size-4 transition-transform duration-200', expanded && 'rotate-180')} />
+                </Button>
+
                 <FormField
                     control={form.control}
                     name={`items.${index}.name`}
@@ -278,25 +332,6 @@ function TransactionItemRow({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    className="shrink-0 text-muted-foreground"
-                    onClick={() => {
-                        if (expanded) {
-                            setExpanded(false)
-                            return
-                        }
-                        expandToPrice()
-                    }}
-                    aria-expanded={expanded}
-                    aria-label={t('actions.edit')}
-                    title={t('actions.edit')}
-                >
-                    <Pencil className="size-4" />
-                </Button>
-
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
                     onClick={onRemove}
                     disabled={!canRemove}
                     className="shrink-0 text-muted-foreground hover:text-destructive"
@@ -315,13 +350,13 @@ function TransactionItemRow({
                 inert={!expanded}
             >
                 <div className="min-h-0 overflow-hidden">
-                    <div className="grid min-w-0 grid-cols-[5.5rem_minmax(0,1fr)_4rem] items-start gap-2 pt-2">
+                    <div className="grid min-w-0 grid-cols-[5.5rem_minmax(0,1fr)] items-start gap-2 py-1 pl-9">
                         <FormField
                             control={form.control}
                             name={`items.${index}.quantity`}
                             render={({ field }) => (
                                 <FormItem className="min-w-0 space-y-1">
-                                    <FormLabel className="text-xs text-muted-foreground">
+                                    <FormLabel className="sr-only">
                                         {t('forms:transactions.qty')}
                                     </FormLabel>
                                     <FormControl>
@@ -334,7 +369,7 @@ function TransactionItemRow({
                                             type="number"
                                             step={priceInputStep(ITEM_QTY_DECIMALS)}
                                             min={0}
-                                            placeholder="1"
+                                            placeholder={t('forms:transactions.qty')}
                                             className="h-8 min-w-0"
                                             data-item-quantity
                                             data-index={index}
@@ -359,7 +394,7 @@ function TransactionItemRow({
                             name={`items.${index}.price_per_unit`}
                             render={({ field }) => (
                                 <FormItem className="min-w-0 space-y-1">
-                                    <FormLabel className="text-xs text-muted-foreground">
+                                    <FormLabel className="sr-only">
                                         {t('forms:transactions.price')}
                                     </FormLabel>
                                     <FormControl>
@@ -372,7 +407,7 @@ function TransactionItemRow({
                                             type="number"
                                             step={priceInputStep(decimals)}
                                             min={0}
-                                            placeholder={decimals <= 0 ? '0' : (0).toFixed(decimals)}
+                                            placeholder={t('forms:transactions.price')}
                                             className="h-8 min-w-0"
                                             data-item-price_per_unit
                                             data-index={index}
@@ -391,15 +426,6 @@ function TransactionItemRow({
                                 </FormItem>
                             )}
                         />
-
-                        <div className="min-w-0 space-y-1">
-                            <div className="text-xs text-muted-foreground">
-                                {t('forms:transactions.total')}
-                            </div>
-                            <div className="flex h-8 items-center justify-end font-mono text-sm text-muted-foreground tabular-nums">
-                                {formattedTotal}
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
