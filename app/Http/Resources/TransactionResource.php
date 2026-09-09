@@ -16,7 +16,7 @@ class TransactionResource extends JsonResource
             'toAmount' => $this->when($this->to_amount !== null, (float) $this->to_amount),
             'exchangeRate' => $this->when($this->exchange_rate !== null, (float) $this->exchange_rate),
             'description' => $this->localizedDescription(),
-            'date' => $this->date->format('Y-m-d'),
+            'date' => $this->date?->format('Y-m-d'),
             'status' => $this->status->value,
             'recurringTransactionId' => $this->recurring_transaction_id,
             'actions' => $this->kind()->actions(),

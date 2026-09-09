@@ -19,8 +19,15 @@ class DebtPaymentRequest extends FormRequest
         return [
             'account_id' => 'required|exists:accounts,id',
             'amount' => 'required|numeric|gt:0',
-            'date' => 'required|date',
+            'date' => 'required|date|before_or_equal:today',
             'description' => 'nullable|string|max:500',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'date.before_or_equal' => __('messages.transactions.date_cannot_be_future'),
         ];
     }
 

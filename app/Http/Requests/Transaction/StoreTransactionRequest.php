@@ -9,9 +9,16 @@ use Illuminate\Validation\Validator;
 
 class StoreTransactionRequest extends FormRequest
 {
+    use NormalizesNullableDate;
+
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->normalizeNullableDate();
     }
 
     public function rules(): array
@@ -25,7 +32,7 @@ class StoreTransactionRequest extends FormRequest
             'to_amount' => 'nullable|numeric|gt:0',
             'exchange_rate' => 'nullable|numeric|gt:0',
             'description' => 'nullable|string|max:500',
-            'date' => 'required|date',
+            'date' => 'nullable|date',
             'items' => 'nullable|array',
             'items.*.name' => 'required_with:items|string|max:255',
             'items.*.quantity' => 'required_with:items|integer|min:1',
@@ -109,7 +116,7 @@ class StoreTransactionRequest extends FormRequest
         $amount = (float) $this->input('amount');
         $date = $this->input('date');
 
-        if ($date && $date > now()->toDateString()) {
+        if (! $date || $date > now()->toDateString()) {
             return;
         }
 

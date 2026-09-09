@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import i18n from '@/lib/i18n'
+import { isDateInFuture } from '@/lib/dates'
 
 const nameField = z.string()
     .min(1, i18n.t('validation.nameRequired'))
@@ -83,6 +84,14 @@ export const debtPaymentSchema = z.object({
     date: z.string().min(1, i18n.t('validation.dateRequired')),
 
     description: z.string().max(1000).optional(),
+}).superRefine((data, ctx) => {
+    if (isDateInFuture(data.date)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: i18n.t('validation.dateCannotBeFuture'),
+            path: ['date'],
+        })
+    }
 })
 
 export type DebtPaymentFormData = z.infer<typeof debtPaymentSchema>

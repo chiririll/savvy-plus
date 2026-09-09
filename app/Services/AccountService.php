@@ -131,12 +131,16 @@ class AccountService
         $seriesData = [];
         foreach ($accounts as $account) {
             $seriesData[$account->id] = [
+                'id' => $account->id,
                 'name' => $account->name,
                 'type' => $account->type,
+                'currency' => $account->currency?->code,
                 'data' => [],
+                'native_data' => [],
             ];
         }
         $totalData = [];
+        $activeAccountIds = [];
 
         foreach ($dates as $date) {
             // Apply transactions for this date
@@ -150,6 +154,7 @@ class AccountService
                         case 'debt_borrow':
                             if (isset($runningBalances[$accountId])) {
                                 $runningBalances[$accountId] += (float) $transaction->amount;
+                                $activeAccountIds[$accountId] = true;
                             }
                             break;
                         case 'expense':
@@ -157,45 +162,54 @@ class AccountService
                         case 'debt_lend':
                             if (isset($runningBalances[$accountId])) {
                                 $runningBalances[$accountId] -= (float) $transaction->amount;
+                                $activeAccountIds[$accountId] = true;
                             }
                             break;
                         case 'transfer':
                             if (isset($runningBalances[$accountId])) {
                                 $runningBalances[$accountId] -= (float) $transaction->amount;
+                                $activeAccountIds[$accountId] = true;
                             }
                             if ($transaction->to_account_id && isset($runningBalances[$transaction->to_account_id])) {
                                 $runningBalances[$transaction->to_account_id] += (float) $transaction->to_amount;
+                                $activeAccountIds[$transaction->to_account_id] = true;
                             }
                             break;
                     }
                 }
             }
 
-            // Calculate balance for each account in base currency
             $totalInBase = 0;
             foreach ($accounts as $account) {
                 $balance = $runningBalances[$account->id] ?? 0;
+                $accountDecimals = $account->currency->decimals ?? $decimals;
                 $balanceInBase = $account->currency_id === $baseCurrency->id
                     ? $balance
                     : $account->currency->convertTo($balance, $baseCurrency);
 
                 $seriesData[$account->id]['data'][] = round($balanceInBase, $decimals);
+                $seriesData[$account->id]['native_data'][] = round($balance, $accountDecimals);
                 $totalInBase += $balanceInBase;
             }
 
             $totalData[] = round($totalInBase, $decimals);
         }
 
-        // Build series array
+        // Only show accounts that had cash flow in the selected period
         $series = [];
         foreach ($accounts as $account) {
+            if (! isset($activeAccountIds[$account->id])) {
+                continue;
+            }
             $series[] = $seriesData[$account->id];
         }
-        // Add total series
         $series[] = [
+            'id' => null,
             'name' => __('messages.reports.total'),
             'type' => 'total',
+            'currency' => $baseCurrency->code,
             'data' => $totalData,
+            'native_data' => $totalData,
         ];
 
         return [

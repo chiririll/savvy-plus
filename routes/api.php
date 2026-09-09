@@ -132,6 +132,7 @@ Route::middleware(['session', 'csrf'])->group(function () {
         Route::post('transactions/{transaction}/confirm', [TransactionController::class, 'confirm']);
         Route::post('transactions/{transaction}/skip', [TransactionController::class, 'skip']);
         Route::get('transactions-summary', [TransactionController::class, 'summary']);
+        Route::get('transactions-pending-summary', [TransactionController::class, 'pendingSummary']);
 
         // Universal S3-compatible multipart uploads (Uppy AwsS3 companion protocol)
         Route::prefix('s3/multipart')->group(function () {

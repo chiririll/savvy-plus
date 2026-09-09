@@ -4,6 +4,7 @@ namespace App\DTOs;
 
 use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
+use App\Support\TransactionDates;
 
 readonly class TransactionData
 {
@@ -11,7 +12,7 @@ readonly class TransactionData
         public TransactionType $type,
         public int $accountId,
         public float $amount,
-        public string $date,
+        public ?string $date,
         public ?int $toAccountId = null,
         public ?int $categoryId = null,
         public ?float $toAmount = null,
@@ -29,7 +30,7 @@ readonly class TransactionData
             type: TransactionType::from($data['type']),
             accountId: $data['account_id'],
             amount: $data['amount'],
-            date: $data['date'],
+            date: self::normalizeDate($data['date'] ?? null),
             toAccountId: $data['to_account_id'] ?? null,
             categoryId: $data['category_id'] ?? null,
             toAmount: $data['to_amount'] ?? null,
@@ -47,5 +48,14 @@ readonly class TransactionData
     public function hasItems(): bool
     {
         return ! empty($this->items);
+    }
+
+    private static function normalizeDate(mixed $date): ?string
+    {
+        if ($date === null || $date === '') {
+            return null;
+        }
+
+        return TransactionDates::normalize($date);
     }
 }

@@ -1,14 +1,17 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import { Page, PageHeader, DataTable, ServerPagination } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import {
+    ApplyDeferredDateDialog,
     createTransactionColumns,
     TransactionFiltersPanel,
     TransactionItemsRow,
     UpcomingPendingStrip,
     useTransactionDeepLink,
 } from '@/components/features/transactions'
+import { Transaction } from '@/types'
 import {
     useTransactions,
     useDeleteTransaction,
@@ -42,6 +45,7 @@ export default function TransactionsPage() {
     const isReadOnly = useReadOnly()
     const transactions = data?.data ?? []
     const { openCreate, openEdit } = useTransactionDeepLink(data?.data)
+    const [applying, setApplying] = useState<Transaction | null>(null)
 
     const handleCreate = () => {
         openCreate(list.params.type ? { type: list.params.type } : undefined)
@@ -50,7 +54,7 @@ export default function TransactionsPage() {
     const columns = createTransactionColumns({
         onDelete: (id) => deleteTransaction.mutate(id),
         onDuplicate: (id) => duplicateTransaction.mutate(id),
-        onConfirm: (id) => confirmTransaction.mutate(id),
+        onConfirm: setApplying,
         onSkip: (id) => skipTransaction.mutate(id),
         onEdit: openEdit,
         isReadOnly,
@@ -77,7 +81,7 @@ export default function TransactionsPage() {
                     <UpcomingPendingStrip
                         transactions={highlight}
                         isReadOnly={isReadOnly}
-                        onConfirm={(id) => confirmTransaction.mutate(id)}
+                        onConfirm={setApplying}
                         onSkip={(id) => skipTransaction.mutate(id)}
                     />
                 ) : undefined}
@@ -109,6 +113,26 @@ export default function TransactionsPage() {
                     infoLabel={t('transactions.itemLabel')}
                 />
             )}
+
+            <ApplyDeferredDateDialog
+                transaction={applying}
+                open={applying !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setApplying(null)
+                    }
+                }}
+                isSubmitting={confirmTransaction.isPending}
+                onConfirm={(date) => {
+                    if (!applying) {
+                        return
+                    }
+                    confirmTransaction.mutate(
+                        { id: applying.id, date },
+                        { onSuccess: () => setApplying(null) },
+                    )
+                }}
+            />
         </Page>
     )
 }

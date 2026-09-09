@@ -11,6 +11,7 @@ use App\Enums\TriggerType;
 use App\Models\Account;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
+use App\Support\TransactionDates;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -107,17 +108,29 @@ class TransactionService
         });
     }
 
-    public function confirm(Transaction $transaction): Transaction
+    public function confirm(Transaction $transaction, ?string $date = null): Transaction
     {
         $kind = $transaction->kind();
         if (! $kind->canConfirm()) {
             throw new DomainException($kind->cannotConfirmMessage());
         }
 
+        $applyDate = $date ?: $transaction->date?->toDateString();
+        if (! $applyDate) {
+            throw new DomainException(__('messages.transactions.date_required_to_confirm'));
+        }
+
+        if (TransactionDates::isFuture($applyDate)) {
+            throw new DomainException(__('messages.transactions.date_cannot_be_future'));
+        }
+
         $this->assertSufficientFunds($transaction);
 
-        $transaction = DB::transaction(function () use ($transaction) {
-            $transaction->update(['status' => TransactionStatus::Confirmed]);
+        $transaction = DB::transaction(function () use ($transaction, $applyDate) {
+            $transaction->update([
+                'status' => TransactionStatus::Confirmed,
+                'date' => $applyDate,
+            ]);
 
             if ($transaction->recurring_transaction_id) {
                 app(RecurringTransactionService::class)->advanceAfterOccurrence(
@@ -235,11 +248,48 @@ class TransactionService
         ];
     }
 
-    public function resolveStatusForDate(string $date): TransactionStatus
+    public function getPendingSummary(): array
     {
-        return $date > now()->toDateString()
-            ? TransactionStatus::Pending
-            : TransactionStatus::Confirmed;
+        $transactions = Transaction::pending()
+            ->with('account.currency')
+            ->get();
+
+        $baseCurrency = \App\Models\Currency::getBase();
+
+        $income = 0.0;
+        $expense = 0.0;
+
+        foreach ($transactions as $transaction) {
+            if ($transaction->type->isDebtOperation()) {
+                continue;
+            }
+
+            $currency = $transaction->account->currency;
+            $amountInBase = $currency->convertToBase((float) $transaction->amount);
+
+            if ($transaction->type === TransactionType::Income) {
+                $income += $amountInBase;
+            } elseif ($transaction->type === TransactionType::Expense) {
+                $expense += $amountInBase;
+            }
+        }
+
+        return [
+            'income' => round($income, 2),
+            'expense' => round($expense, 2),
+            'balance' => round($income - $expense, 2),
+            'transactions_count' => $transactions->count(),
+            'currency' => $baseCurrency?->code,
+        ];
+    }
+
+    public function resolveStatusForDate(?string $date): TransactionStatus
+    {
+        if (! $date || TransactionDates::isFuture($date)) {
+            return TransactionStatus::Pending;
+        }
+
+        return TransactionStatus::Confirmed;
     }
 
     private function prepareTransactionData(TransactionData $data, ?Transaction $existing = null): array
@@ -258,6 +308,11 @@ class TransactionService
             $prepared['recurring_transaction_id'] = $data->recurringTransactionId;
         }
 
+        $this->assertConfirmedDateIsNotFuture(
+            $prepared['date'] ?? null,
+            $prepared['status'] ?? $existing?->status,
+        );
+
         if ($data->type->isTransfer()) {
             $prepared['to_account_id'] = $data->toAccountId;
             $prepared['to_amount'] = $data->toAmount ?? $this->calculateToAmount($data);
@@ -269,6 +324,21 @@ class TransactionService
         }
 
         return $prepared;
+    }
+
+    private function assertConfirmedDateIsNotFuture(?string $date, ?TransactionStatus $status): void
+    {
+        if ($status !== TransactionStatus::Confirmed) {
+            return;
+        }
+
+        if (! $date) {
+            throw new DomainException(__('messages.transactions.date_required'));
+        }
+
+        if (TransactionDates::isFuture($date)) {
+            throw new DomainException(__('messages.transactions.date_cannot_be_future'));
+        }
     }
 
     private function assertSufficientFunds(Transaction $transaction): void

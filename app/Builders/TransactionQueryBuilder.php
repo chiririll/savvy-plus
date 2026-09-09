@@ -62,12 +62,22 @@ class TransactionQueryBuilder
             });
         }
 
-        if ($filters->startDate) {
-            $this->query->where('date', '>=', $filters->startDate);
-        }
+        if ($filters->startDate || $filters->endDate) {
+            $this->query->where(function ($q) use ($filters) {
+                $q->where(function ($dated) use ($filters) {
+                    if ($filters->startDate) {
+                        $dated->where('date', '>=', $filters->startDate);
+                    }
 
-        if ($filters->endDate) {
-            $this->query->where('date', '<=', $filters->endDate);
+                    if ($filters->endDate) {
+                        $dated->where('date', '<=', $filters->endDate);
+                    }
+                });
+
+                if ($filters->status === TransactionStatus::Pending) {
+                    $q->orWhereNull('date');
+                }
+            });
         }
 
         if ($filters->minAmount) {
@@ -107,6 +117,10 @@ class TransactionQueryBuilder
                 ->join('currencies', 'accounts.currency_id', '=', 'currencies.id')
                 ->orderByRaw('transactions.amount * currencies.rate '.($filters->sortDirection === 'asc' ? 'ASC' : 'DESC'))
                 ->select('transactions.*');
+        } elseif ($filters->sortBy === 'date') {
+            $this->query
+                ->orderByRaw('CASE WHEN date IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('date', $filters->sortDirection);
         } else {
             $this->query->orderBy($filters->sortBy, $filters->sortDirection);
         }

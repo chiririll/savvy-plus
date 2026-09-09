@@ -27,6 +27,9 @@ return [
         'cannot_duplicate_recurring' => 'Scheduled occurrences cannot be duplicated.',
         'cannot_duplicate' => 'This transaction cannot be duplicated.',
         'cannot_edit_skipped' => 'Skipped transactions cannot be edited.',
+        'date_required' => 'A date is required for confirmed transactions.',
+        'date_required_to_confirm' => 'Choose a date to confirm this transaction.',
+        'date_cannot_be_future' => 'A confirmed transaction cannot be dated in the future.',
     ],
 
     'categories' => [
@@ -196,6 +199,7 @@ return [
         'select_account' => 'Please select a default account.',
         'account_missing' => 'Selected account does not exist.',
         'invalid_date' => "Invalid date format: ':value'",
+        'date_in_future' => 'Imported transactions cannot be dated in the future.',
         'invalid_amount' => "Invalid amount format: ':value'",
         'date_unmapped' => 'Date column not mapped or empty',
         'amount_unmapped' => 'Amount column not mapped or empty',

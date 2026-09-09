@@ -18,9 +18,12 @@ export interface AccountsResponse {
 }
 
 export interface BalanceHistorySeries {
+    id: number | null
     name: string
     type: string
     data: number[]
+    native_data?: number[]
+    currency: string | null
 }
 
 export interface BalanceHistoryResponse {

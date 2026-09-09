@@ -20,6 +20,7 @@ import {
     ArrowUpRight,
     ArrowRight,
     Calendar,
+    Clock,
     Plus,
     ArrowLeftRight,
     PiggyBank,
@@ -30,9 +31,10 @@ import {
     TrendingUp,
 } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
-import { useTotalBalance, useTransactions, useBalanceHistory, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
+import { useTotalBalance, useTransactions, usePendingSummary, useAccounts, useCategorySummary, useBudgets, useDebtsWithSummary, useBalanceComparison } from '@/hooks'
 import { useOverviewMetrics } from '@/hooks/use-reports'
-import { cn, formatCurrency, formatCurrencyCompact, formatDateLocal, formatYearMonth, addDaysLocal } from '@/lib/utils'
+import { cn, formatCurrency, formatDateLocal, formatYearMonth, addDaysLocal } from '@/lib/utils'
+import { BalanceDynamicsChart } from '@/components/features/accounts'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import { localizeDefaultName } from '@/lib/localized-name'
 import { intlLocale } from '@/lib/i18n'
@@ -43,7 +45,7 @@ import { useTheme } from '@/hooks/use-theme'
 import { Link } from 'react-router-dom'
 import { useCreateTransactionDialog } from '@/components/features/transactions'
 import { Transaction, AccountType } from '@/types'
-import { ACCOUNT_TYPE_CONFIG, CHART_COLORS, CATEGORY_COLORS } from '@/constants'
+import { ACCOUNT_TYPE_CONFIG, CATEGORY_COLORS } from '@/constants'
 import { DEFAULT_FILTERS, type ReportFilters } from '@/pages/reports/types'
 
 type PeriodPreset = 'last_30_days' | 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'custom'
@@ -142,7 +144,11 @@ function toReportFilters(
     }
 }
 
-function formatDate(dateString: string): string {
+function formatDate(dateString: string | null): string {
+    if (!dateString) {
+        return ''
+    }
+
     const date = new Date(dateString)
     return date.toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short' })
 }
@@ -181,7 +187,7 @@ export default function DashboardPage() {
     )
 
     const { data: recentTransactions } = useTransactions({ per_page: 5, status: 'confirmed' })
-    const { data: historyData } = useBalanceHistory(periodDates)
+    const { data: pendingSummary } = usePendingSummary()
     const { data: expensesByCategory } = useCategorySummary({
         type: 'expense',
         ...periodDates,
@@ -229,102 +235,6 @@ export default function DashboardPage() {
         if (previous === 0) return 100
         return ((current - previous) / previous) * 100
     }, [overviewData])
-
-    const balanceChartOption = useMemo(() => {
-        if (!historyData || !historyData.series.length) return {}
-
-        const isDark = theme === 'dark'
-
-        const seriesName = (s: (typeof historyData.series)[number]) =>
-            s.type === 'total' ? t('reports.series.total') : s.name
-
-        const series = historyData.series.map((s, index) => {
-            const isTotal = s.type === 'total'
-            const color = isTotal ? '#6366f1' : CHART_COLORS[index % CHART_COLORS.length]
-
-            return {
-                name: seriesName(s),
-                type: 'line',
-                smooth: true,
-                data: s.data,
-                lineStyle: {
-                    color,
-                    width: isTotal ? 3 : 2,
-                },
-                itemStyle: { color },
-                areaStyle: isTotal
-                    ? {
-                          color: {
-                              type: 'linear',
-                              x: 0,
-                              y: 0,
-                              x2: 0,
-                              y2: 1,
-                              colorStops: [
-                                  { offset: 0, color: 'rgba(99, 102, 241, 0.2)' },
-                                  { offset: 1, color: 'rgba(99, 102, 241, 0.02)' },
-                              ],
-                          },
-                      }
-                    : undefined,
-                emphasis: { focus: 'series' },
-            }
-        })
-
-        // Determine label format based on date range
-        const daysDiff = historyData.dates.length
-        const formatLabel = (d: string) => {
-            const date = new Date(d)
-            if (daysDiff > 90) {
-                return `${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear().toString().slice(2)}`
-            }
-            return `${date.getDate()}.${String(date.getMonth() + 1).padStart(2, '0')}`
-        }
-
-        return {
-            tooltip: {
-                trigger: 'axis',
-                backgroundColor: isDark ? '#1f2937' : '#ffffff',
-                borderColor: isDark ? '#374151' : '#e5e7eb',
-                textStyle: { color: isDark ? '#f3f4f6' : '#1f2937' },
-            },
-            legend: {
-                data: historyData.series.map(seriesName),
-                bottom: 0,
-                textStyle: { color: isDark ? '#9ca3af' : '#6b7280' },
-                icon: 'roundRect',
-                itemWidth: 14,
-                itemHeight: 8,
-            },
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '15%',
-                top: '10%',
-                containLabel: true,
-            },
-            xAxis: {
-                type: 'category',
-                boundaryGap: false,
-                data: historyData.dates.map(formatLabel),
-                axisLine: { lineStyle: { color: isDark ? '#374151' : '#e5e7eb' } },
-                axisLabel: {
-                    color: isDark ? '#9ca3af' : '#6b7280',
-                    interval: daysDiff > 60 ? Math.floor(daysDiff / 10) : 'auto',
-                },
-            },
-            yAxis: {
-                type: 'value',
-                axisLine: { show: false },
-                splitLine: { lineStyle: { color: isDark ? '#374151' : '#e5e7eb' } },
-                axisLabel: {
-                    color: isDark ? '#9ca3af' : '#6b7280',
-                    formatter: (value: number) => formatCurrencyCompact(value, currency, { showSymbol: false }),
-                },
-            },
-            series,
-        }
-    }, [historyData, theme, currency, t])
 
     const pieChartOption = useMemo(() => {
         if (!expensesByCategory?.data.length) return {}
@@ -394,8 +304,8 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-6">
+            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
                     <p className="text-muted-foreground">{t('dashboard.welcome')}</p>
@@ -438,16 +348,16 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-                <Card>
+            <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             {t('dashboard.totalBalance')}
                         </CardTitle>
                         <Wallet className="size-4 text-muted-foreground" />
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-mono">
+                    <CardContent className="min-w-0">
+                        <div className="text-2xl font-bold font-mono break-all">
                             {formatCurrency(totalBalance, currency)}
                         </div>
                         {balanceChange !== null && (
@@ -466,15 +376,15 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             {t('dashboard.income')}
                         </CardTitle>
                         <ArrowDownLeft className="size-4 text-green-600" />
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-mono text-green-600">
+                    <CardContent className="min-w-0">
+                        <div className="text-2xl font-bold font-mono text-green-600 break-all">
                             +{formatCurrency(periodIncome, currency)}
                         </div>
                         {incomeChange !== null && (
@@ -493,15 +403,15 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             {t('dashboard.expenses')}
                         </CardTitle>
                         <ArrowUpRight className="size-4 text-red-600" />
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-mono text-red-600">
+                    <CardContent className="min-w-0">
+                        <div className="text-2xl font-bold font-mono text-red-600 break-all">
                             -{formatCurrency(periodExpense, currency)}
                         </div>
                         {expenseChange !== null && (
@@ -519,40 +429,51 @@ export default function DashboardPage() {
                         )}
                     </CardContent>
                 </Card>
-            </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>{t('dashboard.balanceDynamics')}</CardTitle>
+                <Card className="min-w-0">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                            {t('dashboard.pending')}
+                        </CardTitle>
+                        <Clock className="size-4 text-muted-foreground" />
                     </CardHeader>
-                    <CardContent>
-                        {historyData && historyData.series.length > 0 ? (
-                            <ReactECharts
-                                option={balanceChartOption}
-                                style={{ height: '250px' }}
-                                className="sm:[&]:!h-[300px]"
-                                opts={{ renderer: 'svg' }}
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center h-[250px] sm:h-[300px] text-muted-foreground">
-                                {t('dashboard.noDataPeriod')}
+                    <CardContent className="min-w-0">
+                        <Link to="/transactions?status=pending" className="block min-w-0">
+                            <div className={cn(
+                                'text-2xl font-bold font-mono break-all',
+                                (pendingSummary?.balance ?? 0) > 0 && 'text-green-600',
+                                (pendingSummary?.balance ?? 0) < 0 && 'text-red-600',
+                            )}>
+                                {formatCurrency(pendingSummary?.balance ?? 0, pendingSummary?.currency ?? currency)}
                             </div>
-                        )}
+                            <p className="text-xs text-muted-foreground mt-1">
+                                {(pendingSummary?.transactions_count ?? 0) > 0
+                                    ? t('dashboard.pendingCount', { count: pendingSummary?.transactions_count ?? 0 })
+                                    : t('dashboard.pendingEmpty')}
+                            </p>
+                        </Link>
                     </CardContent>
                 </Card>
+            </div>
 
-                <Card>
+            <div className="grid min-w-0 gap-4 lg:grid-cols-3">
+                <BalanceDynamicsChart
+                    className="min-w-0 overflow-x-auto lg:col-span-2"
+                    startDate={periodDates.start_date}
+                    endDate={periodDates.end_date}
+                />
+
+                <Card className="min-w-0">
                     <CardHeader>
                         <CardTitle>{t('dashboard.accountBalances')}</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="space-y-3">
+                    <CardContent className="min-w-0">
+                        <div className="min-w-0 space-y-3">
                             {accounts && accounts.length > 0 ? (
                                 accounts.map((account) => (
                                     <div
                                         key={account.id}
-                                        className="flex items-center justify-between gap-2"
+                                        className="flex min-w-0 items-center justify-between gap-2"
                                     >
                                         <div className="flex items-center gap-3 min-w-0 flex-1">
                                             {(() => {
@@ -571,9 +492,9 @@ export default function DashboardPage() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="text-right">
-                                                <p className="text-sm font-mono font-medium">
+                                        <div className="flex min-w-0 items-center gap-2">
+                                            <div className="min-w-0 text-right">
+                                                <p className="text-sm font-mono font-medium break-all">
                                                     {formatCurrency(account.currentBalance ?? 0, account.currency, { showSymbol: false })}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
@@ -620,18 +541,21 @@ export default function DashboardPage() {
                 </Card>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-2">
-                <Card>
+            <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+                <Card className="min-w-0">
                     <CardHeader>
                         <CardTitle>{t('dashboard.expensesByCategory')}</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="min-w-0">
                         {expensesByCategory && expensesByCategory.data.some((c) => (c.totalAmount ?? 0) > 0) ? (
-                            <ReactECharts
-                                option={pieChartOption}
-                                style={{ height: '280px' }}
-                                opts={{ renderer: 'svg' }}
-                            />
+                            <div className="min-w-0 overflow-x-auto overscroll-x-contain">
+                                <ReactECharts
+                                    option={pieChartOption}
+                                    style={{ height: '280px', width: '100%' }}
+                                    className="min-w-0 max-w-full"
+                                    opts={{ renderer: 'svg' }}
+                                />
+                            </div>
                         ) : (
                             <div className="flex items-center justify-center h-[280px] text-muted-foreground">
                                 {t('dashboard.noDataPeriod')}
@@ -640,9 +564,9 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between gap-2">
-                        <CardTitle className="truncate">{t('dashboard.recentTransactions')}</CardTitle>
+                <Card className="min-w-0">
+                    <CardHeader className="flex min-w-0 flex-row items-center justify-between gap-2">
+                        <CardTitle className="min-w-0 truncate">{t('dashboard.recentTransactions')}</CardTitle>
                         <Button variant="ghost" size="sm" asChild className="shrink-0">
                             <Link to="/transactions">
                                 <span className="hidden sm:inline">{tCommon('actions.viewAll')}</span>
@@ -651,15 +575,15 @@ export default function DashboardPage() {
                             </Link>
                         </Button>
                     </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
+                    <CardContent className="min-w-0">
+                        <div className="min-w-0 space-y-4 overflow-x-auto overscroll-x-contain">
                             {recentTransactions?.data && recentTransactions.data.length > 0 ? (
                                 recentTransactions.data.map((transaction) => (
                                     <div
                                         key={transaction.id}
-                                        className="flex items-center justify-between gap-3"
+                                        className="flex min-w-0 items-center justify-between gap-3"
                                     >
-                                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                                        <div className="flex min-w-0 flex-1 items-center gap-3">
                                             <div
                                                 className="flex size-9 shrink-0 items-center justify-center rounded-lg"
                                                 style={{
@@ -685,9 +609,9 @@ export default function DashboardPage() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="text-right shrink-0">
+                                        <div className="min-w-0 text-right">
                                             <p
-                                                className={`text-sm font-mono font-medium ${getTransactionColor(transaction.type)}`}
+                                                className={`text-sm font-mono font-medium break-all ${getTransactionColor(transaction.type)}`}
                                             >
                                                 {getTransactionSign(transaction.type)}
                                                 {formatCurrency(transaction.amount, transaction.account.currency, { showSymbol: false })}
@@ -708,10 +632,10 @@ export default function DashboardPage() {
                 </Card>
             </div>
 
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                        <PiggyBank className="size-5" />
+            <Card className="min-w-0">
+                <CardHeader className="flex min-w-0 flex-row items-center justify-between gap-2">
+                    <CardTitle className="flex min-w-0 items-center gap-2">
+                        <PiggyBank className="size-5 shrink-0" />
                         {t('dashboard.budgets')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
@@ -721,9 +645,9 @@ export default function DashboardPage() {
                         </Link>
                     </Button>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="min-w-0">
                     {activeBudgets.length > 0 ? (
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             {activeBudgets.map((budget) => {
                                 const progress = budget.progress
                                 const percent = progress ? Math.min(progress.percent, 100) : 0
@@ -773,10 +697,10 @@ export default function DashboardPage() {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                        <HandCoins className="size-5" />
+            <Card className="min-w-0">
+                <CardHeader className="flex min-w-0 flex-row items-center justify-between gap-2">
+                    <CardTitle className="flex min-w-0 items-center gap-2">
+                        <HandCoins className="size-5 shrink-0" />
                         {t('dashboard.debts')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" asChild>
@@ -786,17 +710,17 @@ export default function DashboardPage() {
                         </Link>
                     </Button>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="min-w-0">
                     {debtSummary && (debtSummary.total_i_owe > 0 || debtSummary.total_owed_to_me > 0) ? (
-                        <div className="space-y-4">
-                            <div className="grid gap-4 sm:grid-cols-3">
+                        <div className="min-w-0 space-y-4">
+                            <div className="grid min-w-0 gap-4 sm:grid-cols-3">
                                 <div className="flex items-center gap-3 p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
                                     <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
                                         <TrendingDown className="size-4 text-red-600" />
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">{t('debts.types.i_owe')}</p>
-                                        <p className="font-mono font-semibold text-red-600">
+                                        <p className="font-mono font-semibold text-red-600 break-all">
                                             {formatCurrency(debtSummary.total_i_owe, debtSummary.currency)}
                                         </p>
                                     </div>
@@ -807,7 +731,7 @@ export default function DashboardPage() {
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">{t('debts.types.owed_to_me')}</p>
-                                        <p className="font-mono font-semibold text-green-600">
+                                        <p className="font-mono font-semibold text-green-600 break-all">
                                             {formatCurrency(debtSummary.total_owed_to_me, debtSummary.currency)}
                                         </p>
                                     </div>
@@ -822,7 +746,7 @@ export default function DashboardPage() {
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">{t('debts.netPosition')}</p>
-                                        <p className={`font-mono font-semibold ${debtSummary.net_debt >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        <p className={`font-mono font-semibold break-all ${debtSummary.net_debt >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                             {formatCurrency(Math.abs(debtSummary.net_debt), debtSummary.currency)}
                                         </p>
                                     </div>

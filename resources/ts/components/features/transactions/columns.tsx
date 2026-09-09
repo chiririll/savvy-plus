@@ -6,6 +6,7 @@ import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { RowActions } from '@/components/shared'
 import { Copy, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronRight, Banknote, HandCoins, Check, SkipForward } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
+import { parseDateKey } from '@/lib/dates'
 import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
 import { localizeDefaultName } from '@/lib/localized-name'
 import i18n, { intlLocale } from '@/lib/i18n'
@@ -24,7 +25,7 @@ const TYPE_CONFIG = {
 interface ColumnsOptions {
     onDelete: (id: number) => void
     onDuplicate: (id: number) => void
-    onConfirm?: (id: number) => void
+    onConfirm?: (transaction: Transaction) => void
     onSkip?: (id: number) => void
     onEdit?: (transaction: Transaction) => void
     isReadOnly?: boolean
@@ -69,7 +70,9 @@ export function createTransactionColumns({
             cell: ({ row }) => (
                 <div className="flex flex-col gap-1">
                     <span className="font-mono text-sm">
-                        {new Date(row.original.date).toLocaleDateString(intlLocale())}
+                        {row.original.date
+                            ? parseDateKey(row.original.date).toLocaleDateString(intlLocale())
+                            : i18n.t('pages:transactions.noDate')}
                     </span>
                     {row.original.status === 'skipped' && (
                         <Badge variant="secondary" className="w-fit text-xs">
@@ -196,7 +199,7 @@ export function createTransactionColumns({
                         deleteDescription={i18n.t('pages:transactions.deleteDescription')}
                     >
                         {canConfirm && (
-                            <DropdownMenuItem onClick={() => onConfirm(transaction.id)}>
+                            <DropdownMenuItem onClick={() => onConfirm(transaction)}>
                                 <Check className="mr-2 size-4" />
                                 {i18n.t('actions.confirm')}
                             </DropdownMenuItem>

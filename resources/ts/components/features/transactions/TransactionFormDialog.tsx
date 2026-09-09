@@ -26,7 +26,7 @@ export function toTransactionFormValues(transaction: Transaction): Partial<Trans
         to_amount: transaction.toAmount ?? null,
         exchange_rate: transaction.exchangeRate ?? null,
         description: transaction.description ?? '',
-        date: transaction.date,
+        date: transaction.date ?? '',
         items: transaction.items?.map((item) => ({
             name: item.name,
             quantity: item.quantity,
@@ -63,8 +63,9 @@ export function TransactionFormDialog({
         >
             {({ formKey, formProps, isEdit }) => (
                 <TransactionForm
-                    key={formKey}
+                    key={`${formKey}-${open}`}
                     {...formProps}
+                    open={open}
                     isEdit={isEdit}
                     originalAffectsBalance={transaction?.status === 'confirmed'}
                     onPreviewChange={setPreview}
