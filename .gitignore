@@ -32,3 +32,8 @@ Thumbs.db
 
 # Large local test fixture
 transactions-500mb.csv
+
+# Go local data / binaries
+/data
+/savvy
+/savvy.exe
