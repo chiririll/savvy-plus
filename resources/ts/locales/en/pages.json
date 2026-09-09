@@ -39,6 +39,14 @@
             "income": "Income",
             "expense": "Expense"
         },
+        "tabs": {
+            "income": "Income",
+            "expenses": "Expenses"
+        },
+        "emptyIncomeTitle": "No income categories",
+        "emptyIncomeDescription": "Create an income category to group incoming money",
+        "emptyExpenseTitle": "No expense categories",
+        "emptyExpenseDescription": "Create an expense category to group spending",
         "deleteTitle": "Delete category?",
         "deleteDescription": "This action cannot be undone. The category \"{{name}}\" will be permanently deleted."
     },

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { EntityFormDialog } from '@/components/shared'
 import { CategoryFormData } from '@/schemas'
-import { Category } from '@/types'
+import { Category, CategoryType } from '@/types'
 import { CategoryForm } from './CategoryForm'
 import { localizeDefaultName, toStoredDefaultName } from '@/lib/localized-name'
 
@@ -13,6 +13,7 @@ interface CategoryFormDialogProps {
     onOpenChange: (open: boolean) => void
     onSubmit: (data: CategoryFormData) => void
     isSubmitting?: boolean
+    defaultType?: CategoryType
 }
 
 export function CategoryFormDialog({
@@ -21,11 +22,12 @@ export function CategoryFormDialog({
     onOpenChange,
     onSubmit,
     isSubmitting,
+    defaultType,
 }: CategoryFormDialogProps) {
     const { t } = useTranslation('pages')
 
     return (
-        <EntityFormDialog
+        <EntityFormDialog<Category, CategoryFormData, CategoryFormData>
             entity={category}
             open={open}
             onOpenChange={onOpenChange}
@@ -37,6 +39,7 @@ export function CategoryFormDialog({
             formId={FORM_ID}
             title={category ? t('categories.editTitle') : t('categories.createTitle')}
             description={t('categories.description')}
+            fallbackValues={defaultType ? { type: defaultType } : undefined}
             toFormValues={(item) => ({
                 name: localizeDefaultName(item.name),
                 type: item.type,
