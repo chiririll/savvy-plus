@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { ColumnDef, Row } from '@tanstack/react-table'
 import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
@@ -18,6 +19,7 @@ interface ListPageProps<T> {
     isLoading?: boolean
     emptyTitle?: string
     emptyDescription?: string
+    toolbar?: ReactNode
     getRowClassName?: (row: Row<T>) => string | undefined
     onReorder?: (items: T[]) => void
 }
@@ -33,6 +35,7 @@ export function ListPage<T>({
     isLoading,
     emptyTitle,
     emptyDescription,
+    toolbar,
     getRowClassName,
     onReorder,
 }: ListPageProps<T>) {
@@ -61,6 +64,7 @@ export function ListPage<T>({
                 createLabel={newLabel}
                 onCreateClick={onCreateClick}
             />
+            {toolbar && <div className="mb-6">{toolbar}</div>}
             <DataTable
                 data={data}
                 columns={columns}

@@ -1,4 +1,4 @@
-import { Monitor, Moon, Sun, type LucideIcon } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,18 +8,44 @@ import {
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useTheme, type ThemePreference } from '@/hooks/use-theme'
+import { useTheme, type Theme, type ThemePreference } from '@/hooks/use-theme'
+import { cn } from '@/lib/utils'
 
-const THEME_OPTIONS: { value: ThemePreference; icon: LucideIcon }[] = [
-    { value: 'light', icon: Sun },
-    { value: 'dark', icon: Moon },
-    { value: 'auto', icon: Monitor },
-]
+function ThemeGlyph({ theme, className }: { theme: Theme; className?: string }) {
+    const Icon = theme === 'dark' ? Moon : Sun
+    return <Icon className={className} />
+}
 
-function TriggerIcon({ preference, theme }: { preference: ThemePreference; theme: 'light' | 'dark' }) {
-    if (preference === 'auto') return <Monitor className="h-5 w-5" />
-    if (theme === 'dark') return <Moon className="h-5 w-5" />
-    return <Sun className="h-5 w-5" />
+/** Regular sun/moon glyph with an "A" badge so Auto is readable in both themes. */
+function AutoThemeIcon({
+    theme,
+    className,
+    badgeClassName,
+}: {
+    theme: Theme
+    className?: string
+    badgeClassName?: string
+}) {
+    return (
+        <span className={cn('relative inline-flex', className)} aria-hidden>
+            <ThemeGlyph theme={theme} className="size-full" />
+            <span
+                className={cn(
+                    'absolute -right-0.5 -bottom-0.5 flex items-center justify-center rounded-[2px] bg-background font-bold leading-none text-foreground ring-1 ring-border',
+                    badgeClassName,
+                )}
+            >
+                A
+            </span>
+        </span>
+    )
+}
+
+function TriggerIcon({ preference, theme }: { preference: ThemePreference; theme: Theme }) {
+    if (preference === 'auto') {
+        return <AutoThemeIcon theme={theme} className="size-5" badgeClassName="size-2.5 text-[8px]" />
+    }
+    return <ThemeGlyph theme={theme} className="h-5 w-5" />
 }
 
 interface ThemeSwitcherProps {
@@ -33,7 +59,7 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className={className} aria-label={t('theme.label')}>
+                <Button variant="ghost" size="icon" className={cn('overflow-visible', className)} aria-label={t('theme.label')}>
                     <TriggerIcon preference={preference} theme={theme} />
                 </Button>
             </DropdownMenuTrigger>
@@ -46,12 +72,18 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
                         }
                     }}
                 >
-                    {THEME_OPTIONS.map(({ value, icon: Icon }) => (
-                        <DropdownMenuRadioItem key={value} value={value}>
-                            <Icon className="size-4" />
-                            {t(`theme.${value}`)}
-                        </DropdownMenuRadioItem>
-                    ))}
+                    <DropdownMenuRadioItem value="light">
+                        <Sun className="size-4" />
+                        {t('theme.light')}
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="dark">
+                        <Moon className="size-4" />
+                        {t('theme.dark')}
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="auto">
+                        <AutoThemeIcon theme={theme} className="size-4" badgeClassName="size-2.5 text-[7px]" />
+                        {t('theme.auto')}
+                    </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
             </DropdownMenuContent>
         </DropdownMenu>
