@@ -22,6 +22,8 @@
             "inactive": "Inactive"
         },
         "initial": "Initial: {{amount}}",
+        "emptyTitle": "No accounts yet",
+        "emptyDescription": "Create your first account to start tracking balances",
         "deleteTitle": "Delete account?",
         "deleteDescription": "This action cannot be undone. The account \"{{name}}\" will be permanently deleted."
     },
@@ -90,6 +92,9 @@
             "decimals": "Decimals",
             "base": "Base"
         },
+        "setAsBase": "Set as base",
+        "emptyTitle": "No currencies yet",
+        "emptyDescription": "Add a currency to record amounts and exchange rates",
         "deleteTitle": "Delete currency?",
         "deleteDescription": "This action cannot be undone. The currency \"{{name}}\" will be permanently deleted."
     },
@@ -104,6 +109,8 @@
         "emptyPendingTitle": "No pending transactions",
         "emptyPendingDescription": "Future, scheduled, and undated transactions will appear here until you confirm them",
         "noDate": "No date",
+        "today": "Today",
+        "yesterday": "Yesterday",
         "applyTitle": "Confirm transaction",
         "applyDescription": "Which date should this transaction be posted on? The posted date cannot be in the future.",
         "applyToday": "Today",

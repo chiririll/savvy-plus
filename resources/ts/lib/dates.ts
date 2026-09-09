@@ -35,6 +35,50 @@ export function isDateOverdue(date?: string | null): boolean {
     return Boolean(date && date < formatDateLocal())
 }
 
+export function formatTransactionGroupHeading(
+    dateKey: string | null,
+    locale: string,
+    labels: { today: string; yesterday: string; noDate: string },
+): string {
+    if (!dateKey) {
+        return labels.noDate
+    }
+
+    const today = formatDateLocal()
+    if (dateKey === today) {
+        return labels.today
+    }
+    if (dateKey === addDaysLocal(new Date(), -1)) {
+        return labels.yesterday
+    }
+
+    const date = parseDateKey(dateKey)
+    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' }
+    if (date.getFullYear() !== new Date().getFullYear()) {
+        options.year = 'numeric'
+    }
+
+    return date.toLocaleDateString(locale, options)
+}
+
+export function groupByDateKey<T extends { date: string | null }>(items: T[]): { date: string | null; items: T[] }[] {
+    const groups: { date: string | null; items: T[] }[] = []
+    const index = new Map<string, number>()
+
+    for (const item of items) {
+        const key = item.date ?? ''
+        const existing = index.get(key)
+        if (existing !== undefined) {
+            groups[existing].items.push(item)
+        } else {
+            index.set(key, groups.length)
+            groups.push({ date: item.date, items: [item] })
+        }
+    }
+
+    return groups
+}
+
 /** Overdue → red, within the next 3 days → yellow, later or unset → muted. */
 export function pendingDateClassName(dateKey?: string | null): string {
     if (!dateKey) {

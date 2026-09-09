@@ -74,18 +74,6 @@ class StoreDebtRequest extends FormRequest
 
                 if ($account->isDebt()) {
                     $validator->errors()->add('account_id', __('messages.validation.cannot_use_debt_account'));
-
-                    return;
-                }
-
-                if ($this->input('debt_type') === DebtType::OwedToMe->value
-                    && $account->current_balance < (float) $this->input('amount')) {
-                    $validator->errors()->add(
-                        'amount',
-                        __('messages.validation.insufficient_funds', [
-                            'available' => number_format($account->current_balance, 2),
-                        ])
-                    );
                 }
             },
         ];

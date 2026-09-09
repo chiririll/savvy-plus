@@ -12,6 +12,7 @@ use App\Models\Account;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
 use App\Support\TransactionDates;
+use App\Support\TransactionItems;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -123,8 +124,6 @@ class TransactionService
         if (TransactionDates::isFuture($applyDate)) {
             throw new DomainException(__('messages.transactions.date_cannot_be_future'));
         }
-
-        $this->assertSufficientFunds($transaction);
 
         $transaction = DB::transaction(function () use ($transaction, $applyDate) {
             $transaction->update([
@@ -341,20 +340,6 @@ class TransactionService
         }
     }
 
-    private function assertSufficientFunds(Transaction $transaction): void
-    {
-        if (! in_array($transaction->type, [TransactionType::Expense, TransactionType::Transfer], true)) {
-            return;
-        }
-
-        $account = $transaction->account;
-        if ($account && $account->current_balance < (float) $transaction->amount) {
-            throw new DomainException(__('messages.validation.insufficient_funds', [
-                'available' => number_format($account->current_balance, 2),
-            ]));
-        }
-    }
-
     private function calculateToAmount(TransactionData $data): float
     {
         $fromAccount = Account::with('currency')->find($data->accountId);
@@ -378,13 +363,19 @@ class TransactionService
 
     private function createItems(Transaction $transaction, array $items): void
     {
+        $transaction->loadMissing('account.currency');
+        $decimals = $transaction->account?->currency?->decimals ?? 2;
+
         foreach ($items as $item) {
+            $quantity = (float) $item['quantity'];
+            $price = TransactionItems::roundedPrice((float) $item['price_per_unit'], $decimals);
+
             TransactionItem::create([
                 'transaction_id' => $transaction->id,
                 'name' => $item['name'],
-                'quantity' => (int) $item['quantity'],
-                'price_per_unit' => $item['price_per_unit'],
-                'total_price' => (int) $item['quantity'] * $item['price_per_unit'],
+                'quantity' => $quantity,
+                'price_per_unit' => $price,
+                'total_price' => $price * $quantity,
             ]);
         }
     }

@@ -27,7 +27,16 @@
         "clear": "Clear",
         "processing": "Processing...",
         "reorder": "Reorder",
-        "help": "Help"
+        "help": "Help",
+        "expand": "Expand",
+        "collapse": "Collapse"
+    },
+    "negativeBalance": {
+        "title": "Balance will go negative",
+        "description": "This operation will put the following accounts below zero.",
+        "descriptionOne": "This operation will put {{name}} below zero.",
+        "current": "Current",
+        "resulting": "After"
     },
     "readOnly": {
         "banner": "You are in read-only mode. You can view all data but cannot make any changes.",
@@ -84,6 +93,8 @@
         "balanceNegative": "Balance cannot be negative",
         "integer": "Must be an integer",
         "atLeastOne": "Must be at least 1",
+        "quantityPositive": "Quantity must be greater than 0",
+        "quantityPrecision": "Use at most 3 decimal places",
         "cannotBeNegative": "Cannot be negative",
         "passwordMin8": "Password must be at least 8 characters",
         "transferDestination": "Destination account is required for transfers",
@@ -122,7 +133,10 @@
         "next": "Next",
         "morePages": "More pages",
         "goPrevious": "Go to previous page",
-        "goNext": "Go to next page"
+        "goNext": "Go to next page",
+        "loadingMore": "Loading more…",
+        "loadMoreError": "Couldn't load more",
+        "endOfList": "You've reached the end"
     },
     "confirm": {
         "cannotUndo": "This action cannot be undone."

@@ -23,7 +23,9 @@ import {
     FormDescription,
 } from '@/components/ui/form'
 import { debtPaymentSchema, DebtPaymentFormData } from '@/schemas'
-import { AccountSelect } from '@/components/shared'
+import { AccountSelect, useNegativeBalanceConfirm } from '@/components/shared'
+import { useAccounts } from '@/hooks'
+import { warningsForAccountOutflow } from '@/lib/negative-balance'
 import { Debt } from '@/types'
 import { formatCurrency, formatDateLocal } from '@/lib/utils'
 
@@ -45,6 +47,8 @@ export function DebtPaymentDialog({
     mode,
 }: DebtPaymentDialogProps) {
     const { t } = useTranslation(['forms', 'pages', 'common'])
+    const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
+    const { confirmIfNeeded, dialog: negativeBalanceDialog } = useNegativeBalanceConfirm<DebtPaymentFormData>()
 
     const form = useForm<DebtPaymentFormData>({
         resolver: schemaResolver<DebtPaymentFormData>(debtPaymentSchema),
@@ -70,9 +74,16 @@ export function DebtPaymentDialog({
     }, [open, debt?.id, mode, form])
 
     const handleSubmit = (data: DebtPaymentFormData) => {
-        if (debt) {
-            onSubmit(debt.id, data)
+        if (!debt) {
+            return
         }
+
+        const selectedAccount = accounts?.find((account) => account.id === Number(data.account_id))
+        const warnings = mode === 'payment'
+            ? warningsForAccountOutflow(selectedAccount, Number(data.amount) || 0)
+            : []
+
+        confirmIfNeeded(data, warnings, (payload) => onSubmit(debt.id, payload))
     }
 
     const title = mode === 'payment' ? t('debts.payment.makeTitle') : t('debts.payment.collectTitle')
@@ -223,6 +234,7 @@ export function DebtPaymentDialog({
                     </form>
                 </Form>
             </DialogContent>
+            {negativeBalanceDialog}
         </Dialog>
     )
 }

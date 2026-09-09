@@ -33,6 +33,7 @@
     },
     "transactions": {
         "toAccount": "Destination account",
+        "swapAccounts": "Swap accounts",
         "sendAmount": "Send amount",
         "receiveAmount": "Receive amount",
         "transferRate": "Transfer rate",
@@ -41,7 +42,9 @@
         "after": "After",
         "toBalance": "To balance",
         "insufficientFunds": "Insufficient funds",
+        "willGoNegative": "Balance will go negative",
         "items": "Items",
+        "itemsCount": "Items ({{count}})",
         "addItem": "Add item",
         "qty": "Qty",
         "price": "Price",

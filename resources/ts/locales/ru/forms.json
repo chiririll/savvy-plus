@@ -33,6 +33,7 @@
     },
     "transactions": {
         "toAccount": "Счёт назначения",
+        "swapAccounts": "Поменять счета местами",
         "sendAmount": "Сумма отправки",
         "receiveAmount": "Сумма получения",
         "transferRate": "Курс перевода",
@@ -41,7 +42,9 @@
         "after": "После",
         "toBalance": "Баланс назначения",
         "insufficientFunds": "Недостаточно средств",
+        "willGoNegative": "Баланс уйдёт в минус",
         "items": "Позиции",
+        "itemsCount": "Позиции ({{count}})",
         "addItem": "Добавить позицию",
         "qty": "Кол-во",
         "price": "Цена",

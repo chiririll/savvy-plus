@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -31,6 +32,10 @@ interface RowActionsProps {
     isReadOnly?: boolean
     leading?: ReactNode
     children?: ReactNode
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+    showTrigger?: boolean
+    triggerClassName?: string
 }
 
 export function RowActions({
@@ -43,14 +48,28 @@ export function RowActions({
     isReadOnly,
     leading,
     children,
+    open,
+    onOpenChange,
+    showTrigger = true,
+    triggerClassName,
 }: RowActionsProps) {
     const { t } = useTranslation()
     const canDelete = Boolean(onDelete) && !isReadOnly
 
     return (
-        <DropdownMenu>
+        <DropdownMenu open={open} onOpenChange={onOpenChange}>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-8">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                        'size-8',
+                        !showTrigger && 'pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 opacity-0',
+                        triggerClassName,
+                    )}
+                    tabIndex={showTrigger ? undefined : -1}
+                    aria-hidden={!showTrigger}
+                >
                     <MoreHorizontal className="size-4" />
                 </Button>
             </DropdownMenuTrigger>

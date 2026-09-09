@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { ListPage } from '@/components/shared'
-import { AccountFormDialog, createAccountColumns } from '@/components/features/accounts'
+import { Plus } from 'lucide-react'
+import { Page, PageHeader } from '@/components/shared'
+import { AccountFormDialog, AccountList } from '@/components/features/accounts'
+import { Button } from '@/components/ui/button'
 import { useAccounts, useCreateAccount, useDeleteAccount, useReorderAccounts, useUpdateAccount, useResourceFormDialog } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import type { Account } from '@/types'
@@ -22,26 +24,37 @@ export default function AccountsPage() {
         update: updateAccount,
     })
 
-    const columns = createAccountColumns({
-        onDelete: (id) => deleteAccount.mutate(id),
-        onEdit: form.openEdit,
-        isReadOnly,
-    })
-
     return (
-        <>
-            <ListPage
+        <Page title={t('accounts.title')}>
+            <PageHeader
                 title={t('accounts.title')}
                 description={t('accounts.description')}
                 createLabel={t('accounts.create')}
                 onCreateClick={isReadOnly ? undefined : form.openCreate}
-                data={items}
-                columns={columns}
-                isLoading={isLoading}
-                onReorder={isReadOnly ? undefined : (reordered) => {
-                    reorderAccounts.mutate(reordered.map((account) => account.id))
-                }}
             />
+
+            <div className="mx-auto w-full max-w-[800px]">
+                <AccountList
+                    accounts={items}
+                    isLoading={isLoading}
+                    emptyTitle={t('accounts.emptyTitle')}
+                    emptyDescription={t('accounts.emptyDescription')}
+                    emptyAction={
+                        !isReadOnly ? (
+                            <Button onClick={form.openCreate}>
+                                <Plus className="size-4" />
+                                {t('accounts.create')}
+                            </Button>
+                        ) : undefined
+                    }
+                    onEdit={form.openEdit}
+                    onDelete={(id) => deleteAccount.mutate(id)}
+                    onReorder={isReadOnly ? undefined : (reordered) => {
+                        reorderAccounts.mutate(reordered.map((account) => account.id))
+                    }}
+                    isReadOnly={isReadOnly}
+                />
+            </div>
 
             <AccountFormDialog
                 account={form.entity}
@@ -50,6 +63,6 @@ export default function AccountsPage() {
                 onSubmit={form.submit}
                 isSubmitting={form.isSubmitting}
             />
-        </>
+        </Page>
     )
 }

@@ -35,6 +35,17 @@ export function displayTransactionDescription(
     }
 }
 
+export function transactionSubtitle(
+    transaction: Pick<Transaction, 'account' | 'category'>,
+): string {
+    const accountName = transaction.account.name
+    const categoryName = transaction.category
+        ? localizeDefaultName(transaction.category.name)
+        : null
+
+    return categoryName ? `${accountName} · ${categoryName}` : accountName
+}
+
 export function transactionAmountAppearance(
     type: TransactionType,
     status?: TransactionStatus,

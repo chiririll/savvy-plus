@@ -12,6 +12,7 @@ class UpdateTransactionRequest extends FormRequest
 {
     use NormalizesNullableDate;
     use RejectsFutureConfirmedDate;
+    use ValidatesTransactionItems;
 
     public function authorize(): bool
     {
@@ -37,7 +38,7 @@ class UpdateTransactionRequest extends FormRequest
             'date' => 'sometimes|nullable|date',
             'items' => 'nullable|array',
             'items.*.name' => 'required_with:items|string|max:255',
-            'items.*.quantity' => 'required_with:items|integer|min:1',
+            'items.*.quantity' => $this->itemQuantityRules(),
             'items.*.price_per_unit' => 'required_with:items|numeric|gte:0',
             'tag_ids' => 'nullable|array',
             'tag_ids.*' => 'exists:tags,id',
@@ -52,7 +53,6 @@ class UpdateTransactionRequest extends FormRequest
                 $this->validateCategoryType($validator);
                 $this->validateItemsTotal($validator);
                 $this->validateConfirmedDate($validator);
-                $this->validateSufficientFunds($validator);
             },
         ];
     }
@@ -95,25 +95,6 @@ class UpdateTransactionRequest extends FormRequest
         }
     }
 
-    private function validateItemsTotal(Validator $validator): void
-    {
-        $items = $this->input('items', []);
-
-        if (empty($items)) {
-            return;
-        }
-
-        $itemsTotal = collect($items)->sum(function ($item) {
-            return ($item['quantity'] ?? 0) * ($item['price_per_unit'] ?? 0);
-        });
-
-        $amount = $this->input('amount') ?? $this->route('transaction')->amount;
-
-        if (abs($itemsTotal - $amount) > 0.01) {
-            $validator->errors()->add('items', __('messages.validation.items_total', ['items' => $itemsTotal, 'amount' => $amount]));
-        }
-    }
-
     private function validateConfirmedDate(Validator $validator): void
     {
         $transaction = $this->route('transaction');
@@ -133,51 +114,5 @@ class UpdateTransactionRequest extends FormRequest
         }
 
         $this->rejectFutureConfirmedDate($validator, $date);
-    }
-
-    private function validateSufficientFunds(Validator $validator): void
-    {
-        $transaction = $this->route('transaction');
-        $originalType = $transaction->type->value;
-        $originalAmount = (float) $transaction->amount;
-        $originalAccountId = $transaction->account_id;
-
-        $newType = $this->input('type') ?? $originalType;
-        $newAmount = (float) ($this->input('amount') ?? $originalAmount);
-        $newAccountId = $this->input('account_id') ?? $originalAccountId;
-
-        if ($transaction->isPending() || $transaction->isSkipped()) {
-            return;
-        }
-
-        // Only check for expense and transfer
-        if (! in_array($newType, [TransactionType::Expense->value, TransactionType::Transfer->value])) {
-            return;
-        }
-
-        $account = \App\Models\Account::find($newAccountId);
-        if (! $account) {
-            return;
-        }
-
-        // Current balance already reflects the original transaction. Only the
-        // amount delta (new outflow minus what is already applied) is checked.
-        $alreadyApplied = 0.0;
-        if ($newAccountId == $originalAccountId) {
-            if (in_array($originalType, [TransactionType::Expense->value, TransactionType::Transfer->value])) {
-                $alreadyApplied = $originalAmount;
-            } elseif ($originalType === TransactionType::Income->value) {
-                $alreadyApplied = -$originalAmount;
-            }
-        }
-
-        $delta = $newAmount - $alreadyApplied;
-        $available = $account->current_balance;
-
-        if ($available < $delta) {
-            $validator->errors()->add('amount', __('messages.validation.insufficient_funds', [
-                'available' => number_format($available + $alreadyApplied, 2),
-            ]));
-        }
     }
 }

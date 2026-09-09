@@ -1,10 +1,20 @@
 import { z } from 'zod'
 import i18n from '@/lib/i18n'
 import { isDateInFuture } from '@/lib/dates'
+import {
+    ITEM_QTY_DECIMALS,
+    quantityDecimalPlaces,
+    sumTransactionItems,
+} from '@/lib/transaction-items'
 
 export const transactionItemSchema = z.object({
     name: z.string().min(1, i18n.t('validation.nameRequired')).max(255),
-    quantity: z.coerce.number().int(i18n.t('validation.integer')).min(1, i18n.t('validation.atLeastOne')),
+    quantity: z.coerce.number()
+        .positive(i18n.t('validation.quantityPositive'))
+        .refine(
+            (value) => quantityDecimalPlaces(value) <= ITEM_QTY_DECIMALS,
+            i18n.t('validation.quantityPrecision'),
+        ),
     price_per_unit: z.coerce.number().min(0, i18n.t('validation.cannotBeNegative')),
 })
 
@@ -66,26 +76,41 @@ export const transactionSchema = z.object({
             path: ['category_id'],
         })
     }
-
-    // Validate items total matches amount (only if there are items with values)
-    const items = data.items ?? []
-    if (items.length > 0) {
-        const itemsTotal = items.reduce((sum, item) => sum + item.quantity * item.price_per_unit, 0)
-        if (itemsTotal > 0 && Math.abs(itemsTotal - data.amount) > 0.01) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: i18n.t('validation.itemsTotalMismatch', {
-                    itemsTotal: itemsTotal.toFixed(2),
-                    amount: data.amount.toFixed(2),
-                }),
-                path: ['items'],
-            })
-        }
-    }
 })
 
-export function getTransactionSchema(options?: { rejectFutureDate?: boolean }) {
+export type TransactionSchemaOptions = {
+    rejectFutureDate?: boolean
+    currencyDecimals?: number
+}
+
+function applyItemsTotalIssue(
+    data: z.infer<typeof transactionSchema>,
+    ctx: z.RefinementCtx,
+    decimals = 2,
+) {
+    const items = data.items ?? []
+    if (items.length === 0) {
+        return
+    }
+
+    const itemsTotal = sumTransactionItems(items, decimals)
+    const tolerance = 1 / (10 ** (Math.max(decimals, 0) + 3))
+    if (itemsTotal > 0 && Math.abs(itemsTotal - data.amount) > tolerance) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: i18n.t('validation.itemsTotalMismatch', {
+                itemsTotal: itemsTotal.toFixed(decimals),
+                amount: data.amount.toFixed(decimals),
+            }),
+            path: ['items'],
+        })
+    }
+}
+
+export function getTransactionSchema(options?: TransactionSchemaOptions) {
     return transactionSchema.superRefine((data, ctx) => {
+        applyItemsTotalIssue(data, ctx, options?.currencyDecimals ?? 2)
+
         if (options?.rejectFutureDate && data.date && isDateInFuture(data.date)) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,

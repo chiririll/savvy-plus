@@ -39,9 +39,9 @@ export function PageHeader({
         </Button>
     ) : null
     return (
-        <div className="mb-8">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+        <div className="mb-4 sm:mb-8">
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-4">
                     {backLink && (
                         <Button variant="ghost" size="icon" asChild>
                             <Link to={backLink}>
@@ -49,19 +49,19 @@ export function PageHeader({
                             </Link>
                         </Button>
                     )}
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+                    <div className="min-w-0">
+                        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
                         {description && (
-                            <p className="text-muted-foreground mt-1">{description}</p>
+                            <p className="text-muted-foreground mt-1 hidden sm:block">{description}</p>
                         )}
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-2">
                     {actions}
                     {createButton}
                 </div>
             </div>
-            <Separator className="mt-6" />
+            <Separator className="mt-4 sm:mt-6" />
         </div>
     )
 }

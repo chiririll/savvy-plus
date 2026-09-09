@@ -1,4 +1,5 @@
 export { AccountForm } from './AccountForm'
 export { AccountFormDialog } from './AccountFormDialog'
+export { AccountList } from './AccountList'
+export { AccountRow } from './AccountRow'
 export { BalanceDynamicsChart } from './BalanceDynamicsChart'
-export { createAccountColumns } from './columns'

@@ -39,8 +39,14 @@ export function AccountSelect({
     const { t } = useTranslation('forms')
     const { data: accounts } = useAccounts({ active: activeOnly, exclude_debts: excludeDebts })
 
-    const filteredAccounts = accounts?.filter(a => {
-        if (excludeId && a.id === excludeId) return false
+    const selectedId = Number(value) > 0 ? Number(value) : null
+    const filteredAccounts = accounts?.filter((account) => {
+        if (selectedId && account.id === selectedId) {
+            return true
+        }
+        if (excludeId && account.id === excludeId) {
+            return false
+        }
         return true
     })
 
@@ -52,8 +58,9 @@ export function AccountSelect({
 
     return (
         <Select
+            key={selectedId ?? 'empty'}
             onValueChange={(val) => onChange(Number(val))}
-            value={value ? value.toString() : undefined}
+            value={selectedId ? String(selectedId) : undefined}
             disabled={disabled}
         >
             {plain ? trigger : <FormControl>{trigger}</FormControl>}
