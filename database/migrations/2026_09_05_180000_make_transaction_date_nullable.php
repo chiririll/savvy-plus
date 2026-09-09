@@ -15,8 +15,11 @@ return new class extends Migration
         } elseif ($driver === 'mysql') {
             DB::statement('ALTER TABLE transactions MODIFY date DATE NULL');
         } else {
-            // SQLite cannot ALTER COLUMN; change() rebuilds the table and can
-            // replace the partial recurring-pending unique index with a full unique.
+            // SQLite cannot ALTER COLUMN; change() rebuilds the table and will
+            // recreate the partial recurring-pending unique as a full unique.
+            // That fails once confirmed occurrences share a recurring id.
+            $this->dropRecurringPendingUnique();
+
             Schema::table('transactions', function ($table) {
                 $table->date('date')->nullable()->change();
             });
@@ -34,6 +37,8 @@ return new class extends Migration
         } elseif ($driver === 'mysql') {
             DB::statement('ALTER TABLE transactions MODIFY date DATE NOT NULL');
         } else {
+            $this->dropRecurringPendingUnique();
+
             Schema::table('transactions', function ($table) {
                 $table->date('date')->nullable(false)->change();
             });
@@ -42,7 +47,7 @@ return new class extends Migration
         }
     }
 
-    private function restoreRecurringPendingUnique(): void
+    private function dropRecurringPendingUnique(): void
     {
         $indexes = DB::select("PRAGMA index_list('transactions')");
 
@@ -63,6 +68,11 @@ return new class extends Migration
         }
 
         DB::statement('DROP INDEX IF EXISTS transactions_recurring_pending_unique');
+    }
+
+    private function restoreRecurringPendingUnique(): void
+    {
+        $this->dropRecurringPendingUnique();
         DB::statement('CREATE UNIQUE INDEX transactions_recurring_pending_unique ON transactions (recurring_transaction_id) WHERE status = \'pending\' AND recurring_transaction_id IS NOT NULL');
     }
 };
