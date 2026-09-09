@@ -1,14 +1,6 @@
-import { FileX, Plus } from 'lucide-react'
+import { type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import {
-    Empty,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
-} from '@/components/ui/empty'
+import { FeedEmpty, FeedRowSkeleton } from '@/components/shared'
 import { formatTransactionGroupHeading, groupByDateKey } from '@/lib/dates'
 import { intlLocale } from '@/lib/i18n'
 import { Transaction } from '@/types'
@@ -19,7 +11,7 @@ interface TransactionListProps {
     isLoading?: boolean
     emptyTitle: string
     emptyDescription: string
-    emptyAction?: React.ReactNode
+    emptyAction?: ReactNode
     onCreate?: () => void
     createLabel?: string
     onDelete: (id: number) => void
@@ -28,28 +20,6 @@ interface TransactionListProps {
     onSkip?: (id: number) => void
     onEdit?: (transaction: Transaction) => void
     isReadOnly?: boolean
-}
-
-function TransactionListSkeleton() {
-    return (
-        <div className="space-y-6">
-            {Array.from({ length: 2 }).map((_, group) => (
-                <div key={group} className="space-y-1">
-                    <Skeleton className="mb-2 h-4 w-28" />
-                    {Array.from({ length: 3 }).map((__, row) => (
-                        <div key={row} className="flex items-center gap-3 px-1.5 py-2">
-                            <Skeleton className="size-10 rounded-full" />
-                            <div className="min-w-0 flex-1 space-y-1.5">
-                                <Skeleton className="h-4 w-40" />
-                                <Skeleton className="h-3 w-28" />
-                            </div>
-                            <Skeleton className="h-4 w-16" />
-                        </div>
-                    ))}
-                </div>
-            ))}
-        </div>
-    )
 }
 
 export function TransactionList({
@@ -71,28 +41,24 @@ export function TransactionList({
     const groups = groupByDateKey(transactions)
 
     if (isLoading) {
-        return <TransactionListSkeleton />
+        return (
+            <div className="space-y-6">
+                <FeedRowSkeleton showHeading />
+                <FeedRowSkeleton showHeading />
+            </div>
+        )
     }
 
     if (transactions.length === 0) {
         return (
-            <Empty className="border rounded-lg py-16">
-                <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                        <FileX />
-                    </EmptyMedia>
-                    <EmptyTitle>{emptyTitle}</EmptyTitle>
-                    <EmptyDescription>{emptyDescription}</EmptyDescription>
-                </EmptyHeader>
-                {emptyAction ?? (
-                    onCreate && !isReadOnly ? (
-                        <Button onClick={onCreate}>
-                            <Plus className="size-4" />
-                            {createLabel}
-                        </Button>
-                    ) : undefined
-                )}
-            </Empty>
+            <FeedEmpty
+                title={emptyTitle}
+                description={emptyDescription}
+                action={emptyAction}
+                onCreate={onCreate}
+                createLabel={createLabel}
+                isReadOnly={isReadOnly}
+            />
         )
     }
 
