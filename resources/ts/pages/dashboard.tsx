@@ -24,7 +24,6 @@ import {
     Plus,
     ArrowLeftRight,
     PiggyBank,
-    CreditCard,
     HandCoins,
     Banknote,
     TrendingDown,
@@ -35,16 +34,14 @@ import { useTotalBalance, useTransactions, usePendingSummary, useAccounts, useCa
 import { useOverviewMetrics } from '@/hooks/use-reports'
 import { cn, formatCurrency, formatDateLocal, formatYearMonth, addDaysLocal } from '@/lib/utils'
 import { BalanceDynamicsChart } from '@/components/features/accounts'
-import { displayTransactionDescription, transactionAmountAppearance } from '@/lib/transaction-description'
+import { TransactionRow, useCreateTransactionDialog } from '@/components/features/transactions'
 import { localizeDefaultName } from '@/lib/localized-name'
-import { intlLocale } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactECharts from 'echarts-for-react'
 import { useTheme } from '@/hooks/use-theme'
 import { Link } from 'react-router-dom'
-import { useCreateTransactionDialog } from '@/components/features/transactions'
-import { Transaction, AccountType } from '@/types'
+import { AccountType } from '@/types'
 import { ACCOUNT_TYPE_CONFIG, CATEGORY_COLORS } from '@/constants'
 import { DEFAULT_FILTERS, type ReportFilters } from '@/pages/reports/types'
 
@@ -144,29 +141,12 @@ function toReportFilters(
     }
 }
 
-function formatDate(dateString: string | null): string {
-    if (!dateString) {
-        return ''
-    }
-
-    const date = new Date(dateString)
-    return date.toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short' })
-}
-
-function getTransactionSign(type: Transaction['type']): string {
-    return transactionAmountAppearance(type).sign
-}
-
-function getTransactionColor(type: Transaction['type']): string {
-    return transactionAmountAppearance(type).className
-}
-
 export default function DashboardPage() {
     const { t, i18n } = useTranslation('pages')
     const { t: tCommon } = useTranslation('common')
     const { t: tNav } = useTranslation('nav')
     const { theme } = useTheme()
-    const { openCreate } = useCreateTransactionDialog()
+    const { openCreate, openEdit } = useCreateTransactionDialog()
     const { data: balance } = useTotalBalance()
     const { data: accounts } = useAccounts({ active: true, exclude_debts: true })
 
@@ -576,52 +556,18 @@ export default function DashboardPage() {
                         </Button>
                     </CardHeader>
                     <CardContent className="min-w-0">
-                        <div className="min-w-0 space-y-4 overflow-x-auto overscroll-x-contain">
+                        <div className="min-w-0">
                             {recentTransactions?.data && recentTransactions.data.length > 0 ? (
-                                recentTransactions.data.map((transaction) => (
-                                    <div
-                                        key={transaction.id}
-                                        className="flex min-w-0 items-center justify-between gap-3"
-                                    >
-                                        <div className="flex min-w-0 flex-1 items-center gap-3">
-                                            <div
-                                                className="flex size-9 shrink-0 items-center justify-center rounded-lg"
-                                                style={{
-                                                    backgroundColor: transaction.category?.color
-                                                        ? `${transaction.category.color}20`
-                                                        : undefined,
-                                                }}
-                                            >
-                                                {transaction.category?.icon ? (
-                                                    <span className="text-sm">
-                                                        {transaction.category.icon}
-                                                    </span>
-                                                ) : (
-                                                    <CreditCard className="size-4" />
-                                                )}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-medium truncate">
-                                                    {displayTransactionDescription(transaction)}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground truncate">
-                                                    {formatDate(transaction.date)} · {transaction.account.name}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="min-w-0 text-right">
-                                            <p
-                                                className={`text-sm font-mono font-medium break-all ${getTransactionColor(transaction.type)}`}
-                                            >
-                                                {getTransactionSign(transaction.type)}
-                                                {formatCurrency(transaction.amount, transaction.account.currency, { showSymbol: false })}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {transaction.account.currency?.symbol ?? ''}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))
+                                <div className="divide-y divide-border/60">
+                                    {recentTransactions.data.map((transaction) => (
+                                        <TransactionRow
+                                            key={transaction.id}
+                                            transaction={transaction}
+                                            onEdit={openEdit}
+                                            showActions={false}
+                                        />
+                                    ))}
+                                </div>
                             ) : (
                                 <div className="text-center text-muted-foreground py-4">
                                     {t('dashboard.noTransactions')}

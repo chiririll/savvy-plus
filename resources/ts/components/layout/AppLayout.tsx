@@ -23,7 +23,7 @@ export function AppLayout() {
                         <ReadOnlyBanner />
                         <Header />
                     </div>
-                    <main className="min-w-0 flex-1 overflow-y-auto p-6">
+                    <main className="min-w-0 flex-1 overflow-y-auto px-3 py-4 sm:p-6">
                         <Outlet />
                     </main>
                 </CreateTransactionProvider>

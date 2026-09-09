@@ -354,6 +354,7 @@ export function TransactionForm({
     const lastTransferPairRef = useRef<string | null>(null)
     const editingRateRef = useRef(false)
     const skipRateFromAmountRef = useRef(false)
+    const skipPairRecalcRef = useRef(false)
     const formDefaultsRef = useRef(formDefaults)
     formDefaultsRef.current = formDefaults
 
@@ -362,6 +363,7 @@ export function TransactionForm({
         lastTransferPairRef.current = null
         editingRateRef.current = false
         skipRateFromAmountRef.current = false
+        skipPairRecalcRef.current = false
         form.reset(formDefaultsRef.current)
     }, [open, form])
 
@@ -403,6 +405,11 @@ export function TransactionForm({
         lastTransferPairRef.current = transferPairKey
         const pairChanged = prevPair !== null && prevPair !== transferPairKey
         const isInit = prevPair === null
+
+        if (skipPairRecalcRef.current) {
+            skipPairRecalcRef.current = false
+            return
+        }
 
         if (sameTransferCurrency) {
             form.setValue('exchange_rate', 1, { shouldValidate: false })
@@ -613,6 +620,9 @@ export function TransactionForm({
                     toCurrencySymbol={selectedToAccount?.currency?.symbol}
                     amountDisabled={Boolean(items && items.length > 0)}
                     toAmountReadOnly={sameTransferCurrency}
+                    onSwapAccounts={() => {
+                        skipPairRecalcRef.current = true
+                    }}
                 />
 
                 <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">

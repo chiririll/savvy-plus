@@ -104,6 +104,8 @@
         "emptyPendingTitle": "No pending transactions",
         "emptyPendingDescription": "Future, scheduled, and undated transactions will appear here until you confirm them",
         "noDate": "No date",
+        "today": "Today",
+        "yesterday": "Yesterday",
         "applyTitle": "Confirm transaction",
         "applyDescription": "Which date should this transaction be posted on? The posted date cannot be in the future.",
         "applyToday": "Today",

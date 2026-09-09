@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { LucideIcon } from 'lucide-react'
 import { Filter, ArrowUpDown, X } from 'lucide-react'
@@ -49,10 +49,9 @@ interface TransactionFiltersPanelProps {
     list: TransactionListFilters
     categories?: Category[]
     tags?: Tag[]
-    afterStatus?: ReactNode
 }
 
-export function TransactionFiltersPanel({ list, categories, tags, afterStatus }: TransactionFiltersPanelProps) {
+export function TransactionFiltersPanel({ list, categories, tags }: TransactionFiltersPanelProps) {
     const { t } = useTranslation('pages')
     const [filtersOpen, setFiltersOpen] = useState(false)
     const { params, activeFiltersCount, setType, setStatus, setSort, setDateRange, toggleCategory, toggleTag, clearFilters } = list
@@ -73,8 +72,6 @@ export function TransactionFiltersPanel({ list, categories, tags, afterStatus }:
                     <TabsTrigger value="pending">{t('transactions.tabs.pending')}</TabsTrigger>
                 </TabsList>
             </Tabs>
-
-            {afterStatus}
 
             <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="grid min-w-0 grid-cols-4 gap-1.5 sm:flex sm:gap-2">

@@ -33,6 +33,7 @@
     },
     "transactions": {
         "toAccount": "Destination account",
+        "swapAccounts": "Swap accounts",
         "sendAmount": "Send amount",
         "receiveAmount": "Receive amount",
         "transferRate": "Transfer rate",

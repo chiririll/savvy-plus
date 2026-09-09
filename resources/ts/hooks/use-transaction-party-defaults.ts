@@ -16,6 +16,9 @@ export function useTransactionPartyDefaults(
     const categoryId = form.watch('category_id') as number | null | undefined
 
     useEffect(() => {
+        if (accountId === null) {
+            return
+        }
         if (!accountId && accounts && accounts.length > 0) {
             form.setValue('account_id', accounts[0].id)
         }

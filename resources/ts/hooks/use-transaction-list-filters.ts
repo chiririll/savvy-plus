@@ -5,7 +5,7 @@ import type { TransactionFilters } from '@/types'
 export const transactionSearchParams = {
     type: parseAsStringLiteral(['income', 'expense', 'transfer'] as const),
     sortBy: parseAsStringLiteral(['date', 'amount'] as const).withDefault('date'),
-    sortDir: parseAsStringLiteral(['asc', 'desc'] as const).withDefault('desc'),
+    sortDir: parseAsStringLiteral(['asc', 'desc'] as const),
     page: parseAsInteger.withDefault(1),
     categoryIds: parseAsArrayOf(parseAsInteger).withDefault([]),
     tagIds: parseAsArrayOf(parseAsInteger).withDefault([]),
@@ -16,13 +16,15 @@ export const transactionSearchParams = {
 
 export function useTransactionListFilters() {
     const [params, setParams] = useQueryStates(transactionSearchParams)
+    const sortDir = params.sortDir
+        ?? (params.status === 'pending' && params.sortBy === 'date' ? 'asc' : 'desc')
 
     const filters: TransactionFilters = {
         per_page: 20,
         page: params.page,
         type: params.type ?? undefined,
         sort_by: params.sortBy,
-        sort_direction: params.sortDir,
+        sort_direction: sortDir,
         category_ids: params.categoryIds.length > 0 ? params.categoryIds : undefined,
         tag_ids: params.tagIds.length > 0 ? params.tagIds : undefined,
         start_date: params.startDate ?? undefined,
@@ -38,12 +40,16 @@ export function useTransactionListFilters() {
     ].filter(Boolean).length
 
     return {
-        params,
+        params: { ...params, sortDir },
         filters,
         activeFiltersCount,
         setPage: (page: number) => setParams({ page }),
         setType: (type: 'income' | 'expense' | 'transfer' | null) => setParams({ type, page: 1 }),
-        setStatus: (status: 'pending' | null) => setParams({ status, page: 1 }),
+        setStatus: (status: 'pending' | null) => setParams({
+            status,
+            page: 1,
+            ...(params.sortBy === 'date' ? { sortDir: null } : {}),
+        }),
         setSort: (sortBy: 'date' | 'amount', sortDir: 'asc' | 'desc') =>
             setParams({ sortBy, sortDir, page: 1 }),
         setDateRange: (field: 'startDate' | 'endDate', value: string) =>
