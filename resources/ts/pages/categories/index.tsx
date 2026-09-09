@@ -1,9 +1,11 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Plus } from 'lucide-react'
 import { parseAsStringLiteral, useQueryState } from 'nuqs'
-import { ListPage } from '@/components/shared'
+import { FeedList, Page, PageHeader } from '@/components/shared'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CategoryFormDialog, createCategoryColumns } from '@/components/features/categories'
+import { Button } from '@/components/ui/button'
+import { CategoryFormDialog, CategoryRow } from '@/components/features/categories'
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory, useResourceFormDialog } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { Category, CategoryType } from '@/types'
@@ -36,44 +38,59 @@ export default function CategoriesPage() {
         expense: items.filter((category) => category.type === 'expense').length,
     }), [items])
 
-    const columns = createCategoryColumns(
-        (id) => deleteCategory.mutate(id),
-        typeCounts,
-        isReadOnly,
-        form.openEdit
-    )
-
     return (
-        <>
-            <ListPage
+        <Page title={t('categories.title')}>
+            <PageHeader
                 title={t('categories.title')}
                 description={t('categories.description')}
                 createLabel={t('categories.create')}
                 onCreateClick={isReadOnly ? undefined : form.openCreate}
-                data={visibleItems}
-                columns={columns}
-                isLoading={isLoading}
-                emptyTitle={type === 'income' ? t('categories.emptyIncomeTitle') : t('categories.emptyExpenseTitle')}
-                emptyDescription={type === 'income' ? t('categories.emptyIncomeDescription') : t('categories.emptyExpenseDescription')}
-                toolbar={(
-                    <Tabs
-                        value={type}
-                        onValueChange={(value) => {
-                            void setType(value as CategoryType)
-                        }}
-                        className="w-full max-w-full"
-                    >
-                        <TabsList className="grid h-auto w-full grid-cols-2 sm:inline-flex sm:h-9 sm:w-fit">
-                            <TabsTrigger value="income" className="min-w-0">
-                                {t('categories.tabs.income')}
-                            </TabsTrigger>
-                            <TabsTrigger value="expense" className="min-w-0">
-                                {t('categories.tabs.expenses')}
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                )}
             />
+
+            <div className="mx-auto w-full max-w-[800px]">
+                <Tabs
+                    value={type}
+                    onValueChange={(value) => {
+                        void setType(value as CategoryType)
+                    }}
+                    className="mb-4 w-full max-w-full"
+                >
+                    <TabsList className="grid h-auto w-full grid-cols-2 sm:inline-flex sm:h-9 sm:w-fit">
+                        <TabsTrigger value="income" className="min-w-0">
+                            {t('categories.tabs.income')}
+                        </TabsTrigger>
+                        <TabsTrigger value="expense" className="min-w-0">
+                            {t('categories.tabs.expenses')}
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
+
+                <FeedList
+                    items={visibleItems}
+                    isLoading={isLoading}
+                    emptyTitle={type === 'income' ? t('categories.emptyIncomeTitle') : t('categories.emptyExpenseTitle')}
+                    emptyDescription={type === 'income' ? t('categories.emptyIncomeDescription') : t('categories.emptyExpenseDescription')}
+                    emptyAction={
+                        !isReadOnly ? (
+                            <Button onClick={form.openCreate}>
+                                <Plus className="size-4" />
+                                {t('categories.create')}
+                            </Button>
+                        ) : undefined
+                    }
+                    getKey={(category) => category.id}
+                >
+                    {(category) => (
+                        <CategoryRow
+                            category={category}
+                            onEdit={form.openEdit}
+                            onDelete={(id) => deleteCategory.mutate(id)}
+                            isReadOnly={isReadOnly}
+                            deleteDisabled={typeCounts[category.type] <= 1}
+                        />
+                    )}
+                </FeedList>
+            </div>
 
             <CategoryFormDialog
                 category={form.entity}
@@ -83,6 +100,6 @@ export default function CategoriesPage() {
                 isSubmitting={form.isSubmitting}
                 defaultType={type}
             />
-        </>
+        </Page>
     )
 }
