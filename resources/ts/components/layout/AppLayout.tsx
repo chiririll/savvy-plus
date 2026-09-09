@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { AppSidebar } from './Sidebar'
 import { Header } from './Header'
+import { DevModeBanner } from './DevModeBanner'
 import { ReadOnlyBanner } from './ReadOnlyBanner'
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import { CreateTransactionProvider } from '@/components/features/transactions'
@@ -16,9 +17,12 @@ export function AppLayout() {
         <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <AppSidebar />
             <SidebarInset className="min-w-0">
-                <ReadOnlyBanner />
                 <CreateTransactionProvider>
-                    <Header />
+                    <div className="sticky top-0 z-50 min-w-0">
+                        <DevModeBanner />
+                        <ReadOnlyBanner />
+                        <Header />
+                    </div>
                     <main className="min-w-0 flex-1 overflow-y-auto p-6">
                         <Outlet />
                     </main>
