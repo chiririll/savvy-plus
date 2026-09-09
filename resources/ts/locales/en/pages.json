@@ -92,6 +92,9 @@
             "decimals": "Decimals",
             "base": "Base"
         },
+        "setAsBase": "Set as base",
+        "emptyTitle": "No currencies yet",
+        "emptyDescription": "Add a currency to record amounts and exchange rates",
         "deleteTitle": "Delete currency?",
         "deleteDescription": "This action cannot be undone. The currency \"{{name}}\" will be permanently deleted."
     },

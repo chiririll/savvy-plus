@@ -26,6 +26,7 @@ interface FeedRowProps {
     title: ReactNode
     titleClassName?: string
     badge?: ReactNode
+    meta?: ReactNode
     subtitle?: ReactNode
     amount?: ReactNode
     amountClassName?: string
@@ -58,6 +59,7 @@ export function FeedRow({
     title,
     titleClassName,
     badge,
+    meta,
     subtitle,
     amount,
     amountClassName,
@@ -123,6 +125,11 @@ export function FeedRow({
                         <p className={cn('truncate font-semibold', titleClassName)}>{title}</p>
                         {badge}
                     </div>
+                    {meta && (
+                        <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-1">
+                            {meta}
+                        </div>
+                    )}
                     {subtitle && (
                         <div className="truncate text-xs text-muted-foreground">
                             {subtitle}
