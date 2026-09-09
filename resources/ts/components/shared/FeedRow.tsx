@@ -27,7 +27,7 @@ interface FeedRowProps {
     titleClassName?: string
     badge?: ReactNode
     subtitle?: ReactNode
-    amount: ReactNode
+    amount?: ReactNode
     amountClassName?: string
     extraAmount?: ReactNode
     leading?: ReactNode
@@ -130,16 +130,20 @@ export function FeedRow({
                     )}
                 </div>
 
-                <div className="min-w-0 shrink-0 text-right">
-                    <p className={cn('font-mono font-semibold', amountClassName)}>
-                        {amount}
-                    </p>
-                    {extraAmount && (
-                        <p className="font-mono text-xs text-muted-foreground">
-                            {extraAmount}
-                        </p>
-                    )}
-                </div>
+                {(amount != null || extraAmount) && (
+                    <div className="min-w-0 shrink-0 text-right">
+                        {amount != null && (
+                            <p className={cn('font-mono font-semibold', amountClassName)}>
+                                {amount}
+                            </p>
+                        )}
+                        {extraAmount && (
+                            <p className="font-mono text-xs text-muted-foreground">
+                                {extraAmount}
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 {hasActions && actions && (
                     <div
@@ -167,6 +171,57 @@ export function FeedRowSkeleton({ showHeading = false }: { showHeading?: boolean
                         <Skeleton className="h-3 w-24" />
                     </div>
                     <Skeleton className="h-4 w-16" />
+                </div>
+            ))}
+        </div>
+    )
+}
+
+export function FeedList<T>({
+    items,
+    isLoading,
+    emptyTitle,
+    emptyDescription,
+    emptyAction,
+    onCreate,
+    createLabel,
+    isReadOnly,
+    getKey,
+    children,
+}: {
+    items: T[]
+    isLoading?: boolean
+    emptyTitle: string
+    emptyDescription: string
+    emptyAction?: ReactNode
+    onCreate?: () => void
+    createLabel?: string
+    isReadOnly?: boolean
+    getKey: (item: T) => string | number
+    children: (item: T) => ReactNode
+}) {
+    if (isLoading) {
+        return <FeedRowSkeleton />
+    }
+
+    if (items.length === 0) {
+        return (
+            <FeedEmpty
+                title={emptyTitle}
+                description={emptyDescription}
+                action={emptyAction}
+                onCreate={onCreate}
+                createLabel={createLabel}
+                isReadOnly={isReadOnly}
+            />
+        )
+    }
+
+    return (
+        <div className="divide-y divide-border/60">
+            {items.map((item) => (
+                <div key={getKey(item)}>
+                    {children(item)}
                 </div>
             ))}
         </div>

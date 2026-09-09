@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { ListPage } from '@/components/shared'
-import { createTagColumns, TagFormDialog } from '@/components/features/tags'
+import { Plus } from 'lucide-react'
+import { FeedList, Page, PageHeader } from '@/components/shared'
+import { TagFormDialog, TagRow } from '@/components/features/tags'
+import { Button } from '@/components/ui/button'
 import { useTags, useCreateTag, useDeleteTag, useUpdateTag, useResourceFormDialog } from '@/hooks'
 import { useReadOnly } from '@/components/providers/ReadOnlyProvider'
 import { Tag } from '@/types'
@@ -21,21 +23,41 @@ export default function TagsPage() {
         update: updateTag,
     })
 
-    const columns = createTagColumns((id) => deleteTag.mutate(id), isReadOnly, form.openEdit)
-
     return (
-        <>
-            <ListPage
+        <Page title={t('tags.title')}>
+            <PageHeader
                 title={t('tags.title')}
                 description={t('tags.description')}
                 onCreateClick={isReadOnly ? undefined : form.openCreate}
                 createLabel={t('tags.create')}
-                data={items}
-                columns={columns}
-                isLoading={isLoading}
-                emptyTitle={t('tags.emptyTitle')}
-                emptyDescription={t('tags.emptyDescription')}
             />
+
+            <div className="mx-auto w-full max-w-[800px]">
+                <FeedList
+                    items={items}
+                    isLoading={isLoading}
+                    emptyTitle={t('tags.emptyTitle')}
+                    emptyDescription={t('tags.emptyDescription')}
+                    emptyAction={
+                        !isReadOnly ? (
+                            <Button onClick={form.openCreate}>
+                                <Plus className="size-4" />
+                                {t('tags.create')}
+                            </Button>
+                        ) : undefined
+                    }
+                    getKey={(tag) => tag.id}
+                >
+                    {(tag) => (
+                        <TagRow
+                            tag={tag}
+                            onEdit={form.openEdit}
+                            onDelete={(id) => deleteTag.mutate(id)}
+                            isReadOnly={isReadOnly}
+                        />
+                    )}
+                </FeedList>
+            </div>
 
             <TagFormDialog
                 tag={form.entity}
@@ -44,6 +66,6 @@ export default function TagsPage() {
                 onSubmit={form.submit}
                 isSubmitting={form.isSubmitting}
             />
-        </>
+        </Page>
     )
 }
