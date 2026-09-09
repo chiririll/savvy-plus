@@ -91,6 +91,8 @@
         "balanceNegative": "Balance cannot be negative",
         "integer": "Must be an integer",
         "atLeastOne": "Must be at least 1",
+        "quantityPositive": "Quantity must be greater than 0",
+        "quantityPrecision": "Use at most 3 decimal places",
         "cannotBeNegative": "Cannot be negative",
         "passwordMin8": "Password must be at least 8 characters",
         "transferDestination": "Destination account is required for transfers",

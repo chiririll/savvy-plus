@@ -12,7 +12,7 @@ class TransactionItemResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'quantity' => (int) $this->quantity,
+            'quantity' => (float) $this->quantity,
             'pricePerUnit' => (float) $this->price_per_unit,
             'totalPrice' => (float) $this->total_price,
         ];

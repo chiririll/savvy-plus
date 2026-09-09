@@ -10,6 +10,7 @@ use Illuminate\Validation\Validator;
 class StoreTransactionRequest extends FormRequest
 {
     use NormalizesNullableDate;
+    use ValidatesTransactionItems;
 
     public function authorize(): bool
     {
@@ -35,7 +36,7 @@ class StoreTransactionRequest extends FormRequest
             'date' => 'nullable|date',
             'items' => 'nullable|array',
             'items.*.name' => 'required_with:items|string|max:255',
-            'items.*.quantity' => 'required_with:items|integer|min:1',
+            'items.*.quantity' => $this->itemQuantityRules(),
             'items.*.price_per_unit' => 'required_with:items|numeric|gte:0',
             'tag_ids' => 'nullable|array',
             'tag_ids.*' => 'exists:tags,id',
@@ -80,25 +81,6 @@ class StoreTransactionRequest extends FormRequest
             if ($category && $category->type !== $type) {
                 $validator->errors()->add('category_id', __('messages.validation.category_type_mismatch'));
             }
-        }
-    }
-
-    private function validateItemsTotal(Validator $validator): void
-    {
-        $items = $this->input('items', []);
-
-        if (empty($items)) {
-            return;
-        }
-
-        $itemsTotal = collect($items)->sum(function ($item) {
-            return ($item['quantity'] ?? 0) * ($item['price_per_unit'] ?? 0);
-        });
-
-        $amount = $this->input('amount');
-
-        if (abs($itemsTotal - $amount) > 0.01) {
-            $validator->errors()->add('items', __('messages.validation.items_total', ['items' => $itemsTotal, 'amount' => $amount]));
         }
     }
 }

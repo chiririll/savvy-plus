@@ -1,6 +1,6 @@
-import { useForm, useFieldArray, useWatch } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { schemaResolver } from '@/lib/form-resolver'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, type KeyboardEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,7 +16,8 @@ import {
 import { getTransactionSchema, TransactionFormValues } from '@/schemas/transactions'
 import { useAccounts, useCategories, useFormValuesChange, useTransactionPartyDefaults } from '@/hooks'
 import { cn, formatCurrency, formatDateLocal, isDateInFuture } from '@/lib/utils'
-import { Plus, Trash2, X } from 'lucide-react'
+import { currencyDecimals, sumTransactionItems } from '@/lib/transaction-items'
+import { X } from 'lucide-react'
 import {
     CategorySelect,
     FieldHelp,
@@ -27,6 +28,7 @@ import {
     useNegativeBalanceConfirm,
 } from '@/components/shared'
 import { collectNegativeBalanceWarnings, warningIfResultNegative } from '@/lib/negative-balance'
+import { TransactionFormItems } from './TransactionFormItems'
 
 type BalancePreview = {
     currentBalance: number
@@ -220,10 +222,15 @@ export function TransactionForm({
         }
     }, [defaultValues])
 
+    const schemaOptionsRef = useRef({
+        rejectFutureDate: Boolean(originalAffectsBalance),
+        currencyDecimals: 2,
+    })
+
     const form = useForm<TransactionFormValues>({
-        resolver: schemaResolver<TransactionFormValues>(
-            getTransactionSchema({ rejectFutureDate: Boolean(originalAffectsBalance) }),
-        ),
+        resolver: (values, context, options) => schemaResolver<TransactionFormValues>(
+            getTransactionSchema(schemaOptionsRef.current),
+        )(values, context, options),
         defaultValues: formDefaults,
     })
 
@@ -233,11 +240,6 @@ export function TransactionForm({
             ? (data) => onValuesChange({ ...data, exchange_rate: null })
             : undefined,
     )
-
-    const { fields, append, remove } = useFieldArray({
-        control: form.control,
-        name: 'items',
-    })
 
     const transactionType = useWatch({ control: form.control, name: 'type' })
     const accountId = useWatch({ control: form.control, name: 'account_id' })
@@ -257,20 +259,6 @@ export function TransactionForm({
 
     useTransactionPartyDefaults(form, accounts, categories)
 
-    // Calculate items total
-    const itemsTotal = items?.reduce((sum, item) => {
-        const qty = Number(item?.quantity) || 0
-        const price = Number(item?.price_per_unit) || 0
-        return sum + qty * price
-    }, 0) ?? 0
-
-    // Sync amount with items total
-    useEffect(() => {
-        if (items && items.length > 0 && itemsTotal > 0) {
-            form.setValue('amount', itemsTotal, { shouldValidate: false })
-        }
-    }, [itemsTotal, items, form])
-
     // Reset category when type changes
     useEffect(() => {
         if (transactionType === 'transfer') {
@@ -278,66 +266,21 @@ export function TransactionForm({
         }
     }, [transactionType, form])
 
-    // Refs for fast navigation
-    const itemRefs = useRef<Map<string, HTMLInputElement>>(new Map())
-
-    const addItem = useCallback(() => {
-        append({ name: '', quantity: 1, price_per_unit: 0 })
-        // Focus on new row's name field after render
-        setTimeout(() => {
-            const inputs = document.querySelectorAll('[data-item-name]')
-            const lastInput = inputs[inputs.length - 1] as HTMLInputElement
-            lastInput?.focus()
-        }, 0)
-    }, [append])
-
-    const handleKeyDown = useCallback((
-        e: KeyboardEvent<HTMLInputElement>,
-        index: number,
-        field: 'name' | 'quantity' | 'price_per_unit'
-    ) => {
-        // Enter on last field of row or Tab on price adds new row
-        if (e.key === 'Enter' && field === 'price_per_unit') {
-            e.preventDefault()
-            addItem()
-        }
-
-        // Backspace on empty name removes row
-        if (e.key === 'Backspace' && field === 'name') {
-            const value = (e.target as HTMLInputElement).value
-            if (value === '' && fields.length > 1) {
-                e.preventDefault()
-                remove(index)
-                // Focus previous row
-                setTimeout(() => {
-                    const inputs = document.querySelectorAll('[data-item-name]')
-                    const prevInput = inputs[Math.max(0, index - 1)] as HTMLInputElement
-                    prevInput?.focus()
-                }, 0)
-            }
-        }
-
-        // Arrow down - next row same field
-        if (e.key === 'ArrowDown' && index < fields.length - 1) {
-            e.preventDefault()
-            const nextInput = document.querySelector(
-                `[data-item-${field}][data-index="${index + 1}"]`
-            ) as HTMLInputElement
-            nextInput?.focus()
-        }
-
-        // Arrow up - previous row same field
-        if (e.key === 'ArrowUp' && index > 0) {
-            e.preventDefault()
-            const prevInput = document.querySelector(
-                `[data-item-${field}][data-index="${index - 1}"]`
-            ) as HTMLInputElement
-            prevInput?.focus()
-        }
-    }, [addItem, remove, fields.length])
-
     const selectedAccount = accounts?.find(a => a.id === Number(accountId))
     const selectedToAccount = accounts?.find(a => a.id === Number(toAccountId))
+    const itemDecimals = currencyDecimals(selectedAccount?.currency)
+    schemaOptionsRef.current = {
+        rejectFutureDate: Boolean(originalAffectsBalance),
+        currencyDecimals: itemDecimals,
+    }
+
+    const itemsTotal = sumTransactionItems(items, itemDecimals)
+
+    useEffect(() => {
+        if (items && items.length > 0 && itemsTotal > 0) {
+            form.setValue('amount', itemsTotal, { shouldValidate: false })
+        }
+    }, [itemsTotal, items, form])
     const sameTransferCurrency = Boolean(
         selectedAccount
         && selectedToAccount
@@ -581,6 +524,7 @@ export function TransactionForm({
         <Form {...form}>
             <form
                 id={formId}
+                noValidate
                 onSubmit={form.handleSubmit((data) => {
                     if (dateRequired && !data.date) {
                         form.setError('date', { message: t('validation.dateRequired') })
@@ -765,122 +709,8 @@ export function TransactionForm({
                     )}
                 />
 
-                {/* Items (Expense only typically, but allow for Income) */}
                 {transactionType !== 'transfer' && (
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <FormLabel>{t('forms:transactions.items')}</FormLabel>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={addItem}
-                            >
-                                <Plus className="size-4 mr-1" />
-                                {t('forms:transactions.addItem')}
-                            </Button>
-                        </div>
-
-                        {fields.length > 0 && (
-                            <div className="border rounded-lg overflow-hidden">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-muted/50">
-                                        <tr>
-                                            <th className="text-left p-2 font-medium">{t('fields.name')}</th>
-                                            <th className="text-left p-2 font-medium w-20">{t('forms:transactions.qty')}</th>
-                                            <th className="text-left p-2 font-medium w-28">{t('forms:transactions.price')}</th>
-                                            <th className="text-right p-2 font-medium w-24">{t('forms:transactions.total')}</th>
-                                            <th className="w-10"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {fields.map((field, index) => {
-                                            const qty = Number(items?.[index]?.quantity) || 0
-                                            const price = Number(items?.[index]?.price_per_unit) || 0
-                                            const total = qty * price
-
-                                            return (
-                                                <tr key={field.id} className="border-t">
-                                                    <td className="p-1">
-                                                        <Input
-                                                            {...form.register(`items.${index}.name`)}
-                                                            placeholder={t('forms:transactions.itemName')}
-                                                            className="h-8 border-0 shadow-none focus-visible:ring-1"
-                                                            data-item-name
-                                                            data-index={index}
-                                                            onKeyDown={(e) => handleKeyDown(e, index, 'name')}
-                                                        />
-                                                    </td>
-                                                    <td className="p-1">
-                                                        <Input
-                                                            {...form.register(`items.${index}.quantity`)}
-                                                            type="number"
-                                                            step="1"
-                                                            min={1}
-                                                            placeholder="1"
-                                                            className="h-8 border-0 shadow-none focus-visible:ring-1"
-                                                            data-item-quantity
-                                                            data-index={index}
-                                                            onKeyDown={(e) => handleKeyDown(e, index, 'quantity')}
-                                                        />
-                                                    </td>
-                                                    <td className="p-1">
-                                                        <Input
-                                                            {...form.register(`items.${index}.price_per_unit`)}
-                                                            type="number"
-                                                            step="0.01"
-                                                            min={0}
-                                                            placeholder="0.00"
-                                                            className="h-8 border-0 shadow-none focus-visible:ring-1"
-                                                            data-item-price_per_unit
-                                                            data-index={index}
-                                                            onKeyDown={(e) => handleKeyDown(e, index, 'price_per_unit')}
-                                                        />
-                                                    </td>
-                                                    <td className="p-2 text-right font-mono text-muted-foreground">
-                                                        {formatCurrency(total, selectedAccount?.currency, { showSymbol: false })}
-                                                    </td>
-                                                    <td className="p-1">
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon-sm"
-                                                            onClick={() => remove(index)}
-                                                            className="text-muted-foreground hover:text-destructive"
-                                                        >
-                                                            <Trash2 className="size-4" />
-                                                        </Button>
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                    <tfoot className="border-t bg-muted/30">
-                                        <tr>
-                                            <td colSpan={5} className="p-2 text-right font-medium">
-                                                {t('forms:transactions.total')}:{' '}
-                                                <span className="font-mono font-semibold">
-                                                    {formatCurrency(itemsTotal, selectedAccount?.currency, { showSymbol: false })}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        )}
-
-                        {fields.length === 0 && (
-                            <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg border-dashed">
-                                {t('forms:transactions.noItems')}
-                            </p>
-                        )}
-
-                        <FormField
-                            control={form.control}
-                            name="items"
-                            render={() => <FormMessage />}
-                        />
-                    </div>
+                    <TransactionFormItems form={form} currency={selectedAccount?.currency} />
                 )}
 
                 {!hideSubmit && (

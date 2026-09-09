@@ -12,6 +12,7 @@ use App\Models\Account;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
 use App\Support\TransactionDates;
+use App\Support\TransactionItems;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -362,13 +363,19 @@ class TransactionService
 
     private function createItems(Transaction $transaction, array $items): void
     {
+        $transaction->loadMissing('account.currency');
+        $decimals = $transaction->account?->currency?->decimals ?? 2;
+
         foreach ($items as $item) {
+            $quantity = (float) $item['quantity'];
+            $price = TransactionItems::roundedPrice((float) $item['price_per_unit'], $decimals);
+
             TransactionItem::create([
                 'transaction_id' => $transaction->id,
                 'name' => $item['name'],
-                'quantity' => (int) $item['quantity'],
-                'price_per_unit' => $item['price_per_unit'],
-                'total_price' => (int) $item['quantity'] * $item['price_per_unit'],
+                'quantity' => $quantity,
+                'price_per_unit' => $price,
+                'total_price' => $price * $quantity,
             ]);
         }
     }

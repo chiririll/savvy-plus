@@ -10,7 +10,7 @@ class TransactionItem extends Model
     protected $fillable = ['transaction_id', 'name', 'quantity', 'price_per_unit', 'total_price'];
 
     protected $casts = [
-        'quantity' => 'integer',
+        'quantity' => 'decimal:3',
         'price_per_unit' => 'decimal:2',
         'total_price' => 'decimal:2',
     ];

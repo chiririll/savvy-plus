@@ -44,6 +44,7 @@
         "insufficientFunds": "Недостаточно средств",
         "willGoNegative": "Баланс уйдёт в минус",
         "items": "Позиции",
+        "itemsCount": "Позиции ({{count}})",
         "addItem": "Добавить позицию",
         "qty": "Кол-во",
         "price": "Цена",

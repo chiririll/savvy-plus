@@ -44,6 +44,7 @@
         "insufficientFunds": "Insufficient funds",
         "willGoNegative": "Balance will go negative",
         "items": "Items",
+        "itemsCount": "Items ({{count}})",
         "addItem": "Add item",
         "qty": "Qty",
         "price": "Price",
