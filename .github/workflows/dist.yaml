@@ -88,7 +88,7 @@ jobs:
         run: |
           mkdir -p dist
           CGO_ENABLED=0 go build -trimpath \
-            -ldflags="-s -w -X github.com/chiririll/savvy-plus/internal/version.Value=${APP_VERSION} -X github.com/chiririll/savvy-plus/internal/version.Env=${APP_ENV}" \
+            -ldflags="-s -w -X savvy-go/internal/version.Value=${APP_VERSION} -X savvy-go/internal/version.Env=${APP_ENV}" \
             -o dist/savvy ./cmd/savvy
 
       - name: Build frontend
